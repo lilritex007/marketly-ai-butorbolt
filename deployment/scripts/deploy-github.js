@@ -20,7 +20,9 @@ import { execSync } from 'child_process';
 import { fileURLToPath } from 'url';
 import {
   getUnasToken,
-  createPageWithContent
+  createPage,
+  createContent,
+  linkContentToPage
 } from './unas-api.js';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -203,15 +205,37 @@ async function deploy() {
     console.log(`✅ Token received: ${token.substring(0, 20)}...`);
     console.log('');
 
-    // STEP 5-6-7: CREATE PAGE WITH CONTENT (ATOMIC OPERATION)
+    // STEP 5: CREATE CONTENT FIRST (before page to ensure it exists)
     console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-    console.log('📄 STEP 5: Creating Page + Content (Atomic)');
+    console.log('📝 STEP 5: Creating HTML Content (GitHub CDN)');
     console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
     
     const htmlContent = generateHTMLContent(jsFiles, cssFiles, config.cdnBase);
     const htmlSize = (Buffer.byteLength(htmlContent, 'utf8') / 1024).toFixed(1);
     console.log(`HTML size: ${htmlSize} KB`);
     console.log(`CDN Base: ${config.cdnBase}`);
+    
+    const contentConfig = {
+      lang: config.lang,
+      title: `${config.pageName} - React App`,
+      type: 'normal',
+      published: true,
+      html: htmlContent
+    };
+
+    if (!isDryRun) {
+      deploymentState.contentId = await createContent(token, config.apiUrl, contentConfig);
+    } else {
+      deploymentState.contentId = 'DRY_RUN_CONTENT_ID';
+    }
+    
+    console.log(`✅ Content created with ID: ${deploymentState.contentId}`);
+    console.log('');
+
+    // STEP 6: CREATE PAGE WITH CONTENT REFERENCE
+    console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+    console.log('📄 STEP 6: Creating AI Shop Page (with Content link)');
+    console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
     
     const pageConfig = {
       lang: config.lang,
@@ -226,18 +250,21 @@ async function deploy() {
     };
 
     if (!isDryRun) {
-      const result = await createPageWithContent(token, config.apiUrl, pageConfig, htmlContent);
-      deploymentState.pageId = result.pageId;
-      deploymentState.contentId = result.contentId || 'embedded';
+      deploymentState.pageId = await createPage(token, config.apiUrl, pageConfig);
+      console.log(`✅ Page created with ID: ${deploymentState.pageId}`);
+      console.log(`   URL: ${config.shopUrl}/${config.pageSlug}`);
+      console.log('');
+
+      // STEP 7: LINK CONTENT TO PAGE
+      console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+      console.log('🔗 STEP 7: Linking Content to Page');
+      console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+      await linkContentToPage(token, config.apiUrl, deploymentState.pageId, deploymentState.contentId);
+      console.log('✅ Content linked to page');
     } else {
       deploymentState.pageId = 'DRY_RUN_PAGE_ID';
-      deploymentState.contentId = 'DRY_RUN_CONTENT_ID';
+      console.log('✅ Dry-run: Page + Content skipped');
     }
-    
-    console.log(`✅ Page + Content created!`);
-    console.log(`   Page ID: ${deploymentState.pageId}`);
-    console.log(`   Content ID: ${deploymentState.contentId}`);
-    console.log(`   URL: ${config.shopUrl}/${config.pageSlug}`);
     console.log('');
 
     // STEP 8: SAVE STATE

@@ -19,8 +19,8 @@ const parseXML = promisify(parseString);
 const config = {
   apiKey: process.env.UNAS_API_KEY,
   apiUrl: process.env.UNAS_API_URL,
-  pageId: '337470',
-  contentId: '3359636'
+  pageId: '500381',
+  contentId: 'embedded'
 };
 
 async function getPage(token, pageId) {
