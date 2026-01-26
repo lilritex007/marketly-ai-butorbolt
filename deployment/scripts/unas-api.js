@@ -34,10 +34,15 @@ export async function getUnasToken(apiKey, apiUrl) {
     throw new Error(`UNAS Login Error: ${result.Error}`);
   }
 
-  const token = result.Login?.Token || result.Token || result.Response?.Token;
+  let token = result.Login?.Token || result.Token || result.Response?.Token;
+  
+  // UNAS returns token in array format sometimes
+  if (Array.isArray(token)) {
+    token = token[0];
+  }
 
-  if (!token) {
-    throw new Error('No token received from UNAS login');
+  if (!token || typeof token !== 'string') {
+    throw new Error('No valid token received from UNAS login');
   }
 
   return token;
