@@ -1,0 +1,56 @@
+{
+  "name": "marketly-ai-butor-shop",
+  "version": "1.0.0",
+  "description": "AI-powered furniture e-commerce platform with visual search and room planning",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "server": "node server/index.js",
+    "dev:full": "concurrently \"npm run server\" \"npm run dev\"",
+    "build": "vite build",
+    "preview": "vite preview",
+    "lint": "eslint . --ext js,jsx --report-unused-disable-directives --max-warnings 0",
+    "test:db": "node scripts/test-db.js",
+    "db:reset": "rm -rf data/ && echo Database reset complete",
+    "deploy:check": "node deployment/scripts/check-ready.js",
+    "deploy:test": "node deployment/scripts/deploy-github.js --dry-run",
+    "deploy:live": "node deployment/scripts/deploy-github.js",
+    "deploy:rollback": "node deployment/scripts/rollback.js",
+    "deploy:status": "node deployment/scripts/status.js"
+  },
+  "dependencies": {
+    "better-sqlite3": "^12.6.2",
+    "cors": "^2.8.6",
+    "dotenv": "^16.6.1",
+    "express": "^4.22.1",
+    "framer-motion": "^12.29.0",
+    "lucide-react": "^0.456.0",
+    "node-fetch": "^3.3.2",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "xml2js": "^0.6.2"
+  },
+  "devDependencies": {
+    "@types/react": "^18.3.12",
+    "@types/react-dom": "^18.3.1",
+    "@vitejs/plugin-react": "^4.3.3",
+    "autoprefixer": "^10.4.20",
+    "concurrently": "^8.2.2",
+    "eslint": "^8.57.1",
+    "eslint-plugin-react": "^7.37.2",
+    "eslint-plugin-react-hooks": "^4.6.2",
+    "eslint-plugin-react-refresh": "^0.4.14",
+    "postcss": "^8.4.49",
+    "tailwindcss": "^3.4.17",
+    "vite": "^5.4.11"
+  },
+  "keywords": [
+    "ai",
+    "furniture",
+    "e-commerce",
+    "react",
+    "visual-search"
+  ],
+  "author": "",
+  "license": "MIT"
+}
