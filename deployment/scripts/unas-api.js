@@ -64,33 +64,33 @@ export async function getUnasToken(apiKey, apiUrl) {
 }
 
 /**
- * Create Page (setPage)
+ * Create Page (setPage) - MANUAL XML (xml2js has UNAS compatibility issues)
  */
 export async function createPage(token, apiUrl, pageConfig) {
-  const pageXML = builder.buildObject({
-    Pages: {
-      Page: {
-        Action: 'add',
-        Lang: pageConfig.lang,
-        Name: pageConfig.name,
-        Title: pageConfig.title || pageConfig.name,
-        Parent: pageConfig.parent || 0,
-        Order: pageConfig.order || 1,
-        Reg: pageConfig.requireLogin ? 'yes' : 'no',
-        Menu: pageConfig.showInMenu ? 'yes' : 'no',
-        Target: pageConfig.target || 'self',
-        Main: pageConfig.isMain ? 'yes' : 'no',
-        ShowMainPage: pageConfig.showOnMain ? 'yes' : 'no',
-        Type: pageConfig.type || 'normal',
-        SefUrl: pageConfig.slug,
-        Meta: {
-          Keywords: pageConfig.metaKeywords || '',
-          Description: pageConfig.metaDescription || '',
-          Title: pageConfig.metaTitle || pageConfig.title || pageConfig.name
-        }
-      }
-    }
-  });
+  // Build XML manually to ensure UNAS compatibility
+  const pageXML = `<?xml version="1.0" encoding="UTF-8"?>
+<Pages>
+  <Page>
+    <Action>add</Action>
+    <Lang>${pageConfig.lang}</Lang>
+    <Name><![CDATA[${pageConfig.name}]]></Name>
+    <Title><![CDATA[${pageConfig.title || pageConfig.name}]]></Title>
+    <Parent>${pageConfig.parent || 0}</Parent>
+    <Order>${pageConfig.order || 1}</Order>
+    <Reg>${pageConfig.requireLogin ? 'yes' : 'no'}</Reg>
+    <Menu>${pageConfig.showInMenu ? 'yes' : 'no'}</Menu>
+    <Target>${pageConfig.target || 'self'}</Target>
+    <Main>${pageConfig.isMain ? 'yes' : 'no'}</Main>
+    <ShowMainPage>${pageConfig.showOnMain ? 'yes' : 'no'}</ShowMainPage>
+    <Type>${pageConfig.type || 'normal'}</Type>
+    <SefUrl><![CDATA[${pageConfig.slug}]]></SefUrl>
+    <Meta>
+      <Keywords><![CDATA[${pageConfig.metaKeywords || ''}]]></Keywords>
+      <Description><![CDATA[${pageConfig.metaDescription || ''}]]></Description>
+      <Title><![CDATA[${pageConfig.metaTitle || pageConfig.title || pageConfig.name}]]></Title>
+    </Meta>
+  </Page>
+</Pages>`;
 
   const response = await fetch(`${apiUrl}/setPage`, {
     method: 'POST',
@@ -107,13 +107,21 @@ export async function createPage(token, apiUrl, pageConfig) {
   }
 
   const responseText = await response.text();
+  console.log('=== setPage Response ===');
+  console.log(responseText);
+  
   const result = await parseXML(responseText);
 
-  if (result.Pages?.Page?.Status === 'error') {
-    throw new Error(`setPage Error: ${result.Pages.Page.Error}`);
+  if (result.Pages?.Page?.Status?.[0] === 'error') {
+    throw new Error(`setPage Error: ${result.Pages?.Page?.Error?.[0] || 'Unknown error'}`);
   }
 
-  return result.Pages?.Page?.Id;
+  const pageId = result.Pages?.Page?.Id?.[0] || result.Pages?.Page?.Id;
+  if (!pageId) {
+    throw new Error('setPage: No Page ID returned!');
+  }
+
+  return pageId;
 }
 
 /**
