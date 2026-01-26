@@ -119,13 +119,22 @@ export async function createPageWithContent(token, apiUrl, pageConfig, htmlConte
     throw new Error(`setPage Error: ${error}`);
   }
 
-  // Extract Page ID
+  // Extract Page ID - try multiple paths
   let pageId = result.Pages?.Page?.Id;
+  if (!pageId) {
+    // Fallback: try to extract from XML directly
+    const idMatch = responseText.match(/<Id>(\d+)<\/Id>/);
+    if (idMatch) {
+      pageId = idMatch[1];
+    }
+  }
   if (Array.isArray(pageId)) {
     pageId = pageId[0];
   }
   
   if (!pageId) {
+    console.error('Full response:', responseText);
+    console.error('Parsed result:', JSON.stringify(result, null, 2));
     throw new Error('setPage: No Page ID returned!');
   }
 
@@ -135,6 +144,9 @@ export async function createPageWithContent(token, apiUrl, pageConfig, htmlConte
   let contentId = result.Pages?.Page?.PageContents?.PageContent?.Id;
   if (Array.isArray(contentId)) {
     contentId = contentId[0];
+  }
+  if (contentId) {
+    console.log(`✅ Content ID extracted: ${contentId}`);
   }
   
   return { pageId, contentId };
