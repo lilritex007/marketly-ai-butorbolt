@@ -1,13 +1,14 @@
 {
-  "timestamp": "2026-01-26T16:44:21.755Z",
+  "timestamp": "2026-01-26T17:54:54.867Z",
   "mode": "live",
+  "strategy": "github-cdn",
   "config": {
     "pageSlug": "butorbolt",
-    "pageName": "AI Bútorbolt"
+    "pageName": "AI Bútorbolt",
+    "cdnBase": "https://raw.githubusercontent.com/kisriti/marketly-ai-butorbolt/main/dist"
   },
-  "pageId": null,
-  "contentId": null,
-  "uploadedFiles": [],
-  "success": false,
-  "error": "setStorage failed for /ai-shop/assets/index-CjZ2iZL6.js: 400 - <?xml version=\"1.0\" encoding=\"UTF-8\" ?>\r\n<StorageItems>\r\n\t<StorageItem>\r\n\t\t<Action>upload</Action>\r\n\t\t<Status>error</Status>\r\n\t\t<Error><![CDATA[Invalid action!]]></Error>\r\n\t</StorageItem>\r\n</StorageItems>\r\n"
+  "pageId": "347767",
+  "contentId": "3359491",
+  "githubCommit": null,
+  "success": true
 }

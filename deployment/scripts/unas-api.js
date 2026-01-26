@@ -120,21 +120,21 @@ export async function createPage(token, apiUrl, pageConfig) {
  * Create Content (setPageContent)
  */
 export async function createContent(token, apiUrl, contentConfig) {
-  const contentXML = builder.buildObject({
-    Contents: {
-      Content: {
-        Action: 'add',
-        Lang: contentConfig.lang,
-        Title: contentConfig.title,
-        Type: contentConfig.type || 'normal',
-        Published: contentConfig.published ? 'yes' : 'no',
-        NormalContent: {
-          Text: contentConfig.html,
-          ContentIsHTML: 'yes'
-        }
-      }
-    }
-  });
+  // Manual XML - xml2js has issues with UNAS API
+  const contentXML = `<?xml version="1.0" encoding="UTF-8"?>
+<PageContents>
+  <PageContent>
+    <Action>add</Action>
+    <Lang>${contentConfig.lang}</Lang>
+    <Title><![CDATA[${contentConfig.title}]]></Title>
+    <Type>${contentConfig.type || 'normal'}</Type>
+    <Published>${contentConfig.published ? 'yes' : 'no'}</Published>
+    <NormalContent>
+      <Text><![CDATA[${contentConfig.html}]]></Text>
+      <ContentIsHTML>yes</ContentIsHTML>
+    </NormalContent>
+  </PageContent>
+</PageContents>`;
 
   const response = await fetch(`${apiUrl}/setPageContent`, {
     method: 'POST',
@@ -153,30 +153,31 @@ export async function createContent(token, apiUrl, contentConfig) {
   const responseText = await response.text();
   const result = await parseXML(responseText);
 
-  if (result.Contents?.Content?.Status === 'error') {
-    throw new Error(`setPageContent Error: ${result.Contents.Content.Error}`);
+  if (result.PageContents?.PageContent?.Status === 'error') {
+    throw new Error(`setPageContent Error: ${result.PageContents.PageContent.Error}`);
   }
 
-  return result.Contents?.Content?.Id;
+  return result.PageContents?.PageContent?.Id;
 }
 
 /**
  * Link Content to Page (setPage modify)
  */
 export async function linkContentToPage(token, apiUrl, pageId, contentId) {
-  const linkXML = builder.buildObject({
-    Pages: {
-      Page: {
-        Action: 'modify',
-        Id: pageId,
-        Contents: {
-          Content: {
-            Id: contentId
-          }
-        }
-      }
-    }
-  });
+  // Manual XML - UNAS expects Type even for modify
+  const linkXML = `<?xml version="1.0" encoding="UTF-8"?>
+<Pages>
+  <Page>
+    <Action>modify</Action>
+    <Id>${pageId}</Id>
+    <Type>normal</Type>
+    <PageContents>
+      <PageContent>
+        <Id>${contentId}</Id>
+      </PageContent>
+    </PageContents>
+  </Page>
+</Pages>`;
 
   const response = await fetch(`${apiUrl}/setPage`, {
     method: 'POST',
