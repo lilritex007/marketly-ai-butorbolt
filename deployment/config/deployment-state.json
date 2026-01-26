@@ -1,14 +1,14 @@
 {
-  "timestamp": "2026-01-26T18:16:18.573Z",
+  "timestamp": "2026-01-26T18:23:09.727Z",
   "mode": "live",
   "strategy": "github-cdn",
   "config": {
     "pageSlug": "butorbolt",
     "pageName": "AI Bútorbolt",
-    "cdnBase": "https://raw.githubusercontent.com/kisriti/marketly-ai-butorbolt/main/dist"
+    "cdnBase": "https://raw.githubusercontent.com/lilritex007/marketly-ai-butorbolt/main/dist"
   },
-  "pageId": "737779",
-  "contentId": "3359536",
-  "githubCommit": null,
+  "pageId": "238524",
+  "contentId": "3359541",
+  "githubCommit": "0157a9b04157fdb59e07494bddc400ab03243914",
   "success": true
 }

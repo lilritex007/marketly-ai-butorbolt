@@ -68,8 +68,8 @@ function generateHTMLContent(jsFiles, cssFiles, cdnBase) {
   return `<!-- AI Shop Styles (GitHub CDN) -->
 ${cssFiles.map(f => `<link rel="stylesheet" href="${cdnBase}/assets/${f}">`).join('\n')}
 
-<!-- AI Shop Root Container -->
-<div id="root"></div>
+<!-- AI Shop Root - React looks for #root -->
+<div id="root" class="min-h-screen"></div>
 
 <!-- Configuration -->
 <script>
