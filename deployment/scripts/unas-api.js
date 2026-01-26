@@ -112,15 +112,24 @@ export async function createPage(token, apiUrl, pageConfig) {
   
   const result = await parseXML(responseText);
 
-  if (result.Pages?.Page?.Status?.[0] === 'error') {
-    throw new Error(`setPage Error: ${result.Pages?.Page?.Error?.[0] || 'Unknown error'}`);
+  // Check for errors
+  const status = result.Pages?.Page?.Status?.[0] || result.Pages?.Page?.Status;
+  if (status === 'error') {
+    const error = result.Pages?.Page?.Error?.[0] || result.Pages?.Page?.Error || 'Unknown error';
+    throw new Error(`setPage Error: ${error}`);
   }
 
-  const pageId = result.Pages?.Page?.Id?.[0] || result.Pages?.Page?.Id;
+  // Extract Page ID correctly (UNAS returns it in array format)
+  let pageId = result.Pages?.Page?.Id;
+  if (Array.isArray(pageId)) {
+    pageId = pageId[0];
+  }
+  
   if (!pageId) {
     throw new Error('setPage: No Page ID returned!');
   }
 
+  console.log(`✅ Page ID extracted: ${pageId}`);
   return pageId;
 }
 
@@ -170,6 +179,7 @@ export async function createContent(token, apiUrl, contentConfig) {
 
 /**
  * Link Content to Page (setPage modify)
+ * CRITICAL: Use <Contents> not <PageContents>!
  */
 export async function linkContentToPage(token, apiUrl, pageId, contentId) {
   // Manual XML - UNAS expects Type even for modify
@@ -179,13 +189,16 @@ export async function linkContentToPage(token, apiUrl, pageId, contentId) {
     <Action>modify</Action>
     <Id>${pageId}</Id>
     <Type>normal</Type>
-    <PageContents>
-      <PageContent>
+    <Contents>
+      <Content>
         <Id>${contentId}</Id>
-      </PageContent>
-    </PageContents>
+      </Content>
+    </Contents>
   </Page>
 </Pages>`;
+
+  console.log('=== linkContentToPage XML ===');
+  console.log(linkXML);
 
   const response = await fetch(`${apiUrl}/setPage`, {
     method: 'POST',
@@ -202,10 +215,16 @@ export async function linkContentToPage(token, apiUrl, pageId, contentId) {
   }
 
   const responseText = await response.text();
+  console.log('=== linkContentToPage Response ===');
+  console.log(responseText);
+  
   const result = await parseXML(responseText);
 
-  if (result.Pages?.Page?.Status === 'error') {
-    throw new Error(`linkContentToPage Error: ${result.Pages.Page.Error}`);
+  // Check for errors
+  const status = result.Pages?.Page?.Status?.[0] || result.Pages?.Page?.Status;
+  if (status === 'error') {
+    const error = result.Pages?.Page?.Error?.[0] || result.Pages?.Page?.Error || 'Unknown error';
+    throw new Error(`linkContentToPage Error: ${error}`);
   }
 
   return true;
