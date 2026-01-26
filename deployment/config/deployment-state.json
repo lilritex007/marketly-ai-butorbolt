@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-01-26T17:54:54.867Z",
+  "timestamp": "2026-01-26T18:16:18.573Z",
   "mode": "live",
   "strategy": "github-cdn",
   "config": {
@@ -7,8 +7,8 @@
     "pageName": "AI Bútorbolt",
     "cdnBase": "https://raw.githubusercontent.com/kisriti/marketly-ai-butorbolt/main/dist"
   },
-  "pageId": "347767",
-  "contentId": "3359491",
+  "pageId": "737779",
+  "contentId": "3359536",
   "githubCommit": null,
   "success": true
 }
