@@ -62,59 +62,43 @@ function getAssetFiles(dir) {
 
 /**
  * Generate HTML content for AI Shop (GitHub CDN)
+ * UNAS-compatible: No <html>, <head>, <body> tags (UNAS provides wrapper)
  */
 function generateHTMLContent(jsFiles, cssFiles, cdnBase) {
-  return `<!DOCTYPE html>
-<html lang="hu">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="AI-powered bútor keresés és személyre szabott ajánlások">
-  
-  <!-- AI Shop Styles (GitHub CDN) -->
-  ${cssFiles.map(f => `<link rel="stylesheet" href="${cdnBase}/assets/${f}">`).join('\n  ')}
-</head>
-<body>
-  <!-- AI Shop Root -->
-  <div id="ai-shop-root" class="min-h-screen"></div>
-  
-  <!-- Configuration -->
-  <script>
-    window.MARKETLY_CONFIG = {
-      apiBase: '${config.shopUrl}',
-      productBaseUrl: '/termek',
-      cartUrl: '/cart',
-      checkoutUrl: '/checkout',
-      mode: 'unas-integrated',
-      cdnBase: '${cdnBase}',
-      features: {
-        sessionSharing: false,
-        stockCheck: false,
-        expressCheckout: false
-      }
-    };
-  </script>
-  
-  <!-- React App (GitHub CDN) -->
-  ${jsFiles.map(f => `<script type="module" crossorigin src="${cdnBase}/assets/${f}"></script>`).join('\n  ')}
-  
-  <!-- Loading Fallback -->
-  <noscript>
-    <div style="text-align:center;padding:50px;">
-      <h2>JavaScript szükséges az AI Bútorbolt használatához</h2>
-      <p>Kérjük engedélyezd a JavaScriptet a böngésződben.</p>
-    </div>
-  </noscript>
-  
-  <!-- GitHub CDN Info -->
-  <script>
-    console.log('🚀 AI Shop loaded from GitHub CDN');
-    console.log('📦 CDN Base:', '${cdnBase}');
-    console.log('📄 JS Files:', ${JSON.stringify(jsFiles)});
-    console.log('🎨 CSS Files:', ${JSON.stringify(cssFiles)});
-  </script>
-</body>
-</html>`;
+  return `<!-- AI Shop Styles (GitHub CDN) -->
+${cssFiles.map(f => `<link rel="stylesheet" href="${cdnBase}/assets/${f}">`).join('\n')}
+
+<!-- AI Shop Root Container -->
+<div id="root"></div>
+
+<!-- Configuration -->
+<script>
+  window.MARKETLY_CONFIG = {
+    apiBase: '${config.shopUrl}',
+    productBaseUrl: '/termek',
+    cartUrl: '/cart',
+    checkoutUrl: '/checkout',
+    mode: 'unas-integrated',
+    cdnBase: '${cdnBase}',
+    features: {
+      sessionSharing: false,
+      stockCheck: false,
+      expressCheckout: false
+    }
+  };
+  console.log('🚀 Marketly AI Shop - GitHub CDN:', '${cdnBase}');
+</script>
+
+<!-- React App (GitHub CDN) -->
+${jsFiles.map(f => `<script type="module" crossorigin src="${cdnBase}/assets/${f}"></script>`).join('\n')}
+
+<!-- Loading Fallback -->
+<noscript>
+  <div style="text-align:center;padding:50px;font-family:sans-serif;">
+    <h2>JavaScript szükséges</h2>
+    <p>Kérjük engedélyezd a JavaScriptet az AI Bútorbolt használatához.</p>
+  </div>
+</noscript>`;
 }
 
 /**
