@@ -3,17 +3,21 @@
  * Handles communication with the backend proxy for UNAS product data
  */
 
-const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+// Use window.MARKETLY_CONFIG in production, fallback to localhost in dev
+const getApiBase = () => {
+  if (typeof window !== 'undefined' && window.MARKETLY_CONFIG?.apiBase) {
+    return window.MARKETLY_CONFIG.apiBase;
+  }
+  return import.meta.env.VITE_API_URL || 'http://localhost:3002';
+};
 
 /**
  * Fetch products from UNAS via backend proxy
  * Uses database-backed storage with optional filters
  */
 export const fetchUnasProducts = async (filters = {}) => {
-  // #region agent log
-  fetch('http://127.0.0.1:7243/ingest/ce754df7-7b1e-4d67-97a6-01293e3ab261',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'unasApi.js:12',message:'fetchUnasProducts called',data:{API_BASE:API_BASE,filters:filters},timestamp:Date.now(),sessionId:'debug-session',runId:'initial',hypothesisId:'H4'})}).catch(()=>{});
-  // #endregion
   try {
+    const API_BASE = getApiBase();
     const params = new URLSearchParams();
     
     if (filters.category) params.append('category', filters.category);
@@ -22,9 +26,7 @@ export const fetchUnasProducts = async (filters = {}) => {
     if (filters.offset) params.append('offset', filters.offset);
     
     const url = `${API_BASE}/api/products${params.toString() ? '?' + params.toString() : ''}`;
-    // #region agent log
-    fetch('http://127.0.0.1:7243/ingest/ce754df7-7b1e-4d67-97a6-01293e3ab261',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'unasApi.js:21',message:'Fetching from URL',data:{url:url},timestamp:Date.now(),sessionId:'debug-session',runId:'initial',hypothesisId:'H4'})}).catch(()=>{});
-    // #endregion
+    console.log('🔍 Fetching products from:', url);
     
     const response = await fetch(url, {
       method: 'GET',
@@ -32,15 +34,9 @@ export const fetchUnasProducts = async (filters = {}) => {
         'Content-Type': 'application/json',
       },
     });
-    // #region agent log
-    fetch('http://127.0.0.1:7243/ingest/ce754df7-7b1e-4d67-97a6-01293e3ab261',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'unasApi.js:30',message:'Response received',data:{ok:response.ok,status:response.status},timestamp:Date.now(),sessionId:'debug-session',runId:'initial',hypothesisId:'H4'})}).catch(()=>{});
-    // #endregion
 
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
-      // #region agent log
-      fetch('http://127.0.0.1:7243/ingest/ce754df7-7b1e-4d67-97a6-01293e3ab261',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'unasApi.js:32',message:'Response not OK',data:{status:response.status,errorData:errorData},timestamp:Date.now(),sessionId:'debug-session',runId:'initial',hypothesisId:'H4'})}).catch(()=>{});
-      // #endregion
       throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
     }
 
@@ -62,6 +58,7 @@ export const fetchUnasProducts = async (filters = {}) => {
  */
 export const refreshUnasProducts = async () => {
   try {
+    const API_BASE = getApiBase();
     const response = await fetch(`${API_BASE}/api/admin/sync`, {
       method: 'POST',
       headers: {
@@ -92,6 +89,7 @@ export const refreshUnasProducts = async () => {
  */
 export const getCacheInfo = async () => {
   try {
+    const API_BASE = getApiBase();
     const response = await fetch(`${API_BASE}/api/stats`, {
       method: 'GET',
       headers: {
@@ -115,6 +113,7 @@ export const getCacheInfo = async () => {
  */
 export const clearCache = async () => {
   try {
+    const API_BASE = getApiBase();
     const response = await fetch(`${API_BASE}/api/admin/sync`, {
       method: 'POST',
       headers: {
@@ -138,6 +137,7 @@ export const clearCache = async () => {
  */
 export const checkBackendHealth = async () => {
   try {
+    const API_BASE = getApiBase();
     const response = await fetch(`${API_BASE}/health`, {
       method: 'GET',
       headers: {

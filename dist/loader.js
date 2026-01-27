@@ -1,6 +1,6 @@
 /**
  * Marketly AI Shop Loader
- * Dinamikusan betölti a React appot GitHub CDN-ről
+ * Dinamikusan betölti a React appot jsDelivr CDN-ről
  */
 
 (function() {
@@ -38,16 +38,40 @@
     return true;
   };
 
+  // Dinamikus JS fájl detektálás
+  const getReactBundlePath = async () => {
+    try {
+      // Próbáljuk meg betölteni az index.html-t a CDN-ről
+      const response = await fetch(`${CDN_BASE}/index.html`);
+      const html = await response.text();
+      
+      // Keressük meg a JS fájl nevét
+      const match = html.match(/\/assets\/(index-[a-zA-Z0-9_]+\.js)/);
+      if (match) {
+        console.log('🔍 Found React bundle:', match[1]);
+        return `/assets/${match[1]}`;
+      }
+      
+      // Fallback: próbáljuk meg a legújabb build-et
+      return '/assets/index-7_60_RQq.js';
+    } catch (error) {
+      console.warn('⚠️ Could not detect bundle name, using fallback');
+      return '/assets/index-7_60_RQq.js';
+    }
+  };
+
   // React bundle betöltése
-  const loadReactApp = () => {
+  const loadReactApp = async () => {
     if (!checkRoot()) return;
 
     console.log('📥 Loading React bundle...');
     
+    const bundlePath = await getReactBundlePath();
+    
     const script = document.createElement('script');
     script.type = 'module';
     script.crossOrigin = 'anonymous';
-    script.src = `${CDN_BASE}/assets/index-CjZ2iZL6.js`;
+    script.src = `${CDN_BASE}${bundlePath}`;
     
     script.onload = () => {
       console.log('✅ React bundle loaded successfully!');
