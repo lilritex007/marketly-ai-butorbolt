@@ -1,6 +1,7 @@
 /**
  * Upstash Redis Client
  * Automatikusan használja a Vercel Integration environment variables-t
+ * Vercel KV_ prefixet használ: KV_REST_API_URL, KV_REST_API_TOKEN
  */
 
 import { Redis } from '@upstash/redis';
@@ -12,19 +13,26 @@ export function getRedis() {
     return redis;
   }
 
-  const url = process.env.UPSTASH_REDIS_REST_URL;
-  const token = process.env.UPSTASH_REDIS_REST_TOKEN;
+  // Vercel integration uses KV_ prefix, Redis.fromEnv() auto-detects it
+  try {
+    redis = Redis.fromEnv();
+    return redis;
+  } catch (error) {
+    // Fallback: manual config (if KV_ vars not found, try UPSTASH_)
+    const url = process.env.KV_REST_API_URL || process.env.UPSTASH_REDIS_REST_URL;
+    const token = process.env.KV_REST_API_TOKEN || process.env.UPSTASH_REDIS_REST_TOKEN;
 
-  if (!url || !token) {
-    throw new Error('Upstash Redis not configured. Add integration in Vercel Dashboard.');
+    if (!url || !token) {
+      throw new Error('Upstash Redis not configured. Add integration in Vercel Dashboard.');
+    }
+
+    redis = new Redis({
+      url,
+      token
+    });
+
+    return redis;
   }
-
-  redis = new Redis({
-    url,
-    token
-  });
-
-  return redis;
 }
 
 /**
