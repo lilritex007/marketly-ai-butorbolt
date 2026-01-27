@@ -1,16 +1,12 @@
 /**
- * Sync endpoint - Triggers QStash background job
- * Endpoint: /api/sync
- * 
- * Returns immediately, actual sync runs in background via QStash
+ * Sync Worker - Long-running sync job
+ * Called by QStash (no timeout limit!)
+ * Endpoint: /api/sync-worker
  */
 
-import { triggerSync } from './qstash.js';
-
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Content-Type': 'application/json'
-};
+import fetch from 'node-fetch';
+import xml2js from 'xml2js';
+import { getRedis, saveProductsBatch } from './redis.js';
 
 /**
  * Login to UNAS
@@ -142,42 +138,46 @@ async function fetchAllProducts(token) {
 }
 
 /**
- * Vercel Serverless Handler
- * Triggers QStash background job (returns immediately)
+ * QStash Worker Handler
+ * No timeout limit - can run for hours!
  */
 export default async function handler(req, res) {
-  const corsHeaders = {
-    'Access-Control-Allow-Origin': '*',
-    'Content-Type': 'application/json'
-  };
-
-  Object.keys(corsHeaders).forEach(key => {
-    res.setHeader(key, corsHeaders[key]);
-  });
-
-  // Only allow POST (or GET for manual trigger)
-  if (req.method !== 'POST' && req.method !== 'GET') {
-    return res.status(405).json({ error: 'Method not allowed' });
-  }
+  // QStash signature verification (optional but recommended)
+  // For now, skip for simplicity
 
   try {
-    console.log('🚀 Triggering sync via QStash...');
-    
-    // Trigger QStash background job
-    const result = await triggerSync();
+    const startTime = Date.now();
 
-    res.status(202).json({
+    // Check Redis connection
+    const redis = getRedis();
+    await redis.ping();
+    console.log('✅ Redis connected');
+
+    // Get UNAS token
+    console.log('🔐 Logging in to UNAS...');
+    const token = await getUnasToken();
+    console.log('✅ UNAS token received');
+
+    // Fetch all products
+    const products = await fetchAllProducts(token);
+
+    // Save to Redis (batch write)
+    const batchCount = await saveProductsBatch(products);
+
+    const elapsed = Date.now() - startTime;
+
+    res.status(200).json({
       success: true,
-      message: 'Sync job queued',
-      messageId: result.messageId,
-      status: 'processing',
-      note: 'Sync is running in background. Check logs for progress.'
+      productsCount: products.length,
+      batches: batchCount,
+      elapsed: elapsed,
+      message: `Synced ${products.length} products in ${(elapsed / 1000).toFixed(1)}s`
     });
 
   } catch (error) {
-    console.error('❌ Sync trigger error:', error);
+    console.error('❌ Sync worker error:', error);
     res.status(500).json({
-      error: 'Failed to trigger sync',
+      error: 'Sync failed',
       message: error.message
     });
   }
