@@ -54,10 +54,16 @@
 **F12 Console várható kimenet:**
 ```
 ✅ "AI Shop Loader starting..."
-✅ "MARKETLY_CONFIG initialized"
+✅ "MARKETLY_CONFIG initialized: {apiBase: 'https://www.marketly.hu', ...}"
+✅ "CDN Base (jsDelivr): https://cdn.jsdelivr.net/gh/..."
 ✅ "#root element found"
+✅ "Found React bundle: index-XXXXX.js"
+✅ "Script tag injected"
 ✅ "React bundle loaded successfully!"
+✅ "Fetching products from: https://www.marketly.hu/api/products"
 ```
+
+**FONTOS:** Most már a **production API-t használja** (`https://www.marketly.hu/api/products`), nem localhost-ot! ✅
 
 ---
 
