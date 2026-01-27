@@ -15,7 +15,7 @@
     cartUrl: '/cart',
     checkoutUrl: '/checkout',
     mode: 'unas-integrated',
-    cdnBase: 'https://raw.githubusercontent.com/lilritex007/marketly-ai-butorbolt/main/dist',
+    cdnBase: 'https://cdn.jsdelivr.net/gh/lilritex007/marketly-ai-butorbolt@main/dist',
     features: {
       sessionSharing: false,
       stockCheck: false,
@@ -25,7 +25,7 @@
   console.log('✅ MARKETLY_CONFIG initialized:', window.MARKETLY_CONFIG);
 
   const CDN_BASE = window.MARKETLY_CONFIG.cdnBase;
-  console.log('📦 CDN Base:', CDN_BASE);
+  console.log('📦 CDN Base (jsDelivr):', CDN_BASE);
 
   // Ellenőrizzük hogy a root elem létezik-e
   const checkRoot = () => {
