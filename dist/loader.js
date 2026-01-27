@@ -66,27 +66,29 @@
 
   // Dinamikus JS fájl detektálás
   const getReactBundlePath = async () => {
+    // Use current build bundle name directly (updated: 2025-01-27)
+    const currentBundle = 'index-Bq8nIWua.js';
+    console.log('🔍 Using current bundle:', currentBundle);
+    
+    // Try to detect from CDN, but use current as fallback
     try {
-      // Próbáljuk meg betölteni az index.html-t a CDN-ről (cache-busting)
       const cacheBuster = '?v=' + Date.now();
       const response = await fetch(`${CDN_BASE}/index.html${cacheBuster}`);
       const html = await response.text();
       
       // Keressük meg a JS fájl nevét
       const match = html.match(/\/assets\/(index-[a-zA-Z0-9_]+\.js)/);
-      if (match) {
-        console.log('🔍 Found React bundle:', match[1]);
+      if (match && match[1] !== 'index-7_60_RQq.js') {
+        // Only use detected bundle if it's not the old cached one
+        console.log('🔍 Found React bundle from CDN:', match[1]);
         return `/assets/${match[1]}`;
       }
-      
-      // Fallback: use current build bundle name
-      return '/assets/index-Bq8nIWua.js';
     } catch (error) {
-      console.warn('⚠️ Could not detect bundle name, using fallback');
-      console.warn('⚠️ Error:', error.message);
-      // Fallback to current build bundle
-      return '/assets/index-Bq8nIWua.js';
+      console.warn('⚠️ Could not detect bundle name from CDN, using current build');
     }
+    
+    // Always use current build bundle (most recent)
+    return `/assets/${currentBundle}`;
   };
 
   // React bundle betöltése
