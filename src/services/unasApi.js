@@ -20,14 +20,13 @@ export const fetchUnasProducts = async (filters = {}) => {
     const API_BASE = getApiBase();
     const params = new URLSearchParams();
     
-    // PHP proxy expects 'action=products' + filters
-    params.append('action', 'products');
+    // Vercel serverless API uses query params directly
     if (filters.category) params.append('category', filters.category);
     if (filters.search) params.append('search', filters.search);
     if (filters.limit) params.append('limit', filters.limit);
     if (filters.offset) params.append('offset', filters.offset);
     
-    const url = `${API_BASE}?${params.toString()}`;
+    const url = `${API_BASE}/products${params.toString() ? '?' + params.toString() : ''}`;
     console.log('🔍 Fetching products from:', url);
     
     const response = await fetch(url, {

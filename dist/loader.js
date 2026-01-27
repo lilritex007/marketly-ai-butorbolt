@@ -10,7 +10,7 @@
 
   // Config inicializálás (mivel tinyMCE elrontja a script tageket)
   window.MARKETLY_CONFIG = {
-    apiBase: 'https://www.marketly.hu/api.php',  // PHP Proxy
+    apiBase: 'https://marketly-ai-butorbolt.vercel.app/api',  // Vercel Serverless API
     productBaseUrl: '/termek',
     cartUrl: '/cart',
     checkoutUrl: '/checkout',
@@ -79,7 +79,7 @@
       }
       
       // Fallback: próbáljuk meg a legújabb build-et
-      return '/assets/index-Dxnpg5Xj.js';
+      return '/assets/index-Bq8nIWua.js';
     } catch (error) {
       console.warn('⚠️ Could not detect bundle name, using fallback');
       return '/assets/index-7_60_RQq.js';
