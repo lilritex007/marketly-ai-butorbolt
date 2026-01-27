@@ -44,7 +44,7 @@
 | **Név** | `AI Shop Loader` |
 | **Típus** | `head` |
 | **Betöltés** | `defer` ✅ |
-| **Script URL** | `https://cdn.jsdelivr.net/gh/lilritex007/marketly-ai-butorbolt@main/dist/loader.js` |
+| **Script URL** | `https://cdn.jsdelivr.net/gh/lilritex007/marketly-ai-butorbolt@main/dist/loader.js?v=1769538548` |
 | **Scope** | Csak `/butorbolt` oldalon |
 
 **✅ Használd a `@main` branch-et** (nem specifikus commit hash), hogy automatikusan frissüljön!

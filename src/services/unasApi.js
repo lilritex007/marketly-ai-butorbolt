@@ -27,9 +27,9 @@ export const fetchUnasProducts = async (filters = {}) => {
     if (filters.offset) params.append('offset', filters.offset);
     
     // API_BASE already includes /api, so we need /products, not /api/products
-    // API_BASE already includes /api, so we just need /products
     const url = `${API_BASE}/products${params.toString() ? '?' + params.toString() : ''}`;
     console.log('🔍 Fetching products from:', url);
+    console.log('🔍 API_BASE value:', API_BASE);
     
     const response = await fetch(url, {
       method: 'GET',
