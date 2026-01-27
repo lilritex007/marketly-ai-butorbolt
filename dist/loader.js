@@ -8,11 +8,21 @@
   
   console.log('🚀 AI Shop Loader starting...');
 
-  // Config ellenőrzés
-  if (!window.MARKETLY_CONFIG) {
-    console.error('❌ MARKETLY_CONFIG not found!');
-    return;
-  }
+  // Config inicializálás (mivel tinyMCE elrontja a script tageket)
+  window.MARKETLY_CONFIG = {
+    apiBase: 'https://www.marketly.hu',
+    productBaseUrl: '/termek',
+    cartUrl: '/cart',
+    checkoutUrl: '/checkout',
+    mode: 'unas-integrated',
+    cdnBase: 'https://raw.githubusercontent.com/lilritex007/marketly-ai-butorbolt/main/dist',
+    features: {
+      sessionSharing: false,
+      stockCheck: false,
+      expressCheckout: false
+    }
+  };
+  console.log('✅ MARKETLY_CONFIG initialized:', window.MARKETLY_CONFIG);
 
   const CDN_BASE = window.MARKETLY_CONFIG.cdnBase;
   console.log('📦 CDN Base:', CDN_BASE);
