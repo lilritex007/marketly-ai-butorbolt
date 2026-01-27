@@ -13,6 +13,7 @@
     "lint": "eslint . --ext js,jsx --report-unused-disable-directives --max-warnings 0",
     "test:db": "node scripts/test-db.js",
     "db:reset": "rm -rf data/ && echo Database reset complete",
+    "export:products": "node server/scripts/export-products.js",
     "deploy:check": "node deployment/scripts/check-ready.js",
     "deploy:test": "node deployment/scripts/deploy-scripttag.js --dry-run",
     "deploy:live": "node deployment/scripts/deploy-scripttag.js",

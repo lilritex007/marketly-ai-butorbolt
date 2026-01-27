@@ -12,24 +12,70 @@ const getApiBase = () => {
 };
 
 /**
- * Fetch products from UNAS via backend proxy
- * Uses database-backed storage with optional filters
+ * Fetch products - tries static JSON first, then falls back to API
+ * This avoids API issues and CDN cache problems
  */
 export const fetchUnasProducts = async (filters = {}) => {
+  // Try static JSON first (from CDN - in dist folder)
+  try {
+    const CDN_BASE = window.MARKETLY_CONFIG?.cdnBase || 'https://cdn.jsdelivr.net/gh/lilritex007/marketly-ai-butorbolt@main/dist';
+    const staticUrl = `${CDN_BASE}/products.json?v=${Date.now()}`;
+    console.log('📦 Trying static JSON first:', staticUrl);
+    
+    const staticResponse = await fetch(staticUrl, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (staticResponse.ok) {
+      const staticData = await staticResponse.json();
+      console.log('✅ Loaded from static JSON:', staticData.stats?.total || staticData.products?.length, 'products');
+      
+      // Apply filters client-side
+      let products = staticData.products || [];
+      
+      if (filters.category && filters.category !== 'Összes') {
+        products = products.filter(p => p.category === filters.category);
+      }
+      
+      if (filters.search) {
+        const searchLower = filters.search.toLowerCase();
+        products = products.filter(p => 
+          p.name?.toLowerCase().includes(searchLower) ||
+          p.description?.toLowerCase().includes(searchLower)
+        );
+      }
+      
+      if (filters.limit) {
+        products = products.slice(0, parseInt(filters.limit));
+      }
+      
+      return {
+        products,
+        total: staticData.stats?.total || staticData.products?.length || 0,
+        count: products.length,
+        lastSync: staticData.stats?.exported_at || null,
+        source: 'static'
+      };
+    }
+  } catch (staticError) {
+    console.warn('⚠️ Static JSON not available, falling back to API:', staticError.message);
+  }
+
+  // Fallback to API
   try {
     const API_BASE = getApiBase();
     const params = new URLSearchParams();
     
-    // Vercel serverless API uses query params directly
     if (filters.category) params.append('category', filters.category);
     if (filters.search) params.append('search', filters.search);
     if (filters.limit) params.append('limit', filters.limit);
     if (filters.offset) params.append('offset', filters.offset);
     
-    // API_BASE already includes /api, so we need /products, not /api/products
     const url = `${API_BASE}/products${params.toString() ? '?' + params.toString() : ''}`;
-    console.log('🔍 Fetching products from:', url);
-    console.log('🔍 API_BASE value:', API_BASE);
+    console.log('🔍 Falling back to API:', url);
     
     const response = await fetch(url, {
       method: 'GET',
@@ -48,10 +94,11 @@ export const fetchUnasProducts = async (filters = {}) => {
       products: data.products || [],
       total: data.total || 0,
       count: data.count || data.products?.length || 0,
-      lastSync: data.lastSync
+      lastSync: data.lastSync,
+      source: 'api'
     };
   } catch (error) {
-    console.error('Error fetching UNAS products:', error);
+    console.error('❌ Error fetching from API:', error);
     throw new Error(`Failed to fetch products: ${error.message}`);
   }
 };
