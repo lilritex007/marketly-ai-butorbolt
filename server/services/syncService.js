@@ -92,15 +92,82 @@ export async function syncProductsFromUnas(options = {}) {
 
     console.log('✅ Login successful, token received');
 
-    // STEP 2: Fetch ALL products in batches (NO StatusBase = ALL products including inactive)
+    // STEP 2: Pre-load enabled categories (if filtering needed)
+    let enabledCategories = null;
+    if (categories && Array.isArray(categories) && categories.length > 0) {
+      enabledCategories = new Set(categories);
+      console.log(`🔍 Filtering by ${categories.length} specified categories`);
+    } else if (!categories) {
+      // Load enabled categories from database (ONLY if categories exist)
+      const categoriesStmt = db.prepare('SELECT COUNT(*) as count FROM categories');
+      const catCount = categoriesStmt.get().count;
+      
+      if (catCount > 0) {
+        const enabledCatsStmt = db.prepare('SELECT name FROM categories WHERE enabled = 1');
+        const dbCategories = enabledCatsStmt.all();
+        if (dbCategories.length > 0) {
+          enabledCategories = new Set(dbCategories.map(c => c.name));
+          console.log(`🔍 Filtering by ${dbCategories.length} enabled categories from database`);
+        } else {
+          console.log('⚠️ No enabled categories in database - no products will be synced');
+        }
+      } else {
+        // First sync - accept all products
+        console.log('🆕 First sync - accepting all categories');
+      }
+    }
+
+    // STEP 3: Fetch and save products in batches (MEMORY EFFICIENT)
     console.log('📡 Fetching ALL products from UNAS (active + inactive)...');
     console.log('🎯 Target: ~160-170K products');
+    console.log('💾 Saving to database batch-by-batch (memory efficient)');
     
-    let allProducts = [];
     let offset = 0;
     const batchSize = 1000;
     let hasMore = true;
     let batchCount = 0;
+    let totalFetched = 0;
+    let totalAdded = 0;
+    let totalUpdated = 0;
+
+    // Batch save function (reusable, memory efficient)
+    const saveBatch = db.transaction((batchProducts) => {
+      let batchAdded = 0;
+      let batchUpdated = 0;
+      
+      // Check which products already exist (batch query for efficiency)
+      const existingIds = new Set();
+      if (batchProducts.length > 0) {
+        const placeholders = batchProducts.map(() => '?').join(',');
+        const checkStmt = db.prepare(`SELECT id FROM products WHERE id IN (${placeholders})`);
+        const existing = checkStmt.all(batchProducts.map(p => p.id));
+        existing.forEach(row => existingIds.add(row.id));
+      }
+      
+      for (const product of batchProducts) {
+        try {
+          const wasNew = !existingIds.has(product.id);
+          const result = upsertProduct(product);
+          
+          if (result.changes > 0) {
+            if (wasNew) {
+              batchAdded++;
+            } else {
+              batchUpdated++;
+            }
+          }
+
+          // Add category to categories table
+          if (product.category) {
+            upsertCategory(product.category, product.category_path || product.category, true);
+          }
+        } catch (error) {
+          console.error(`Failed to upsert product ${product.id}:`, error.message);
+        }
+      }
+      
+      return { added: batchAdded, updated: batchUpdated };
+    });
     
     while (hasMore) {
       batchCount++;
@@ -131,7 +198,7 @@ export async function syncProductsFromUnas(options = {}) {
         // Check for rate limit
         if (errorText.includes('Too much') || errorText.includes('banned')) {
           console.error('⚠️  Rate limit reached. Stopping batch sync.');
-          console.log(`✓ Downloaded ${allProducts.length} products before rate limit`);
+          console.log(`✓ Processed ${totalFetched} products before rate limit`);
           break;
         }
         
@@ -147,12 +214,31 @@ export async function syncProductsFromUnas(options = {}) {
         console.log('✓ No more products, stopping...');
         hasMore = false;
       } else {
-        console.log(`  ✓ Got ${batchProducts.length} products`);
-        allProducts = allProducts.concat(batchProducts);
+        console.log(`  ✓ Got ${batchProducts.length} products from UNAS`);
+        
+        // Filter by categories if needed
+        if (enabledCategories) {
+          const beforeFilter = batchProducts.length;
+          batchProducts = batchProducts.filter(p => enabledCategories.has(p.category));
+          if (beforeFilter !== batchProducts.length) {
+            console.log(`  🔍 Filtered: ${beforeFilter} → ${batchProducts.length} products`);
+          }
+        }
+        
+        // Save batch immediately to database (memory efficient!)
+        if (batchProducts.length > 0) {
+          console.log(`  💾 Saving ${batchProducts.length} products to database...`);
+          const stats = saveBatch(batchProducts);
+          totalAdded += stats.added;
+          totalUpdated += stats.updated;
+          console.log(`  ✅ Saved: +${stats.added} new, ~${stats.updated} updated`);
+        }
+        
+        totalFetched += batchProducts.length;
         offset += batchSize;
         
         // Safety limit
-        if (allProducts.length >= 200000) {
+        if (totalFetched >= 200000) {
           console.log('⚠️  Reached 200K safety limit');
           hasMore = false;
         }
@@ -162,77 +248,17 @@ export async function syncProductsFromUnas(options = {}) {
           console.log('   ⏳ Waiting 2s (rate limit protection)...');
           await new Promise(resolve => setTimeout(resolve, 2000));
         }
-      }
-    }
-
-    let products = allProducts;
-    console.log(`\n📊 Total fetched: ${products.length} products`);
-    
-    // DEBUG: Show first product's category
-    if (products.length > 0) {
-      console.log(`🔍 First product: "${products[0].name}" -> Category: "${products[0].category}"`);
-    }
-
-    // Filter by categories if specified
-    let enabledCategories = null;
-    if (categories && Array.isArray(categories) && categories.length > 0) {
-      enabledCategories = new Set(categories);
-      products = products.filter(p => enabledCategories.has(p.category));
-      console.log(`🔍 Filtered to ${products.length} products in selected categories`);
-    } else if (!categories) {
-      // Load enabled categories from database (ONLY if categories exist)
-      const categoriesStmt = db.prepare('SELECT COUNT(*) as count FROM categories');
-      const catCount = categoriesStmt.get().count;
-      
-      if (catCount > 0) {
-        // Only filter if we have categories in the database
-        const enabledCatsStmt = db.prepare('SELECT name FROM categories WHERE enabled = 1');
-        const dbCategories = enabledCatsStmt.all();
-        if (dbCategories.length > 0) {
-          enabledCategories = new Set(dbCategories.map(c => c.name));
-          products = products.filter(p => enabledCategories.has(p.category));
-          console.log(`🔍 Filtered to ${products.length} products in enabled categories`);
-        } else {
-          console.log('⚠️ No enabled categories in database - no products will be synced');
-        }
-      } else {
-        // First sync - accept all products
-        console.log('🆕 First sync - accepting all categories');
-      }
-    }
-
-    // Track stats
-    let added = 0;
-    let updated = 0;
-
-    // Use transaction for better performance
-    const insertMany = db.transaction((products) => {
-      for (const product of products) {
-        try {
-          const result = upsertProduct(product);
-          if (result.changes > 0) {
-            // Check if it was insert or update
-            const existsStmt = db.prepare('SELECT id FROM products WHERE id = ?');
-            const exists = existsStmt.get(product.id);
-            if (exists) {
-              updated++;
-            } else {
-              added++;
-            }
-          }
-
-          // Add category to categories table
-          if (product.category) {
-            upsertCategory(product.category, product.category_path || product.category, true);
-          }
-        } catch (error) {
-          console.error(`Failed to upsert product ${product.id}:`, error.message);
+        
+        // Force garbage collection hint (if available)
+        if (global.gc && batchCount % 10 === 0) {
+          global.gc();
         }
       }
-    });
+    }
 
-    console.log('💾 Saving to database...');
-    insertMany(products);
+    console.log(`\n📊 Total processed: ${totalFetched} products`);
+    console.log(`   - Added: ${totalAdded}`);
+    console.log(`   - Updated: ${totalUpdated}`);
 
     // Update sync history
     const updateSyncStmt = db.prepare(`
@@ -245,18 +271,18 @@ export async function syncProductsFromUnas(options = {}) {
         products_updated = ?
       WHERE id = ?
     `);
-    updateSyncStmt.run(products.length, added, updated, syncId);
+    updateSyncStmt.run(totalFetched, totalAdded, totalUpdated, syncId);
 
       console.log('✅ Sync completed successfully');
-      console.log(`   - Fetched: ${products.length}`);
-      console.log(`   - Added: ${added}`);
-      console.log(`   - Updated: ${updated}`);
+      console.log(`   - Fetched: ${totalFetched}`);
+      console.log(`   - Added: ${totalAdded}`);
+      console.log(`   - Updated: ${totalUpdated}`);
 
       return {
         success: true,
-        fetched: products.length,
-        added,
-        updated,
+        fetched: totalFetched,
+        added: totalAdded,
+        updated: totalUpdated,
         syncId
       };
 
