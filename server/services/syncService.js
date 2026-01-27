@@ -202,6 +202,14 @@ export async function syncProductsFromUnas(options = {}) {
           break;
         }
         
+        // Check for "end of range" - means we've fetched all products
+        if (errorText.includes('end of the range') || errorText.includes('end of range') || 
+            response.status === 404 || errorText.includes('No more products')) {
+          console.log('✅ Reached end of product range. All products fetched.');
+          hasMore = false;
+          break;
+        }
+        
         throw new Error(`UNAS API returned ${response.status}: ${response.statusText}`);
       }
 

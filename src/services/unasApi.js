@@ -26,6 +26,7 @@ export const fetchUnasProducts = async (filters = {}) => {
     if (filters.limit) params.append('limit', filters.limit);
     if (filters.offset) params.append('offset', filters.offset);
     
+    // API_BASE already includes /api, so we need /products, not /api/products
     const url = `${API_BASE}/products${params.toString() ? '?' + params.toString() : ''}`;
     console.log('🔍 Fetching products from:', url);
     

@@ -37,6 +37,8 @@
 
 ## 2️⃣ SCRIPT TAG BEÁLLÍTÁSOK (UNAS Script Manager)
 
+**⚠️ FONTOS: Frissítsd az UNAS Script Manager-ben!**
+
 | Mező | Érték |
 |------|-------|
 | **Név** | `AI Shop Loader` |
@@ -44,6 +46,8 @@
 | **Betöltés** | `defer` ✅ |
 | **Script URL** | `https://cdn.jsdelivr.net/gh/lilritex007/marketly-ai-butorbolt@main/dist/loader.js` |
 | **Scope** | Csak `/butorbolt` oldalon |
+
+**✅ Használd a `@main` branch-et** (nem specifikus commit hash), hogy automatikusan frissüljön!
 
 ---
 
@@ -54,16 +58,16 @@
 **F12 Console várható kimenet:**
 ```
 ✅ "AI Shop Loader starting..."
-✅ "MARKETLY_CONFIG initialized: {apiBase: 'https://www.marketly.hu', ...}"
+✅ "MARKETLY_CONFIG initialized: {apiBase: 'https://marketly-ai-butorbolt-production.up.railway.app/api', ...}"
 ✅ "CDN Base (jsDelivr): https://cdn.jsdelivr.net/gh/..."
 ✅ "#root element found"
 ✅ "Found React bundle: index-XXXXX.js"
 ✅ "Script tag injected"
 ✅ "React bundle loaded successfully!"
-✅ "Fetching products from: https://www.marketly.hu/api/products"
+✅ "Fetching products from: https://marketly-ai-butorbolt-production.up.railway.app/api/products"
 ```
 
-**FONTOS:** Most már a **production API-t használja** (`https://www.marketly.hu/api/products`), nem localhost-ot! ✅
+**FONTOS:** Most már a **Railway Backend API-t használja** (`https://marketly-ai-butorbolt-production.up.railway.app/api`), nem localhost-ot! ✅
 
 ---
 
