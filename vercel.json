@@ -1,21 +1,6 @@
 {
   "version": 2,
   "name": "marketly-ai-shop",
-  "builds": [
-    {
-      "src": "api/**/*.js",
-      "use": "@vercel/node"
-    }
-  ],
-  "routes": [
-    {
-      "src": "/api/(.*)",
-      "dest": "/api/$1"
-    }
-  ],
-  "env": {
-    "UNAS_API_KEY": "@unas-api-key"
-  },
   "functions": {
     "api/**/*.js": {
       "memory": 1024,
