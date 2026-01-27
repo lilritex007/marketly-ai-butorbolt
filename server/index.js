@@ -26,7 +26,11 @@ const PORT = process.env.PORT || 3001;
 
 // CORS configuration
 app.use(cors({
-  origin: process.env.FRONTEND_URL || 'http://localhost:3000',
+  origin: [
+    process.env.FRONTEND_URL || 'http://localhost:3000',
+    'https://www.marketly.hu',
+    'https://marketly.hu'
+  ],
   credentials: true
 }));
 
@@ -44,9 +48,6 @@ app.get('/health', (req, res) => {
  * Query params: category, search, limit, offset
  */
 app.get('/api/products', async (req, res) => {
-  // #region agent log
-  fetch('http://127.0.0.1:7243/ingest/ce754df7-7b1e-4d67-97a6-01293e3ab261',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'server/index.js:46',message:'Products API called',data:{query:req.query},timestamp:Date.now(),sessionId:'debug-session',runId:'initial',hypothesisId:'H1'})}).catch(()=>{});
-  // #endregion
   try {
     const {
       category,
@@ -65,9 +66,6 @@ app.get('/api/products', async (req, res) => {
       limit: parseInt(limit),
       offset: parseInt(offset)
     });
-    // #region agent log
-    fetch('http://127.0.0.1:7243/ingest/ce754df7-7b1e-4d67-97a6-01293e3ab261',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'server/index.js:65',message:'Products fetched from DB',data:{count:products.length},timestamp:Date.now(),sessionId:'debug-session',runId:'initial',hypothesisId:'H2'})}).catch(()=>{});
-    // #endregion
 
     const total = getProductCount({
       category,
@@ -83,9 +81,6 @@ app.get('/api/products', async (req, res) => {
       lastSync: lastSync?.completed_at || null
     });
   } catch (error) {
-    // #region agent log
-    fetch('http://127.0.0.1:7243/ingest/ce754df7-7b1e-4d67-97a6-01293e3ab261',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'server/index.js:80',message:'Products API error',data:{error:error.message,stack:error.stack},timestamp:Date.now(),sessionId:'debug-session',runId:'initial',hypothesisId:'H3'})}).catch(()=>{});
-    // #endregion
     console.error('Error fetching products:', error);
     res.status(500).json({
       error: 'Failed to fetch products',

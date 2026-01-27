@@ -4,6 +4,7 @@
   "description": "AI-powered furniture e-commerce platform with visual search and room planning",
   "type": "module",
   "scripts": {
+    "start": "node server/index.js",
     "dev": "vite",
     "server": "node server/index.js",
     "dev:full": "concurrently \"npm run server\" \"npm run dev\"",
