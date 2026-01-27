@@ -361,4 +361,24 @@ app.listen(PORT, () => {
     console.log('🔄 Running initial auto-sync...');
     autoSync(60).catch(err => console.error('Initial sync error:', err));
   }, 2000);
+
+  // Export products.json after sync (for static loading)
+  // This runs after sync completes to create products.json in dist folder
+  setTimeout(async () => {
+    try {
+      const { exportProducts } = await import('./scripts/export-products.js');
+      // Check if products.json exists, if not, export it
+      const fs = await import('fs');
+      const path = await import('path');
+      const distPath = path.join(process.cwd(), 'dist', 'products.json');
+      if (!fs.existsSync(distPath)) {
+        console.log('📦 Exporting products.json for static loading...');
+        // Run export in a separate process to avoid blocking
+        const { spawn } = await import('child_process');
+        spawn('node', ['server/scripts/export-products.js'], { detached: true, stdio: 'ignore' });
+      }
+    } catch (err) {
+      console.warn('⚠️ Could not export products.json:', err.message);
+    }
+  }, 10000); // Wait 10 seconds for initial sync
 });

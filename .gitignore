@@ -35,3 +35,7 @@ data/
 *.db
 *.db-shm
 *.db-wal
+
+# Large product exports (generated on Railway)
+public/products.json
+dist/products.json

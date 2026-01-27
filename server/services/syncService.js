@@ -298,6 +298,17 @@ export async function syncProductsFromUnas(options = {}) {
       console.log(`   - Added: ${totalAdded}`);
       console.log(`   - Updated: ${totalUpdated}`);
 
+      // Export products.json for static loading (async, don't wait)
+      setTimeout(async () => {
+        try {
+          const exportScript = await import('../scripts/export-products.js');
+          // The script will run and exit, we don't need to wait
+          console.log('📦 Products.json export triggered (runs in background)');
+        } catch (err) {
+          console.warn('⚠️ Could not export products.json:', err.message);
+        }
+      }, 2000);
+
       return {
         success: true,
         fetched: totalFetched,

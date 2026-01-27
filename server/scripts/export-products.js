@@ -79,4 +79,7 @@ if (parseFloat(fileSizeMB) > 50) {
   console.log('⚠️  File is large (>50MB). Frontend will load from CDN with cache.');
 }
 
-process.exit(0);
+// Don't exit if imported as module
+if (import.meta.url === `file://${process.argv[1]}`) {
+  process.exit(0);
+}
