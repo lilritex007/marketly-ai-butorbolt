@@ -19,6 +19,7 @@
     "deploy:status": "node deployment/scripts/status.js"
   },
   "dependencies": {
+    "@upstash/redis": "^1.36.1",
     "better-sqlite3": "^12.6.2",
     "cors": "^2.8.6",
     "dotenv": "^16.6.1",
