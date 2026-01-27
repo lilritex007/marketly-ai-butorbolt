@@ -92,9 +92,9 @@ export function upsertProduct(product) {
   const stmt = db.prepare(`
     INSERT INTO products (
       id, unas_id, name, price, category, category_path, images, 
-      description, params, link, in_stock, updated_at, last_synced_at
+      description, params, link, in_stock, show_in_ai, updated_at, last_synced_at
     ) VALUES (
-      ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP
+      ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP
     )
     ON CONFLICT(id) DO UPDATE SET
       name = excluded.name,
@@ -106,6 +106,7 @@ export function upsertProduct(product) {
       params = excluded.params,
       link = excluded.link,
       in_stock = excluded.in_stock,
+      show_in_ai = COALESCE(excluded.show_in_ai, 1),
       updated_at = CURRENT_TIMESTAMP,
       last_synced_at = CURRENT_TIMESTAMP
   `);

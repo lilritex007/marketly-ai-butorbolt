@@ -260,6 +260,18 @@ export async function syncProductsFromUnas(options = {}) {
     console.log(`   - Added: ${totalAdded}`);
     console.log(`   - Updated: ${totalUpdated}`);
 
+    // Ensure all synced products have show_in_ai = 1 (enable for AI shop)
+    console.log('🔧 Ensuring all products are enabled for AI shop...');
+    const enableStmt = db.prepare(`
+      UPDATE products 
+      SET show_in_ai = 1 
+      WHERE show_in_ai IS NULL OR show_in_ai = 0
+    `);
+    const enableResult = enableStmt.run();
+    if (enableResult.changes > 0) {
+      console.log(`   ✅ Enabled ${enableResult.changes} products for AI shop`);
+    }
+
     // Update sync history
     const updateSyncStmt = db.prepare(`
       UPDATE sync_history 
