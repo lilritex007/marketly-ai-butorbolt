@@ -758,8 +758,10 @@ const App = () => {
         const data = await fetchUnasProducts();
         
         if (data.products && data.products.length > 0) {
+          console.log('✅ Loaded products:', data.products.length, 'total:', data.total);
+          console.log('📦 First product sample:', data.products[0]);
           setProducts(data.products);
-          setLastUpdated(data.lastUpdated);
+          setLastUpdated(data.lastSync || data.lastUpdated);
           setIsDemoMode(false);
           setDataSource('unas');
           
@@ -770,10 +772,13 @@ const App = () => {
           setUnasError('No products available');
         }
       } catch (error) {
+        console.error('❌ Error loading UNAS products:', error);
         setUnasError(error.message);
         // Keep demo products if UNAS fails
       } finally {
         setIsLoadingUnas(false);
+        console.log('📊 Products state after load:', products.length, 'products');
+        console.log('📊 Displayed products:', displayedProducts.length);
       }
     };
 
@@ -791,6 +796,13 @@ const App = () => {
   const filteredAndSortedProducts = useMemo(() => {
       let result = products;
       
+      console.log('🔍 Filtering products:', {
+        total: products.length,
+        searchQuery,
+        categoryFilter,
+        sortOption
+      });
+      
       // Text search
       if (searchQuery) result = result.filter(p => p.name.toLowerCase().includes(searchQuery.toLowerCase()));
       
@@ -806,6 +818,7 @@ const App = () => {
       if (sortOption === "price-asc") result = [...result].sort((a, b) => a.price - b.price);
       if (sortOption === "price-desc") result = [...result].sort((a, b) => b.price - a.price);
       
+      console.log('✅ Filtered products:', result.length);
       return result;
   }, [products, searchQuery, categoryFilter, sortOption, advancedFilters]);
 
