@@ -12,19 +12,16 @@ export function getQStash() {
     return qstash;
   }
 
-  // QStash integration provides these env vars
-  const token = process.env.QSTASH_CURRENT_SIGNING_KEY || 
-                process.env.QSTASH_TOKEN ||
-                process.env.QSTASH_SIGNING_KEY;
+  // QStash integration provides QSTASH_TOKEN (not signing key for Client)
+  const token = process.env.QSTASH_TOKEN;
 
   if (!token) {
     console.error('QStash env vars:', {
-      hasCurrentKey: !!process.env.QSTASH_CURRENT_SIGNING_KEY,
       hasToken: !!process.env.QSTASH_TOKEN,
-      hasSigningKey: !!process.env.QSTASH_SIGNING_KEY,
+      hasCurrentKey: !!process.env.QSTASH_CURRENT_SIGNING_KEY,
       allEnvKeys: Object.keys(process.env).filter(k => k.includes('QSTASH'))
     });
-    throw new Error('QStash not configured. QSTASH_CURRENT_SIGNING_KEY required.');
+    throw new Error('QStash not configured. QSTASH_TOKEN required.');
   }
 
   console.log('🔗 Initializing QStash client...');
