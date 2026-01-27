@@ -13,8 +13,8 @@
     "test:db": "node scripts/test-db.js",
     "db:reset": "rm -rf data/ && echo Database reset complete",
     "deploy:check": "node deployment/scripts/check-ready.js",
-    "deploy:test": "node deployment/scripts/deploy-github.js --dry-run",
-    "deploy:live": "node deployment/scripts/deploy-github.js",
+    "deploy:test": "node deployment/scripts/deploy-scripttag.js --dry-run",
+    "deploy:live": "node deployment/scripts/deploy-scripttag.js",
     "deploy:rollback": "node deployment/scripts/rollback.js",
     "deploy:status": "node deployment/scripts/status.js"
   },

@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-01-26T19:21:12.357Z",
+  "timestamp": "2026-01-26T19:26:24.506Z",
   "mode": "live",
   "strategy": "github-cdn",
   "config": {
@@ -7,8 +7,8 @@
     "pageName": "AI Bútorbolt",
     "cdnBase": "https://raw.githubusercontent.com/lilritex007/marketly-ai-butorbolt/main/dist"
   },
-  "pageId": "500381",
-  "contentId": "embedded",
-  "githubCommit": null,
-  "success": true
+  "pageId": null,
+  "githubCommit": "5bcb22d76e8c46d8002da0b26adf465a822b2fa0",
+  "success": false,
+  "error": "setPage: No Page ID returned!"
 }
