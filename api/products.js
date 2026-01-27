@@ -5,6 +5,7 @@
 
 import fetch from 'node-fetch';
 import xml2js from 'xml2js';
+import { getCachedToken, setCachedToken } from './token-cache.js';
 
 // CORS headers
 const corsHeaders = {
@@ -196,11 +197,15 @@ export default async function handler(req, res) {
       search
     } = req.query;
 
-    // Get UNAS token
-    console.log('🔐 Getting UNAS token...');
-    const loginStart = Date.now();
-    const token = await getUnasToken();
-    console.log(`✅ Token received (${Date.now() - loginStart}ms)`);
+    // Get UNAS token (try cache first)
+    let token = getCachedToken();
+    if (!token) {
+      console.log('🔐 Getting fresh UNAS token...');
+      const loginStart = Date.now();
+      token = await getUnasToken();
+      console.log(`✅ Token received (${Date.now() - loginStart}ms)`);
+      setCachedToken(token);
+    }
 
     // Fetch products
     console.log(`📡 Fetching ${limit} products...`);
