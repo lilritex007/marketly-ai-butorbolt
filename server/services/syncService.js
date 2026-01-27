@@ -3,10 +3,26 @@ import db from '../database/db.js';
 import { parseUnasData } from '../transformers/unasParser.js';
 import { upsertProduct, upsertCategory } from './productService.js';
 
+// Sync lock to prevent concurrent syncs
+let isSyncing = false;
+let syncPromise = null;
+
 /**
  * Sync products from UNAS API with category filtering
  */
 export async function syncProductsFromUnas(options = {}) {
+  // Check if sync is already running
+  if (isSyncing) {
+    console.log('⏸️  Sync already in progress, waiting for current sync to complete...');
+    // Wait for the current sync to complete
+    if (syncPromise) {
+      return await syncPromise;
+    }
+  }
+
+  // Set lock
+  isSyncing = true;
+  
   const {
     forceRefresh = false,
     categories = null // null = all, or array of category names
@@ -19,8 +35,10 @@ export async function syncProductsFromUnas(options = {}) {
   const syncResult = syncStmt.run();
   const syncId = syncResult.lastInsertRowid;
 
-  try {
-    console.log('🔄 Starting UNAS sync...');
+  // Create promise that will be awaited by concurrent calls
+  syncPromise = (async () => {
+    try {
+      console.log('🔄 Starting UNAS sync...');
 
     // Get UNAS API Key
     const apiKey = process.env.UNAS_API_KEY;
@@ -229,39 +247,46 @@ export async function syncProductsFromUnas(options = {}) {
     `);
     updateSyncStmt.run(products.length, added, updated, syncId);
 
-    console.log('✅ Sync completed successfully');
-    console.log(`   - Fetched: ${products.length}`);
-    console.log(`   - Added: ${added}`);
-    console.log(`   - Updated: ${updated}`);
+      console.log('✅ Sync completed successfully');
+      console.log(`   - Fetched: ${products.length}`);
+      console.log(`   - Added: ${added}`);
+      console.log(`   - Updated: ${updated}`);
 
-    return {
-      success: true,
-      fetched: products.length,
-      added,
-      updated,
-      syncId
-    };
+      return {
+        success: true,
+        fetched: products.length,
+        added,
+        updated,
+        syncId
+      };
 
-  } catch (error) {
-    console.error('❌ Sync failed:', error);
+    } catch (error) {
+      console.error('❌ Sync failed:', error);
 
-    // Update sync history with error
-    const updateSyncStmt = db.prepare(`
-      UPDATE sync_history 
-      SET 
-        completed_at = CURRENT_TIMESTAMP,
-        status = 'failed',
-        error_message = ?
-      WHERE id = ?
-    `);
-    updateSyncStmt.run(error.message, syncId);
+      // Update sync history with error
+      const updateSyncStmt = db.prepare(`
+        UPDATE sync_history 
+        SET 
+          completed_at = CURRENT_TIMESTAMP,
+          status = 'failed',
+          error_message = ?
+        WHERE id = ?
+      `);
+      updateSyncStmt.run(error.message, syncId);
 
-    return {
-      success: false,
-      error: error.message,
-      syncId
-    };
-  }
+      return {
+        success: false,
+        error: error.message,
+        syncId
+      };
+    } finally {
+      // Release lock
+      isSyncing = false;
+      syncPromise = null;
+    }
+  })();
+
+  return await syncPromise;
 }
 
 /**
@@ -308,6 +333,16 @@ export function isSyncNeeded(thresholdMinutes = 60) {
  * Auto-sync with throttling
  */
 export async function autoSync(thresholdMinutes = 60) {
+  // Don't trigger if sync is already running
+  if (isSyncing) {
+    console.log('⏭️ Sync already in progress, skipping auto-sync');
+    return {
+      success: true,
+      skipped: true,
+      message: 'Sync already in progress'
+    };
+  }
+
   if (isSyncNeeded(thresholdMinutes)) {
     console.log('⏰ Auto-sync triggered');
     return await syncProductsFromUnas();
