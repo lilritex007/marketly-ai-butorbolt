@@ -13,26 +13,26 @@ export function getRedis() {
     return redis;
   }
 
-  // Vercel integration uses KV_ prefix, Redis.fromEnv() auto-detects it
-  try {
-    redis = Redis.fromEnv();
-    return redis;
-  } catch (error) {
-    // Fallback: manual config (if KV_ vars not found, try UPSTASH_)
-    const url = process.env.KV_REST_API_URL || process.env.UPSTASH_REDIS_REST_URL;
-    const token = process.env.KV_REST_API_TOKEN || process.env.UPSTASH_REDIS_REST_TOKEN;
+  // Vercel integration uses KV_ prefix
+  const url = process.env.KV_REST_API_URL;
+  const token = process.env.KV_REST_API_TOKEN;
 
-    if (!url || !token) {
-      throw new Error('Upstash Redis not configured. Add integration in Vercel Dashboard.');
-    }
-
-    redis = new Redis({
-      url,
-      token
+  if (!url || !token) {
+    console.error('Missing Redis env vars:', {
+      hasUrl: !!url,
+      hasToken: !!token,
+      envKeys: Object.keys(process.env).filter(k => k.includes('KV') || k.includes('REDIS'))
     });
-
-    return redis;
+    throw new Error('Upstash Redis not configured. KV_REST_API_URL and KV_REST_API_TOKEN required.');
   }
+
+  console.log('🔗 Initializing Redis client...');
+  redis = new Redis({
+    url,
+    token
+  });
+
+  return redis;
 }
 
 /**
