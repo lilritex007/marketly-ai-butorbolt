@@ -67,8 +67,9 @@
   // Dinamikus JS fájl detektálás
   const getReactBundlePath = async () => {
     try {
-      // Próbáljuk meg betölteni az index.html-t a CDN-ről
-      const response = await fetch(`${CDN_BASE}/index.html`);
+      // Próbáljuk meg betölteni az index.html-t a CDN-ről (cache-busting)
+      const cacheBuster = '?v=' + Date.now();
+      const response = await fetch(`${CDN_BASE}/index.html${cacheBuster}`);
       const html = await response.text();
       
       // Keressük meg a JS fájl nevét
@@ -102,7 +103,9 @@
     const script = document.createElement('script');
     script.type = 'module';
     script.crossOrigin = 'anonymous';
-    script.src = `${CDN_BASE}${bundlePath}`;
+    // Cache-busting to ensure latest version
+    const cacheBuster = '?v=' + Date.now();
+    script.src = `${CDN_BASE}${bundlePath}${cacheBuster}`;
     
     script.onload = () => {
       console.log('✅ React bundle loaded successfully!');
