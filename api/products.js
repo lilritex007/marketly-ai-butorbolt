@@ -186,9 +186,11 @@ export default async function handler(req, res) {
   });
 
   try {
+    const startTime = Date.now();
+    
     // Get query parameters
     const {
-      limit = '100',
+      limit = '20',  // Csökkentett alapértelmezett limit (gyorsabb)
       offset = '0',
       category,
       search
@@ -196,18 +198,21 @@ export default async function handler(req, res) {
 
     // Get UNAS token
     console.log('🔐 Getting UNAS token...');
+    const loginStart = Date.now();
     const token = await getUnasToken();
-    console.log('✅ Token received');
+    console.log(`✅ Token received (${Date.now() - loginStart}ms)`);
 
     // Fetch products
-    console.log('📡 Fetching products...');
+    console.log(`📡 Fetching ${limit} products...`);
+    const fetchStart = Date.now();
     const result = await getProducts(token, {
       limit: parseInt(limit),
       offset: parseInt(offset),
       category,
       search
     });
-    console.log(`✅ ${result.count} products fetched`);
+    console.log(`✅ ${result.count} products fetched (${Date.now() - fetchStart}ms)`);
+    console.log(`⏱️ Total time: ${Date.now() - startTime}ms`);
 
     // Return JSON
     res.status(200).json(result);
