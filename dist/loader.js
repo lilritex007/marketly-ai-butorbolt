@@ -27,6 +27,32 @@
   const CDN_BASE = window.MARKETLY_CONFIG.cdnBase;
   console.log('📦 CDN Base (jsDelivr):', CDN_BASE);
 
+  // CSS betöltése dinamikusan
+  const loadCSS = () => {
+    // Ellenőrizzük hogy a CSS már be van-e töltve
+    const existingLink = document.querySelector('link[href*="index-Cxl7vB80.css"]');
+    if (existingLink) {
+      console.log('✅ CSS already loaded');
+      return;
+    }
+
+    const link = document.createElement('link');
+    link.rel = 'stylesheet';
+    link.href = `${CDN_BASE}/assets/index-Cxl7vB80.css`;
+    link.crossOrigin = 'anonymous';
+    
+    link.onload = () => {
+      console.log('✅ CSS loaded successfully');
+    };
+    
+    link.onerror = () => {
+      console.error('❌ Failed to load CSS');
+    };
+    
+    document.head.appendChild(link);
+    console.log('📦 CSS link injected');
+  };
+
   // Ellenőrizzük hogy a root elem létezik-e
   const checkRoot = () => {
     const root = document.getElementById('root');
@@ -63,6 +89,9 @@
   // React bundle betöltése
   const loadReactApp = async () => {
     if (!checkRoot()) return;
+
+    // Először töltsük be a CSS-t
+    loadCSS();
 
     console.log('📥 Loading React bundle...');
     
