@@ -64,7 +64,7 @@
     return true;
   };
 
-  // React bundle betöltése - use current build directly
+  // React bundle betöltése - use current build directly (NO DETECTION)
   const loadReactApp = async () => {
     if (!checkRoot()) return;
 
@@ -73,11 +73,11 @@
 
     console.log('📥 Loading React bundle...');
     
-    // Use current build bundle directly (updated: 2025-01-27)
-    // This avoids CDN cache issues with old bundle names
+    // ALWAYS use current build bundle directly (updated: 2025-01-27)
+    // DO NOT try to detect from index.html - CDN cache issues!
     const currentBundle = 'index-D2KXc36-.js';
     const bundlePath = `/assets/${currentBundle}`;
-    console.log('🔍 Using bundle:', currentBundle);
+    console.log('🔍 Using CURRENT bundle (no detection):', currentBundle);
     
     const script = document.createElement('script');
     script.type = 'module';
