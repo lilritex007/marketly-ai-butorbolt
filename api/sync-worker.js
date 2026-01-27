@@ -145,13 +145,19 @@ export default async function handler(req, res) {
   // QStash signature verification (optional but recommended)
   // For now, skip for simplicity
 
+  console.log('🚀 Sync worker started!');
+  console.log('📊 Request method:', req.method);
+  console.log('📊 Request headers:', JSON.stringify(req.headers, null, 2));
+
   try {
     const startTime = Date.now();
+    console.log('⏰ Start time:', new Date().toISOString());
 
     // Check Redis connection
+    console.log('🔗 Connecting to Redis...');
     const redis = getRedis();
-    await redis.ping();
-    console.log('✅ Redis connected');
+    const pingResult = await redis.ping();
+    console.log('✅ Redis connected, ping:', pingResult);
 
     // Get UNAS token
     console.log('🔐 Logging in to UNAS...');
