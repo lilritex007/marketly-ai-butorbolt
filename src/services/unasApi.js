@@ -27,6 +27,7 @@ export const fetchUnasProducts = async (filters = {}) => {
     if (filters.offset) params.append('offset', filters.offset);
     
     // API_BASE already includes /api, so we need /products, not /api/products
+    // API_BASE already includes /api, so we just need /products
     const url = `${API_BASE}/products${params.toString() ? '?' + params.toString() : ''}`;
     console.log('🔍 Fetching products from:', url);
     
@@ -61,7 +62,8 @@ export const fetchUnasProducts = async (filters = {}) => {
 export const refreshUnasProducts = async () => {
   try {
     const API_BASE = getApiBase();
-    const response = await fetch(`${API_BASE}/api/admin/sync`, {
+    // API_BASE already includes /api, so we need /admin/sync, not /api/admin/sync
+    const response = await fetch(`${API_BASE}/admin/sync`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -92,7 +94,8 @@ export const refreshUnasProducts = async () => {
 export const getCacheInfo = async () => {
   try {
     const API_BASE = getApiBase();
-    const response = await fetch(`${API_BASE}/api/stats`, {
+    // API_BASE already includes /api, so we need /stats, not /api/stats
+    const response = await fetch(`${API_BASE}/stats`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
@@ -116,7 +119,8 @@ export const getCacheInfo = async () => {
 export const clearCache = async () => {
   try {
     const API_BASE = getApiBase();
-    const response = await fetch(`${API_BASE}/api/admin/sync`, {
+    // API_BASE already includes /api, so we need /admin/sync, not /api/admin/sync
+    const response = await fetch(`${API_BASE}/admin/sync`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
