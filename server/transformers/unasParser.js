@@ -259,27 +259,25 @@ function transformUnasProduct(unasProduct) {
     return 0;
   };
 
-  const getCategory = () => {
-    // UNAS API: Categories.Category.Name
+  const getCategoryPath = () => {
+    // UNAS API: full path (e.g. "Otthon|Bútor|Kanapé") for main category filtering
     if (unasProduct.Categories && unasProduct.Categories.Category) {
-      const categories = Array.isArray(unasProduct.Categories.Category) 
-        ? unasProduct.Categories.Category 
+      const categories = Array.isArray(unasProduct.Categories.Category)
+        ? unasProduct.Categories.Category
         : [unasProduct.Categories.Category];
-      
-      // Find base category
       const baseCategory = categories.find(c => c.Type === 'base');
-      if (baseCategory && baseCategory.Name) {
-        const catPath = baseCategory.Name;
-        // Extract last part of category path (e.g., "Főcsoport1|Alcsoport1" -> "Alcsoport1")
-        return catPath.includes('|') ? catPath.split('|').pop().trim() : catPath;
-      }
+      if (baseCategory && baseCategory.Name) return baseCategory.Name.trim();
     }
-    
-    // Fallback
-    const cat = unasProduct.category || unasProduct.Category || 
+    const cat = unasProduct.category || unasProduct.Category ||
                 unasProduct.product_type || unasProduct.g_product_category || 'Egyéb';
-    return cat.includes('>') ? cat.split('>').pop().trim() : 
-           (cat.includes('|') ? cat.split('|').pop().trim() : cat);
+    return cat.includes('>') ? cat : (cat.includes('|') ? cat : cat);
+  };
+
+  const getCategory = () => {
+    // UNAS API: Categories.Category.Name (leaf = last part of path)
+    const catPath = getCategoryPath();
+    return catPath.includes('|') ? catPath.split('|').pop().trim() :
+           (catPath.includes('>') ? catPath.split('>').pop().trim() : catPath);
   };
 
   const getImages = () => {
@@ -394,13 +392,20 @@ function transformUnasProduct(unasProduct) {
   };
 
   const getStock = () => {
-    // UNAS API: Stocks.Stock.Qty
+    // UNAS API: Stocks.Stock.Qty (single or array of warehouses)
     if (unasProduct.Stocks && unasProduct.Stocks.Stock) {
-      const stock = unasProduct.Stocks.Stock;
-      if (stock.Qty !== undefined) {
-        const qty = parseInt(stock.Qty);
-        return !isNaN(qty) && qty > 0;
+      const stockEntries = Array.isArray(unasProduct.Stocks.Stock)
+        ? unasProduct.Stocks.Stock
+        : [unasProduct.Stocks.Stock];
+      let totalQty = 0;
+      for (const s of stockEntries) {
+        if (s && s.Qty !== undefined) {
+          const qty = parseInt(s.Qty);
+          if (!isNaN(qty)) totalQty += qty;
+        }
       }
+      if (totalQty > 0) return true;
+      if (stockEntries.length > 0) return false; // explicit stock data, total 0
     }
     
     // Fallback
@@ -432,6 +437,7 @@ function transformUnasProduct(unasProduct) {
     name: getName(),
     price: getPrice(),
     category: getCategory(),
+    category_path: getCategoryPath(),
     images: getImages(),
     description: getDescription(),
     params: getParams(),

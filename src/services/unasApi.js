@@ -33,8 +33,11 @@ export const fetchUnasProducts = async (filters = {}) => {
       const staticData = await staticResponse.json();
       console.log('✅ Loaded from static JSON:', staticData.stats?.total || staticData.products?.length, 'products');
       
-      // Apply filters client-side
-      let products = staticData.products || [];
+      // Apply filters client-side; normalize inStock for display (készlet)
+      let products = (staticData.products || []).map(p => ({
+        ...p,
+        inStock: p.inStock !== undefined ? p.inStock : Boolean(p.in_stock)
+      }));
       
       if (filters.category && filters.category !== 'Összes') {
         products = products.filter(p => p.category === filters.category);
@@ -90,10 +93,15 @@ export const fetchUnasProducts = async (filters = {}) => {
     }
 
     const data = await response.json();
+    // Normalize inStock (API returns in_stock; frontend expects inStock)
+    const products = (data.products || []).map(p => ({
+      ...p,
+      inStock: p.inStock !== undefined ? p.inStock : Boolean(p.in_stock)
+    }));
     return {
-      products: data.products || [],
+      products,
       total: data.total || 0,
-      count: data.count || data.products?.length || 0,
+      count: data.count || products.length || 0,
       lastSync: data.lastSync,
       source: 'api'
     };

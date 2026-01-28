@@ -1,7 +1,9 @@
 import db from '../database/db.js';
+import { EXCLUDED_MAIN_CATEGORIES } from '../config/excludedCategories.js';
 
 /**
  * Get all products (with optional filtering)
+ * When showInAI is true, products in EXCLUDED_MAIN_CATEGORIES are filtered out
  */
 export function getProducts(filters = {}) {
   const {
@@ -26,6 +28,11 @@ export function getProducts(filters = {}) {
   if (showInAI !== undefined) {
     query += ' AND show_in_ai = ?';
     params.push(showInAI ? 1 : 0);
+  }
+
+  if (showInAI && EXCLUDED_MAIN_CATEGORIES.length > 0) {
+    query += ` AND (CASE WHEN category_path IS NOT NULL AND category_path != '' AND instr(category_path, '|') > 0 THEN trim(substr(category_path, 1, instr(category_path, '|') - 1)) ELSE category END) NOT IN (${EXCLUDED_MAIN_CATEGORIES.map(() => '?').join(',')})`;
+    params.push(...EXCLUDED_MAIN_CATEGORIES);
   }
 
   if (inStock !== undefined) {
@@ -59,13 +66,17 @@ export function getProducts(filters = {}) {
   const stmt = db.prepare(query);
   const products = stmt.all(...params);
 
-  // Parse JSON fields
-  return products.map(product => ({
-    ...product,
-    images: product.images ? JSON.parse(product.images) : [],
-    in_stock: Boolean(product.in_stock),
-    show_in_ai: Boolean(product.show_in_ai)
-  }));
+  // Parse JSON fields, normalize inStock for frontend (camelCase)
+  return products.map(product => {
+    const inStock = Boolean(product.in_stock);
+    return {
+      ...product,
+      images: product.images ? JSON.parse(product.images) : [],
+      in_stock: inStock,
+      inStock,
+      show_in_ai: Boolean(product.show_in_ai)
+    };
+  });
 }
 
 /**
@@ -77,10 +88,12 @@ export function getProductById(id) {
   
   if (!product) return null;
 
+  const inStock = Boolean(product.in_stock);
   return {
     ...product,
     images: product.images ? JSON.parse(product.images) : [],
-    in_stock: Boolean(product.in_stock),
+    in_stock: inStock,
+    inStock,
     show_in_ai: Boolean(product.show_in_ai)
   };
 }
@@ -191,6 +204,11 @@ export function getProductCount(filters = {}) {
     params.push(showInAI ? 1 : 0);
   }
 
+  if (showInAI && EXCLUDED_MAIN_CATEGORIES.length > 0) {
+    query += ` AND (CASE WHEN category_path IS NOT NULL AND category_path != '' AND instr(category_path, '|') > 0 THEN trim(substr(category_path, 1, instr(category_path, '|') - 1)) ELSE category END) NOT IN (${EXCLUDED_MAIN_CATEGORIES.map(() => '?').join(',')})`;
+    params.push(...EXCLUDED_MAIN_CATEGORIES);
+  }
+
   if (inStock !== undefined) {
     query += ' AND in_stock = ?';
     params.push(inStock ? 1 : 0);
@@ -202,7 +220,7 @@ export function getProductCount(filters = {}) {
 }
 
 /**
- * Get all categories
+ * Get all categories (config table)
  */
 export function getCategories() {
   const stmt = db.prepare('SELECT * FROM categories ORDER BY name');
@@ -210,6 +228,43 @@ export function getCategories() {
     ...cat,
     enabled: Boolean(cat.enabled)
   }));
+}
+
+/**
+ * Get main categories from products:
+ * - If category_path contains '|', use first segment as main category
+ * - Otherwise use distinct category (leaf)
+ * Optional limit: return top N by product count (default no limit)
+ * Returns list of { name, productCount } for filtering AI shop
+ */
+export function getMainCategories(limit = null) {
+  const withPathSql = `
+    SELECT
+      trim(substr(category_path, 1, instr(category_path, '|') - 1)) AS name,
+      COUNT(*) AS productCount
+    FROM products
+    WHERE category_path IS NOT NULL AND category_path != '' AND instr(category_path, '|') > 0
+    GROUP BY name
+    ORDER BY productCount DESC, name ASC
+  `;
+  let withPath = db.prepare(withPathSql + (limit != null ? ' LIMIT ?' : ''));
+  withPath = limit != null ? withPath.all(parseInt(limit, 10)) : withPath.all();
+
+  if (withPath.length > 0) {
+    return withPath.map(row => ({ name: row.name, productCount: row.productCount }));
+  }
+
+  const fallbackSql = `
+    SELECT category AS name, COUNT(*) AS productCount
+    FROM products
+    WHERE category IS NOT NULL AND category != ''
+    GROUP BY category
+    ORDER BY productCount DESC, name ASC
+  `;
+  let fallback = db.prepare(fallbackSql + (limit != null ? ' LIMIT ?' : ''));
+  fallback = limit != null ? fallback.all(parseInt(limit, 10)) : fallback.all();
+
+  return fallback.map(row => ({ name: row.name, productCount: row.productCount }));
 }
 
 /**

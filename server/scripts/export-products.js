@@ -1,9 +1,11 @@
 /**
  * Export products from SQLite database to JSON file
  * This creates a static products.json file that can be loaded directly in the frontend
+ * Excludes main categories listed in config/excludedCategories.js
  */
 
 import db from '../database/db.js';
+import { EXCLUDED_MAIN_CATEGORIES } from '../config/excludedCategories.js';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -11,17 +13,22 @@ import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Get all products (optimized - only essential fields)
+const excludeCondition = EXCLUDED_MAIN_CATEGORIES.length > 0
+  ? ` AND (CASE WHEN category_path IS NOT NULL AND category_path != '' AND instr(category_path, '|') > 0 THEN trim(substr(category_path, 1, instr(category_path, '|') - 1)) ELSE category END) NOT IN (${EXCLUDED_MAIN_CATEGORIES.map(() => '?').join(',')})`
+  : '';
 const stmt = db.prepare(`
   SELECT 
     id, name, price, category, 
     images, description, link, in_stock
   FROM products 
   WHERE show_in_ai = 1
+  ${excludeCondition}
   ORDER BY category, name
 `);
 
-const products = stmt.all();
+const products = EXCLUDED_MAIN_CATEGORIES.length > 0
+  ? stmt.all(...EXCLUDED_MAIN_CATEGORIES)
+  : stmt.all();
 
 // Parse JSON fields and optimize
 const formattedProducts = products.map(product => {

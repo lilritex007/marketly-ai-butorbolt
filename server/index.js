@@ -9,6 +9,7 @@ import {
   deleteProduct,
   getProductCount,
   getCategories,
+  getMainCategories,
   toggleCategory,
   getStatistics
 } from './services/productService.js';
@@ -52,19 +53,22 @@ app.get('/api/products', async (req, res) => {
     const {
       category,
       search,
-      limit = 100,
+      limit,
       offset = 0
     } = req.query;
 
     // Auto-sync if needed (async, don't wait)
     autoSync(60).catch(err => console.error('Auto-sync error:', err));
 
+    // No limit = load ALL products; only apply limit when explicitly set
+    const limitNum = limit !== undefined && limit !== '' ? parseInt(limit, 10) : undefined;
+
     const products = getProducts({
       category,
       search,
       showInAI: true, // Only show products enabled for AI
-      limit: parseInt(limit),
-      offset: parseInt(offset)
+      limit: limitNum,
+      offset: parseInt(offset, 10) || 0
     });
 
     const total = getProductCount({
@@ -121,6 +125,25 @@ app.get('/api/categories', async (req, res) => {
     console.error('Error fetching categories:', error);
     res.status(500).json({
       error: 'Failed to fetch categories',
+      message: error.message
+    });
+  }
+});
+
+/**
+ * Get main categories from products (for AI shop include/exclude)
+ * Query: ?limit=300 (optional, top N by product count)
+ * Returns { mainCategories: [ { name, productCount }, ... ] }
+ */
+app.get('/api/categories/main', async (req, res) => {
+  try {
+    const limit = req.query.limit ? parseInt(req.query.limit, 10) : null;
+    const mainCategories = getMainCategories(limit);
+    res.json({ mainCategories });
+  } catch (error) {
+    console.error('Error fetching main categories:', error);
+    res.status(500).json({
+      error: 'Failed to fetch main categories',
       message: error.message
     });
   }
@@ -346,6 +369,7 @@ app.listen(PORT, () => {
   console.log('    GET  /api/products - Get products for display');
   console.log('    GET  /api/products/:id - Get single product');
   console.log('    GET  /api/categories - Get available categories');
+  console.log('    GET  /api/categories/main - Get main categories (for AI shop filter)');
   console.log('    GET  /api/stats - Get statistics');
   console.log('  Admin API:');
   console.log('    POST   /api/admin/sync - Trigger UNAS sync');
