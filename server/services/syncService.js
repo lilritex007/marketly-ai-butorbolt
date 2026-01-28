@@ -391,28 +391,38 @@ export async function syncProductsFromUnas(options = {}) {
 }
 
 /**
- * Get sync history
+ * Get sync history. Never throws: returns [] on error.
  */
 export function getSyncHistory(limit = 10) {
-  const stmt = db.prepare(`
-    SELECT * FROM sync_history 
-    ORDER BY started_at DESC 
-    LIMIT ?
-  `);
-  return stmt.all(limit);
+  try {
+    const stmt = db.prepare(`
+      SELECT * FROM sync_history 
+      ORDER BY started_at DESC 
+      LIMIT ?
+    `);
+    return stmt.all(limit) || [];
+  } catch (error) {
+    console.error('getSyncHistory error:', error);
+    return [];
+  }
 }
 
 /**
- * Get last successful sync info
+ * Get last successful sync info. Never throws: returns null on error.
  */
 export function getLastSyncInfo() {
-  const stmt = db.prepare(`
-    SELECT * FROM sync_history 
-    WHERE status = 'completed'
-    ORDER BY completed_at DESC 
-    LIMIT 1
-  `);
-  return stmt.get();
+  try {
+    const stmt = db.prepare(`
+      SELECT * FROM sync_history 
+      WHERE status = 'completed'
+      ORDER BY completed_at DESC 
+      LIMIT 1
+    `);
+    return stmt.get() || null;
+  } catch (error) {
+    console.error('getLastSyncInfo error:', error);
+    return null;
+  }
 }
 
 /**

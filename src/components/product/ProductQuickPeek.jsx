@@ -36,8 +36,10 @@ const ProductQuickPeek = ({ product, isOpen, onClose, onAddToCart }) => {
     }).format(price);
   };
 
-  // Parse product images (if multiple)
-  const images = product.image ? [product.image] : [];
+  // Parse product images (array or single)
+  const images = Array.isArray(product.images) && product.images.length > 0
+    ? product.images
+    : product.image ? [product.image] : [];
   
   return (
     <AnimatePresence>
@@ -52,14 +54,16 @@ const ProductQuickPeek = ({ product, isOpen, onClose, onAddToCart }) => {
             className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50"
           />
 
-          {/* Modal */}
-          <motion.div
-            initial={{ opacity: 0, scale: 0.9, y: 20 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.9, y: 20 }}
-            transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-            className="fixed inset-4 md:inset-auto md:left-1/2 md:top-1/2 md:-translate-x-1/2 md:-translate-y-1/2 md:w-[90%] md:max-w-4xl z-50"
-          >
+          {/* Wrapper: always center modal on screen */}
+          <div className="fixed inset-0 flex items-center justify-center p-4 z-50 pointer-events-none">
+            {/* Modal */}
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.9, y: 20 }}
+              transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+              className="w-full max-w-4xl max-h-[90vh] pointer-events-auto"
+            >
             <div className="bg-white rounded-2xl shadow-2xl overflow-hidden h-full md:h-auto max-h-[90vh] flex flex-col">
               {/* Header */}
               <div className="flex items-center justify-between p-4 border-b border-gray-200 bg-gradient-to-r from-indigo-50 to-purple-50">
@@ -158,7 +162,9 @@ const ProductQuickPeek = ({ product, isOpen, onClose, onAddToCart }) => {
                     <div className="border-t border-b border-gray-200 py-4 space-y-2">
                       <div className="flex items-center justify-between text-sm">
                         <span className="text-gray-600">Állapot</span>
-                        <span className="font-medium text-green-600">Raktáron</span>
+                        <span className={`font-medium ${(product.inStock ?? product.in_stock) ? 'text-green-600' : 'text-red-500'}`}>
+                          {(product.inStock ?? product.in_stock) ? 'Raktáron' : 'Készlethiány'}
+                        </span>
                       </div>
                       <div className="flex items-center justify-between text-sm">
                         <span className="text-gray-600">Szállítás</span>
@@ -209,7 +215,8 @@ const ProductQuickPeek = ({ product, isOpen, onClose, onAddToCart }) => {
                 </div>
               </div>
             </div>
-          </motion.div>
+            </motion.div>
+          </div>
         </>
       )}
     </AnimatePresence>

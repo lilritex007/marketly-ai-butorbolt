@@ -4,112 +4,123 @@ import { EXCLUDED_MAIN_CATEGORIES } from '../config/excludedCategories.js';
 /**
  * Get all products (with optional filtering)
  * When showInAI is true, products in EXCLUDED_MAIN_CATEGORIES are filtered out
+ * Never throws: returns [] on error.
  */
 export function getProducts(filters = {}) {
-  const {
-    category,
-    showInAI,
-    inStock,
-    minPrice,
-    maxPrice,
-    limit,
-    offset = 0,
-    search
-  } = filters;
-
-  let query = 'SELECT * FROM products WHERE 1=1';
-  const params = [];
-
-  if (category) {
-    query += ' AND category = ?';
-    params.push(category);
-  }
-
-  if (showInAI !== undefined) {
-    query += ' AND show_in_ai = ?';
-    params.push(showInAI ? 1 : 0);
-  }
-
-  if (showInAI && EXCLUDED_MAIN_CATEGORIES.length > 0) {
-    query += ` AND (CASE WHEN category_path IS NOT NULL AND category_path != '' AND instr(category_path, '|') > 0 THEN trim(substr(category_path, 1, instr(category_path, '|') - 1)) ELSE category END) NOT IN (${EXCLUDED_MAIN_CATEGORIES.map(() => '?').join(',')})`;
-    params.push(...EXCLUDED_MAIN_CATEGORIES);
-  }
-
-  if (inStock !== undefined) {
-    query += ' AND in_stock = ?';
-    params.push(inStock ? 1 : 0);
-  }
-
-  if (minPrice !== undefined) {
-    query += ' AND price >= ?';
-    params.push(minPrice);
-  }
-
-  if (maxPrice !== undefined) {
-    query += ' AND price <= ?';
-    params.push(maxPrice);
-  }
-
-  if (search) {
-    query += ' AND (name LIKE ? OR description LIKE ? OR params LIKE ?)';
-    const searchPattern = `%${search}%`;
-    params.push(searchPattern, searchPattern, searchPattern);
-  }
-
-  query += ' ORDER BY priority DESC, name ASC';
-
-  if (limit) {
-    query += ' LIMIT ? OFFSET ?';
-    params.push(limit, offset);
-  }
-
-  const stmt = db.prepare(query);
-  const products = stmt.all(...params);
-
-  const safeParseImages = (raw) => {
-    if (!raw) return [];
-    try {
-      const parsed = JSON.parse(raw);
-      return Array.isArray(parsed) ? parsed : [];
-    } catch {
-      return [];
-    }
-  };
-
-  return products.map(product => {
-    const inStock = Boolean(product.in_stock);
-    return {
-      ...product,
-      images: safeParseImages(product.images),
-      in_stock: inStock,
+  try {
+    const {
+      category,
+      showInAI,
       inStock,
-      show_in_ai: Boolean(product.show_in_ai)
+      minPrice,
+      maxPrice,
+      limit,
+      offset = 0,
+      search
+    } = filters;
+
+    let query = 'SELECT * FROM products WHERE 1=1';
+    const params = [];
+
+    if (category) {
+      query += ' AND category = ?';
+      params.push(category);
+    }
+
+    if (showInAI !== undefined) {
+      query += ' AND show_in_ai = ?';
+      params.push(showInAI ? 1 : 0);
+    }
+
+    if (showInAI && EXCLUDED_MAIN_CATEGORIES.length > 0) {
+      query += ` AND (CASE WHEN category_path IS NOT NULL AND category_path != '' AND instr(category_path, '|') > 0 THEN trim(substr(category_path, 1, instr(category_path, '|') - 1)) ELSE category END) NOT IN (${EXCLUDED_MAIN_CATEGORIES.map(() => '?').join(',')})`;
+      params.push(...EXCLUDED_MAIN_CATEGORIES);
+    }
+
+    if (inStock !== undefined) {
+      query += ' AND in_stock = ?';
+      params.push(inStock ? 1 : 0);
+    }
+
+    if (minPrice !== undefined) {
+      query += ' AND price >= ?';
+      params.push(minPrice);
+    }
+
+    if (maxPrice !== undefined) {
+      query += ' AND price <= ?';
+      params.push(maxPrice);
+    }
+
+    if (search) {
+      query += ' AND (name LIKE ? OR description LIKE ? OR params LIKE ?)';
+      const searchPattern = `%${search}%`;
+      params.push(searchPattern, searchPattern, searchPattern);
+    }
+
+    query += ' ORDER BY priority DESC, name ASC';
+
+    if (limit) {
+      query += ' LIMIT ? OFFSET ?';
+      params.push(limit, offset);
+    }
+
+    const stmt = db.prepare(query);
+    const products = stmt.all(...params);
+
+    const safeParseImages = (raw) => {
+      if (!raw) return [];
+      try {
+        const parsed = JSON.parse(raw);
+        return Array.isArray(parsed) ? parsed : [];
+      } catch {
+        return [];
+      }
     };
-  });
+
+    return products.map(product => {
+      const inStockVal = Boolean(product.in_stock);
+      return {
+        ...product,
+        images: safeParseImages(product.images),
+        in_stock: inStockVal,
+        inStock: inStockVal,
+        show_in_ai: Boolean(product.show_in_ai)
+      };
+    });
+  } catch (error) {
+    console.error('getProducts error:', error);
+    return [];
+  }
 }
 
 /**
- * Get product by ID
+ * Get product by ID. Never throws: returns null on error.
  */
 export function getProductById(id) {
-  const stmt = db.prepare('SELECT * FROM products WHERE id = ?');
-  const product = stmt.get(id);
-  
-  if (!product) return null;
-
-  const inStock = Boolean(product.in_stock);
-  let images = [];
   try {
-    images = product.images ? JSON.parse(product.images) : [];
-    if (!Array.isArray(images)) images = [];
-  } catch { images = []; }
-  return {
-    ...product,
-    images,
-    in_stock: inStock,
-    inStock,
-    show_in_ai: Boolean(product.show_in_ai)
-  };
+    if (!id) return null;
+    const stmt = db.prepare('SELECT * FROM products WHERE id = ?');
+    const product = stmt.get(id);
+    if (!product) return null;
+
+    const inStockVal = Boolean(product.in_stock);
+    let images = [];
+    try {
+      images = product.images ? JSON.parse(product.images) : [];
+      if (!Array.isArray(images)) images = [];
+    } catch { images = []; }
+    return {
+      ...product,
+      images,
+      in_stock: inStockVal,
+      inStock: inStockVal,
+      show_in_ai: Boolean(product.show_in_ai)
+    };
+  } catch (error) {
+    console.error('getProductById error:', error);
+    return null;
+  }
 }
 
 /**
@@ -200,37 +211,42 @@ export function deleteProduct(id) {
 }
 
 /**
- * Get product count
+ * Get product count. Never throws: returns 0 on error.
  */
 export function getProductCount(filters = {}) {
-  const { category, showInAI, inStock } = filters;
+  try {
+    const { category, showInAI, inStock } = filters;
 
-  let query = 'SELECT COUNT(*) as count FROM products WHERE 1=1';
-  const params = [];
+    let query = 'SELECT COUNT(*) as count FROM products WHERE 1=1';
+    const params = [];
 
-  if (category) {
-    query += ' AND category = ?';
-    params.push(category);
+    if (category) {
+      query += ' AND category = ?';
+      params.push(category);
+    }
+
+    if (showInAI !== undefined) {
+      query += ' AND show_in_ai = ?';
+      params.push(showInAI ? 1 : 0);
+    }
+
+    if (showInAI && EXCLUDED_MAIN_CATEGORIES.length > 0) {
+      query += ` AND (CASE WHEN category_path IS NOT NULL AND category_path != '' AND instr(category_path, '|') > 0 THEN trim(substr(category_path, 1, instr(category_path, '|') - 1)) ELSE category END) NOT IN (${EXCLUDED_MAIN_CATEGORIES.map(() => '?').join(',')})`;
+      params.push(...EXCLUDED_MAIN_CATEGORIES);
+    }
+
+    if (inStock !== undefined) {
+      query += ' AND in_stock = ?';
+      params.push(inStock ? 1 : 0);
+    }
+
+    const stmt = db.prepare(query);
+    const result = stmt.get(...params);
+    return result?.count ?? 0;
+  } catch (error) {
+    console.error('getProductCount error:', error);
+    return 0;
   }
-
-  if (showInAI !== undefined) {
-    query += ' AND show_in_ai = ?';
-    params.push(showInAI ? 1 : 0);
-  }
-
-  if (showInAI && EXCLUDED_MAIN_CATEGORIES.length > 0) {
-    query += ` AND (CASE WHEN category_path IS NOT NULL AND category_path != '' AND instr(category_path, '|') > 0 THEN trim(substr(category_path, 1, instr(category_path, '|') - 1)) ELSE category END) NOT IN (${EXCLUDED_MAIN_CATEGORIES.map(() => '?').join(',')})`;
-    params.push(...EXCLUDED_MAIN_CATEGORIES);
-  }
-
-  if (inStock !== undefined) {
-    query += ' AND in_stock = ?';
-    params.push(inStock ? 1 : 0);
-  }
-
-  const stmt = db.prepare(query);
-  const result = stmt.get(...params);
-  return result.count;
 }
 
 /**
@@ -305,15 +321,21 @@ export function toggleCategory(name, enabled) {
 }
 
 /**
- * Get statistics
+ * Get statistics. Never throws: returns safe defaults on error.
  */
 export function getStatistics() {
+  const empty = {
+    total_products: 0,
+    active_products: 0,
+    in_stock_products: 0,
+    categories_count: 0,
+    last_sync: null
+  };
   try {
-    const totalProducts = db.prepare('SELECT COUNT(*) as count FROM products').get().count;
-    const activeProducts = db.prepare('SELECT COUNT(*) as count FROM products WHERE show_in_ai = 1').get().count;
-    const inStockProducts = db.prepare('SELECT COUNT(*) as count FROM products WHERE in_stock = 1').get().count;
-    const categoriesCount = db.prepare("SELECT COUNT(DISTINCT category) as count FROM products WHERE category IS NOT NULL AND category != ''").get().count;
-    
+    const totalProducts = db.prepare('SELECT COUNT(*) as count FROM products').get()?.count ?? 0;
+    const activeProducts = db.prepare('SELECT COUNT(*) as count FROM products WHERE show_in_ai = 1').get()?.count ?? 0;
+    const inStockProducts = db.prepare('SELECT COUNT(*) as count FROM products WHERE in_stock = 1').get()?.count ?? 0;
+    const categoriesCount = db.prepare("SELECT COUNT(DISTINCT category) as count FROM products WHERE category IS NOT NULL AND category != ''").get()?.count ?? 0;
     const lastSync = db.prepare('SELECT completed_at FROM sync_history WHERE status = ? ORDER BY completed_at DESC LIMIT 1').get('completed');
 
     return {
@@ -325,6 +347,6 @@ export function getStatistics() {
     };
   } catch (error) {
     console.error('Error in getStatistics:', error);
-    throw error;
+    return empty;
   }
 }

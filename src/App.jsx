@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useMemo } from 'react';
+import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { ShoppingCart, Camera, MessageCircle, X, Send, Plus, Move, Trash2, Home, ZoomIn, ZoomOut, Upload, Settings, Link as LinkIcon, FileText, RefreshCw, AlertCircle, Database, Lock, Search, ChevronLeft, ChevronRight, Filter, Heart, ArrowDownUp, Info, Check, Star, Truck, ShieldCheck, Phone, ArrowRight, Mail, Eye, Sparkles, Lightbulb, Image as ImageIcon, MousePointer2 } from 'lucide-react';
 import { AnimatePresence } from 'framer-motion';
 import { fetchUnasProducts, refreshUnasProducts } from './services/unasApi';
@@ -61,11 +61,8 @@ const GOOGLE_API_KEY = import.meta.env.VITE_GOOGLE_API_KEY || "AIzaSyDZV-fAFVCvh
 const WEBSHOP_DOMAIN = "https://www.marketly.hu";
 const SHOP_ID = "81697"; 
 
-const INITIAL_PRODUCTS = [
-  { id: 'mkt-1', name: "Nordic Minimalista Kanapé", price: 189900, category: "Kanapé", style: "Skandináv", color: "Szürke", images: ["https://images.unsplash.com/photo-1555041469-a586c61ea9bc?auto=format&fit=crop&q=80&w=800", "https://images.unsplash.com/photo-1550226891-ef816aed4a98?auto=format&fit=crop&q=80&w=800"], link: "#", description: "Prémium minőségű, háromszemélyes kanapé kopásálló szövettel.", params: "Anyag: Szövet, Láb: Tölgy", inStock: true },
-  { id: 'mkt-2', name: "Chesterfield Bőrfotel", price: 125000, category: "Fotel", style: "Vintage", color: "Barna", images: ["https://images.unsplash.com/photo-1586023492125-27b2c045efd7?auto=format&fit=crop&q=80&w=800"], link: "#", description: "Klasszikus elegancia, valódi olasz bőrből.", params: "Anyag: Bőr", inStock: true },
-  { id: 'mkt-3', name: "Loft Dohányzóasztal", price: 45000, category: "Asztal", style: "Indusztriális", color: "Fekete/Tölgy", images: ["https://images.unsplash.com/photo-1532372320572-cda25653a26d?auto=format&fit=crop&q=80&w=800"], link: "#", description: "Masszív fém vázas asztal tömörfa lappal.", params: "Szélesség: 90cm", inStock: true }
-];
+const INITIAL_PAGE_SIZE = 2000;
+const DISPLAY_BATCH = 48;
 
 /* --- 2. SEGÉDFÜGGVÉNYEK --- */
 
@@ -683,13 +680,25 @@ const RoomPlanner = ({ products }) => {
 
 const App = () => {
   const [activeTab, setActiveTab] = useState('shop');
-  const [products, setProducts] = useState(INITIAL_PRODUCTS);
+  const [products, setProducts] = useState([]);
+  const [totalProductsCount, setTotalProductsCount] = useState(0);
+  const [hasMoreProducts, setHasMoreProducts] = useState(true);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const [visibleCount, setVisibleCount] = useState(DISPLAY_BATCH);
+  const loadMoreSentinelRef = useRef(null);
+  const visibleCountRef = useRef(visibleCount);
+  const filteredLengthRef = useRef(0);
+  const hasMoreProductsRef = useRef(hasMoreProducts);
+  const isLoadingMoreRef = useRef(isLoadingMore);
+  visibleCountRef.current = visibleCount;
+  filteredLengthRef.current = filteredAndSortedProducts.length;
+  hasMoreProductsRef.current = hasMoreProducts;
+  isLoadingMoreRef.current = isLoadingMore;
   const [wishlist, setWishlist] = useLocalStorage('mkt_wishlist', []);
   const [searchQuery, setSearchQuery] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("Összes");
   const [sortOption, setSortOption] = useState("default");
-  const [page, setPage] = useState(1);
-  const [isDemoMode, setIsDemoMode] = useState(true);
+  const [isDemoMode, setIsDemoMode] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [showAIOnboarding, setShowAIOnboarding] = useState(false);
@@ -749,32 +758,71 @@ const App = () => {
     }
   };
   
-  // Load UNAS data on mount
-  useEffect(() => {
-    const loadUnasData = async () => {
+  // Initial load: first batch only for fast display. Background refresh: silent, replace current data.
+  const loadUnasData = useCallback(async (silent = false) => {
+    if (!silent) {
       setIsLoadingUnas(true);
       setUnasError(null);
-      try {
-        const data = await fetchUnasProducts();
-        if (data.products && data.products.length > 0) {
-          setProducts(data.products);
-          setLastUpdated(data.lastSync || data.lastUpdated);
-          setIsDemoMode(false);
-          setDataSource('unas');
-        } else {
-          setUnasError(data.error || 'No products available');
-        }
-      } catch (_) {
-        setUnasError('Failed to load products');
-      } finally {
-        setIsLoadingUnas(false);
+    }
+    try {
+      const offset = silent ? 0 : 0;
+      const limit = silent && products.length > 0 ? Math.max(INITIAL_PAGE_SIZE, products.length) : INITIAL_PAGE_SIZE;
+      const data = await fetchUnasProducts({ limit, offset });
+      const list = data.products || [];
+      if (!silent) {
+        setProducts(list);
+        setTotalProductsCount(data.total ?? list.length);
+        setHasMoreProducts((data.total ?? 0) > list.length);
+        setVisibleCount(DISPLAY_BATCH);
+      } else if (list.length > 0) {
+        setProducts(list);
+        setTotalProductsCount(data.total ?? list.length);
+        setHasMoreProducts((data.total ?? 0) > list.length);
       }
-    };
+      setLastUpdated(data.lastSync || data.lastUpdated);
+      if (list.length > 0) {
+        setDataSource('unas');
+        setUnasError(null);
+      } else if (!silent) {
+        setUnasError(data.error || 'Nincs termék');
+      }
+    } catch (_) {
+      if (!silent) setUnasError('Termékek betöltése sikertelen');
+    } finally {
+      if (!silent) setIsLoadingUnas(false);
+    }
+  }, [products.length]);
 
-    loadUnasData();
-    
-    const interval = setInterval(loadUnasData, 300000);
-    return () => clearInterval(interval);
+  // Load more from API when user scrolls to bottom
+  const loadMoreProducts = useCallback(async () => {
+    if (isLoadingMore || !hasMoreProducts || products.length >= totalProductsCount) return;
+    setIsLoadingMore(true);
+    try {
+      const data = await fetchUnasProducts({ limit: INITIAL_PAGE_SIZE, offset: products.length });
+      const list = data.products || [];
+      if (list.length > 0) {
+        setProducts(prev => [...prev, ...list]);
+        setHasMoreProducts(products.length + list.length < (data.total ?? 0));
+      } else {
+        setHasMoreProducts(false);
+      }
+    } catch (_) {
+      setHasMoreProducts(false);
+    } finally {
+      setIsLoadingMore(false);
+    }
+  }, [isLoadingMore, hasMoreProducts, products.length, totalProductsCount]);
+
+  const loadUnasDataRef = useRef(loadUnasData);
+  loadUnasDataRef.current = loadUnasData;
+
+  useEffect(() => {
+    loadUnasDataRef.current(false);
+  }, []);
+
+  useEffect(() => {
+    const t = setInterval(() => loadUnasDataRef.current?.(true), 300000);
+    return () => clearInterval(t);
   }, []);
   
   const filteredAndSortedProducts = useMemo(() => {
@@ -788,9 +836,37 @@ const App = () => {
       return result;
   }, [products, searchQuery, categoryFilter, sortOption, advancedFilters]);
 
-  const itemsPerPage = 12;
-  const displayedProducts = filteredAndSortedProducts.slice((page - 1) * itemsPerPage, page * itemsPerPage);
-  const totalPages = Math.ceil(filteredAndSortedProducts.length / itemsPerPage);
+  // Infinite scroll: show first visibleCount items; when sentinel visible, show more or load from API
+  const displayedProducts = filteredAndSortedProducts.slice(0, visibleCount);
+  const hasMoreToShow = visibleCount < filteredAndSortedProducts.length || (hasMoreProducts && products.length < totalProductsCount);
+
+  // When filters/search/category change, scroll list to top and reset visible window
+  useEffect(() => {
+    setVisibleCount(DISPLAY_BATCH);
+    const productsSection = document.getElementById('products-section');
+    if (productsSection) productsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }, [searchQuery, categoryFilter, sortOption, advancedFilters]);
+
+  // Infinite scroll: when sentinel is visible, show more items or load from API
+  useEffect(() => {
+    const el = loadMoreSentinelRef.current;
+    if (!el || !(el instanceof Element)) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (!entry?.isIntersecting) return;
+        const v = visibleCountRef.current;
+        const len = filteredLengthRef.current;
+        if (v < len) {
+          setVisibleCount(prev => Math.min(prev + DISPLAY_BATCH, len));
+          return;
+        }
+        if (hasMoreProductsRef.current && !isLoadingMoreRef.current) loadMoreProducts();
+      },
+      { rootMargin: '200px', threshold: 0.1 }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [loadMoreProducts]);
 
   const categories = useMemo(() => {
       const seen = new Set();
@@ -1022,26 +1098,18 @@ const App = () => {
                   </div>
                 )}
                 
-                {/* Pagination */}
-                {totalPages > 1 && (
-                  <div className="flex justify-center mt-12 gap-2">
-                    <button 
-                      onClick={() => setPage(p => Math.max(1, p - 1))} 
-                      disabled={page === 1} 
-                      className="px-4 py-2 border border-gray-300 rounded-xl hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center gap-2"
-                    >
-                      <ChevronLeft className="w-4 h-4" /> Előző
-                    </button>
-                    <span className="px-4 py-2 bg-indigo-50 text-indigo-600 font-bold rounded-xl">
-                      {page} / {totalPages}
-                    </span>
-                    <button 
-                      onClick={() => setPage(p => Math.min(totalPages, p + 1))} 
-                      disabled={page === totalPages} 
-                      className="px-4 py-2 border border-gray-300 rounded-xl hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center gap-2"
-                    >
-                      Következő <ChevronRight className="w-4 h-4" />
-                    </button>
+                {/* Infinite scroll: load more when sentinel visible */}
+                {!isLoadingUnas && displayedProducts.length > 0 && (
+                  <div ref={loadMoreSentinelRef} className="py-8 flex justify-center min-h-[80px]">
+                    {isLoadingMore && (
+                      <div className="flex flex-col items-center gap-2">
+                        <div className="w-8 h-8 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin" />
+                        <span className="text-sm text-gray-500 font-medium">Több termék betöltése...</span>
+                      </div>
+                    )}
+                    {!isLoadingMore && !hasMoreToShow && filteredAndSortedProducts.length > 0 && (
+                      <span className="text-sm text-gray-400">✓ Minden termék betöltve</span>
+                    )}
                   </div>
                 )}
             </div>

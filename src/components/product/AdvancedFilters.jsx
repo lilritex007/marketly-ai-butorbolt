@@ -92,13 +92,26 @@ export const AdvancedFilters = ({
     }));
   };
 
+  const previousFiltersRef = React.useRef(null);
+  const [hasRestorableFilters, setHasRestorableFilters] = useState(false);
+
   const clearFilters = () => {
+    previousFiltersRef.current = { ...filters };
+    setHasRestorableFilters(true);
     setFilters({
       priceMin: priceRange.min,
       priceMax: priceRange.max,
       inStockOnly: false,
       categories: []
     });
+  };
+
+  const restorePreviousFilters = () => {
+    if (previousFiltersRef.current) {
+      setFilters(previousFiltersRef.current);
+      previousFiltersRef.current = null;
+      setHasRestorableFilters(false);
+    }
   };
 
   const activeFilterCount = [
@@ -223,16 +236,24 @@ export const AdvancedFilters = ({
           </div>
 
           {/* Footer */}
-          <div className="p-4 border-t border-gray-200 flex gap-2">
+          <div className="p-4 border-t border-gray-200 flex flex-wrap gap-2">
             <button
               onClick={clearFilters}
-              className="flex-1 px-4 py-2 border border-gray-300 rounded-xl text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+              className="flex-1 min-w-[80px] px-4 py-2 border border-gray-300 rounded-xl text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
             >
               Törlés
             </button>
+            {hasRestorableFilters && (
+              <button
+                onClick={restorePreviousFilters}
+                className="flex-1 min-w-[80px] px-4 py-2 border border-indigo-300 rounded-xl text-sm font-medium text-indigo-700 hover:bg-indigo-50 transition-colors"
+              >
+                Visszaállítás
+              </button>
+            )}
             <button
               onClick={() => setIsOpen(false)}
-              className="flex-1 px-4 py-2 bg-indigo-600 text-white rounded-xl text-sm font-bold hover:bg-indigo-700 transition-colors"
+              className="flex-1 min-w-[80px] px-4 py-2 bg-indigo-600 text-white rounded-xl text-sm font-bold hover:bg-indigo-700 transition-colors"
             >
               Alkalmaz
             </button>
@@ -253,8 +274,8 @@ export const applyFilters = (products, filters) => {
       return false;
     }
 
-    // Stock filter
-    if (filters.inStockOnly && !product.inStock) {
+    // Stock filter (support both inStock and in_stock)
+    if (filters.inStockOnly && !(product.inStock ?? product.in_stock)) {
       return false;
     }
 

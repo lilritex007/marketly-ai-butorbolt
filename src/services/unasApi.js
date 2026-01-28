@@ -3,12 +3,18 @@
  * Handles communication with the backend proxy for UNAS product data
  */
 
-// Use window.MARKETLY_CONFIG in production, fallback to localhost in dev
+// Use window.MARKETLY_CONFIG in production, fallback to localhost in dev.
+// Normalize so base always ends with /api (backend routes are /api/products, etc.) to avoid 404.
 const getApiBase = () => {
+  let base = '';
   if (typeof window !== 'undefined' && window.MARKETLY_CONFIG?.apiBase) {
-    return window.MARKETLY_CONFIG.apiBase;
+    base = window.MARKETLY_CONFIG.apiBase;
+  } else {
+    base = import.meta.env.VITE_API_URL || 'http://localhost:3002';
   }
-  return import.meta.env.VITE_API_URL || 'http://localhost:3002';
+  base = (base || '').replace(/\/+$/, '');
+  if (base && !base.endsWith('/api')) base = base + '/api';
+  return base;
 };
 
 const STATIC_JSON_TIMEOUT_MS = 12000; // 12s – gyors fallback API-ra ha CDN lassú
@@ -62,7 +68,8 @@ export const fetchUnasProducts = async (filters = {}) => {
     if (filters.offset) params.append('offset', filters.offset);
     const url = `${API_BASE}/products${params.toString() ? '?' + params.toString() : ''}`;
 
-    const res = await fetch(url, { method: 'GET', headers: { 'Content-Type': 'application/json' } });
+    // Do not send Content-Type on GET to avoid CORS preflight (CDN/backend may not allow it)
+    const res = await fetch(url, { method: 'GET' });
     if (!res.ok) {
       const err = await res.json().catch(() => ({}));
       return { products: [], total: 0, count: 0, lastSync: null, source: 'api', error: err.message || res.status };

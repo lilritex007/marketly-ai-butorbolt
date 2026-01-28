@@ -15,6 +15,7 @@ const __dirname = path.dirname(__filename);
 
 dotenv.config({ path: path.join(__dirname, '../../.env.deployment') });
 
+// SHOP_URL = full backend API base including /api (e.g. https://xxx.railway.app/api)
 const config = {
   apiKey: process.env.UNAS_API_KEY,
   apiUrl: process.env.UNAS_API_URL,
@@ -42,66 +43,63 @@ function getAssetFiles(buildDir) {
 }
 
 /**
- * Generate loader script that dynamically loads React app
+ * Generate loader script: fix URL, version.json + ?v=buildTime = mindig friss kód push után.
+ * Egy deploy elég; a script src fix marad, a változások mindig élesben.
  */
 function generateLoaderScript(jsFiles, cssFiles, cdnBase) {
   return `
 (function() {
   'use strict';
-  
-  console.log('🚀 Marketly AI Shop - ScriptTag Loader');
-  console.log('CDN:', '${cdnBase}');
-  
-  // 1. Create root container
-  const container = document.createElement('div');
+  var cdnBase = '${cdnBase}';
+  var container = document.createElement('div');
   container.id = 'root';
   container.className = 'marketly-ai-shop min-h-screen';
-  
-  // Insert at the beginning of main content area
-  const mainContent = document.querySelector('main') || document.querySelector('#content') || document.body;
-  if (mainContent.firstChild) {
-    mainContent.insertBefore(container, mainContent.firstChild);
-  } else {
-    mainContent.appendChild(container);
-  }
-  
-  // 2. Load CSS files
-  ${cssFiles.map(f => `
-  const css${cssFiles.indexOf(f)} = document.createElement('link');
-  css${cssFiles.indexOf(f)}.rel = 'stylesheet';
-  css${cssFiles.indexOf(f)}.href = '${cdnBase}/assets/${f}';
-  document.head.appendChild(css${cssFiles.indexOf(f)});
-  `).join('\n')}
-  
-  // 3. Set configuration
+  var mainContent = document.querySelector('main') || document.querySelector('#content') || document.body;
+  if (mainContent.firstChild) mainContent.insertBefore(container, mainContent.firstChild);
+  else mainContent.appendChild(container);
+
   window.MARKETLY_CONFIG = {
     apiBase: '${config.shopUrl}',
     productBaseUrl: '/termek',
     cartUrl: '/cart',
     checkoutUrl: '/checkout',
     mode: 'unas-integrated',
-    cdnBase: '${cdnBase}',
-    features: {
-      sessionSharing: false,
-      stockCheck: false,
-      expressCheckout: false
-    }
+    cdnBase: cdnBase,
+    features: { sessionSharing: false, stockCheck: false, expressCheckout: false }
   };
-  
-  // 4. Load React app (module script)
-  ${jsFiles.map(f => `
-  const script${jsFiles.indexOf(f)} = document.createElement('script');
-  script${jsFiles.indexOf(f)}.type = 'module';
-  script${jsFiles.indexOf(f)}.crossOrigin = 'anonymous';
-  script${jsFiles.indexOf(f)}.src = '${cdnBase}/assets/${f}';
-  script${jsFiles.indexOf(f)}.onerror = function() {
-    console.error('Failed to load React app from CDN');
+
+  function onError() {
     container.innerHTML = '<div style="text-align:center;padding:50px;"><h2>Betöltési hiba</h2><p>Próbáld újra később.</p></div>';
-  };
-  document.body.appendChild(script${jsFiles.indexOf(f)});
-  `).join('\n')}
-  
-  console.log('✅ AI Shop loader initialized');
+  }
+
+  fetch(cdnBase + '/version.json?t=' + Date.now())
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      var ver = (data && data.buildTime) || Date.now();
+      var link = document.createElement('link');
+      link.rel = 'stylesheet';
+      link.href = cdnBase + '/assets/index.css?v=' + ver;
+      document.head.appendChild(link);
+      var script = document.createElement('script');
+      script.type = 'module';
+      script.crossOrigin = 'anonymous';
+      script.src = cdnBase + '/assets/index.js?v=' + ver;
+      script.onerror = onError;
+      document.body.appendChild(script);
+    })
+    .catch(function() {
+      var ver = Date.now();
+      var link = document.createElement('link');
+      link.rel = 'stylesheet';
+      link.href = cdnBase + '/assets/index.css?v=' + ver;
+      document.head.appendChild(link);
+      var script = document.createElement('script');
+      script.type = 'module';
+      script.crossOrigin = 'anonymous';
+      script.src = cdnBase + '/assets/index.js?v=' + ver;
+      script.onerror = onError;
+      document.body.appendChild(script);
+    });
 })();
 `.trim();
 }
