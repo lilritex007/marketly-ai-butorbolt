@@ -22,8 +22,8 @@ export const fetchUnasProducts = async (filters = {}) => {
     const staticUrl = `${CDN_BASE}/products.json?v=${Date.now()}`;
     console.log('📦 Trying static JSON first:', staticUrl);
     
-    // No custom headers: GET + Content-Type triggers CORS preflight; jsDelivr may reject it
-    const staticResponse = await fetch(staticUrl, { method: 'GET' });
+    // No options: any custom header triggers CORS preflight; jsDelivr blocks Content-Type on GET
+    const staticResponse = await fetch(staticUrl);
 
     if (staticResponse.ok) {
       const staticData = await staticResponse.json();
