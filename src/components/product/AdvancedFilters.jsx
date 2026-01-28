@@ -18,28 +18,40 @@ export const AdvancedFilters = ({
     ...initialFilters
   });
 
-  // Calculate price range from products
+  // Calculate price range from products (avoid Math.min/max spread – 168k args = stack overflow)
   const priceRange = React.useMemo(() => {
     if (products.length === 0) return { min: 0, max: 1000000 };
-    const prices = products.map(p => p.price);
+    let min = Infinity;
+    let max = -Infinity;
+    for (let i = 0; i < products.length; i++) {
+      const p = products[i].price;
+      if (p < min) min = p;
+      if (p > max) max = p;
+    }
     return {
-      min: Math.floor(Math.min(...prices) / 1000) * 1000,
-      max: Math.ceil(Math.max(...prices) / 1000) * 1000
+      min: min === Infinity ? 0 : Math.floor(min / 1000) * 1000,
+      max: max === -Infinity ? 1000000 : Math.ceil(max / 1000) * 1000
     };
   }, [products]);
 
-  // Get unique categories
+  // Get unique categories (limit to 500 to avoid huge lists; sample if needed)
   const categories = React.useMemo(() => {
-    const cats = [...new Set(products.map(p => p.category).filter(Boolean))];
-    return cats.sort();
+    const seen = new Set();
+    const step = Math.max(1, Math.floor(products.length / 20000));
+    for (let i = 0; i < products.length && seen.size < 500; i += step) {
+      const c = products[i]?.category;
+      if (c) seen.add(c);
+    }
+    return [...seen].sort();
   }, [products]);
 
-  // Extract colors and materials from params
+  // Extract colors and materials from params (sample to avoid long loop on 168k)
   const extractedAttributes = React.useMemo(() => {
     const colors = new Set();
     const materials = new Set();
-    
-    products.forEach(p => {
+    const step = Math.max(1, Math.floor(products.length / 5000));
+    for (let i = 0; i < products.length; i += step) {
+      const p = products[i];
       if (p.params) {
         const params = p.params.toLowerCase();
         // Simple extraction - can be enhanced
@@ -52,7 +64,7 @@ export const AdvancedFilters = ({
           if (match) materials.add(match[1].trim());
         }
       }
-    });
+    }
 
     return {
       colors: Array.from(colors).slice(0, 10),

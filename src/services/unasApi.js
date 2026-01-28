@@ -22,12 +22,8 @@ export const fetchUnasProducts = async (filters = {}) => {
     const staticUrl = `${CDN_BASE}/products.json?v=${Date.now()}`;
     console.log('📦 Trying static JSON first:', staticUrl);
     
-    const staticResponse = await fetch(staticUrl, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    });
+    // No custom headers: GET + Content-Type triggers CORS preflight; jsDelivr may reject it
+    const staticResponse = await fetch(staticUrl, { method: 'GET' });
 
     if (staticResponse.ok) {
       const staticData = await staticResponse.json();
