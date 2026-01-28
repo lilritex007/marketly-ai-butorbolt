@@ -11,46 +11,36 @@ const getApiBase = () => {
   return import.meta.env.VITE_API_URL || 'http://localhost:3002';
 };
 
+const STATIC_JSON_TIMEOUT_MS = 12000; // 12s – gyors fallback API-ra ha CDN lassú
+
 /**
- * Fetch products - tries static JSON first, then falls back to API
- * This avoids API issues and CDN cache problems
+ * Fetch products - tries static JSON first (with timeout), then falls back to API.
+ * Never throws: on full failure returns empty array so UI can show demo/empty state.
  */
 export const fetchUnasProducts = async (filters = {}) => {
-  // Try static JSON first (from CDN - in dist folder)
+  if (typeof window === 'undefined') return { products: [], total: 0, count: 0, lastSync: null, source: null };
+
+  const CDN_BASE = window.MARKETLY_CONFIG?.cdnBase || 'https://cdn.jsdelivr.net/gh/lilritex007/marketly-ai-butorbolt@main/dist';
+  const staticUrl = `${CDN_BASE}/products.json?v=${Date.now()}`;
+
   try {
-    const CDN_BASE = window.MARKETLY_CONFIG?.cdnBase || 'https://cdn.jsdelivr.net/gh/lilritex007/marketly-ai-butorbolt@main/dist';
-    const staticUrl = `${CDN_BASE}/products.json?v=${Date.now()}`;
-    console.log('📦 Trying static JSON first:', staticUrl);
-    
-    // No options: any custom header triggers CORS preflight; jsDelivr blocks Content-Type on GET
-    const staticResponse = await fetch(staticUrl);
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), STATIC_JSON_TIMEOUT_MS);
+    const staticResponse = await fetch(staticUrl, { signal: controller.signal });
+    clearTimeout(timeoutId);
 
     if (staticResponse.ok) {
       const staticData = await staticResponse.json();
-      console.log('✅ Loaded from static JSON:', staticData.stats?.total || staticData.products?.length, 'products');
-      
-      // Apply filters client-side; normalize inStock for display (készlet)
       let products = (staticData.products || []).map(p => ({
         ...p,
         inStock: p.inStock !== undefined ? p.inStock : Boolean(p.in_stock)
       }));
-      
-      if (filters.category && filters.category !== 'Összes') {
-        products = products.filter(p => p.category === filters.category);
-      }
-      
+      if (filters.category && filters.category !== 'Összes') products = products.filter(p => p.category === filters.category);
       if (filters.search) {
-        const searchLower = filters.search.toLowerCase();
-        products = products.filter(p => 
-          p.name?.toLowerCase().includes(searchLower) ||
-          p.description?.toLowerCase().includes(searchLower)
-        );
+        const q = (filters.search || '').toLowerCase();
+        products = products.filter(p => p.name?.toLowerCase().includes(q) || p.description?.toLowerCase().includes(q));
       }
-      
-      if (filters.limit) {
-        products = products.slice(0, parseInt(filters.limit));
-      }
-      
+      if (filters.limit) products = products.slice(0, parseInt(filters.limit, 10) || 0);
       return {
         products,
         total: staticData.stats?.total || staticData.products?.length || 0,
@@ -59,37 +49,25 @@ export const fetchUnasProducts = async (filters = {}) => {
         source: 'static'
       };
     }
-  } catch (staticError) {
-    console.warn('⚠️ Static JSON not available, falling back to API:', staticError.message);
+  } catch (_) {
+    /* timeout or CORS – fallback to API */
   }
 
-  // Fallback to API
   try {
     const API_BASE = getApiBase();
     const params = new URLSearchParams();
-    
     if (filters.category) params.append('category', filters.category);
     if (filters.search) params.append('search', filters.search);
     if (filters.limit) params.append('limit', filters.limit);
     if (filters.offset) params.append('offset', filters.offset);
-    
     const url = `${API_BASE}/products${params.toString() ? '?' + params.toString() : ''}`;
-    console.log('🔍 Falling back to API:', url);
-    
-    const response = await fetch(url, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    });
 
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+    const res = await fetch(url, { method: 'GET', headers: { 'Content-Type': 'application/json' } });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      return { products: [], total: 0, count: 0, lastSync: null, source: 'api', error: err.message || res.status };
     }
-
-    const data = await response.json();
-    // Normalize inStock (API returns in_stock; frontend expects inStock)
+    const data = await res.json();
     const products = (data.products || []).map(p => ({
       ...p,
       inStock: p.inStock !== undefined ? p.inStock : Boolean(p.in_stock)
@@ -98,12 +76,11 @@ export const fetchUnasProducts = async (filters = {}) => {
       products,
       total: data.total || 0,
       count: data.count || products.length || 0,
-      lastSync: data.lastSync,
+      lastSync: data.lastSync || null,
       source: 'api'
     };
   } catch (error) {
-    console.error('❌ Error fetching from API:', error);
-    throw new Error(`Failed to fetch products: ${error.message}`);
+    return { products: [], total: 0, count: 0, lastSync: null, source: null, error: error.message };
   }
 };
 

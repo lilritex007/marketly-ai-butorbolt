@@ -66,12 +66,21 @@ export function getProducts(filters = {}) {
   const stmt = db.prepare(query);
   const products = stmt.all(...params);
 
-  // Parse JSON fields, normalize inStock for frontend (camelCase)
+  const safeParseImages = (raw) => {
+    if (!raw) return [];
+    try {
+      const parsed = JSON.parse(raw);
+      return Array.isArray(parsed) ? parsed : [];
+    } catch {
+      return [];
+    }
+  };
+
   return products.map(product => {
     const inStock = Boolean(product.in_stock);
     return {
       ...product,
-      images: product.images ? JSON.parse(product.images) : [],
+      images: safeParseImages(product.images),
       in_stock: inStock,
       inStock,
       show_in_ai: Boolean(product.show_in_ai)
@@ -89,9 +98,14 @@ export function getProductById(id) {
   if (!product) return null;
 
   const inStock = Boolean(product.in_stock);
+  let images = [];
+  try {
+    images = product.images ? JSON.parse(product.images) : [];
+    if (!Array.isArray(images)) images = [];
+  } catch { images = []; }
   return {
     ...product,
-    images: product.images ? JSON.parse(product.images) : [],
+    images,
     in_stock: inStock,
     inStock,
     show_in_ai: Boolean(product.show_in_ai)

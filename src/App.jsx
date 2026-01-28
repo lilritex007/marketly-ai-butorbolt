@@ -529,9 +529,9 @@ const ChatWidget = ({ products }) => {
 
     try {
       const lowerQuery = userMsg.toLowerCase();
-      const relevantProducts = products.filter(p => 
-          p.name.toLowerCase().includes(lowerQuery) || 
-          p.category.toLowerCase().includes(lowerQuery) ||
+      const relevantProducts = products.filter(p =>
+          (p.name || '').toLowerCase().includes(lowerQuery) ||
+          (p.category || '').toLowerCase().includes(lowerQuery) ||
           (p.params && p.params.toLowerCase().includes(lowerQuery))
       ).slice(0, 5);
 
@@ -632,7 +632,7 @@ const VisualSearch = ({ products }) => {
         )}
       </div>
       {searchResults.length > 0 && (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">{searchResults.map(product => (<div key={product.id} className="border p-4 rounded"><img src={product.images[0]} className="h-32 mx-auto object-contain" /><p className="font-bold mt-2">{product.name}</p><p>{formatPrice(product.price)}</p></div>))}</div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">{searchResults.map(product => (<div key={product.id} className="border p-4 rounded"><img src={product.images?.[0]} alt="" className="h-32 mx-auto object-contain" /><p className="font-bold mt-2 truncate">{product.name}</p><p>{formatPrice(product.price)}</p></div>))}</div>
       )}
     </div>
   );
@@ -756,69 +756,35 @@ const App = () => {
       setUnasError(null);
       try {
         const data = await fetchUnasProducts();
-        
         if (data.products && data.products.length > 0) {
-          console.log('✅ Loaded products:', data.products.length, 'total:', data.total);
-          console.log('📦 First product sample:', data.products[0]);
           setProducts(data.products);
           setLastUpdated(data.lastSync || data.lastUpdated);
           setIsDemoMode(false);
           setDataSource('unas');
-          
-          if (data.stale) {
-            // Serving stale data due to API error
-          }
         } else {
-          setUnasError('No products available');
+          setUnasError(data.error || 'No products available');
         }
-      } catch (error) {
-        console.error('❌ Error loading UNAS products:', error);
-        setUnasError(error.message);
-        // Keep demo products if UNAS fails
+      } catch (_) {
+        setUnasError('Failed to load products');
       } finally {
         setIsLoadingUnas(false);
-        console.log('📊 Products state after load:', products.length, 'products');
-        console.log('📊 Displayed products:', displayedProducts.length);
       }
     };
 
     loadUnasData();
     
-    // Auto-refresh every 5 minutes
-    const interval = setInterval(() => {
-      console.log('Auto-refreshing UNAS data...');
-      loadUnasData();
-    }, 300000); // 5 minutes
-    
+    const interval = setInterval(loadUnasData, 300000);
     return () => clearInterval(interval);
   }, []);
   
   const filteredAndSortedProducts = useMemo(() => {
       let result = products;
-      
-      console.log('🔍 Filtering products:', {
-        total: products.length,
-        searchQuery,
-        categoryFilter,
-        sortOption
-      });
-      
-      // Text search
-      if (searchQuery) result = result.filter(p => p.name.toLowerCase().includes(searchQuery.toLowerCase()));
-      
-      // Category filter
-      if (categoryFilter !== "Összes") result = result.filter(p => p.category === categoryFilter);
-      
-      // Advanced filters
-      if (Object.keys(advancedFilters).length > 0) {
-        result = applyFilters(result, advancedFilters);
-      }
-      
-      // Sorting
-      if (sortOption === "price-asc") result = [...result].sort((a, b) => a.price - b.price);
-      if (sortOption === "price-desc") result = [...result].sort((a, b) => b.price - a.price);
-      
-      console.log('✅ Filtered products:', result.length);
+      const q = (searchQuery || '').toLowerCase();
+      if (q) result = result.filter(p => (p.name || '').toLowerCase().includes(q));
+      if (categoryFilter !== 'Összes') result = result.filter(p => p.category === categoryFilter);
+      if (Object.keys(advancedFilters).length > 0) result = applyFilters(result, advancedFilters);
+      if (sortOption === 'price-asc') result = [...result].sort((a, b) => (a.price || 0) - (b.price || 0));
+      if (sortOption === 'price-desc') result = [...result].sort((a, b) => (b.price || 0) - (a.price || 0));
       return result;
   }, [products, searchQuery, categoryFilter, sortOption, advancedFilters]);
 
@@ -827,8 +793,13 @@ const App = () => {
   const totalPages = Math.ceil(filteredAndSortedProducts.length / itemsPerPage);
 
   const categories = useMemo(() => {
-      const cats = products.map(p => p.category).filter(Boolean);
-      return ["Összes", ...new Set(cats)];
+      const seen = new Set();
+      const step = Math.max(1, Math.floor(products.length / 500));
+      for (let i = 0; i < products.length && seen.size < 200; i += step) {
+        const c = products[i]?.category;
+        if (c) seen.add(c);
+      }
+      return ['Összes', ...[...seen].sort()];
   }, [products]);
 
   return (
