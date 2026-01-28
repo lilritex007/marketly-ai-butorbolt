@@ -20,18 +20,26 @@ export const AdvancedFilters = ({
 
   // Calculate price range from products (avoid Math.min/max spread – 168k args = stack overflow)
   const priceRange = React.useMemo(() => {
+    // #region agent log
+    fetch('http://127.0.0.1:7243/ingest/ce754df7-7b1e-4d67-97a6-01293e3ab261',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'AdvancedFilters.jsx:priceRange',message:'useMemo entry',data:{productsLength:products.length},timestamp:Date.now(),sessionId:'debug-session',hypothesisId:'H3'})}).catch(()=>{});
+    // #endregion
     if (products.length === 0) return { min: 0, max: 1000000 };
     let min = Infinity;
     let max = -Infinity;
-    for (let i = 0; i < products.length; i++) {
+    const cap = Math.min(products.length, 100000);
+    for (let i = 0; i < cap; i++) {
       const p = products[i].price;
       if (p < min) min = p;
       if (p > max) max = p;
     }
-    return {
+    const out = {
       min: min === Infinity ? 0 : Math.floor(min / 1000) * 1000,
       max: max === -Infinity ? 1000000 : Math.ceil(max / 1000) * 1000
     };
+    // #region agent log
+    console.log('[DEBUG H3] AdvancedFilters priceRange exit', { min: out.min, max: out.max, iterated: cap });
+    // #endregion
+    return out;
   }, [products]);
 
   // Get unique categories (limit to 500 to avoid huge lists; sample if needed)

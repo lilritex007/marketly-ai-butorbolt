@@ -769,6 +769,9 @@ const App = () => {
       const limit = silent && products.length > 0 ? Math.max(INITIAL_PAGE_SIZE, products.length) : INITIAL_PAGE_SIZE;
       const data = await fetchUnasProducts({ limit, offset });
       const list = data.products || [];
+      // #region agent log
+      console.log('[DEBUG H1] App loadUnasData after fetch', { limit, offset, listLength: list.length, total: data.total });
+      // #endregion
       if (!silent) {
         setProducts(list);
         setTotalProductsCount(data.total ?? list.length);

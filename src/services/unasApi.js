@@ -32,7 +32,11 @@ export const fetchUnasProducts = async (filters = {}) => {
   try {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), STATIC_JSON_TIMEOUT_MS);
-    const staticResponse = await fetch(staticUrl, { signal: controller.signal });
+    const staticOpts = { signal: controller.signal };
+    // #region agent log
+    console.log('[DEBUG H5] unasApi static fetch', { hasContentType: !!(staticOpts.headers && staticOpts.headers['Content-Type']) });
+    // #endregion
+    const staticResponse = await fetch(staticUrl, staticOpts);
     clearTimeout(timeoutId);
 
     if (staticResponse.ok) {
@@ -68,6 +72,10 @@ export const fetchUnasProducts = async (filters = {}) => {
     if (filters.offset) params.append('offset', filters.offset);
     const url = `${API_BASE}/products${params.toString() ? '?' + params.toString() : ''}`;
 
+    // #region agent log
+    console.log('[DEBUG H1] unasApi API request', { limit: filters.limit, offset: filters.offset, url });
+    // #endregion
+
     // Do not send Content-Type on GET to avoid CORS preflight (CDN/backend may not allow it)
     const res = await fetch(url, { method: 'GET' });
     if (!res.ok) {
@@ -75,6 +83,10 @@ export const fetchUnasProducts = async (filters = {}) => {
       return { products: [], total: 0, count: 0, lastSync: null, source: 'api', error: err.message || res.status };
     }
     const data = await res.json();
+    const rawLen = (data.products && data.products.length) || 0;
+    // #region agent log
+    fetch('http://127.0.0.1:7243/ingest/ce754df7-7b1e-4d67-97a6-01293e3ab261',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'unasApi.js:API-response',message:'API response lengths',data:{productsLength:rawLen,total:data.total},timestamp:Date.now(),sessionId:'debug-session',hypothesisId:'H2'})}).catch(()=>{});
+    // #endregion
     const products = (data.products || []).map(p => ({
       ...p,
       inStock: p.inStock !== undefined ? p.inStock : Boolean(p.in_stock)
