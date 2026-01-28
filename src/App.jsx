@@ -54,6 +54,7 @@ import { useInfiniteScroll, InfiniteScrollSentinel } from './hooks/useInfiniteSc
 
 // Utils
 import { getOptimizedImageProps } from './utils/imageOptimizer';
+import { PLACEHOLDER_IMAGE } from './utils/helpers';
 
 /* --- 1. KONFIGURÁCIÓ & ADATOK --- */
 
@@ -71,10 +72,10 @@ const formatPrice = (price) => {
 };
 
 const fixUrl = (url, type = 'main') => {
-    if (!url) return "https://via.placeholder.com/400x400?text=Nincs+Kép";
+    if (!url) return PLACEHOLDER_IMAGE;
     let cleanUrl = url.trim().replace(/^"|"$/g, '');
     
-    if (cleanUrl.length === 0) return "https://via.placeholder.com/400x400?text=Nincs+Kép";
+    if (cleanUrl.length === 0) return PLACEHOLDER_IMAGE;
     if (cleanUrl.startsWith('http')) return cleanUrl;
 
     // UNAS speciális útvonalak kezelése
@@ -436,7 +437,7 @@ const ProductModal = ({ product, isOpen, onClose }) => {
                             src={product.images && product.images[activeImg]} 
                             alt={product.name} 
                             className="absolute inset-0 w-full h-full object-contain p-4"
-                            onError={(e) => {e.target.src = 'https://via.placeholder.com/400x400?text=Kép+Hiba'}}
+                            onError={(e) => {e.target.src = PLACEHOLDER_IMAGE}}
                         />
                     </div>
                     {product.images && product.images.length > 1 && (
@@ -769,9 +770,6 @@ const App = () => {
       const limit = silent && products.length > 0 ? Math.max(INITIAL_PAGE_SIZE, products.length) : INITIAL_PAGE_SIZE;
       const data = await fetchUnasProducts({ limit, offset });
       const list = data.products || [];
-      // #region agent log
-      console.log('[DEBUG H1] App loadUnasData after fetch', { limit, offset, listLength: list.length, total: data.total });
-      // #endregion
       if (!silent) {
         setProducts(list);
         setTotalProductsCount(data.total ?? list.length);
@@ -1060,10 +1058,13 @@ const App = () => {
 
                 {/* Loading State */}
                 {isLoadingUnas && (
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                    {[...Array(8)].map((_, i) => (
-                      <ProductCardSkeleton key={i} />
-                    ))}
+                  <div className="space-y-4">
+                    <p className="text-sm text-gray-500 text-center font-medium">Termékek betöltése...</p>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                      {[...Array(8)].map((_, i) => (
+                        <ProductCardSkeleton key={`skeleton-${i}`} />
+                      ))}
+                    </div>
                   </div>
                 )}
 
@@ -1089,10 +1090,7 @@ const App = () => {
                               product={product} 
                               onToggleWishlist={toggleWishlist} 
                               isWishlisted={wishlist.includes(product.id)} 
-                              onQuickView={(e) => {
-                                e.stopPropagation();
-                                handleProductView(product);
-                              }}
+                              onQuickView={handleProductView}
                               isInComparison={comparison.isInComparison(product.id)}
                               onToggleComparison={handleToggleComparison}
                             />

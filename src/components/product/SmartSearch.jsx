@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Search, Sparkles, TrendingUp, Clock, X } from 'lucide-react';
 import { useDebounce } from '../../hooks';
+import { PLACEHOLDER_IMAGE } from '../../utils/helpers';
 
 const GOOGLE_API_KEY = import.meta.env.VITE_GOOGLE_API_KEY || "AIzaSyDZV-fAFVCvh4Ad2lKlARMdtHoZWNRwZQA";
 
@@ -202,10 +203,10 @@ Magyarul, röviden, konkrétan. Csak olyan kategóriák/termékek amit TÉNYLEG 
                   className="w-full text-left px-3 py-2 hover:bg-indigo-50 rounded-lg transition-colors flex items-center gap-3 group"
                 >
                   <img
-                    src={product.images?.[0] || 'https://via.placeholder.com/50'}
+                    src={product.images?.[0] || PLACEHOLDER_IMAGE}
                     alt={product.name}
                     className="w-10 h-10 object-contain rounded bg-gray-50"
-                    onError={(e) => {e.target.src = 'https://via.placeholder.com/50'}}
+                    onError={(e) => {e.target.src = PLACEHOLDER_IMAGE}}
                   />
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium text-gray-900 truncate group-hover:text-indigo-600 transition-colors">

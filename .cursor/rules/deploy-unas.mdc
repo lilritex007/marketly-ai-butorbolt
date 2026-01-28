@@ -1,0 +1,37 @@
+---
+description: UNAS deploy, injektáló loader és host oldal (butorbolt) script javítások
+globs: deployment/**/*.js, deployment/**/*.md, src/services/unasApi.js, src/App.jsx
+alwaysApply: false
+---
+
+# UNAS deploy és injektáló kód
+
+## Éles frissítés lépései
+
+1. **Build:** `npm run build` → `dist/assets/index.js`, `dist/version.json` frissül (Vite fix nevek: index.js, index.css).
+2. **Git:** `git add -A` → commit → `git push origin main` → CDN (jsDelivr) a repóból szolgálja a dist-et.
+3. **UNAS script tag frissítése:** `node deployment/scripts/deploy-scripttag.js` (kell `.env.deployment` + UNAS token). Ez felülírja a butorbolt oldalra beállított scriptet; a loader ezután `index.js?v=buildTime`-ot tölt a CDN-ről.
+
+## Injektáló loader és script src
+
+- **Loader tartalma:** `deployment/scripts/deploy-scripttag.js` → `generateLoaderScript(jsFiles, cssFiles, cdnBase)`.
+- A loader: létrehozza a `#root`-ot, beállítja a `window.MARKETLY_CONFIG`-ot (kötelező: `apiBase` = teljes API base **/api**-val, pl. `https://xxx.railway.app/api`), majd `fetch(cdnBase + '/version.json')` → CSS/JS link: `cdnBase + '/assets/index.css?v=' + ver` és `cdnBase + '/assets/index.js?v=' + ver`. **Fix bundle nevek** (index.js, index.css), nincs hash a fájlnevekben.
+- **UNAS beállítás:** script tag az UNAS `setScriptTag` API-n keresztül kerül be (createScriptTag). A script a `body_end`-re, a megadott PageUrl-ra (pl. butorbolt) érvényes.
+- **Ha módosítod az injektáló kódot vagy a script src-t:** szerkeszd a `generateLoaderScript` visszaadott stringet a deploy-scripttag.js-ben; a `config.shopUrl` a `.env.deployment` SHOP_URL (teljes API base, /api-val). Módosítás után futtasd újra a deploy scriptet, hogy az UNAS oldalon frissüljön a script.
+
+## Host oldal hibák (butorbolt:2591, butorbolt:2520)
+
+Ezek **nem** a mi loaderünkből vagy React bundle-ből jönnek. A **butorbolt** oldal HTML-jében (UNAS téma vagy egyedi HTML/script) fut egy script, ami:
+- `IntersectionObserver.observe()`-t hív nem-Elementre (pl. null),
+- vagy `addEventListener`-t hív null elemre.
+
+**Javítás az UNAS oldalon:** a butorbolt oldal forrását/sablonját az UNAS adminban szerkeszd, keress rá a hibás sorokra (~2520, ~2589–2591), és add hozzá az ellenőrzéseket:
+- addEventListener: `if (element != null && typeof element.addEventListener === 'function') { element.addEventListener(...); }`
+- observer.observe: `if (element && element.nodeType === 1) { observer.observe(element); }`
+
+Részletes lépések és példakód: `deployment/DEPLOY-UNAS.md`. Az UNAS HTML/téma szerkesztése az UNAS adminban történik (nem a repóból); ha később API-val lehetne oldal tartalmat módosítani, ugyanezek az ellenőrzések kellenek a host scriptbe.
+
+## Frontend és API
+
+- `src/services/unasApi.js`: `getApiBase()` normalizálja az apiBase-t (mindig /api-ra végződik). Statikus products.json fetch: **ne** küldjön Content-Type headert (CORS elkerülés).
+- App: kezdeti termékbetöltés `INITIAL_PAGE_SIZE` (2000) limit/offset-tal; infinite scroll további batch-ekkel.

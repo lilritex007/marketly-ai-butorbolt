@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { X, Check, ArrowLeftRight, Plus } from 'lucide-react';
-import { formatPrice } from '../../utils/helpers';
+import { formatPrice, PLACEHOLDER_IMAGE } from '../../utils/helpers';
 
 /**
  * Product Comparison Tool
@@ -75,10 +75,10 @@ export const ProductComparison = ({
                     {/* Image */}
                     <div className="h-48 bg-gray-50 flex items-center justify-center p-4">
                       <img
-                        src={product.images?.[0] || 'https://via.placeholder.com/200'}
+                        src={product.images?.[0] || PLACEHOLDER_IMAGE}
                         alt={product.name}
                         className="max-h-full max-w-full object-contain"
-                        onError={(e) => {e.target.src = 'https://via.placeholder.com/200'}}
+                        onError={(e) => {e.target.src = PLACEHOLDER_IMAGE}}
                       />
                     </div>
 

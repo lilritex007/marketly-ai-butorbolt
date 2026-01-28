@@ -106,7 +106,7 @@ export const EnhancedProductCard = ({
 
       {/* Image section */}
       <div 
-        onClick={() => onQuickView(product)} 
+        onClick={(e) => { e.stopPropagation(); onQuickView(product); }} 
         className="relative h-64 overflow-hidden bg-gray-50 cursor-pointer shrink-0"
       >
         {!imageLoaded && (
@@ -114,7 +114,7 @@ export const EnhancedProductCard = ({
         )}
         
         <img 
-          src={images[0] || "https://via.placeholder.com/400x400?text=Nincs+Kép"} 
+          src={images[0] || PLACEHOLDER_IMAGE} 
           alt={product.name} 
           className={`
             w-full h-full object-contain p-4 transition-all duration-700
@@ -123,7 +123,7 @@ export const EnhancedProductCard = ({
           `}
           loading="lazy" 
           onLoad={() => setImageLoaded(true)}
-          onError={(e) => {e.target.src = 'https://via.placeholder.com/400x400?text=Nincs+Kép'}} 
+          onError={(e) => {e.target.src = PLACEHOLDER_IMAGE}} 
         />
         
         {images[1] && (
@@ -184,7 +184,7 @@ export const EnhancedProductCard = ({
         </div>
         
         <h3 
-          onClick={() => onQuickView(product)} 
+          onClick={(e) => { e.stopPropagation(); onQuickView(product); }} 
           className="text-lg font-bold text-gray-900 mb-2 line-clamp-2 leading-tight cursor-pointer hover:text-indigo-600 transition-colors" 
           title={product.name}
         >
@@ -211,7 +211,7 @@ export const EnhancedProductCard = ({
               </span>
             </div>
             <button 
-              onClick={() => onQuickView(product)} 
+              onClick={(e) => { e.stopPropagation(); onQuickView(product); }} 
               className="bg-gray-100 text-gray-900 p-2.5 rounded-full hover:bg-indigo-600 hover:text-white transition-all transform hover:scale-110 hover:rotate-90 shadow-sm"
               aria-label="Részletek"
             >

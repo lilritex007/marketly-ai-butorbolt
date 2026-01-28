@@ -37,9 +37,20 @@ app.use(cors({
 
 app.use(express.json());
 
-// Health check endpoint
+// Health check – DB elérhetőség is (Railway/monitoring)
 app.get('/health', (req, res) => {
-  res.json({ status: 'ok', timestamp: new Date().toISOString() });
+  try {
+    getStatistics(); // DB read – ha nincs DB, throw
+    res.json({ status: 'ok', db: 'ok', timestamp: new Date().toISOString() });
+  } catch (err) {
+    console.error('Health check DB error:', err);
+    res.status(503).json({
+      status: 'degraded',
+      db: 'error',
+      message: err.message,
+      timestamp: new Date().toISOString()
+    });
+  }
 });
 
 // ==================== PUBLIC API ====================
@@ -388,12 +399,24 @@ app.listen(PORT, () => {
   console.log('    PATCH  /api/admin/categories/:name - Toggle category');
   console.log('');
   
-  // Initial auto-sync
+  // Kezdeti auto-sync (nem blokkol, hiba nem dönti le a szervert)
   setTimeout(() => {
     console.log('🔄 Running initial auto-sync...');
     autoSync(60).catch(err => console.error('Initial sync error:', err));
   }, 2000);
 
+  // Opcionális időzített sync (pl. napi): SYNC_CRON_HOURS=24
+  const cronHours = process.env.SYNC_CRON_HOURS ? parseInt(process.env.SYNC_CRON_HOURS, 10) : 0;
+  if (cronHours > 0) {
+    const intervalMs = cronHours * 60 * 60 * 1000;
+    setInterval(() => {
+      console.log(`🕐 Scheduled sync (every ${cronHours}h)...`);
+      autoSync(0).catch(err => console.error('Scheduled sync error:', err));
+    }, intervalMs);
+    console.log(`📅 Scheduled sync every ${cronHours} hour(s)`);
+  }
+
+  // Opcionális export dist/products.json (backup/statikus másolat)
   setTimeout(async () => {
     try {
       const fs = await import('fs');

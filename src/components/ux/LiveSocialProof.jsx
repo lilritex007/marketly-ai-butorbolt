@@ -26,11 +26,11 @@ const LiveSocialProof = ({ currentProduct, recentPurchases = [] }) => {
     return () => clearInterval(interval);
   }, [currentProduct]);
 
-  // Show periodic notifications (ONLY when currentProduct is set)
+  // Show at most ONE notification per product view (after 5s), no repeated spam
   useEffect(() => {
-    // ✅ FIX: Only show notifications if currentProduct exists
     if (!currentProduct) {
       setShowNotification(false);
+      setCurrentNotification(null);
       return;
     }
 
@@ -58,29 +58,20 @@ const LiveSocialProof = ({ currentProduct, recentPurchases = [] }) => {
       }
     ];
 
-    const showRandomNotification = () => {
-      const random = notifications[Math.floor(Math.random() * notifications.length)];
-      setCurrentNotification(random);
+    const random = notifications[Math.floor(Math.random() * notifications.length)];
+    setCurrentNotification(random);
+
+    // Single notification 5s after viewing this product; no interval
+    const t = setTimeout(() => {
       setShowNotification(true);
+      setTimeout(() => setShowNotification(false), 5000);
+    }, 5000);
 
-      setTimeout(() => {
-        setShowNotification(false);
-      }, 5000); // Hide after 5s
-    };
-
-    // ✅ FIX: Show first notification after 5s (not 3s to avoid spam)
-    const initialTimeout = setTimeout(showRandomNotification, 5000);
-
-    // ✅ FIX: Then show every 20s (not 15s, less spam)
-    const interval = setInterval(showRandomNotification, 20000);
-
-    // ✅ CRITICAL: Cleanup intervals on unmount or currentProduct change
     return () => {
-      clearTimeout(initialTimeout);
-      clearInterval(interval);
-      setShowNotification(false); // Hide notification immediately
+      clearTimeout(t);
+      setShowNotification(false);
     };
-  }, [currentProduct]);
+  }, [currentProduct?.id]);
 
   return (
     <>

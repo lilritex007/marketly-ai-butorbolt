@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { X, ShoppingCart, Heart, Share2, ExternalLink, Sparkles } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import QuickAddToCart from './QuickAddToCart';
+import { PLACEHOLDER_IMAGE } from '../../utils/helpers';
 
 /**
  * ProductQuickPeek - Hover/click modal for quick product preview
@@ -54,17 +55,17 @@ const ProductQuickPeek = ({ product, isOpen, onClose, onAddToCart }) => {
             className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50"
           />
 
-          {/* Wrapper: always center modal on screen */}
-          <div className="fixed inset-0 flex items-center justify-center p-4 z-50 pointer-events-none">
-            {/* Modal */}
+          {/* Wrapper: always center modal on screen (safe area for mobile) */}
+          <div className="fixed inset-0 flex items-center justify-center p-4 z-50 pointer-events-none overflow-y-auto">
+            {/* Modal: centered, scrolls on small screens */}
             <motion.div
               initial={{ opacity: 0, scale: 0.9, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.9, y: 20 }}
               transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-              className="w-full max-w-4xl max-h-[90vh] pointer-events-auto"
+              className="w-full max-w-4xl max-h-[90vh] my-auto pointer-events-auto flex flex-col"
             >
-            <div className="bg-white rounded-2xl shadow-2xl overflow-hidden h-full md:h-auto max-h-[90vh] flex flex-col">
+            <div className="bg-white rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh] min-h-0">
               {/* Header */}
               <div className="flex items-center justify-between p-4 border-b border-gray-200 bg-gradient-to-r from-indigo-50 to-purple-50">
                 <div className="flex items-center gap-2">
@@ -79,14 +80,14 @@ const ProductQuickPeek = ({ product, isOpen, onClose, onAddToCart }) => {
                 </button>
               </div>
 
-              {/* Content */}
-              <div className="flex-1 overflow-y-auto">
+              {/* Content: scrollable, keeps modal centered */}
+              <div className="flex-1 min-h-0 overflow-y-auto">
                 <div className="grid md:grid-cols-2 gap-6 p-6">
                   {/* Left: Image */}
                   <div className="space-y-4">
                     <div className="relative aspect-square bg-gray-100 rounded-xl overflow-hidden group">
                       <img
-                        src={images[activeImage] || product.image || 'https://via.placeholder.com/400'}
+                        src={images[activeImage] || product.image || PLACEHOLDER_IMAGE}
                         alt={product.name}
                         onLoad={() => setImageLoaded(true)}
                         className={`
