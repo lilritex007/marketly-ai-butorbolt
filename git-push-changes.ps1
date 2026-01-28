@@ -10,7 +10,7 @@ Write-Host "Status:" -ForegroundColor Cyan
 git status
 
 Write-Host "`nCommitting..." -ForegroundColor Cyan
-git commit -m "AI shop: készlet megjelenítés, összes termék, főkategóriák, kizárt kategóriák"
+git commit -m "Sync: retry on ECONNRESET/socket hang up; AI shop készlet, kategóriák, kizárt list"
 
 if ($LASTEXITCODE -eq 0) {
     Write-Host "`nPushing to origin main..." -ForegroundColor Cyan

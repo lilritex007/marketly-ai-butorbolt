@@ -7,6 +7,41 @@ import { upsertProduct, upsertCategory } from './productService.js';
 let isSyncing = false;
 let syncPromise = null;
 
+const RETRYABLE_CODES = ['ECONNRESET', 'ETIMEDOUT', 'ECONNREFUSED', 'ENOTFOUND', 'EPIPE', 'ENETUNREACH'];
+const MAX_RETRIES = 4;
+const RETRY_DELAYS_MS = [5000, 15000, 45000, 90000]; // exponential backoff
+
+/**
+ * Fetch with retry on socket/network errors (ECONNRESET, socket hang up, etc.)
+ * Options: method, headers, body, timeoutMs (default 180000)
+ */
+async function fetchWithRetry(url, options = {}, retries = MAX_RETRIES) {
+  const timeoutMs = options.timeoutMs ?? 180000; // 3 min default
+  const { timeoutMs: _t, ...fetchOpts } = options;
+  for (let attempt = 0; attempt <= retries; attempt++) {
+    try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+      const res = await fetch(url, {
+        ...fetchOpts,
+        signal: controller.signal
+      });
+      clearTimeout(timeoutId);
+      return res;
+    } catch (err) {
+      const isRetryable = RETRYABLE_CODES.includes(err.code) ||
+        (err.message && (err.message.includes('socket hang up') || err.message.includes('aborted'))) ||
+        err.name === 'AbortError';
+      if (!isRetryable || attempt === retries) {
+        throw err;
+      }
+      const delay = RETRY_DELAYS_MS[Math.min(attempt, RETRY_DELAYS_MS.length - 1)];
+      console.warn(`   ⚠️  UNAS request failed (${err.code || err.message}), retry in ${delay / 1000}s (attempt ${attempt + 1}/${retries})...`);
+      await new Promise(resolve => setTimeout(resolve, delay));
+    }
+  }
+}
+
 /**
  * Sync products from UNAS API with category filtering
  */
@@ -54,13 +89,14 @@ export async function syncProductsFromUnas(options = {}) {
     <ApiKey>${apiKey}</ApiKey>
 </Params>`;
 
-    const loginResponse = await fetch('https://api.unas.eu/shop/login', {
+    const loginResponse = await fetchWithRetry('https://api.unas.eu/shop/login', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/xml; charset=UTF-8'
       },
-      body: loginXml
-    });
+      body: loginXml,
+      timeoutMs: 60000 // 1 min for login
+    }, MAX_RETRIES);
 
     if (!loginResponse.ok) {
       const errorText = await loginResponse.text();
@@ -123,7 +159,7 @@ export async function syncProductsFromUnas(options = {}) {
     console.log('💾 Saving to database batch-by-batch (memory efficient)');
     
     let offset = 0;
-    const batchSize = 1000;
+    const batchSize = 500; // smaller batches to reduce socket hang up / timeout
     let hasMore = true;
     let batchCount = 0;
     let totalFetched = 0;
@@ -181,30 +217,44 @@ export async function syncProductsFromUnas(options = {}) {
     <LimitStart>${offset}</LimitStart>
 </Params>`;
 
-      const response = await fetch('https://api.unas.eu/shop/getProduct', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/xml; charset=UTF-8',
-          'Authorization': `Bearer ${token}`
-        },
-        body: productXml,
-        signal: AbortSignal.timeout(120000) // 2 minute timeout per batch
-      });
+      let response;
+      let rawData;
+      for (let batchAttempt = 0; batchAttempt <= MAX_RETRIES; batchAttempt++) {
+        try {
+          response = await fetchWithRetry('https://api.unas.eu/shop/getProduct', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/xml; charset=UTF-8',
+              'Authorization': `Bearer ${token}`
+            },
+            body: productXml,
+            timeoutMs: 180000 // 3 min per batch
+          }, MAX_RETRIES);
+          rawData = await response.text();
+          break;
+        } catch (err) {
+          const isRetryable = RETRYABLE_CODES.includes(err.code) ||
+            (err.message && err.message.includes('socket hang up'));
+          if (!isRetryable || batchAttempt === MAX_RETRIES) throw err;
+          const delayMs = RETRY_DELAYS_MS[Math.min(batchAttempt, RETRY_DELAYS_MS.length - 1)];
+          console.warn(`   ⚠️  Batch failed (${err.code || err.message}), retry in ${delayMs / 1000}s (${batchAttempt + 1}/${MAX_RETRIES})...`);
+          await new Promise(resolve => setTimeout(resolve, delayMs));
+        }
+      }
 
       if (!response.ok) {
-        const errorText = await response.text();
-        console.error('UNAS API Error Response:', errorText.substring(0, 500));
+        console.error('UNAS API Error Response:', (rawData || '').substring(0, 500));
         
         // Check for rate limit
-        if (errorText.includes('Too much') || errorText.includes('banned')) {
+        if (rawData && (rawData.includes('Too much') || rawData.includes('banned'))) {
           console.error('⚠️  Rate limit reached. Stopping batch sync.');
           console.log(`✓ Processed ${totalFetched} products before rate limit`);
           break;
         }
         
         // Check for "end of range" - means we've fetched all products
-        if (errorText.includes('end of the range') || errorText.includes('end of range') || 
-            response.status === 404 || errorText.includes('No more products')) {
+        if (rawData && (rawData.includes('end of the range') || rawData.includes('end of range')) ||
+            response.status === 404 || (rawData && rawData.includes('No more products'))) {
           console.log('✅ Reached end of product range. All products fetched.');
           hasMore = false;
           break;
@@ -214,7 +264,6 @@ export async function syncProductsFromUnas(options = {}) {
       }
 
       const contentType = response.headers.get('content-type') || '';
-      const rawData = await response.text();
       
       let batchProducts = await parseUnasData(rawData, contentType);
       
@@ -251,10 +300,10 @@ export async function syncProductsFromUnas(options = {}) {
           hasMore = false;
         }
         
-        // Rate limit protection: wait 2 seconds between batches
+        // Rate limit / connection protection: wait 3 seconds between batches
         if (hasMore && batchProducts.length === batchSize) {
-          console.log('   ⏳ Waiting 2s (rate limit protection)...');
-          await new Promise(resolve => setTimeout(resolve, 2000));
+          console.log('   ⏳ Waiting 3s (rate limit protection)...');
+          await new Promise(resolve => setTimeout(resolve, 3000));
         }
         
         // Force garbage collection hint (if available)
