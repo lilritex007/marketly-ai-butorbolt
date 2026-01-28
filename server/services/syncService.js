@@ -159,7 +159,7 @@ export async function syncProductsFromUnas(options = {}) {
     console.log('💾 Saving to database batch-by-batch (memory efficient)');
     
     let offset = 0;
-    const batchSize = 500; // smaller batches to reduce socket hang up / timeout
+    const batchSize = 2000; // larger batches = fewer requests; retry handles occasional failures
     let hasMore = true;
     let batchCount = 0;
     let totalFetched = 0;
@@ -300,10 +300,10 @@ export async function syncProductsFromUnas(options = {}) {
           hasMore = false;
         }
         
-        // Rate limit / connection protection: wait 3 seconds between batches
+        // Rate limit protection: 2s between batches (fewer batches with 2k size)
         if (hasMore && batchProducts.length === batchSize) {
-          console.log('   ⏳ Waiting 3s (rate limit protection)...');
-          await new Promise(resolve => setTimeout(resolve, 3000));
+          console.log('   ⏳ Waiting 2s (rate limit protection)...');
+          await new Promise(resolve => setTimeout(resolve, 2000));
         }
         
         // Force garbage collection hint (if available)
