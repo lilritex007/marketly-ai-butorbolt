@@ -268,7 +268,11 @@ export async function syncProductsFromUnas(options = {}) {
       let batchProducts = await parseUnasData(rawData, contentType);
       
       if (batchProducts.length === 0) {
+        // Log the raw response to understand why no products were found
+        console.log('⚠️ Empty batch received. Raw response preview:');
+        console.log(rawData.substring(0, 500));
         console.log('✓ No more products, stopping...');
+        console.log(`📊 Final offset was: ${offset}, total fetched so far: ${totalFetched}`);
         hasMore = false;
       } else {
         console.log(`  ✓ Got ${batchProducts.length} products from UNAS`);
@@ -293,6 +297,12 @@ export async function syncProductsFromUnas(options = {}) {
         
         totalFetched += batchProducts.length;
         offset += batchSize;
+        
+        // Progress update every 10 batches
+        if (batchCount % 10 === 0) {
+          const estimatedProgress = Math.min(100, (totalFetched / 170000 * 100)).toFixed(1);
+          console.log(`📈 Progress: ~${estimatedProgress}% (${totalFetched.toLocaleString()} products fetched)`);
+        }
         
         // Safety limit
         if (totalFetched >= 200000) {

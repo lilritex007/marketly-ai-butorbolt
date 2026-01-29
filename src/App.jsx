@@ -62,7 +62,7 @@ const GOOGLE_API_KEY = import.meta.env.VITE_GOOGLE_API_KEY || "AIzaSyDZV-fAFVCvh
 const WEBSHOP_DOMAIN = "https://www.marketly.hu";
 const SHOP_ID = "81697"; 
 
-const INITIAL_PAGE_SIZE = 2000; // Products loaded from API per batch (lazy loading)
+const INITIAL_PAGE_SIZE = 50000; // Products loaded from API per batch (larger for better coverage)
 const DISPLAY_BATCH = 48; // Products rendered per "Tovább" click
 
 /* --- 2. SEGÉDFÜGGVÉNYEK --- */
@@ -1071,7 +1071,17 @@ const App = () => {
                 {/* Sticky products header: search + filters + sort */}
                 <div className="sticky top-20 z-40 bg-white/95 backdrop-blur-sm py-4 -mx-4 px-4 sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8 2xl:-mx-10 2xl:px-10 mb-6 shadow-sm">
                   <div className="flex flex-col md:flex-row justify-between items-end gap-4">
-                    <h2 className="text-2xl sm:text-3xl font-bold">Termékek {!isLoadingUnas && <span className="text-gray-400 text-lg sm:text-xl ml-2">({filteredAndSortedProducts.length})</span>}</h2>
+                    <div>
+                      <h2 className="text-2xl sm:text-3xl font-bold">Termékek</h2>
+                      {!isLoadingUnas && (
+                        <p className="text-sm text-gray-500 mt-1">
+                          <span className="font-semibold text-indigo-600">{filteredAndSortedProducts.length.toLocaleString('hu-HU')}</span> termék 
+                          {totalProductsCount > 0 && filteredAndSortedProducts.length !== totalProductsCount && (
+                            <span> (összes: <span className="font-semibold">{totalProductsCount.toLocaleString('hu-HU')}</span>)</span>
+                          )}
+                        </p>
+                      )}
+                    </div>
                     <div className="w-full md:w-auto flex flex-wrap items-center gap-3">
                       <div className="flex-1 md:flex-initial flex items-center gap-2 min-w-0">
                         <SmartSearch 
