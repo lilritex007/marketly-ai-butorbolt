@@ -50,7 +50,7 @@ import ARProductPreview from './components/ar/ARProductPreview';
 // Hooks
 import { useToast } from './hooks/useToast';
 import { useLocalStorage } from './hooks/index';
-import { useInfiniteScroll, InfiniteScrollSentinel } from './hooks/useInfiniteScroll.jsx';
+// useInfiniteScroll removed - using manual "Load More" button instead
 
 // Utils
 import { getOptimizedImageProps } from './utils/imageOptimizer';
@@ -63,7 +63,7 @@ const WEBSHOP_DOMAIN = "https://www.marketly.hu";
 const SHOP_ID = "81697"; 
 
 const INITIAL_PAGE_SIZE = 10000; // Load more products initially for better search/filter
-const DISPLAY_BATCH = 48;
+const DISPLAY_BATCH = 48; // Products shown per "load more" click
 
 /* --- 2. SEGÉDFÜGGVÉNYEK --- */
 
@@ -749,7 +749,6 @@ const App = () => {
   const [hasMoreProducts, setHasMoreProducts] = useState(true);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [visibleCount, setVisibleCount] = useState(DISPLAY_BATCH);
-  const loadMoreSentinelRef = useRef(null);
   const visibleCountRef = useRef(visibleCount);
   const filteredLengthRef = useRef(0);
   const hasMoreProductsRef = useRef(hasMoreProducts);
@@ -914,25 +913,19 @@ const App = () => {
     if (productsSection) productsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }, [searchQuery, categoryFilter, sortOption, advancedFilters]);
 
-  // Infinite scroll: when sentinel is visible, show more items or load from API
-  useEffect(() => {
-    const el = loadMoreSentinelRef.current;
-    if (!el || !(el instanceof Element)) return;
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (!entry?.isIntersecting) return;
-        const v = visibleCountRef.current;
-        const len = filteredLengthRef.current;
-        if (v < len) {
-          setVisibleCount(prev => Math.min(prev + DISPLAY_BATCH, len));
-          return;
-        }
-        if (hasMoreProductsRef.current && !isLoadingMoreRef.current) loadMoreProducts();
-      },
-      { rootMargin: '200px', threshold: 0.1 }
-    );
-    observer.observe(el);
-    return () => observer.disconnect();
+  // Manual "Load More" button handler - shows more products or fetches from API
+  const handleLoadMore = useCallback(() => {
+    const v = visibleCountRef.current;
+    const len = filteredLengthRef.current;
+    // First show more from already loaded products
+    if (v < len) {
+      setVisibleCount(prev => Math.min(prev + DISPLAY_BATCH, len));
+      return;
+    }
+    // If all loaded products are shown, fetch more from API
+    if (hasMoreProductsRef.current && !isLoadingMoreRef.current) {
+      loadMoreProducts();
+    }
   }, [loadMoreProducts]);
 
   const categories = useMemo(() => {
@@ -1180,17 +1173,29 @@ const App = () => {
                   </div>
                 )}
                 
-                {/* Infinite scroll: load more when sentinel visible */}
+                {/* Load More Button */}
                 {!isLoadingUnas && !unasError && displayedProducts.length > 0 && (
-                  <div ref={loadMoreSentinelRef} className="py-8 flex justify-center min-h-[80px]">
-                    {isLoadingMore && (
+                  <div className="py-8 flex flex-col items-center gap-4">
+                    {isLoadingMore ? (
                       <div className="flex flex-col items-center gap-2">
                         <div className="w-8 h-8 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin" />
                         <span className="text-sm text-gray-500 font-medium">Több termék betöltése...</span>
                       </div>
-                    )}
-                    {!isLoadingMore && !hasMoreToShow && filteredAndSortedProducts.length > 0 && (
-                      <span className="text-sm text-gray-400">✓ Minden termék betöltve</span>
+                    ) : hasMoreToShow ? (
+                      <button
+                        onClick={handleLoadMore}
+                        className="px-8 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-semibold rounded-xl
+                                   hover:from-indigo-700 hover:to-purple-700 transition-all duration-300
+                                   shadow-lg hover:shadow-xl transform hover:-translate-y-0.5
+                                   flex items-center gap-2"
+                      >
+                        <span>Tovább</span>
+                        <span className="text-sm opacity-80">
+                          ({displayedProducts.length} / {filteredAndSortedProducts.length > 0 ? filteredAndSortedProducts.length : totalProductsCount})
+                        </span>
+                      </button>
+                    ) : (
+                      <span className="text-sm text-gray-400">✓ Minden termék betöltve ({displayedProducts.length} db)</span>
                     )}
                   </div>
                 )}
