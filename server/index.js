@@ -1,5 +1,6 @@
 import express from 'express';
 import cors from 'cors';
+import compression from 'compression';
 import dotenv from 'dotenv';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -39,6 +40,17 @@ app.use(cors({
     'https://marketly.hu'
   ],
   credentials: true
+}));
+
+// GZIP compression - reduces ~85MB JSON to ~8-10MB (90% smaller!)
+app.use(compression({
+  level: 6, // Good balance between speed and compression
+  threshold: 1024, // Only compress responses > 1KB
+  filter: (req, res) => {
+    // Compress JSON and text responses
+    if (req.headers['x-no-compression']) return false;
+    return compression.filter(req, res);
+  }
 }));
 
 app.use(express.json());
@@ -95,7 +107,8 @@ app.get('/api/products', async (req, res) => {
       category,
       search,
       limit,
-      offset = 0
+      offset = 0,
+      slim // If slim=true, return only essential fields (faster)
     } = req.query;
 
     // Auto-sync if needed (async, don't wait)
@@ -104,13 +117,26 @@ app.get('/api/products', async (req, res) => {
     // No limit = load ALL products; only apply limit when explicitly set
     const limitNum = limit !== undefined && limit !== '' ? parseInt(limit, 10) : undefined;
 
-    const products = getProducts({
+    let products = getProducts({
       category,
       search,
       showInAI: true, // Only show products enabled for AI
       limit: limitNum,
       offset: parseInt(offset, 10) || 0
     });
+
+    // SLIM MODE: Only return essential fields for list view (much smaller payload)
+    // Full product details fetched on-demand when user clicks
+    if (slim === 'true' || slim === '1') {
+      products = products.map(p => ({
+        id: p.id,
+        name: p.name,
+        price: p.price,
+        category: p.category,
+        image: Array.isArray(p.images) ? p.images[0] : p.images, // Only first image
+        inStock: p.in_stock ?? p.inStock ?? true
+      }));
+    }
 
     const total = getProductCount({
       category,

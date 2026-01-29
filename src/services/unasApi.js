@@ -36,6 +36,7 @@ export const fetchUnasProducts = async (filters = {}) => {
     if (filters.search) params.append('search', filters.search);
     if (filters.limit) params.append('limit', filters.limit);
     if (filters.offset) params.append('offset', filters.offset);
+    if (filters.slim) params.append('slim', 'true'); // Slim mode: only essential fields
     const url = `${API_BASE}/products${params.toString() ? '?' + params.toString() : ''}`;
 
     const res = await fetch(url, { method: 'GET' });
