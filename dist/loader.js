@@ -1,24 +1,28 @@
 /**
  * Marketly AI Shop Loader
- * Dinamikusan betölti a React appot jsDelivr CDN-ről.
+ * Dinamikusan betölti a React appot a Railway backend-ről.
+ * FIX URL - minden deploy után azonnal él, nincs CDN cache!
  */
 (function() {
   'use strict';
 
   console.log('🚀 AI Shop Loader starting...');
 
+  // Railway backend URL - ez fix, deploy után azonnal frissül
+  var BACKEND_URL = 'https://marketly-ai-butorbolt-production.up.railway.app';
+
   window.MARKETLY_CONFIG = {
-    apiBase: 'https://marketly-ai-butorbolt-production.up.railway.app/api',
+    apiBase: BACKEND_URL + '/api',
     productBaseUrl: '/termek',
     cartUrl: '/cart',
     checkoutUrl: '/checkout',
     mode: 'unas-integrated',
-    cdnBase: 'https://cdn.jsdelivr.net/gh/lilritex007/marketly-ai-butorbolt@main/dist',
+    distBase: BACKEND_URL + '/dist', // Frontend fájlok a backend-ről
     features: { sessionSharing: false, stockCheck: false, expressCheckout: false }
   };
   console.log('✅ MARKETLY_CONFIG initialized');
 
-  var CDN_BASE = window.MARKETLY_CONFIG.cdnBase;
+  var DIST_BASE = window.MARKETLY_CONFIG.distBase;
 
   function ensureRoot() {
     var root = document.getElementById('root');
@@ -53,50 +57,34 @@
   function loadReactApp() {
     ensureRoot();
 
-    fetch(CDN_BASE + '/version.json?t=' + Date.now())
-      .then(function(r) { return r.json(); })
-      .then(function(data) {
-        var ver = (data && data.buildTime) || Date.now();
-        
-        var link = document.createElement('link');
-        link.rel = 'stylesheet';
-        link.href = CDN_BASE + '/assets/index.css?v=' + ver;
-        link.crossOrigin = 'anonymous';
-        document.head.appendChild(link);
+    // Cache bust with timestamp to always get fresh files
+    var cacheBust = Date.now();
 
-        var vendorPreload = document.createElement('link');
-        vendorPreload.rel = 'modulepreload';
-        vendorPreload.href = CDN_BASE + '/assets/vendor.js?v=' + ver;
-        vendorPreload.crossOrigin = 'anonymous';
-        document.head.appendChild(vendorPreload);
+    // Load CSS
+    var link = document.createElement('link');
+    link.rel = 'stylesheet';
+    link.href = DIST_BASE + '/assets/index.css?t=' + cacheBust;
+    document.head.appendChild(link);
 
-        var script = document.createElement('script');
-        script.type = 'module';
-        script.crossOrigin = 'anonymous';
-        script.src = CDN_BASE + '/assets/index.js?v=' + ver;
-        script.onload = function() {
-          console.log('✅ React app loaded');
-          hideLoadingOverlay();
-        };
-        script.onerror = function() {
-          console.error('❌ Failed to load React app');
-          showLoadError();
-        };
-        document.body.appendChild(script);
-      })
-      .catch(function() {
-        var ver = Date.now();
-        var link = document.createElement('link');
-        link.rel = 'stylesheet';
-        link.href = CDN_BASE + '/assets/index.css?v=' + ver;
-        document.head.appendChild(link);
-        var script = document.createElement('script');
-        script.type = 'module';
-        script.src = CDN_BASE + '/assets/index.js?v=' + ver;
-        script.onload = hideLoadingOverlay;
-        script.onerror = showLoadError;
-        document.body.appendChild(script);
-      });
+    // Preload vendor bundle
+    var vendorPreload = document.createElement('link');
+    vendorPreload.rel = 'modulepreload';
+    vendorPreload.href = DIST_BASE + '/assets/vendor.js?t=' + cacheBust;
+    document.head.appendChild(vendorPreload);
+
+    // Load main React bundle
+    var script = document.createElement('script');
+    script.type = 'module';
+    script.src = DIST_BASE + '/assets/index.js?t=' + cacheBust;
+    script.onload = function() {
+      console.log('✅ React app loaded');
+      hideLoadingOverlay();
+    };
+    script.onerror = function() {
+      console.error('❌ Failed to load React app');
+      showLoadError();
+    };
+    document.body.appendChild(script);
   }
 
   if (document.readyState === 'loading') {

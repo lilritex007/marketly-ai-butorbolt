@@ -1,7 +1,13 @@
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
+import path from 'path';
+import { fileURLToPath } from 'url';
 import './database/db.js'; // Initialize database
+
+// ES module __dirname equivalent
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 import {
   getProducts,
   getProductById,
@@ -36,6 +42,30 @@ app.use(cors({
 }));
 
 app.use(express.json());
+
+// Serve frontend static files from /dist folder (no caching for immediate updates)
+const distPath = path.join(__dirname, '..', 'dist');
+app.use('/dist', express.static(distPath, {
+  maxAge: 0, // No caching
+  etag: false,
+  setHeaders: (res) => {
+    res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+    res.setHeader('Pragma', 'no-cache');
+    res.setHeader('Expires', '0');
+  }
+}));
+
+// Serve loader.js from /public folder (the script UNAS loads)
+const publicPath = path.join(__dirname, '..', 'public');
+app.use('/public', express.static(publicPath, {
+  maxAge: 0,
+  etag: false,
+  setHeaders: (res) => {
+    res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+    res.setHeader('Pragma', 'no-cache');
+    res.setHeader('Expires', '0');
+  }
+}));
 
 // Health check – DB elérhetőség is (Railway/monitoring)
 app.get('/health', (req, res) => {
