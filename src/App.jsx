@@ -1087,42 +1087,42 @@ const App = () => {
             />
             <Features />
             
-            <div id="products-section" className="container-app py-10">
-                {/* Sticky products header: search + filters + sort */}
-                <div className="sticky top-20 z-40 bg-white/95 backdrop-blur-sm py-4 -mx-4 px-4 sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8 2xl:-mx-10 2xl:px-10 mb-6 shadow-sm">
-                  <div className="flex flex-col md:flex-row justify-between items-end gap-4">
-                    <div>
-                      <h2 className="text-2xl sm:text-3xl font-bold">Termékek</h2>
+            <section id="products-section" className="container-app section-padding">
+                {/* Sticky products header */}
+                <div className="sticky top-16 sm:top-20 z-40 -mx-3 sm:-mx-4 lg:-mx-6 px-3 sm:px-4 lg:px-6 py-3 sm:py-4 mb-4 sm:mb-6 bg-white/95 backdrop-blur-md border-b border-gray-100 shadow-sm">
+                  <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-4">
+                    {/* Title & Count */}
+                    <div className="flex items-baseline gap-3">
+                      <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900">Termékek</h2>
                       {!isLoadingUnas && (
-                        <p className="mt-1 text-sm text-gray-500">
-                          <span className="font-semibold text-indigo-600">{products.length.toLocaleString('hu-HU')}</span> termék
-                        </p>
+                        <span className="text-sm sm:text-base text-gray-500">
+                          <span className="font-semibold text-indigo-600">{products.length.toLocaleString('hu-HU')}</span> db
+                        </span>
                       )}
                     </div>
-                    <div className="w-full md:w-auto flex flex-wrap items-center gap-3">
-                      <div className="flex-1 md:flex-initial flex items-center gap-2 min-w-0">
+                    
+                    {/* Search & Filters */}
+                    <div className="w-full sm:w-auto flex items-center gap-2 sm:gap-3">
+                      <div className="flex-1 sm:flex-initial sm:w-64 lg:w-80">
                         <SmartSearch 
                           products={products}
                           onSearch={handleServerSearch}
                           onSelectProduct={handleProductView}
                         />
-{/* VoiceSearch removed */}
                       </div>
-                      <div className="relative">
-                        <AdvancedFilters
-                          products={products}
-                          onFilterChange={setAdvancedFilters}
-                          initialFilters={advancedFilters}
-                        />
-                      </div>
+                      <AdvancedFilters
+                        products={products}
+                        onFilterChange={setAdvancedFilters}
+                        initialFilters={advancedFilters}
+                      />
                       <select 
                         onChange={(e) => setSortOption(e.target.value)} 
-                        className="px-4 py-3 min-h-[44px] border-2 border-gray-200 rounded-2xl focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 outline-none transition-all"
+                        className="hidden sm:block px-3 lg:px-4 py-2.5 min-h-[44px] text-sm border-2 border-gray-200 rounded-xl bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 outline-none transition-all cursor-pointer"
                         aria-label="Rendezés"
                       >
                         <option value="default">Rendezés</option>
-                        <option value="price-asc">Ár ↑</option>
-                        <option value="price-desc">Ár ↓</option>
+                        <option value="price-asc">Ár: alacsony → magas</option>
+                        <option value="price-desc">Ár: magas → alacsony</option>
                       </select>
                     </div>
                   </div>
@@ -1143,10 +1143,13 @@ const App = () => {
 
                 {/* Loading State */}
                 {isLoadingUnas && (
-                  <div className="space-y-4">
-                    <p className="text-sm text-gray-500 text-center font-medium">Termékek betöltése...</p>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-4 sm:gap-6">
-                      {[...Array(8)].map((_, i) => (
+                  <div className="space-y-6">
+                    <div className="flex items-center justify-center gap-3">
+                      <div className="w-6 h-6 border-3 border-indigo-600 border-t-transparent rounded-full animate-spin" />
+                      <p className="text-sm text-gray-500 font-medium">Termékek betöltése...</p>
+                    </div>
+                    <div className="product-grid">
+                      {[...Array(12)].map((_, i) => (
                         <ProductCardSkeleton key={`skeleton-${i}`} />
                       ))}
                     </div>
@@ -1178,55 +1181,48 @@ const App = () => {
                   />
                 )}
 
-                {/* Products Grid */}
+                {/* Products Grid - Responsive */}
                 {!isLoadingUnas && displayedProducts.length > 0 && (
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-4 sm:gap-6">
-                      {displayedProducts.map(product => (
-                          <div 
-                            key={product.id}
-                            onClick={() => setQuickPeekProduct(product)}
-                            className="cursor-pointer group"
-                          >
-                            <EnhancedProductCard 
-                              product={product} 
-                              onToggleWishlist={toggleWishlist} 
-                              isWishlisted={wishlist.includes(product.id)} 
-                              onQuickView={handleProductView}
-                              isInComparison={comparison.isInComparison(product.id)}
-                              onToggleComparison={handleToggleComparison}
-                            />
-                          </div>
-                      ))}
+                  <div className="product-grid">
+                    {displayedProducts.map(product => (
+                      <EnhancedProductCard 
+                        key={product.id}
+                        product={product} 
+                        onToggleWishlist={toggleWishlist} 
+                        isWishlisted={wishlist.includes(product.id)} 
+                        onQuickView={handleProductView}
+                      />
+                    ))}
                   </div>
                 )}
                 
                 {/* Load More Button */}
                 {!isLoadingUnas && !unasError && displayedProducts.length > 0 && (
-                  <div className="py-8 flex flex-col items-center gap-4">
-                    {isLoadingMore ? (
-                      <div className="flex flex-col items-center gap-2">
-                        <div className="w-8 h-8 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin" />
-                        <span className="text-sm text-gray-500 font-medium">Több termék betöltése...</span>
-                      </div>
-                    ) : hasMoreToShow ? (
+                  <div className="py-8 sm:py-12 flex flex-col items-center gap-4">
+                    {hasMoreToShow ? (
                       <button
                         onClick={handleLoadMore}
-                        className="px-8 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-semibold rounded-xl
+                        className="group px-6 sm:px-8 py-3 sm:py-4 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-bold rounded-2xl
                                    hover:from-indigo-700 hover:to-purple-700 transition-all duration-300
-                                   shadow-lg hover:shadow-xl transform hover:-translate-y-0.5
-                                   flex items-center gap-2"
+                                   shadow-xl hover:shadow-2xl transform hover:-translate-y-1 active:scale-95
+                                   flex items-center gap-3 text-sm sm:text-base"
                       >
-                        <span>Tovább</span>
-                        <span className="text-sm opacity-80">
-                          ({displayedProducts.length} / {filteredAndSortedProducts.length > 0 ? filteredAndSortedProducts.length : totalProductsCount})
+                        <span>Több termék</span>
+                        <span className="px-2.5 py-1 bg-white/20 rounded-lg text-xs sm:text-sm">
+                          {displayedProducts.length.toLocaleString('hu-HU')} / {filteredAndSortedProducts.length.toLocaleString('hu-HU')}
                         </span>
                       </button>
                     ) : (
-                      <span className="text-sm text-gray-400">✓ Minden termék betöltve ({displayedProducts.length} db)</span>
+                      <div className="flex items-center gap-2 text-sm text-gray-400">
+                        <svg className="w-5 h-5 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                        </svg>
+                        <span>Minden termék betöltve ({displayedProducts.length.toLocaleString('hu-HU')} db)</span>
+                      </div>
                     )}
                   </div>
                 )}
-            </div>
+            </section>
             
             {/* Recently Viewed Products */}
             <RecentlyViewed

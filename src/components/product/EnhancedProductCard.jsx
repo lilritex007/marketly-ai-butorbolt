@@ -1,9 +1,12 @@
 import React, { useState } from 'react';
-import { Heart, Eye, Plus, ShoppingBag, Share2, ArrowLeftRight } from 'lucide-react';
-import { AIBadge, StockBadge, NewBadge, TrendingBadge, DiscountBadge } from '../ui/Badge';
+import { Heart, Eye, ShoppingBag, Share2 } from 'lucide-react';
+import { StockBadge, NewBadge, DiscountBadge } from '../ui/Badge';
+
+// Placeholder image
+const PLACEHOLDER_IMAGE = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="400" height="400" viewBox="0 0 400 400"%3E%3Crect fill="%23f3f4f6" width="400" height="400"/%3E%3Ctext fill="%239ca3af" font-family="sans-serif" font-size="14" x="50%25" y="50%25" text-anchor="middle" dy=".3em"%3ENo Image%3C/text%3E%3C/svg%3E';
 
 /**
- * Enhanced Product Card with animations and badges
+ * Enhanced Product Card - Responsive & Beautiful
  */
 export const EnhancedProductCard = ({ 
   product, 
@@ -11,13 +14,13 @@ export const EnhancedProductCard = ({
   isWishlisted, 
   onQuickView,
   onAddToCart,
-  showBadges = true,
-  isInComparison = false,
-  onToggleComparison
+  showBadges = true
 }) => {
   const [isHovered, setIsHovered] = useState(false);
   const [imageLoaded, setImageLoaded] = useState(false);
+  const [imageError, setImageError] = useState(false);
   const images = product.images || [];
+  const mainImage = images[0] || PLACEHOLDER_IMAGE;
 
   // Determine if product is new (added in last 7 days)
   const isNew = product.createdAt && 
@@ -29,134 +32,95 @@ export const EnhancedProductCard = ({
     : 0;
 
   const displayPrice = product.salePrice || product.price;
+  const inStock = product.inStock ?? product.in_stock ?? true;
+
+  const formatPrice = (price) => {
+    return new Intl.NumberFormat('hu-HU', { 
+      style: 'currency', 
+      currency: 'HUF', 
+      maximumFractionDigits: 0 
+    }).format(price);
+  };
 
   return (
-    <div 
-      className="group relative bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-2xl transition-all duration-500 border border-gray-100 h-full flex flex-col transform hover:-translate-y-2"
+    <article 
+      className="group relative bg-white rounded-2xl lg:rounded-3xl overflow-hidden shadow-sm hover:shadow-2xl transition-all duration-500 border border-gray-100/80 h-full flex flex-col"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      {/* Badges */}
-      {showBadges && (
-        <div className="absolute top-3 left-3 z-20 flex flex-col gap-2">
+      {/* Badges - Top Left */}
+      {showBadges && (isNew || discount > 0) && (
+        <div className="absolute top-2 sm:top-3 left-2 sm:left-3 z-20 flex flex-col gap-1.5">
           {isNew && <NewBadge />}
           {discount > 0 && <DiscountBadge percent={discount} />}
-          {product.trending && <TrendingBadge />}
-          {product.aiRecommended && <AIBadge size="sm" animate />}
         </div>
       )}
 
-      {/* Action buttons */}
-      <div className="absolute top-3 right-3 z-20 flex flex-col gap-2">
-        <button 
-          onClick={(e) => { 
-            e.stopPropagation(); 
-            onToggleWishlist(product.id); 
-          }} 
-          className={`
-            p-2.5 min-h-[44px] min-w-[44px] flex items-center justify-center rounded-full shadow-lg backdrop-blur-sm transition-all transform 
-            ${isWishlisted 
-              ? 'bg-red-500 text-white scale-110' 
-              : 'bg-white/90 text-gray-600 hover:bg-red-50 hover:text-red-500 hover:scale-110'
-            }
-          `}
-          aria-label={isWishlisted ? 'Eltávolítás a kívánságlistáról' : 'Hozzáadás kívánságlistához'}
-        >
-          <Heart className={`w-4 h-4 ${isWishlisted ? 'fill-current' : ''} transition-transform ${isWishlisted ? 'animate-ping-once' : ''}`} />
-        </button>
-        
-        {onToggleComparison && (
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              onToggleComparison(product);
-            }}
-            className={`
-              p-2.5 min-h-[44px] min-w-[44px] flex items-center justify-center rounded-full shadow-lg backdrop-blur-sm transition-all transform hover:scale-110
-              ${isInComparison
-                ? 'bg-indigo-500 text-white'
-                : 'bg-white/90 text-gray-600 hover:bg-indigo-50 hover:text-indigo-600'
-              }
-            `}
-            aria-label={isInComparison ? 'Eltávolítás az összehasonlításból' : 'Hozzáadás az összehasonlításhoz'}
-          >
-            <ArrowLeftRight className="w-4 h-4" />
-          </button>
-        )}
-        
-        {isHovered && (
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              navigator.share?.({
-                title: product.name,
-                text: `Nézd meg: ${product.name}`,
-                url: product.link
-              });
-            }}
-            className="p-2.5 min-h-[44px] min-w-[44px] flex items-center justify-center rounded-full bg-white/90 text-gray-600 hover:bg-indigo-50 hover:text-indigo-600 shadow-lg backdrop-blur-sm transition-all transform hover:scale-110 animate-slide-in-down"
-            aria-label="Megosztás"
-          >
-            <Share2 className="w-4 h-4" />
-          </button>
-        )}
-      </div>
-
-      {/* Image section */}
-      <div 
-        onClick={(e) => { e.stopPropagation(); onQuickView(product); }} 
-        className="relative h-64 overflow-hidden bg-gray-50 cursor-pointer shrink-0"
+      {/* Wishlist Button - Top Right */}
+      <button 
+        onClick={(e) => { 
+          e.stopPropagation(); 
+          onToggleWishlist?.(product.id); 
+        }} 
+        className={`
+          absolute top-2 sm:top-3 right-2 sm:right-3 z-20
+          w-9 h-9 sm:w-10 sm:h-10 flex items-center justify-center 
+          rounded-full shadow-lg backdrop-blur-sm transition-all duration-300
+          ${isWishlisted 
+            ? 'bg-red-500 text-white scale-110' 
+            : 'bg-white/90 text-gray-500 hover:bg-red-50 hover:text-red-500 hover:scale-110'
+          }
+        `}
+        aria-label={isWishlisted ? 'Eltávolítás' : 'Kedvencekhez'}
       >
-        {!imageLoaded && (
-          <div className="absolute inset-0 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 animate-pulse" />
+        <Heart className={`w-4 h-4 sm:w-5 sm:h-5 ${isWishlisted ? 'fill-current' : ''}`} />
+      </button>
+
+      {/* Image Section */}
+      <div 
+        onClick={() => onQuickView?.(product)} 
+        className="relative aspect-square overflow-hidden bg-gray-50 cursor-pointer"
+      >
+        {/* Loading skeleton */}
+        {!imageLoaded && !imageError && (
+          <div className="absolute inset-0 bg-gradient-to-r from-gray-100 via-gray-200 to-gray-100 animate-pulse" />
         )}
         
+        {/* Main image */}
         <img 
-          src={images[0] || PLACEHOLDER_IMAGE} 
+          src={imageError ? PLACEHOLDER_IMAGE : mainImage}
           alt={product.name} 
           className={`
-            w-full h-full object-contain p-4 transition-all duration-700
+            w-full h-full object-contain p-3 sm:p-4 transition-all duration-500
             ${imageLoaded ? 'opacity-100' : 'opacity-0'}
-            ${isHovered && images[1] ? 'opacity-0 scale-105' : 'scale-100'}
+            group-hover:scale-105
           `}
-          loading="lazy" 
+          loading="lazy"
           onLoad={() => setImageLoaded(true)}
-          onError={(e) => {e.target.src = PLACEHOLDER_IMAGE}} 
+          onError={() => { setImageError(true); setImageLoaded(true); }}
         />
         
-        {images[1] && (
-          <img 
-            src={images[1]} 
-            alt={product.name + " alt"} 
-            className={`
-              absolute inset-0 w-full h-full object-contain p-4 transition-all duration-700
-              ${isHovered ? 'opacity-100 scale-105' : 'opacity-0 scale-100'}
-            `}
-            loading="lazy"
-            onError={(e) => {e.target.style.display='none'}}
-          />
-        )}
-        
-        {/* Stock label */}
-        <div className="absolute bottom-3 left-3">
-          <StockBadge inStock={product.inStock ?? product.in_stock} count={product.stockCount} />
+        {/* Stock badge */}
+        <div className="absolute bottom-2 sm:bottom-3 left-2 sm:left-3">
+          <StockBadge inStock={inStock} />
         </div>
         
-        {/* Hover overlay with quick view */}
+        {/* Hover overlay - Desktop only */}
         <div className={`
-          absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent
-          flex items-end justify-center pb-6 transition-opacity duration-300
+          hidden sm:flex absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent
+          items-end justify-center pb-4 sm:pb-6 transition-opacity duration-300
           ${isHovered ? 'opacity-100' : 'opacity-0'}
         `}>
           <div className="flex gap-2">
             <button
               onClick={(e) => {
                 e.stopPropagation();
-                onQuickView(product);
+                onQuickView?.(product);
               }}
-              className="bg-white text-gray-900 px-4 py-2 rounded-full text-sm font-bold shadow-lg transform translate-y-4 group-hover:translate-y-0 transition-transform flex items-center gap-2 hover:bg-gray-100"
+              className="bg-white text-gray-900 px-3 sm:px-4 py-2 rounded-full text-xs sm:text-sm font-semibold shadow-lg transform translate-y-4 group-hover:translate-y-0 transition-all duration-300 flex items-center gap-1.5 hover:bg-gray-100"
             >
-              <Eye className="w-4 h-4" /> Gyorsnézet
+              <Eye className="w-3.5 h-3.5 sm:w-4 sm:h-4" /> 
+              <span>Megnézem</span>
             </button>
             {onAddToCart && (
               <button
@@ -164,7 +128,8 @@ export const EnhancedProductCard = ({
                   e.stopPropagation();
                   onAddToCart(product);
                 }}
-                className="bg-indigo-600 text-white p-2 rounded-full shadow-lg transform translate-y-4 group-hover:translate-y-0 transition-transform hover:bg-indigo-700"
+                className="bg-indigo-600 text-white p-2.5 rounded-full shadow-lg transform translate-y-4 group-hover:translate-y-0 transition-all duration-300 hover:bg-indigo-700"
+                aria-label="Kosárba"
               >
                 <ShoppingBag className="w-4 h-4" />
               </button>
@@ -173,77 +138,52 @@ export const EnhancedProductCard = ({
         </div>
       </div>
 
-      {/* Content section */}
-      <div className="p-5 flex flex-col flex-1">
-        <div className="mb-2">
-          <span className="text-xs font-bold text-gray-500 uppercase tracking-wide">
-            {product.category}
-          </span>
-        </div>
+      {/* Content Section */}
+      <div className="p-3 sm:p-4 flex flex-col flex-1">
+        {/* Category */}
+        <span className="text-[10px] sm:text-xs font-semibold text-indigo-600 uppercase tracking-wider mb-1">
+          {product.category}
+        </span>
         
+        {/* Product Name */}
         <h3 
-          onClick={(e) => { e.stopPropagation(); onQuickView(product); }} 
-          className="text-lg font-bold text-gray-900 mb-2 line-clamp-2 leading-tight cursor-pointer hover:text-indigo-600 transition-colors" 
+          onClick={() => onQuickView?.(product)} 
+          className="text-sm sm:text-base font-bold text-gray-900 line-clamp-2 leading-snug cursor-pointer hover:text-indigo-600 transition-colors mb-2 sm:mb-3" 
           title={product.name}
         >
           {product.name}
         </h3>
         
-        {product.params && (
-          <p className="text-xs text-gray-500 line-clamp-1 mb-3">
-            {product.params.split(',')[0]?.trim()}
-          </p>
-        )}
-        
-        {/* Price section */}
-        <div className="mt-auto pt-3 border-t border-gray-100">
-          <div className="flex justify-between items-center">
-            <div>
+        {/* Price Section */}
+        <div className="mt-auto pt-2 sm:pt-3 border-t border-gray-100">
+          <div className="flex justify-between items-end gap-2">
+            <div className="min-w-0">
               {discount > 0 && (
-                <span className="text-sm text-gray-400 line-through block">
-                  {new Intl.NumberFormat('hu-HU', { style: 'currency', currency: 'HUF', maximumFractionDigits: 0 }).format(product.price)}
+                <span className="text-xs text-gray-400 line-through block truncate">
+                  {formatPrice(product.price)}
                 </span>
               )}
-              <span className={`text-xl font-extrabold ${discount > 0 ? 'text-red-600' : 'text-gray-900'}`}>
-                {new Intl.NumberFormat('hu-HU', { style: 'currency', currency: 'HUF', maximumFractionDigits: 0 }).format(displayPrice)}
+              <span className={`text-base sm:text-lg lg:text-xl font-extrabold ${discount > 0 ? 'text-red-600' : 'text-gray-900'}`}>
+                {formatPrice(displayPrice)}
               </span>
             </div>
+            
+            {/* Quick View Button - Mobile friendly */}
             <button 
-              onClick={(e) => { e.stopPropagation(); onQuickView(product); }} 
-              className="bg-gray-100 text-gray-900 p-2.5 rounded-full hover:bg-indigo-600 hover:text-white transition-all transform hover:scale-110 hover:rotate-90 shadow-sm"
+              onClick={(e) => { 
+                e.stopPropagation(); 
+                onQuickView?.(product); 
+              }} 
+              className="shrink-0 w-9 h-9 sm:w-10 sm:h-10 flex items-center justify-center bg-gray-100 text-gray-700 rounded-full hover:bg-indigo-600 hover:text-white transition-all shadow-sm"
               aria-label="Részletek"
             >
-              <Plus className="w-5 h-5" />
+              <Eye className="w-4 h-4 sm:w-5 sm:h-5" />
             </button>
           </div>
         </div>
       </div>
-
-      <style>
-        {`
-          @keyframes ping-once {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.2); }
-            100% { transform: scale(1); }
-          }
-          @keyframes slide-in-down {
-            from {
-              opacity: 0;
-              transform: translateY(-10px);
-            }
-            to {
-              opacity: 1;
-              transform: translateY(0);
-            }
-          }
-          .animate-ping-once {
-            animation: ping-once 0.5s ease-out;
-          }
-          .animate-slide-in-down {
-            animation: slide-in-down 0.3s ease-out;
-          }
-        `}
-      </style>
-    </div>
+    </article>
   );
 };
+
+export default EnhancedProductCard;

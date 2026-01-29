@@ -1,25 +1,24 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Search, Sparkles, TrendingUp, Clock, X } from 'lucide-react';
 import { useDebounce } from '../../hooks';
-import { PLACEHOLDER_IMAGE } from '../../utils/helpers';
 
+const PLACEHOLDER_IMAGE = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"%3E%3Crect fill="%23f3f4f6" width="100" height="100"/%3E%3C/svg%3E';
 const GOOGLE_API_KEY = import.meta.env.VITE_GOOGLE_API_KEY || "AIzaSyDZV-fAFVCvh4Ad2lKlARMdtHoZWNRwZQA";
 
 /**
- * AI-Powered Smart Search with autocomplete and suggestions
+ * SmartSearch - Responsive Search with Autocomplete
  */
 export const SmartSearch = ({ products, onSearch, onSelectProduct }) => {
   const [query, setQuery] = useState('');
   const [isOpen, setIsOpen] = useState(false);
   const [suggestions, setSuggestions] = useState([]);
-  const [aiSuggestions, setAiSuggestions] = useState([]);
-  const [isLoadingAI, setIsLoadingAI] = useState(false);
   const [recentSearches, setRecentSearches] = useState(() => 
     JSON.parse(localStorage.getItem('recent_searches') || '[]')
   );
   
   const debouncedQuery = useDebounce(query, 300);
   const searchRef = useRef(null);
+  const inputRef = useRef(null);
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -36,228 +35,144 @@ export const SmartSearch = ({ products, onSearch, onSelectProduct }) => {
   useEffect(() => {
     if (debouncedQuery.length < 2) {
       setSuggestions([]);
-      setAiSuggestions([]);
       return;
     }
 
-    // Basic text-based suggestions
     const lowerQuery = debouncedQuery.toLowerCase();
     const matches = products
       .filter(p => 
         p.name.toLowerCase().includes(lowerQuery) ||
-        p.category.toLowerCase().includes(lowerQuery) ||
-        (p.params && p.params.toLowerCase().includes(lowerQuery))
+        p.category.toLowerCase().includes(lowerQuery)
       )
-      .slice(0, 5);
+      .slice(0, 6);
 
     setSuggestions(matches);
-
-    // Get AI suggestions if query is substantial
-    if (debouncedQuery.length >= 5 && matches.length < 3) {
-      getAISuggestions(debouncedQuery);
-    }
   }, [debouncedQuery, products]);
-
-  const getAISuggestions = async (searchQuery) => {
-    setIsLoadingAI(true);
-    try {
-      const categoryList = [...new Set(products.map(p => p.category))].join(', ');
-      
-      const prompt = `Bútor webshop vásárlói keresés: "${searchQuery}"
-      
-Elérhető kategóriák: ${categoryList}
-
-Add vissza JSON formátumban 3 találó keresési javaslat a mi termékeink alapján:
-{
-  "suggestions": ["javaslat1", "javaslat2", "javaslat3"]
-}
-
-Magyarul, röviden, konkrétan. Csak olyan kategóriák/termékek amit TÉNYLEG van a listában!`;
-
-      const response = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=${GOOGLE_API_KEY}`,
-        {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            contents: [{ parts: [{ text: prompt }] }],
-            generationConfig: { responseMimeType: "application/json" }
-          })
-        }
-      );
-
-      const data = await response.json();
-      const result = JSON.parse(data.candidates?.[0]?.content?.parts?.[0]?.text || '{"suggestions":[]}');
-      setAiSuggestions(result.suggestions || []);
-    } catch (error) {
-      setAiSuggestions([]);
-    } finally {
-      setIsLoadingAI(false);
-    }
-  };
 
   const handleSearch = (searchTerm) => {
     const term = searchTerm || query;
     if (term.trim()) {
-      // Save to recent searches
       const updated = [term, ...recentSearches.filter(s => s !== term)].slice(0, 5);
       setRecentSearches(updated);
       localStorage.setItem('recent_searches', JSON.stringify(updated));
-      
       onSearch(term);
       setIsOpen(false);
     }
   };
 
-  const handleSelectSuggestion = (suggestion) => {
-    if (typeof suggestion === 'string') {
-      setQuery(suggestion);
-      handleSearch(suggestion);
-    } else {
-      // It's a product
-      onSelectProduct(suggestion);
-      setIsOpen(false);
-    }
+  const handleSelectProduct = (product) => {
+    onSelectProduct(product);
+    setIsOpen(false);
+    setQuery('');
   };
 
-  const clearRecentSearches = () => {
-    setRecentSearches([]);
-    localStorage.removeItem('recent_searches');
+  const clearSearch = () => {
+    setQuery('');
+    setSuggestions([]);
+    inputRef.current?.focus();
   };
 
   return (
-    <div ref={searchRef} className="relative w-full max-w-2xl">
+    <div ref={searchRef} className="relative w-full">
       {/* Search Input */}
       <div className="relative">
-        <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+        <Search className="absolute left-3 sm:left-4 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4 sm:w-5 sm:h-5 pointer-events-none" />
         <input
+          ref={inputRef}
           type="text"
-          placeholder="Keresés bútorok között... (pl. skandináv kanapé)"
+          placeholder="Keresés..."
           value={query}
           onChange={(e) => {
             setQuery(e.target.value);
             setIsOpen(true);
           }}
           onFocus={() => setIsOpen(true)}
-          onKeyDown={(e) => {
-            if (e.key === 'Enter') {
-              handleSearch();
-            }
-          }}
-          className="w-full pl-12 pr-4 py-3 border-2 border-gray-200 rounded-2xl focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 outline-none transition-all text-base"
+          onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+          className="w-full h-10 sm:h-11 pl-9 sm:pl-11 pr-9 sm:pr-10 text-sm sm:text-base border-2 border-gray-200 rounded-xl bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 outline-none transition-all placeholder:text-gray-400"
         />
         {query && (
           <button
-            onClick={() => {
-              setQuery('');
-              setSuggestions([]);
-              setAiSuggestions([]);
-            }}
-            className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+            onClick={clearSearch}
+            className="absolute right-2.5 sm:right-3 top-1/2 -translate-y-1/2 w-6 h-6 flex items-center justify-center text-gray-400 hover:text-gray-600 rounded-full hover:bg-gray-100 transition-colors"
+            aria-label="Törlés"
           >
-            <X className="w-5 h-5" />
+            <X className="w-4 h-4" />
           </button>
         )}
       </div>
 
       {/* Dropdown */}
       {isOpen && (query || recentSearches.length > 0) && (
-        <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-2xl shadow-2xl border border-gray-100 max-h-96 overflow-y-auto z-50 animate-fade-in-down">
+        <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-2xl shadow-2xl border border-gray-100 max-h-80 sm:max-h-96 overflow-y-auto z-50 animate-fade-in">
+          
           {/* Recent Searches */}
           {!query && recentSearches.length > 0 && (
-            <div className="p-3 border-b border-gray-100">
-              <div className="flex items-center justify-between mb-2 px-2">
-                <span className="text-xs font-bold text-gray-500 uppercase tracking-wide flex items-center gap-1">
-                  <Clock className="w-3 h-3" /> Legutóbbi keresések
+            <div className="p-2 sm:p-3 border-b border-gray-100">
+              <div className="flex items-center justify-between px-2 mb-2">
+                <span className="text-[10px] sm:text-xs font-bold text-gray-400 uppercase tracking-wider flex items-center gap-1">
+                  <Clock className="w-3 h-3" /> Korábbi
                 </span>
                 <button
-                  onClick={clearRecentSearches}
-                  className="text-xs text-indigo-600 hover:text-indigo-700 font-medium"
+                  onClick={() => { setRecentSearches([]); localStorage.removeItem('recent_searches'); }}
+                  className="text-[10px] sm:text-xs text-indigo-600 hover:text-indigo-700 font-medium"
                 >
                   Törlés
                 </button>
               </div>
-              {recentSearches.map((search, idx) => (
-                <button
-                  key={idx}
-                  onClick={() => handleSelectSuggestion(search)}
-                  className="w-full text-left px-3 py-2 hover:bg-gray-50 rounded-lg transition-colors flex items-center gap-2"
-                >
-                  <Clock className="w-4 h-4 text-gray-400" />
-                  <span className="text-sm text-gray-700">{search}</span>
-                </button>
-              ))}
+              <div className="space-y-0.5">
+                {recentSearches.map((search, idx) => (
+                  <button
+                    key={idx}
+                    onClick={() => { setQuery(search); handleSearch(search); }}
+                    className="w-full text-left px-2 sm:px-3 py-2 hover:bg-gray-50 rounded-lg transition-colors flex items-center gap-2"
+                  >
+                    <Clock className="w-3.5 h-3.5 text-gray-300 shrink-0" />
+                    <span className="text-xs sm:text-sm text-gray-600 truncate">{search}</span>
+                  </button>
+                ))}
+              </div>
             </div>
           )}
 
           {/* Product Suggestions */}
           {suggestions.length > 0 && (
-            <div className="p-3 border-b border-gray-100">
-              <div className="text-xs font-bold text-gray-500 uppercase tracking-wide mb-2 px-2 flex items-center gap-1">
+            <div className="p-2 sm:p-3">
+              <div className="text-[10px] sm:text-xs font-bold text-gray-400 uppercase tracking-wider mb-2 px-2 flex items-center gap-1">
                 <TrendingUp className="w-3 h-3" /> Termékek
               </div>
-              {suggestions.map((product) => (
-                <button
-                  key={product.id}
-                  onClick={() => handleSelectSuggestion(product)}
-                  className="w-full text-left px-3 py-2 hover:bg-indigo-50 rounded-lg transition-colors flex items-center gap-3 group"
-                >
-                  <img
-                    src={product.images?.[0] || PLACEHOLDER_IMAGE}
-                    alt={product.name}
-                    className="w-10 h-10 object-contain rounded bg-gray-50"
-                    onError={(e) => {e.target.src = PLACEHOLDER_IMAGE}}
-                  />
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-gray-900 truncate group-hover:text-indigo-600 transition-colors">
-                      {product.name}
-                    </p>
-                    <p className="text-xs text-gray-500">{product.category}</p>
-                  </div>
-                  <span className="text-sm font-bold text-gray-900 whitespace-nowrap">
-                    {new Intl.NumberFormat('hu-HU', { style: 'currency', currency: 'HUF', maximumFractionDigits: 0 }).format(product.price)}
-                  </span>
-                </button>
-              ))}
-            </div>
-          )}
-
-          {/* AI Suggestions */}
-          {aiSuggestions.length > 0 && (
-            <div className="p-3">
-              <div className="text-xs font-bold text-purple-600 uppercase tracking-wide mb-2 px-2 flex items-center gap-1">
-                <Sparkles className="w-3 h-3" /> AI Javaslatok
-              </div>
-              {aiSuggestions.map((suggestion, idx) => (
-                <button
-                  key={idx}
-                  onClick={() => handleSelectSuggestion(suggestion)}
-                  className="w-full text-left px-3 py-2 hover:bg-purple-50 rounded-lg transition-colors flex items-center gap-2 group"
-                >
-                  <Sparkles className="w-4 h-4 text-purple-500" />
-                  <span className="text-sm text-gray-700 group-hover:text-purple-700">
-                    {suggestion}
-                  </span>
-                </button>
-              ))}
-            </div>
-          )}
-
-          {/* Loading AI */}
-          {isLoadingAI && (
-            <div className="p-4 text-center">
-              <div className="inline-flex items-center gap-2 text-sm text-indigo-600">
-                <Sparkles className="w-4 h-4 animate-pulse" />
-                AI gondolkodik...
+              <div className="space-y-0.5">
+                {suggestions.map((product) => (
+                  <button
+                    key={product.id}
+                    onClick={() => handleSelectProduct(product)}
+                    className="w-full text-left px-2 sm:px-3 py-2 hover:bg-indigo-50 rounded-xl transition-colors flex items-center gap-2 sm:gap-3 group"
+                  >
+                    <img
+                      src={product.images?.[0] || PLACEHOLDER_IMAGE}
+                      alt=""
+                      className="w-10 h-10 sm:w-12 sm:h-12 object-contain rounded-lg bg-gray-50 shrink-0"
+                      onError={(e) => { e.target.src = PLACEHOLDER_IMAGE; }}
+                    />
+                    <div className="flex-1 min-w-0">
+                      <p className="text-xs sm:text-sm font-medium text-gray-900 truncate group-hover:text-indigo-600 transition-colors">
+                        {product.name}
+                      </p>
+                      <p className="text-[10px] sm:text-xs text-gray-400 truncate">{product.category}</p>
+                    </div>
+                    <span className="text-xs sm:text-sm font-bold text-gray-900 whitespace-nowrap shrink-0">
+                      {new Intl.NumberFormat('hu-HU', { style: 'currency', currency: 'HUF', maximumFractionDigits: 0 }).format(product.price)}
+                    </span>
+                  </button>
+                ))}
               </div>
             </div>
           )}
 
           {/* No Results */}
-          {query && !isLoadingAI && suggestions.length === 0 && aiSuggestions.length === 0 && (
-            <div className="p-6 text-center text-gray-500">
-              <p className="text-sm">Nincs találat erre: <strong>{query}</strong></p>
-              <p className="text-xs mt-2">Próbálj meg más keresési kifejezést!</p>
+          {query && suggestions.length === 0 && (
+            <div className="p-6 sm:p-8 text-center text-gray-400">
+              <Search className="w-8 h-8 mx-auto mb-2 opacity-50" />
+              <p className="text-xs sm:text-sm">Nincs találat: <strong className="text-gray-600">{query}</strong></p>
             </div>
           )}
         </div>
@@ -265,3 +180,5 @@ Magyarul, röviden, konkrétan. Csak olyan kategóriák/termékek amit TÉNYLEG 
     </div>
   );
 };
+
+export default SmartSearch;
