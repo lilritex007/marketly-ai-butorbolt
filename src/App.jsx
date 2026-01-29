@@ -1114,17 +1114,6 @@ const App = () => {
                               <span> / <span className="font-semibold">{totalProductsCount.toLocaleString('hu-HU')}</span></span>
                             )}
                           </p>
-                          {isBackgroundLoading && (
-                            <div className="flex items-center gap-2 mt-1">
-                              <div className="w-32 h-1.5 bg-gray-200 rounded-full overflow-hidden">
-                                <div 
-                                  className="h-full bg-gradient-to-r from-indigo-500 to-purple-500 transition-all duration-300"
-                                  style={{ width: `${loadingProgress}%` }}
-                                />
-                              </div>
-                              <span className="text-xs text-gray-400">{loadingProgress}% betöltve</span>
-                            </div>
-                          )}
                         </div>
                       )}
                     </div>
