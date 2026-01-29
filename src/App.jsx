@@ -62,8 +62,10 @@ const GOOGLE_API_KEY = import.meta.env.VITE_GOOGLE_API_KEY || "AIzaSyDZV-fAFVCvh
 const WEBSHOP_DOMAIN = "https://www.marketly.hu";
 const SHOP_ID = "81697"; 
 
-// NO LIMIT - load ALL products from API
-const DISPLAY_BATCH = 48; // Products rendered per "Tovább" click
+// Progressive loading configuration
+const INITIAL_FAST_LOAD = 500;  // First batch - loads fast, user sees products immediately
+const BACKGROUND_BATCH = 5000;  // Subsequent batches loaded in background
+const DISPLAY_BATCH = 48;       // Products rendered per "Tovább" click
 
 /* --- 2. SEGÉDFÜGGVÉNYEK --- */
 
@@ -821,40 +823,80 @@ const App = () => {
     }
   };
   
-  // Initial load: first batch only for fast display. Background refresh: silent, replace current data.
-  // Load ALL products from API (no limit)
+  // Progressive loading state
+  const [isBackgroundLoading, setIsBackgroundLoading] = useState(false);
+  const [loadingProgress, setLoadingProgress] = useState(0);
+  const backgroundLoadingRef = useRef(false);
+
+  // PROGRESSIVE LOADING: Fast initial load, then background loading for the rest
   const loadUnasData = useCallback(async (silent = false) => {
     if (!silent) {
       setIsLoadingUnas(true);
       setUnasError(null);
     }
+    
     try {
-      // NO LIMIT - fetch ALL products from backend
-      const data = await fetchUnasProducts({});
-      const list = data.products || [];
-      setProducts(list);
-      setTotalProductsCount(data.total ?? list.length);
-      setHasMoreProducts(false); // All products loaded, no more to fetch
-      if (!silent) {
-        setVisibleCount(DISPLAY_BATCH);
+      // STEP 1: Fast initial load - get first batch quickly
+      const initialData = await fetchUnasProducts({ limit: INITIAL_FAST_LOAD, offset: 0 });
+      const initialList = initialData.products || [];
+      const totalCount = initialData.total ?? initialList.length;
+      
+      // Show initial products immediately
+      setProducts(initialList);
+      setTotalProductsCount(totalCount);
+      setVisibleCount(DISPLAY_BATCH);
+      setLastUpdated(initialData.lastSync || initialData.lastUpdated);
+      setDataSource('unas');
+      setUnasError(null);
+      setIsLoadingUnas(false); // Hide main loading spinner
+      
+      // STEP 2: Background loading for the rest
+      if (initialList.length < totalCount && !backgroundLoadingRef.current) {
+        backgroundLoadingRef.current = true;
+        setIsBackgroundLoading(true);
+        setHasMoreProducts(true);
+        
+        let offset = initialList.length;
+        let allProducts = [...initialList];
+        
+        while (offset < totalCount) {
+          try {
+            const batchData = await fetchUnasProducts({ limit: BACKGROUND_BATCH, offset });
+            const batchList = batchData.products || [];
+            
+            if (batchList.length === 0) break;
+            
+            allProducts = [...allProducts, ...batchList];
+            setProducts(allProducts);
+            setLoadingProgress(Math.round((allProducts.length / totalCount) * 100));
+            
+            offset += batchList.length;
+            
+            // Small delay to prevent overwhelming the browser
+            await new Promise(r => setTimeout(r, 100));
+          } catch (err) {
+            console.warn('Background loading batch error:', err);
+            break;
+          }
+        }
+        
+        setIsBackgroundLoading(false);
+        setHasMoreProducts(false);
+        setLoadingProgress(100);
+        backgroundLoadingRef.current = false;
+      } else {
+        setHasMoreProducts(false);
       }
-      setLastUpdated(data.lastSync || data.lastUpdated);
-      if (list.length > 0) {
-        setDataSource('unas');
-        setUnasError(null);
-      } else if (!silent) {
-        setUnasError(data.error || 'Nincs termék');
-      }
-    } catch (_) {
+      
+    } catch (err) {
       if (!silent) setUnasError('Termékek betöltése sikertelen');
-    } finally {
-      if (!silent) setIsLoadingUnas(false);
+      setIsLoadingUnas(false);
     }
   }, []);
 
-  // No longer needed - all products loaded at once
+  // Manual load more (not needed with progressive loading, but kept for compatibility)
   const loadMoreProducts = useCallback(async () => {
-    // All products already loaded
+    // Progressive loading handles this automatically
   }, []);
 
   const loadUnasDataRef = useRef(loadUnasData);
@@ -1055,12 +1097,25 @@ const App = () => {
                     <div>
                       <h2 className="text-2xl sm:text-3xl font-bold">Termékek</h2>
                       {!isLoadingUnas && (
-                        <p className="text-sm text-gray-500 mt-1">
-                          <span className="font-semibold text-indigo-600">{filteredAndSortedProducts.length.toLocaleString('hu-HU')}</span> termék 
-                          {totalProductsCount > 0 && filteredAndSortedProducts.length !== totalProductsCount && (
-                            <span> (összes: <span className="font-semibold">{totalProductsCount.toLocaleString('hu-HU')}</span>)</span>
+                        <div className="mt-1">
+                          <p className="text-sm text-gray-500">
+                            <span className="font-semibold text-indigo-600">{filteredAndSortedProducts.length.toLocaleString('hu-HU')}</span> termék 
+                            {totalProductsCount > 0 && products.length < totalProductsCount && (
+                              <span> / <span className="font-semibold">{totalProductsCount.toLocaleString('hu-HU')}</span></span>
+                            )}
+                          </p>
+                          {isBackgroundLoading && (
+                            <div className="flex items-center gap-2 mt-1">
+                              <div className="w-32 h-1.5 bg-gray-200 rounded-full overflow-hidden">
+                                <div 
+                                  className="h-full bg-gradient-to-r from-indigo-500 to-purple-500 transition-all duration-300"
+                                  style={{ width: `${loadingProgress}%` }}
+                                />
+                              </div>
+                              <span className="text-xs text-gray-400">{loadingProgress}% betöltve</span>
+                            </div>
                           )}
-                        </p>
+                        </div>
                       )}
                     </div>
                     <div className="w-full md:w-auto flex flex-wrap items-center gap-3">
