@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { ShoppingCart, Camera, MessageCircle, X, Send, Plus, Move, Trash2, Home, ZoomIn, ZoomOut, Upload, Settings, Link as LinkIcon, FileText, RefreshCw, AlertCircle, Database, Lock, Search, ChevronLeft, ChevronRight, Filter, Heart, ArrowDownUp, Info, Check, Star, Truck, ShieldCheck, Phone, ArrowRight, Mail, Eye, Sparkles, Lightbulb, Image as ImageIcon, MousePointer2, Menu } from 'lucide-react';
 // framer-motion removed due to Vite production build TDZ issues
-import { fetchUnasProducts, refreshUnasProducts } from './services/unasApi';
+import { fetchUnasProducts, refreshUnasProducts, fetchCategories } from './services/unasApi';
 
 // New UI Components
 import { ProductCardSkeleton, ChatMessageSkeleton } from './components/ui/Skeleton';
@@ -62,9 +62,10 @@ const GOOGLE_API_KEY = import.meta.env.VITE_GOOGLE_API_KEY || "AIzaSyDZV-fAFVCvh
 const WEBSHOP_DOMAIN = "https://www.marketly.hu";
 const SHOP_ID = "81697"; 
 
-// Fast loading with slim mode + GZIP compression
-// ~170k products load in 1-3 seconds
-const DISPLAY_BATCH = 48; // Products rendered per "Tovább" click
+// PERFORMANCE CONFIG - Don't load all 170k products!
+// Server-side filtering + pagination for instant UX
+const PAGE_SIZE = 100;     // Products per page (loaded from server)
+const DISPLAY_BATCH = 48;  // Products shown initially, more on scroll
 
 /* --- 2. SEGÉDFÜGGVÉNYEK --- */
 
@@ -822,78 +823,117 @@ const App = () => {
     }
   };
   
-  // Progressive loading state
-  const [isBackgroundLoading, setIsBackgroundLoading] = useState(false);
-  const [loadingProgress, setLoadingProgress] = useState(0);
-  const backgroundLoadingRef = useRef(false);
+  // Server-side search state
+  const [serverSearchQuery, setServerSearchQuery] = useState('');
+  const [serverCategory, setServerCategory] = useState('');
+  const searchTimeoutRef = useRef(null);
 
-  // FAST LOADING: Use slim mode (only essential fields) + GZIP compression
-  // Full ~170k products in ~1-3 seconds instead of 30+ seconds
-  const loadUnasData = useCallback(async (silent = false) => {
+  // FAST LOADING: Server-side search + pagination
+  // Only load PAGE_SIZE products at a time - instant UX!
+  const loadUnasData = useCallback(async (options = {}) => {
+    const { silent = false, search = '', category = '', offset = 0, append = false } = options;
+    
     if (!silent) {
       setIsLoadingUnas(true);
       setUnasError(null);
     }
     
     try {
-      // Load ALL products at once with slim mode (only essential fields)
-      // GZIP compression reduces ~85MB to ~5-8MB, slim mode reduces further to ~2-3MB
-      const data = await fetchUnasProducts({ slim: true });
-      const products = data.products || [];
-      const totalCount = data.total ?? products.length;
+      // Server-side filtering - only get what we need
+      const params = { 
+        slim: true, 
+        limit: PAGE_SIZE, 
+        offset,
+        ...(search && { search }),
+        ...(category && category !== 'Összes' && { category })
+      };
       
-      // Transform slim products to full format for UI compatibility
-      const formattedProducts = products.map(p => ({
+      const data = await fetchUnasProducts(params);
+      const newProducts = (data.products || []).map(p => ({
         ...p,
-        images: p.image ? [p.image] : [], // Convert single image to array
+        images: p.image ? [p.image] : [],
         inStock: p.inStock ?? true
       }));
       
-      setProducts(formattedProducts);
+      const totalCount = data.total ?? 0;
+      
+      if (append && offset > 0) {
+        // Append to existing products (infinite scroll)
+        setProducts(prev => [...prev, ...newProducts]);
+      } else {
+        // Replace products (new search/filter)
+        setProducts(newProducts);
+        setVisibleCount(DISPLAY_BATCH);
+      }
+      
       setTotalProductsCount(totalCount);
-      setVisibleCount(DISPLAY_BATCH);
+      setHasMoreProducts(offset + newProducts.length < totalCount);
       setLastUpdated(data.lastSync || data.lastUpdated);
       setDataSource('unas');
       setUnasError(null);
-      setHasMoreProducts(false); // All products loaded at once
-      setIsBackgroundLoading(false);
-      setLoadingProgress(100);
       
     } catch (err) {
       console.error('Load error:', err);
       if (!silent) setUnasError('Termékek betöltése sikertelen');
     } finally {
       if (!silent) setIsLoadingUnas(false);
+      setIsLoadingMore(false);
     }
   }, []);
 
-  // Manual load more (not needed with progressive loading, but kept for compatibility)
+  // Debounced server-side search
+  const handleServerSearch = useCallback((query) => {
+    setSearchQuery(query);
+    if (searchTimeoutRef.current) clearTimeout(searchTimeoutRef.current);
+    searchTimeoutRef.current = setTimeout(() => {
+      setServerSearchQuery(query);
+      loadUnasData({ search: query, category: serverCategory });
+    }, 300); // 300ms debounce
+  }, [loadUnasData, serverCategory]);
+
+  // Server-side category filter
+  const handleCategoryChange = useCallback((category) => {
+    setCategoryFilter(category);
+    setServerCategory(category);
+    loadUnasData({ search: serverSearchQuery, category });
+  }, [loadUnasData, serverSearchQuery]);
+
+  // Load more products (infinite scroll)
   const loadMoreProducts = useCallback(async () => {
-    // Progressive loading handles this automatically
-  }, []);
+    if (isLoadingMore || !hasMoreProducts) return;
+    setIsLoadingMore(true);
+    await loadUnasData({ 
+      search: serverSearchQuery, 
+      category: serverCategory, 
+      offset: products.length,
+      append: true,
+      silent: true 
+    });
+  }, [isLoadingMore, hasMoreProducts, loadUnasData, serverSearchQuery, serverCategory, products.length]);
 
   const loadUnasDataRef = useRef(loadUnasData);
   loadUnasDataRef.current = loadUnasData;
 
   useEffect(() => {
-    loadUnasDataRef.current(false);
+    loadUnasDataRef.current({}); // Initial load with no filters
   }, []);
 
   useEffect(() => {
-    const t = setInterval(() => loadUnasDataRef.current?.(true), 300000);
+    const t = setInterval(() => loadUnasDataRef.current?.({ silent: true }), 300000);
     return () => clearInterval(t);
   }, []);
   
+  // Products are already filtered server-side (search + category)
+  // Only apply client-side sorting and advanced filters
   const filteredAndSortedProducts = useMemo(() => {
       let result = products;
-      const q = (searchQuery || '').toLowerCase();
-      if (q) result = result.filter(p => (p.name || '').toLowerCase().includes(q));
-      if (categoryFilter !== 'Összes') result = result.filter(p => p.category === categoryFilter);
+      // Advanced filters (price range, etc.) - still client-side for now
       if (Object.keys(advancedFilters).length > 0) result = applyFilters(result, advancedFilters);
+      // Sorting
       if (sortOption === 'price-asc') result = [...result].sort((a, b) => (a.price || 0) - (b.price || 0));
       if (sortOption === 'price-desc') result = [...result].sort((a, b) => (b.price || 0) - (a.price || 0));
       return result;
-  }, [products, searchQuery, categoryFilter, sortOption, advancedFilters]);
+  }, [products, sortOption, advancedFilters]);
 
   // Update ref after filteredAndSortedProducts is defined
   filteredLengthRef.current = filteredAndSortedProducts.length;
@@ -902,12 +942,11 @@ const App = () => {
   const displayedProducts = filteredAndSortedProducts.slice(0, visibleCount);
   const hasMoreToShow = visibleCount < filteredAndSortedProducts.length || (hasMoreProducts && products.length < totalProductsCount);
 
-  // When filters/search/category change, scroll list to top and reset visible window
+  // When sort/advanced filters change, scroll to top and reset visible window
+  // (search and category changes are handled by server-side loading)
   useEffect(() => {
     setVisibleCount(DISPLAY_BATCH);
-    const productsSection = document.getElementById('products-section');
-    if (productsSection) productsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
-  }, [searchQuery, categoryFilter, sortOption, advancedFilters]);
+  }, [sortOption, advancedFilters]);
 
   // Manual "Load More" button handler - shows more products or fetches from API
   const handleLoadMore = useCallback(() => {
@@ -924,14 +963,12 @@ const App = () => {
     }
   }, [loadMoreProducts]);
 
-  // Get ALL categories from ALL products (no sampling, no limit)
-  const categories = useMemo(() => {
-      const seen = new Set();
-      for (const p of products) {
-        if (p?.category) seen.add(p.category);
-      }
-      return ['Összes', ...[...seen].sort()];
-  }, [products]);
+  // Fetch categories from server (not computed from products in memory)
+  const [categories, setCategories] = useState(['Összes']);
+  
+  useEffect(() => {
+    fetchCategories().then(setCategories);
+  }, []);
 
   return (
     <div id="mkt-butorbolt-app" className="min-h-screen bg-white font-sans text-gray-900">
@@ -1095,7 +1132,7 @@ const App = () => {
                       <div className="flex-1 md:flex-initial flex items-center gap-2 min-w-0">
                         <SmartSearch 
                           products={products}
-                          onSearch={(query) => setSearchQuery(query)}
+                          onSearch={handleServerSearch}
                           onSelectProduct={handleProductView}
                         />
 {/* VoiceSearch removed */}
@@ -1129,7 +1166,7 @@ const App = () => {
                     icon: cat === "Összes" ? "🏠" : idx % 6 === 0 ? "🛋️" : idx % 6 === 1 ? "🪑" : idx % 6 === 2 ? "🛏️" : idx % 6 === 3 ? "🪞" : idx % 6 === 4 ? "💡" : "📦"
                   }))}
                   activeCategory={categoryFilter}
-                  onCategoryChange={(catId) => setCategoryFilter(catId)}
+                  onCategoryChange={handleCategoryChange}
                 />
 
                 {/* Loading State */}
@@ -1165,7 +1202,7 @@ const App = () => {
                   <EmptyState 
                     type="products"
                     action="Minden kategória megtekintése"
-                    onAction={() => setCategoryFilter("Összes")}
+                    onAction={() => handleCategoryChange("Összes")}
                   />
                 )}
 

@@ -62,6 +62,22 @@ export const fetchUnasProducts = async (filters = {}) => {
 };
 
 /**
+ * Fetch categories from backend
+ */
+export const fetchCategories = async () => {
+  try {
+    const API_BASE = getApiBase();
+    const res = await fetch(`${API_BASE}/categories`);
+    if (!res.ok) return ['Összes'];
+    const data = await res.json();
+    return ['Összes', ...(data.categories || []).sort()];
+  } catch (error) {
+    console.error('Error fetching categories:', error);
+    return ['Összes'];
+  }
+};
+
+/**
  * Force refresh products from UNAS (trigger sync)
  */
 export const refreshUnasProducts = async () => {
