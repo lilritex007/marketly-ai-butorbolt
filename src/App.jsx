@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
-import { ShoppingCart, Camera, MessageCircle, X, Send, Plus, Move, Trash2, Home, ZoomIn, ZoomOut, Upload, Settings, Link as LinkIcon, FileText, RefreshCw, AlertCircle, Database, Lock, Search, ChevronLeft, ChevronRight, Filter, Heart, ArrowDownUp, Info, Check, Star, Truck, ShieldCheck, Phone, ArrowRight, Mail, Eye, Sparkles, Lightbulb, Image as ImageIcon, MousePointer2, Menu } from 'lucide-react';
+import { ShoppingCart, Camera, MessageCircle, X, Send, Plus, Move, Trash2, Home, ZoomIn, ZoomOut, Upload, Settings, Link as LinkIcon, FileText, RefreshCw, AlertCircle, Database, Lock, Search, ChevronLeft, ChevronRight, Filter, Heart, ArrowDownUp, Info, Check, Star, Truck, ShieldCheck, Phone, ArrowRight, Mail, Eye, Sparkles, Lightbulb, Image as ImageIcon, MousePointer2, Menu, Bot } from 'lucide-react';
 // framer-motion removed due to Vite production build TDZ issues
 import { fetchUnasProducts, refreshUnasProducts, fetchCategories } from './services/unasApi';
 
@@ -804,7 +804,7 @@ const App = () => {
     );
     
     if (isAdding) {
-      toast.wishlist('Hozzáadva a kívánságlistához! ❤️');
+      toast.wishlist('Hozzáadva a kívánságlistához!');
     } else {
       toast.info('Eltávolítva a kívánságlistáról');
     }
@@ -1010,35 +1010,39 @@ const App = () => {
             {/* AI Super Features Row */}
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
               <div className="text-center mb-8">
-                <h2 className="text-3xl font-bold text-gray-900 mb-3">
-                  🤖 AI Szuper Funkciók
+                <div className="inline-flex items-center gap-2 px-4 py-2 bg-indigo-100 rounded-full mb-4">
+                  <Bot className="w-5 h-5 text-indigo-600" />
+                  <span className="text-sm font-bold text-indigo-600">AI Powered</span>
+                </div>
+                <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-3">
+                  AI Szuper Funkciók
                 </h2>
                 <p className="text-gray-600">
                   Próbáld ki a legújabb AI technológiáinkat!
                 </p>
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 max-w-4xl mx-auto">
                 <button
                   onClick={() => setShowStyleQuiz(true)}
                   className="
-                    group p-8 rounded-2xl
+                    group p-5 sm:p-8 rounded-2xl
                     bg-gradient-to-br from-indigo-50 to-purple-50
                     hover:from-indigo-100 hover:to-purple-100
                     border-2 border-transparent hover:border-indigo-300
                     transition-all duration-300
-                    hover:shadow-xl hover:scale-105
+                    hover:shadow-xl hover:scale-[1.02]
                     text-left
                   "
                 >
-                  <div className="flex items-start gap-4">
-                    <div className="p-3 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl text-white group-hover:scale-110 transition-transform">
-                      <Sparkles className="w-8 h-8" />
+                  <div className="flex items-start gap-3 sm:gap-4">
+                    <div className="p-2.5 sm:p-3 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl text-white group-hover:scale-110 transition-transform shrink-0">
+                      <Sparkles className="w-6 h-6 sm:w-8 sm:h-8" />
                     </div>
-                    <div className="flex-1">
-                      <h3 className="text-xl font-bold text-gray-900 mb-2">
-                        AI Stílus Quiz 🧬
+                    <div className="flex-1 min-w-0">
+                      <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-1 sm:mb-2">
+                        AI Stílus Quiz
                       </h3>
-                      <p className="text-gray-600 text-sm mb-3">
+                      <p className="text-gray-600 text-sm mb-2 sm:mb-3">
                         5 kérdés, és megismered a Style DNA-d! Személyre szabott ajánlatok.
                       </p>
                       <span className="text-indigo-600 font-semibold text-sm flex items-center gap-2">
@@ -1051,24 +1055,24 @@ const App = () => {
                 <button
                   onClick={() => setShowRoomDesigner(true)}
                   className="
-                    group p-8 rounded-2xl
+                    group p-5 sm:p-8 rounded-2xl
                     bg-gradient-to-br from-purple-50 to-pink-50
                     hover:from-purple-100 hover:to-pink-100
                     border-2 border-transparent hover:border-purple-300
                     transition-all duration-300
-                    hover:shadow-xl hover:scale-105
+                    hover:shadow-xl hover:scale-[1.02]
                     text-left
                   "
                 >
-                  <div className="flex items-start gap-4">
-                    <div className="p-3 bg-gradient-to-br from-purple-500 to-pink-600 rounded-xl text-white group-hover:scale-110 transition-transform">
-                      <Camera className="w-8 h-8" />
+                  <div className="flex items-start gap-3 sm:gap-4">
+                    <div className="p-2.5 sm:p-3 bg-gradient-to-br from-purple-500 to-pink-600 rounded-xl text-white group-hover:scale-110 transition-transform shrink-0">
+                      <Camera className="w-6 h-6 sm:w-8 sm:h-8" />
                     </div>
-                    <div className="flex-1">
-                      <h3 className="text-xl font-bold text-gray-900 mb-2">
-                        AI Szoba Tervező 📸
+                    <div className="flex-1 min-w-0">
+                      <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-1 sm:mb-2">
+                        AI Szoba Tervező
                       </h3>
-                      <p className="text-gray-600 text-sm mb-3">
+                      <p className="text-gray-600 text-sm mb-2 sm:mb-3">
                         Töltsd fel a szobád fotóját, és az AI megtervezi neked!
                       </p>
                       <span className="text-purple-600 font-semibold text-sm flex items-center gap-2">
@@ -1134,7 +1138,7 @@ const App = () => {
                     id: cat.name,
                     name: cat.name,
                     totalCount: cat.count,
-                    icon: cat.name === "Összes" ? "🏠" : idx % 6 === 0 ? "🛋️" : idx % 6 === 1 ? "🪑" : idx % 6 === 2 ? "🛏️" : idx % 6 === 3 ? "🪞" : idx % 6 === 4 ? "💡" : "📦"
+                    icon: null // Icons handled by CategorySwipe component
                   }))}
                   activeCategory={categoryFilter}
                   onCategoryChange={handleCategoryChange}

@@ -1,9 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { 
-  Sparkles, Camera, Move, MessageCircle, ArrowRight, Check, 
+  Sparkles, Camera, Move3d, MessageCircle, ArrowRight, Check, 
   TrendingUp, Users, ShoppingBag, Star, Zap, Eye, Heart,
-  Package, Shield, Clock, Award, ChevronRight, Play
+  Package, Shield, Clock, Award, ChevronRight, Play, Target, Gift, Bot
 } from 'lucide-react';
+import { DemoFlow } from '../ui/Icons';
 
 /**
  * Modern Hero Section with 3D effect and animations
@@ -158,7 +159,11 @@ export const AIFeaturesShowcase = ({ onFeatureClick }) => {
       title: 'AI Képfelismerés',
       description: 'Fotózd le a bútort és azonnal találd meg a hasonló termékeket',
       color: 'from-blue-500 to-indigo-600',
-      demo: '📸 → 🤖 → ✨',
+      demoSteps: [
+        { icon: Camera, color: 'text-blue-600', bg: 'bg-blue-100' },
+        { icon: Bot, color: 'text-indigo-600', bg: 'bg-indigo-100' },
+        { icon: Sparkles, color: 'text-purple-600', bg: 'bg-purple-100' }
+      ],
       stats: '99% pontosság'
     },
     {
@@ -166,15 +171,23 @@ export const AIFeaturesShowcase = ({ onFeatureClick }) => {
       title: 'Intelligens Asszisztens',
       description: 'Beszélgess szakértőnkkel és kérj személyre szabott ajánlatokat',
       color: 'from-purple-500 to-pink-600',
-      demo: '💬 → 🎯 → 🎁',
+      demoSteps: [
+        { icon: MessageCircle, color: 'text-purple-600', bg: 'bg-purple-100' },
+        { icon: Target, color: 'text-pink-600', bg: 'bg-pink-100' },
+        { icon: Gift, color: 'text-rose-600', bg: 'bg-rose-100' }
+      ],
       stats: '24/7 elérhető'
     },
     {
-      icon: Move,
+      icon: Move3d,
       title: 'Virtuális Tervező',
       description: 'Helyezd el a bútorokat otthonodban virtuálisan, látogatás élőben',
       color: 'from-green-500 to-emerald-600',
-      demo: '🏠 → 🪄 → 👀',
+      demoSteps: [
+        { icon: Camera, color: 'text-green-600', bg: 'bg-green-100' },
+        { icon: Move3d, color: 'text-emerald-600', bg: 'bg-emerald-100' },
+        { icon: Eye, color: 'text-teal-600', bg: 'bg-teal-100' }
+      ],
       stats: 'AR támogatás'
     }
   ];
@@ -230,7 +243,7 @@ export const AIFeaturesShowcase = ({ onFeatureClick }) => {
 
                 {/* Demo Flow */}
                 <div className="bg-gray-50 rounded-xl p-4 mb-4">
-                  <div className="text-center text-2xl font-mono">{feature.demo}</div>
+                  <DemoFlow steps={feature.demoSteps} />
                 </div>
 
                 {/* Stats */}

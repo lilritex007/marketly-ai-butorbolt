@@ -149,7 +149,7 @@ const SmartNewsletterPopup = ({ onSubscribe }) => {
                 </h2>
                 <p className="text-white/90 text-center text-sm">
                   {isSubmitted 
-                    ? 'Feliratkoztál a hírlevelünkre! 🎉' 
+                    ? 'Feliratkoztál a hírlevelünkre!' 
                     : 'Iratkozz fel és kapd meg első vásárlásodhoz!'
                   }
                 </p>
@@ -220,7 +220,7 @@ const SmartNewsletterPopup = ({ onSubscribe }) => {
                       <strong>{email}</strong>
                     </p>
                     <p className="text-sm text-gray-600">
-                      Nézd meg az email fiókod a kedvezmény kódért! 📧
+                      Nézd meg az email fiókod a kedvezmény kódért!
                     </p>
                   </div>
                 )}

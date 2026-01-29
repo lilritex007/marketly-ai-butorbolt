@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { ChevronDown, ChevronUp, ChevronLeft, ChevronRight, Grid3X3 } from 'lucide-react';
+import { CategoryIcon } from '../ui/Icons';
 
 /**
  * CategorySwipe - Golden Standard Responsive Category Navigation
@@ -126,13 +127,14 @@ const CategorySwipe = ({ categories, activeCategory, onCategoryChange, displayed
               onClick={() => onCategoryChange(category.id)}
               className={`
                 shrink-0 px-3 py-2.5 min-h-[44px] rounded-xl text-[13px] font-semibold transition-all whitespace-nowrap
+                flex items-center gap-1.5
                 ${category.id === activeCategory
                   ? 'bg-indigo-600 text-white shadow-md'
                   : 'bg-gray-100 text-gray-700 active:bg-gray-200'
                 }
               `}
             >
-              {category.icon && <span className="mr-1">{category.icon}</span>}
+              <CategoryIcon name={category.name} className="w-4 h-4 shrink-0" />
               {category.name}
             </button>
           ))}
@@ -157,13 +159,14 @@ const CategorySwipe = ({ categories, activeCategory, onCategoryChange, displayed
               onClick={() => onCategoryChange(category.id)}
               className={`
                 px-3.5 lg:px-4 py-2 lg:py-2.5 rounded-xl text-sm lg:text-[15px] font-medium transition-all
+                flex items-center gap-1.5
                 ${category.id === activeCategory
                   ? 'bg-indigo-600 text-white shadow-lg scale-[1.02]'
                   : 'bg-gray-50 text-gray-700 hover:bg-gray-100 hover:shadow-sm'
                 }
               `}
             >
-              {category.icon && <span className="mr-1.5">{category.icon}</span>}
+              <CategoryIcon name={category.name} className="w-4 h-4 shrink-0" />
               {category.name}
             </button>
           ))}

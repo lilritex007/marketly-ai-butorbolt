@@ -105,7 +105,7 @@ Formázd szépen, rövid bekezdésekben, barátságos hangnemben.
       }
 
     } catch (error) {
-      setAnalysis('❌ Hiba történt az elemzés közben. Kérlek próbáld újra!');
+      setAnalysis('Hiba történt az elemzés közben. Kérlek próbáld újra!');
     } finally {
       setIsAnalyzing(false);
     }
@@ -267,21 +267,21 @@ Formázd szépen, rövid bekezdésekben, barátságos hangnemben.
                       className="space-y-6"
                     >
                       {/* Analysis Text (or error) */}
-                      <div className={`rounded-xl p-6 ${analysis.startsWith('❌') ? 'bg-red-50' : 'bg-gradient-to-br from-purple-50 to-pink-50'}`}>
+                      <div className={`rounded-xl p-6 ${analysis.includes('Hiba történt') ? 'bg-red-50' : 'bg-gradient-to-br from-purple-50 to-pink-50'}`}>
                         <div className="flex items-center gap-2 mb-4">
-                          {analysis.startsWith('❌') ? (
+                          {analysis.includes('Hiba történt') ? (
                             <X className="w-6 h-6 text-red-500" />
                           ) : (
                             <CheckCircle className="w-6 h-6 text-green-500" />
                           )}
                           <h3 className="text-xl font-bold text-gray-800">
-                            {analysis.startsWith('❌') ? 'Hiba' : 'Elemzés Eredménye'}
+                            {analysis.includes('Hiba történt') ? 'Hiba' : 'Elemzés Eredménye'}
                           </h3>
                         </div>
                         <div className="prose prose-sm max-w-none text-gray-700 whitespace-pre-wrap">
                           {analysis}
                         </div>
-                        {analysis.startsWith('❌') && (
+                        {analysis.includes('Hiba történt') && (
                           <button
                             type="button"
                             onClick={analyzeRoom}
@@ -332,7 +332,7 @@ Formázd szépen, rövid bekezdésekben, barátságos hangnemben.
                           </div>
                         </div>
                       )}
-                      {analysis && !analysis.startsWith('❌') && recommendations.length === 0 && (
+                      {analysis && !analysis.includes('Hiba történt') && recommendations.length === 0 && (
                         <p className="text-gray-500 text-center py-4">Nincs egyező ajánlat a katalógusban. Próbálj másik fotót vagy böngéssz a termékek között!</p>
                       )}
 

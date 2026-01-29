@@ -13,7 +13,7 @@ const AIChatAssistant = ({ products }) => {
   const [messages, setMessages] = useState([
     {
       role: 'assistant',
-      content: 'Szia! 👋 Segíthetek találni a tökéletes bútort. Mit keresel?',
+      content: 'Szia! Segíthetek találni a tökéletes bútort. Mit keresel?',
       timestamp: new Date()
     }
   ]);
@@ -108,7 +108,7 @@ Ha konkrét termékeket ajánlasz, hivatkozz a nevükre.
     } catch (error) {
       setMessages(prev => [...prev, {
         role: 'assistant',
-        content: 'Hoppá, valami hiba történt! 😅 Kérlek próbáld újra.',
+        content: 'Hoppá, valami hiba történt. Kérlek próbáld újra később!',
         timestamp: new Date()
       }]);
     } finally {

@@ -126,7 +126,7 @@ Adj reális elemzést a bútoráruház kontextusában.
     const badges = {
       buy_now: { text: '✓ Jó ár', color: 'bg-green-100 text-green-800' },
       wait: { text: '⏳ Érdemes várni', color: 'bg-yellow-100 text-yellow-800' },
-      good_deal: { text: '🔥 Kiváló ajánlat', color: 'bg-indigo-100 text-indigo-800' }
+      good_deal: { text: 'Kiváló ajánlat', color: 'bg-indigo-100 text-indigo-800' }
     };
     
     const badge = badges[prediction.recommendation] || badges.buy_now;
