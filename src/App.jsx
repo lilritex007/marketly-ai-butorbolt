@@ -963,12 +963,26 @@ const App = () => {
     }
   }, [loadMoreProducts]);
 
-  // Fetch categories from backend (all non-excluded categories)
-  const [categories, setCategories] = useState(['Összes']);
-  
-  useEffect(() => {
-    fetchCategories().then(cats => setCategories(cats));
-  }, []);
+  // Compute categories from products (already filtered by EXCLUDED_MAIN_CATEGORIES)
+  // This ensures only valid categories with actual products are shown
+  const categories = useMemo(() => {
+    if (!products || products.length === 0) return ['Összes'];
+    
+    // Count products per category
+    const categoryCount = new Map();
+    for (const p of products) {
+      if (p.category) {
+        categoryCount.set(p.category, (categoryCount.get(p.category) || 0) + 1);
+      }
+    }
+    
+    // Sort by count (most products first)
+    const sorted = Array.from(categoryCount.entries())
+      .sort((a, b) => b[1] - a[1])
+      .map(([name, count]) => ({ name, count }));
+    
+    return [{ name: 'Összes', count: products.length }, ...sorted];
+  }, [products]);
 
   return (
     <div id="mkt-butorbolt-app" className="min-h-screen bg-white font-sans text-gray-900">
@@ -1141,18 +1155,17 @@ const App = () => {
                   </div>
                 </div>
                 
-                {/* Category Swipe Navigation */}
+                {/* Category Navigation */}
                 <CategorySwipe
                   categories={categories.map((cat, idx) => ({
-                    id: cat,
-                    name: cat,
-                    icon: cat === "Összes" ? "🏠" : idx % 6 === 0 ? "🛋️" : idx % 6 === 1 ? "🪑" : idx % 6 === 2 ? "🛏️" : idx % 6 === 3 ? "🪞" : idx % 6 === 4 ? "💡" : "📦"
+                    id: cat.name,
+                    name: cat.name,
+                    totalCount: cat.count,
+                    icon: cat.name === "Összes" ? "🏠" : idx % 6 === 0 ? "🛋️" : idx % 6 === 1 ? "🪑" : idx % 6 === 2 ? "🛏️" : idx % 6 === 3 ? "🪞" : idx % 6 === 4 ? "💡" : "📦"
                   }))}
                   activeCategory={categoryFilter}
                   onCategoryChange={handleCategoryChange}
-                  // For active category: show displayed/total
                   displayedCount={Math.min(visibleCount, filteredAndSortedProducts.length)}
-                  totalCount={filteredAndSortedProducts.length}
                 />
 
                 {/* Loading State */}
