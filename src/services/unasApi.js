@@ -70,7 +70,12 @@ export const fetchCategories = async () => {
     const res = await fetch(`${API_BASE}/categories`);
     if (!res.ok) return ['Összes'];
     const data = await res.json();
-    return ['Összes', ...(data.categories || []).sort()];
+    // Backend returns category objects, extract just the names
+    const categoryNames = (data.categories || [])
+      .map(cat => typeof cat === 'string' ? cat : cat.name)
+      .filter(Boolean)
+      .sort();
+    return ['Összes', ...categoryNames];
   } catch (error) {
     console.error('Error fetching categories:', error);
     return ['Összes'];
