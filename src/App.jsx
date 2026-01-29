@@ -64,7 +64,7 @@ const SHOP_ID = "81697";
 
 // PERFORMANCE CONFIG - Don't load all 170k products!
 // Server-side filtering + pagination for instant UX
-const PAGE_SIZE = 100;     // Products per page (loaded from server)
+// No page size limit - load ALL products at once (slim mode + GZIP = fast)
 const DISPLAY_BATCH = 48;  // Products shown initially, more on scroll
 
 /* --- 2. SEGÉDFÜGGVÉNYEK --- */
@@ -828,10 +828,10 @@ const App = () => {
   const [serverCategory, setServerCategory] = useState('');
   const searchTimeoutRef = useRef(null);
 
-  // FAST LOADING: Server-side search + pagination
-  // Only load PAGE_SIZE products at a time - instant UX!
+  // FAST LOADING: Load ALL products at once (slim mode + GZIP compression)
+  // This ensures all categories are available immediately
   const loadUnasData = useCallback(async (options = {}) => {
-    const { silent = false, search = '', category = '', offset = 0, append = false } = options;
+    const { silent = false, search = '', category = '' } = options;
     
     if (!silent) {
       setIsLoadingUnas(true);
@@ -839,11 +839,9 @@ const App = () => {
     }
     
     try {
-      // Server-side filtering - only get what we need
+      // Load ALL products at once - slim mode + GZIP makes this fast (~2-3 sec)
       const params = { 
-        slim: true, 
-        limit: PAGE_SIZE, 
-        offset,
+        slim: true,
         ...(search && { search }),
         ...(category && category !== 'Összes' && { category })
       };
@@ -855,19 +853,12 @@ const App = () => {
         inStock: p.inStock ?? true
       }));
       
-      const totalCount = data.total ?? 0;
+      const totalCount = data.total ?? newProducts.length;
       
-      if (append && offset > 0) {
-        // Append to existing products (infinite scroll)
-        setProducts(prev => [...prev, ...newProducts]);
-      } else {
-        // Replace products (new search/filter)
-        setProducts(newProducts);
-        setVisibleCount(DISPLAY_BATCH);
-      }
-      
+      setProducts(newProducts);
+      setVisibleCount(DISPLAY_BATCH);
       setTotalProductsCount(totalCount);
-      setHasMoreProducts(offset + newProducts.length < totalCount);
+      setHasMoreProducts(false); // All products loaded
       setLastUpdated(data.lastSync || data.lastUpdated);
       setDataSource('unas');
       setUnasError(null);
@@ -898,18 +889,11 @@ const App = () => {
     loadUnasData({ search: serverSearchQuery, category });
   }, [loadUnasData, serverSearchQuery]);
 
-  // Load more products (infinite scroll)
-  const loadMoreProducts = useCallback(async () => {
-    if (isLoadingMore || !hasMoreProducts) return;
-    setIsLoadingMore(true);
-    await loadUnasData({ 
-      search: serverSearchQuery, 
-      category: serverCategory, 
-      offset: products.length,
-      append: true,
-      silent: true 
-    });
-  }, [isLoadingMore, hasMoreProducts, loadUnasData, serverSearchQuery, serverCategory, products.length]);
+  // Load more is now just showing more from already-loaded products
+  // All products are loaded at once, so no server fetch needed
+  const loadMoreProducts = useCallback(() => {
+    // This is handled by handleLoadMore - just show more from filteredAndSortedProducts
+  }, []);
 
   const loadUnasDataRef = useRef(loadUnasData);
   loadUnasDataRef.current = loadUnasData;
@@ -938,30 +922,19 @@ const App = () => {
   // Update ref after filteredAndSortedProducts is defined
   filteredLengthRef.current = filteredAndSortedProducts.length;
 
-  // Infinite scroll: show first visibleCount items; when sentinel visible, show more or load from API
+  // Show first visibleCount items from filtered products
   const displayedProducts = filteredAndSortedProducts.slice(0, visibleCount);
-  const hasMoreToShow = visibleCount < filteredAndSortedProducts.length || (hasMoreProducts && products.length < totalProductsCount);
+  const hasMoreToShow = visibleCount < filteredAndSortedProducts.length;
 
-  // When sort/advanced filters change, scroll to top and reset visible window
-  // (search and category changes are handled by server-side loading)
+  // When sort/advanced filters change, reset visible window
   useEffect(() => {
     setVisibleCount(DISPLAY_BATCH);
   }, [sortOption, advancedFilters]);
 
-  // Manual "Load More" button handler - shows more products or fetches from API
+  // Manual "Load More" button handler - shows more from already-loaded products
   const handleLoadMore = useCallback(() => {
-    const v = visibleCountRef.current;
-    const len = filteredLengthRef.current;
-    // First show more from already loaded products
-    if (v < len) {
-      setVisibleCount(prev => Math.min(prev + DISPLAY_BATCH, len));
-      return;
-    }
-    // If all loaded products are shown, fetch more from API
-    if (hasMoreProductsRef.current && !isLoadingMoreRef.current) {
-      loadMoreProducts();
-    }
-  }, [loadMoreProducts]);
+    setVisibleCount(prev => Math.min(prev + DISPLAY_BATCH, filteredAndSortedProducts.length));
+  }, [filteredAndSortedProducts.length]);
 
   // Compute categories from products (already filtered by EXCLUDED_MAIN_CATEGORIES)
   // This ensures only valid categories with actual products are shown
