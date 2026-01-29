@@ -963,12 +963,25 @@ const App = () => {
     }
   }, [loadMoreProducts]);
 
-  // Fetch categories from server (not computed from products in memory)
-  const [categories, setCategories] = useState(['Összes']);
-  
-  useEffect(() => {
-    fetchCategories().then(setCategories);
-  }, []);
+  // Compute categories from loaded products (only shows categories that have products)
+  const categories = useMemo(() => {
+    if (!products || products.length === 0) return ['Összes'];
+    
+    // Get unique categories from products and count them
+    const categoryMap = new Map();
+    for (const p of products) {
+      if (p.category) {
+        categoryMap.set(p.category, (categoryMap.get(p.category) || 0) + 1);
+      }
+    }
+    
+    // Sort by product count (descending), then alphabetically
+    const sortedCategories = Array.from(categoryMap.entries())
+      .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
+      .map(([name]) => name);
+    
+    return ['Összes', ...sortedCategories];
+  }, [products]);
 
   return (
     <div id="mkt-butorbolt-app" className="min-h-screen bg-white font-sans text-gray-900">

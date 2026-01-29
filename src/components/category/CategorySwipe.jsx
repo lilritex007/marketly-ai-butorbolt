@@ -243,6 +243,9 @@ const CategorySwipe = ({ categories, activeCategory, onCategoryChange }) => {
             >
               {category.icon && <span className="mr-1">{category.icon}</span>}
               {category.name}
+              <span className="ml-1 opacity-75">
+                {category.displayedCount}/{category.totalCount}
+              </span>
             </button>
           ))}
         </div>
