@@ -963,25 +963,12 @@ const App = () => {
     }
   }, [loadMoreProducts]);
 
-  // Compute categories from loaded products (only shows categories that have products)
-  const categories = useMemo(() => {
-    if (!products || products.length === 0) return ['Összes'];
-    
-    // Get unique categories from products and count them
-    const categoryMap = new Map();
-    for (const p of products) {
-      if (p.category) {
-        categoryMap.set(p.category, (categoryMap.get(p.category) || 0) + 1);
-      }
-    }
-    
-    // Sort by product count (descending), then alphabetically
-    const sortedCategories = Array.from(categoryMap.entries())
-      .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
-      .map(([name]) => name);
-    
-    return ['Összes', ...sortedCategories];
-  }, [products]);
+  // Fetch categories from backend (all non-excluded categories)
+  const [categories, setCategories] = useState(['Összes']);
+  
+  useEffect(() => {
+    fetchCategories().then(cats => setCategories(cats));
+  }, []);
 
   return (
     <div id="mkt-butorbolt-app" className="min-h-screen bg-white font-sans text-gray-900">
@@ -1120,14 +1107,9 @@ const App = () => {
                     <div>
                       <h2 className="text-2xl sm:text-3xl font-bold">Termékek</h2>
                       {!isLoadingUnas && (
-                        <div className="mt-1">
-                          <p className="text-sm text-gray-500">
-                            <span className="font-semibold text-indigo-600">{filteredAndSortedProducts.length.toLocaleString('hu-HU')}</span> termék 
-                            {totalProductsCount > 0 && products.length < totalProductsCount && (
-                              <span> / <span className="font-semibold">{totalProductsCount.toLocaleString('hu-HU')}</span></span>
-                            )}
-                          </p>
-                        </div>
+                        <p className="mt-1 text-sm text-gray-500">
+                          <span className="font-semibold text-indigo-600">{products.length.toLocaleString('hu-HU')}</span> termék
+                        </p>
                       )}
                     </div>
                     <div className="w-full md:w-auto flex flex-wrap items-center gap-3">
@@ -1161,30 +1143,16 @@ const App = () => {
                 
                 {/* Category Swipe Navigation */}
                 <CategorySwipe
-                  categories={categories.map((cat, idx) => {
-                    // Total products in this category (from full products list)
-                    const totalInCategory = cat === "Összes" 
-                      ? products.length 
-                      : products.filter(p => p.category === cat).length;
-                    
-                    // Currently visible products on screen
-                    const visibleProducts = filteredAndSortedProducts.slice(0, visibleCount);
-                    
-                    // How many of THIS category are in the visible products
-                    const displayedFromCategory = cat === "Összes"
-                      ? visibleProducts.length
-                      : visibleProducts.filter(p => p.category === cat).length;
-                    
-                    return {
-                      id: cat,
-                      name: cat,
-                      displayedCount: displayedFromCategory,
-                      totalCount: totalInCategory,
-                      icon: cat === "Összes" ? "🏠" : idx % 6 === 0 ? "🛋️" : idx % 6 === 1 ? "🪑" : idx % 6 === 2 ? "🛏️" : idx % 6 === 3 ? "🪞" : idx % 6 === 4 ? "💡" : "📦"
-                    };
-                  })}
+                  categories={categories.map((cat, idx) => ({
+                    id: cat,
+                    name: cat,
+                    icon: cat === "Összes" ? "🏠" : idx % 6 === 0 ? "🛋️" : idx % 6 === 1 ? "🪑" : idx % 6 === 2 ? "🛏️" : idx % 6 === 3 ? "🪞" : idx % 6 === 4 ? "💡" : "📦"
+                  }))}
                   activeCategory={categoryFilter}
                   onCategoryChange={handleCategoryChange}
+                  // For active category: show displayed/total
+                  displayedCount={Math.min(visibleCount, filteredAndSortedProducts.length)}
+                  totalCount={filteredAndSortedProducts.length}
                 />
 
                 {/* Loading State */}
