@@ -75,7 +75,7 @@ Adj vissza JSON-t a ${maxResults} LEGINKÁBB HASONLÓ termék ID-jével:
 Figyelj a stílusra, kategóriára, árkategóriára.`;
 
       const response = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=${GOOGLE_API_KEY}`,
+        `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GOOGLE_API_KEY}`,
         {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -86,15 +86,28 @@ Figyelj a stílusra, kategóriára, árkategóriára.`;
         }
       );
 
-      const data = await response.json();
-      const result = JSON.parse(data.candidates?.[0]?.content?.parts?.[0]?.text || '{"similarIds":[]}');
+      if (!response.ok) {
+        console.warn('Gemini API error, falling back to basic similarity');
+        findSimilarBasic();
+        return;
+      }
 
-      const similar = result.similarIds
+      const data = await response.json();
+      const resultText = data.candidates?.[0]?.content?.parts?.[0]?.text || '{"similarIds":[]}';
+      const result = JSON.parse(resultText);
+
+      const similarIds = result.similarIds || [];
+      const similar = similarIds
         .map(id => allProducts.find(p => p.id === id))
         .filter(Boolean);
 
-      setSimilarProducts(similar.length > 0 ? similar : findSimilarBasic());
+      if (similar.length > 0) {
+        setSimilarProducts(similar);
+      } else {
+        findSimilarBasic();
+      }
     } catch (error) {
+      console.warn('Similar products AI error:', error);
       findSimilarBasic(); // Fallback to basic
     } finally {
       setIsLoading(false);
