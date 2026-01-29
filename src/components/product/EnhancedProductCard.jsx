@@ -46,24 +46,29 @@ export const EnhancedProductCard = ({
     }).format(price);
   };
 
-  // Intersection Observer for scroll animation
+  // Intersection Observer for scroll animation - optimized
   useEffect(() => {
+    const element = cardRef.current;
+    if (!element) return;
+
+    // Use requestIdleCallback for non-critical animation
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {
-          // Staggered delay based on index
-          const delay = Math.min(index % 6 * 50, 250);
-          setTimeout(() => setIsVisible(true), delay);
-          observer.unobserve(entry.target);
+          // Minimal stagger, max 100ms
+          const delay = Math.min((index % 4) * 25, 100);
+          if (delay > 0) {
+            setTimeout(() => setIsVisible(true), delay);
+          } else {
+            setIsVisible(true);
+          }
+          observer.disconnect();
         }
       },
-      { threshold: 0.1, rootMargin: '50px' }
+      { threshold: 0.05, rootMargin: '100px 0px' }
     );
 
-    if (cardRef.current) {
-      observer.observe(cardRef.current);
-    }
-
+    observer.observe(element);
     return () => observer.disconnect();
   }, [index]);
 
@@ -71,12 +76,15 @@ export const EnhancedProductCard = ({
     <article 
       ref={cardRef}
       className={`
-        group relative bg-white rounded-xl sm:rounded-2xl lg:rounded-3xl overflow-hidden 
-        shadow-sm hover:shadow-xl border border-gray-100 h-full flex flex-col
-        transition-all duration-300 hover-card tap-scale
-        ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}
+        group relative bg-white rounded-xl sm:rounded-2xl overflow-hidden 
+        shadow-sm border border-gray-100 h-full flex flex-col
+        hover-card tap-scale
+        ${isVisible ? 'opacity-100' : 'opacity-0 translate-y-3'}
       `}
-      style={{ transitionDelay: `${Math.min(index % 6 * 50, 250)}ms` }}
+      style={{ 
+        transition: 'opacity 0.3s ease-out, transform 0.3s ease-out, box-shadow 0.2s ease-out',
+        willChange: isVisible ? 'auto' : 'opacity, transform'
+      }}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
@@ -93,47 +101,41 @@ export const EnhancedProductCard = ({
         }} 
         className={`
           absolute top-2 sm:top-3 right-2 sm:right-3 z-20
-          w-10 h-10 sm:w-11 sm:h-11 flex items-center justify-center 
-          rounded-full shadow-lg backdrop-blur-sm transition-all duration-200
-          hover-lift tap-scale
+          w-10 h-10 flex items-center justify-center 
+          rounded-full shadow-md tap-scale
           ${isWishlisted 
             ? 'bg-red-500 text-white' 
-            : 'bg-white/95 text-gray-500 hover:bg-red-50 hover:text-red-500'
+            : 'bg-white/95 text-gray-500 hover:text-red-500'
           }
         `}
+        style={{ transition: 'background-color 0.15s, color 0.15s' }}
         aria-label={isWishlisted ? 'Eltávolítás' : 'Kedvencekhez'}
       >
-        <Heart className={`w-5 h-5 transition-transform ${isWishlisted ? 'fill-current scale-110' : ''}`} />
+        <Heart className={`w-5 h-5 ${isWishlisted ? 'fill-current' : ''}`} />
       </button>
 
-      {/* Image Section with Blur-up Loading */}
+      {/* Image Section - Optimized Loading */}
       <div 
         onClick={() => onQuickView?.(product)} 
         className="relative aspect-square overflow-hidden bg-gray-50 cursor-pointer"
       >
-        {/* Blur placeholder */}
-        <div 
-          className={`
-            absolute inset-0 bg-gradient-to-br from-gray-100 to-gray-200
-            transition-opacity duration-500
-            ${imageLoaded ? 'opacity-0' : 'opacity-100'}
-          `}
-        >
-          {/* Shimmer effect while loading */}
-          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent animate-shimmer bg-[length:200%_100%]" />
-        </div>
+        {/* Simple placeholder */}
+        {!imageLoaded && (
+          <div className="absolute inset-0 bg-gray-100" />
+        )}
         
-        {/* Actual image */}
+        {/* Actual image - GPU optimized */}
         <img 
           src={imageError ? PLACEHOLDER_IMAGE : mainImage}
           alt={product.name} 
           className={`
-            w-full h-full object-contain p-2 sm:p-3 lg:p-4 
-            transition-all duration-500
-            ${imageLoaded ? 'opacity-100 scale-100' : 'opacity-0 scale-105'}
-            group-hover:scale-110
+            w-full h-full object-contain p-2 sm:p-3
+            transition-opacity duration-300 ease-out
+            ${imageLoaded ? 'opacity-100' : 'opacity-0'}
           `}
+          style={{ transform: 'translateZ(0)' }}
           loading="lazy"
+          decoding="async"
           onLoad={() => setImageLoaded(true)}
           onError={() => { setImageError(true); setImageLoaded(true); }}
         />
@@ -143,20 +145,19 @@ export const EnhancedProductCard = ({
           <StockBadge inStock={inStock} />
         </div>
         
-        {/* Desktop hover overlay */}
-        <div className={`
-          hidden md:flex absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent
-          items-end justify-center pb-4 lg:pb-6 transition-all duration-300
-          ${isHovered ? 'opacity-100' : 'opacity-0'}
-        `}>
+        {/* Desktop hover overlay - lightweight */}
+        <div 
+          className="hidden md:flex absolute inset-0 bg-black/40 items-end justify-center pb-4 transition-opacity duration-200"
+          style={{ opacity: isHovered ? 1 : 0, pointerEvents: isHovered ? 'auto' : 'none' }}
+        >
           <button
             onClick={(e) => {
               e.stopPropagation();
               onQuickView?.(product);
             }}
-            className="bg-white text-gray-900 px-4 py-2 lg:px-5 lg:py-2.5 rounded-full text-sm lg:text-base font-semibold shadow-lg transform translate-y-3 group-hover:translate-y-0 transition-all duration-300 flex items-center gap-2 hover:bg-gray-50 hover-lift"
+            className="bg-white text-gray-900 px-4 py-2 rounded-full text-sm font-semibold shadow-lg flex items-center gap-2 hover:bg-gray-50 tap-scale"
           >
-            <Eye className="w-4 h-4 lg:w-5 lg:h-5" /> 
+            <Eye className="w-4 h-4" /> 
             Megnézem
           </button>
         </div>

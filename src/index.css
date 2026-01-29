@@ -276,99 +276,64 @@
 .animation-delay-2000 { animation-delay: 2s; }
 .animation-delay-4000 { animation-delay: 4s; }
 
-/* Scroll-triggered animations (used with JS observer) */
+/* Scroll-triggered animations - GPU accelerated for smooth 60fps */
 .scroll-animate {
   opacity: 0;
-  transform: translateY(20px);
-  transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+  transform: translateY(12px) translateZ(0);
+  transition: opacity 0.4s ease-out, transform 0.4s ease-out;
+  will-change: opacity, transform;
+  backface-visibility: hidden;
 }
 
 .scroll-animate.is-visible {
   opacity: 1;
-  transform: translateY(0);
+  transform: translateY(0) translateZ(0);
 }
 
-.scroll-animate-left {
-  opacity: 0;
-  transform: translateX(-30px);
-  transition: opacity 0.6s ease-out, transform 0.6s ease-out;
-}
-
-.scroll-animate-left.is-visible {
-  opacity: 1;
-  transform: translateX(0);
-}
-
-.scroll-animate-right {
-  opacity: 0;
-  transform: translateX(30px);
-  transition: opacity 0.6s ease-out, transform 0.6s ease-out;
-}
-
-.scroll-animate-right.is-visible {
-  opacity: 1;
-  transform: translateX(0);
-}
-
-.scroll-animate-scale {
-  opacity: 0;
-  transform: scale(0.9);
-  transition: opacity 0.6s ease-out, transform 0.6s ease-out;
-}
-
-.scroll-animate-scale.is-visible {
-  opacity: 1;
-  transform: scale(1);
+/* Remove will-change after animation to free GPU memory */
+.scroll-animate.is-visible {
+  will-change: auto;
 }
 
 /* ========================================
-   MICRO-INTERACTIONS
+   MICRO-INTERACTIONS - GPU Optimized
    ======================================== */
 
-/* Button hover lift */
+/* Button hover lift - lightweight */
 #mkt-butorbolt-app .hover-lift {
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  transform: translateZ(0);
+  transition: transform 0.15s ease-out, box-shadow 0.15s ease-out;
+  backface-visibility: hidden;
 }
 
 #mkt-butorbolt-app .hover-lift:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  transform: translateY(-2px) translateZ(0);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
-/* Card hover effect */
+/* Card hover effect - subtle and fast */
 #mkt-butorbolt-app .hover-card {
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  transform: translateZ(0);
+  transition: transform 0.2s ease-out, box-shadow 0.2s ease-out;
+  backface-visibility: hidden;
 }
 
 #mkt-butorbolt-app .hover-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.12);
+  transform: translateY(-3px) translateZ(0);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
 }
 
-/* Scale on tap (mobile) */
+/* Scale on tap (mobile) - instant feedback */
 #mkt-butorbolt-app .tap-scale {
-  transition: transform 0.1s ease;
+  transform: translateZ(0);
+  transition: transform 0.1s ease-out;
 }
 
 #mkt-butorbolt-app .tap-scale:active {
-  transform: scale(0.97);
+  transform: scale(0.98) translateZ(0);
 }
 
-/* Glow effect on hover */
-#mkt-butorbolt-app .hover-glow {
-  transition: box-shadow 0.3s ease;
-}
-
-#mkt-butorbolt-app .hover-glow:hover {
-  box-shadow: 0 0 20px rgba(99, 102, 241, 0.4);
-}
-
-/* Icon spin on hover */
-#mkt-butorbolt-app .hover-spin:hover svg {
-  animation: spin-slow 2s linear infinite;
-}
-
-/* Underline slide animation */
+/* Underline slide - simple */
 #mkt-butorbolt-app .underline-slide {
   position: relative;
 }
@@ -381,11 +346,42 @@
   width: 0;
   height: 2px;
   background: currentColor;
-  transition: width 0.3s ease;
+  transition: width 0.2s ease-out;
 }
 
 #mkt-butorbolt-app .underline-slide:hover::after {
   width: 100%;
+}
+
+/* ========================================
+   PERFORMANCE OPTIMIZATIONS
+   ======================================== */
+
+/* Smooth scrolling */
+#mkt-butorbolt-app {
+  scroll-behavior: smooth;
+}
+
+/* Reduce motion for accessibility */
+@media (prefers-reduced-motion: reduce) {
+  #mkt-butorbolt-app *,
+  #mkt-butorbolt-app *::before,
+  #mkt-butorbolt-app *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* GPU acceleration for scrolling containers */
+#mkt-butorbolt-app .product-grid {
+  transform: translateZ(0);
+  contain: layout style;
+}
+
+/* Optimize images */
+#mkt-butorbolt-app img {
+  content-visibility: auto;
 }
 
 /* ========================================
