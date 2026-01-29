@@ -25,7 +25,7 @@
     cartUrl: '/cart',
     checkoutUrl: '/checkout',
     mode: 'unas-integrated',
-    cdnBase: 'https://cdn.jsdelivr.net/gh/lilritex007/marketly-ai-butorbolt@80e1052/dist',
+    cdnBase: 'https://cdn.jsdelivr.net/gh/lilritex007/marketly-ai-butorbolt@cffaf78/dist',
     features: { sessionSharing: false, stockCheck: false, expressCheckout: false }
   };
   console.log('✅ MARKETLY_CONFIG initialized:', window.MARKETLY_CONFIG);
