@@ -1148,30 +1148,30 @@ const App = () => {
                 
                 {/* Category Swipe Navigation */}
                 <CategorySwipe
-                  categories={categories
-                    .map((cat, idx) => {
-                      // Count total products in this category from FULL products list (not filtered)
-                      const totalInCategory = cat === "Összes" 
-                        ? products.length 
-                        : products.filter(p => p.category === cat).length;
-                      
-                      // Skip categories with 0 products (except "Összes")
-                      if (totalInCategory === 0 && cat !== "Összes") return null;
-                      
-                      return {
-                        id: cat,
-                        name: cat,
-                        count: totalInCategory,
-                        icon: cat === "Összes" ? "🏠" : idx % 6 === 0 ? "🛋️" : idx % 6 === 1 ? "🪑" : idx % 6 === 2 ? "🛏️" : idx % 6 === 3 ? "🪞" : idx % 6 === 4 ? "💡" : "📦"
-                      };
-                    })
-                    .filter(Boolean) // Remove null entries (0-product categories)
-                  }
+                  categories={categories.map((cat, idx) => {
+                    // Total products in this category (from full products list)
+                    const totalInCategory = cat === "Összes" 
+                      ? products.length 
+                      : products.filter(p => p.category === cat).length;
+                    
+                    // Currently visible products on screen
+                    const visibleProducts = filteredAndSortedProducts.slice(0, visibleCount);
+                    
+                    // How many of THIS category are in the visible products
+                    const displayedFromCategory = cat === "Összes"
+                      ? visibleProducts.length
+                      : visibleProducts.filter(p => p.category === cat).length;
+                    
+                    return {
+                      id: cat,
+                      name: cat,
+                      displayedCount: displayedFromCategory,
+                      totalCount: totalInCategory,
+                      icon: cat === "Összes" ? "🏠" : idx % 6 === 0 ? "🛋️" : idx % 6 === 1 ? "🪑" : idx % 6 === 2 ? "🛏️" : idx % 6 === 3 ? "🪞" : idx % 6 === 4 ? "💡" : "📦"
+                    };
+                  })}
                   activeCategory={categoryFilter}
                   onCategoryChange={handleCategoryChange}
-                  // Pass current display info for active category
-                  displayedCount={Math.min(visibleCount, filteredAndSortedProducts.length)}
-                  totalCount={filteredAndSortedProducts.length}
                 />
 
                 {/* Loading State */}
