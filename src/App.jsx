@@ -17,6 +17,7 @@ import AIStyleQuiz from './components/ai/AIStyleQuiz';
 
 // Category Components
 import CategorySwipe from './components/category/CategorySwipe';
+import CategoryPage from './components/category/CategoryPage';
 
 // UX Components
 import ScrollProgress from './components/ux/ScrollProgress';
@@ -1088,6 +1089,21 @@ const App = () => {
             />
             <Features />
             
+            {/* Category Page View - shown when specific category selected */}
+            {categoryFilter && categoryFilter !== "Összes" && !isLoadingUnas ? (
+              <CategoryPage
+                category={categoryFilter}
+                products={filteredAndSortedProducts}
+                onBack={() => handleCategoryChange("Összes")}
+                onProductClick={handleProductView}
+                onWishlistToggle={toggleWishlist}
+                wishlist={wishlist}
+                onAskAI={() => setShowStyleQuiz(true)}
+                visibleCount={visibleCount}
+                onLoadMore={handleLoadMore}
+                hasMore={hasMoreToShow}
+              />
+            ) : (
             <section id="products-section" className="container-app section-padding">
                 {/* Sticky products header */}
                 <div className="sticky top-16 sm:top-20 z-40 -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8 py-3 sm:py-4 mb-4 sm:mb-6 bg-white/95 backdrop-blur-md border-b border-gray-100 shadow-sm">
@@ -1233,6 +1249,7 @@ const App = () => {
                   </div>
                 )}
             </section>
+            )}
             
             {/* Recently Viewed Products */}
             <RecentlyViewed
