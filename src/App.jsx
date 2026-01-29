@@ -39,8 +39,8 @@ import QuickAddToCart from './components/product/QuickAddToCart';
 import ProductQuickPeek from './components/product/ProductQuickPeek';
 import AIPricePredictor from './components/ai/AIPricePredictor';
 
-// Search Components (lazy loaded to avoid TDZ issues with framer-motion)
-const VoiceSearch = lazy(() => import('./components/search/VoiceSearch'));
+// Search Components - VoiceSearch disabled due to framer-motion bundling issue
+// const VoiceSearch = lazy(() => import('./components/search/VoiceSearch'));
 
 // Marketing Components
 import SmartNewsletterPopup from './components/marketing/SmartNewsletterPopup';
@@ -1087,12 +1087,14 @@ const App = () => {
                           onSearch={(query) => setSearchQuery(query)}
                           onSelectProduct={handleProductView}
                         />
+{/* VoiceSearch disabled - framer-motion bundling issue
                         <Suspense fallback={<div className="p-3 rounded-full bg-gray-200 animate-pulse w-11 h-11" />}>
                           <VoiceSearch
                             onSearchQuery={(query) => setSearchQuery(query)}
                             className="group"
                           />
                         </Suspense>
+*/}
                       </div>
                       <div className="relative">
                         <AdvancedFilters
