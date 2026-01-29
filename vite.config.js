@@ -1,7 +1,7 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import { writeFileSync } from 'fs'
-import { join } from 'path'
+import { join, resolve } from 'path'
 
 // https://vitejs.dev/config/
 export default defineConfig({
@@ -15,9 +15,11 @@ export default defineConfig({
       }
     }
   ],
-  // Pre-bundle framer-motion to avoid TDZ issues
-  optimizeDeps: {
-    include: ['framer-motion']
+  // Replace framer-motion with our CSS-based shim to avoid TDZ issues
+  resolve: {
+    alias: {
+      'framer-motion': resolve(__dirname, 'src/utils/motion-shim.jsx')
+    }
   },
   server: {
     port: 3000,
@@ -33,13 +35,11 @@ export default defineConfig({
   build: {
     outDir: 'dist',
     sourcemap: true,
-    // Disable code splitting to avoid framer-motion TDZ issues
     rollupOptions: {
       output: {
         entryFileNames: 'assets/index.js',
-        // Use manualChunks to bundle framer-motion with vendor
         manualChunks: {
-          vendor: ['react', 'react-dom', 'framer-motion']
+          vendor: ['react', 'react-dom']
         },
         chunkFileNames: 'assets/[name].js',
         assetFileNames: 'assets/[name][extname]'

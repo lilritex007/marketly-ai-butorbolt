@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { ShoppingCart, Camera, MessageCircle, X, Send, Plus, Move, Trash2, Home, ZoomIn, ZoomOut, Upload, Settings, Link as LinkIcon, FileText, RefreshCw, AlertCircle, Database, Lock, Search, ChevronLeft, ChevronRight, Filter, Heart, ArrowDownUp, Info, Check, Star, Truck, ShieldCheck, Phone, ArrowRight, Mail, Eye, Sparkles, Lightbulb, Image as ImageIcon, MousePointer2, Menu } from 'lucide-react';
-import { AnimatePresence } from 'framer-motion';
+// framer-motion removed due to Vite production build TDZ issues
 import { fetchUnasProducts, refreshUnasProducts } from './services/unasApi';
 
 // New UI Components
@@ -249,48 +249,46 @@ const Navbar = ({ activeTab, setActiveTab, wishlistCount }) => {
       </div>
 
       {/* Mobile menu overlay / drawer */}
-      <AnimatePresence>
-        {mobileMenuOpen && (
-          <>
-            <div
-              className="fixed inset-0 bg-black/50 z-40 md:hidden"
-              onClick={closeMobileMenu}
-              aria-hidden="true"
-            />
-            <div
-              className="fixed top-0 right-0 bottom-0 w-full max-w-sm bg-white shadow-2xl z-50 md:hidden flex flex-col animate-fade-in"
-              role="dialog"
-              aria-label="Navigációs menü"
-            >
-              <div className="flex justify-between items-center p-4 border-b border-gray-100">
-                <span className="font-bold text-lg text-gray-900">Menü</span>
-                <button
-                  type="button"
-                  className="p-2 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-xl text-gray-600 hover:bg-gray-100"
-                  onClick={closeMobileMenu}
-                  aria-label="Menü bezárása"
-                >
-                  <X className="w-6 h-6" />
-                </button>
-              </div>
-              <nav className="p-4 flex flex-col gap-2">
-                <button onClick={() => setTabAndClose('shop')} className={`flex items-center gap-3 w-full px-4 py-3 min-h-[44px] rounded-xl text-left font-medium transition-colors ${activeTab === 'shop' ? 'bg-indigo-50 text-indigo-600' : 'text-gray-700 hover:bg-gray-50'}`}>
-                  <Home className="w-5 h-5" /> Főoldal
-                </button>
-                <button onClick={() => setTabAndClose('visual-search')} className={`flex items-center gap-3 w-full px-4 py-3 min-h-[44px] rounded-xl text-left font-medium transition-colors ${activeTab === 'visual-search' ? 'bg-indigo-50 text-indigo-600' : 'text-gray-700 hover:bg-gray-50'}`}>
-                  <Camera className="w-5 h-5" /> Képkereső
-                </button>
-                <button onClick={() => setTabAndClose('room-planner')} className={`flex items-center gap-3 w-full px-4 py-3 min-h-[44px] rounded-xl text-left font-medium transition-colors ${activeTab === 'room-planner' ? 'bg-indigo-50 text-indigo-600' : 'text-gray-700 hover:bg-gray-50'}`}>
-                  <Move className="w-5 h-5" /> Szobatervező
-                </button>
-                <a href={WEBSHOP_DOMAIN} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 w-full px-4 py-3 min-h-[44px] rounded-xl text-left font-medium bg-gray-900 text-white hover:bg-gray-800 transition-colors mt-4" onClick={closeMobileMenu}>
-                  Belépés a webshopba
-                </a>
-              </nav>
+      {mobileMenuOpen && (
+        <>
+          <div
+            className="fixed inset-0 bg-black/50 z-40 md:hidden transition-opacity"
+            onClick={closeMobileMenu}
+            aria-hidden="true"
+          />
+          <div
+            className="fixed top-0 right-0 bottom-0 w-full max-w-sm bg-white shadow-2xl z-50 md:hidden flex flex-col transition-transform"
+            role="dialog"
+            aria-label="Navigációs menü"
+          >
+            <div className="flex justify-between items-center p-4 border-b border-gray-100">
+              <span className="font-bold text-lg text-gray-900">Menü</span>
+              <button
+                type="button"
+                className="p-2 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-xl text-gray-600 hover:bg-gray-100"
+                onClick={closeMobileMenu}
+                aria-label="Menü bezárása"
+              >
+                <X className="w-6 h-6" />
+              </button>
             </div>
-          </>
-        )}
-      </AnimatePresence>
+            <nav className="p-4 flex flex-col gap-2">
+              <button onClick={() => setTabAndClose('shop')} className={`flex items-center gap-3 w-full px-4 py-3 min-h-[44px] rounded-xl text-left font-medium transition-colors ${activeTab === 'shop' ? 'bg-indigo-50 text-indigo-600' : 'text-gray-700 hover:bg-gray-50'}`}>
+                <Home className="w-5 h-5" /> Főoldal
+              </button>
+              <button onClick={() => setTabAndClose('visual-search')} className={`flex items-center gap-3 w-full px-4 py-3 min-h-[44px] rounded-xl text-left font-medium transition-colors ${activeTab === 'visual-search' ? 'bg-indigo-50 text-indigo-600' : 'text-gray-700 hover:bg-gray-50'}`}>
+                <Camera className="w-5 h-5" /> Képkereső
+              </button>
+              <button onClick={() => setTabAndClose('room-planner')} className={`flex items-center gap-3 w-full px-4 py-3 min-h-[44px] rounded-xl text-left font-medium transition-colors ${activeTab === 'room-planner' ? 'bg-indigo-50 text-indigo-600' : 'text-gray-700 hover:bg-gray-50'}`}>
+                <Move className="w-5 h-5" /> Szobatervező
+              </button>
+              <a href={WEBSHOP_DOMAIN} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 w-full px-4 py-3 min-h-[44px] rounded-xl text-left font-medium bg-gray-900 text-white hover:bg-gray-800 transition-colors mt-4" onClick={closeMobileMenu}>
+                Belépés a webshopba
+              </a>
+            </nav>
+          </div>
+        </>
+      )}
     </nav>
   );
 };
@@ -1241,30 +1239,26 @@ const App = () => {
       />
       
       {/* AI Style Quiz Modal */}
-      <AnimatePresence>
-        {showStyleQuiz && (
-          <AIStyleQuiz
-            products={products}
-            onRecommendations={(recs) => {
-              toast.success(`${recs.length} termék a Style DNA-d alapján!`);
-            }}
-            onClose={() => setShowStyleQuiz(false)}
-          />
-        )}
-      </AnimatePresence>
+      {showStyleQuiz && (
+        <AIStyleQuiz
+          products={products}
+          onRecommendations={(recs) => {
+            toast.success(`${recs.length} termék a Style DNA-d alapján!`);
+          }}
+          onClose={() => setShowStyleQuiz(false)}
+        />
+      )}
       
       {/* AI Room Designer Modal */}
-      <AnimatePresence>
-        {showRoomDesigner && (
-          <AIRoomDesigner
-            products={products}
-            onProductRecommendations={(recs) => {
-              toast.success(`${recs.length} termék ajánlat!`);
-            }}
-            onClose={() => setShowRoomDesigner(false)}
-          />
-        )}
-      </AnimatePresence>
+      {showRoomDesigner && (
+        <AIRoomDesigner
+          products={products}
+          onProductRecommendations={(recs) => {
+            toast.success(`${recs.length} termék ajánlat!`);
+          }}
+          onClose={() => setShowRoomDesigner(false)}
+        />
+      )}
 
       {/* Product Quick Peek Modal */}
       <ProductQuickPeek
