@@ -15,6 +15,10 @@ export default defineConfig({
       }
     }
   ],
+  // Pre-bundle framer-motion to avoid TDZ issues
+  optimizeDeps: {
+    include: ['framer-motion']
+  },
   server: {
     port: 3000,
     open: true,
@@ -29,10 +33,15 @@ export default defineConfig({
   build: {
     outDir: 'dist',
     sourcemap: true,
+    // Disable code splitting to avoid framer-motion TDZ issues
     rollupOptions: {
       output: {
         entryFileNames: 'assets/index.js',
-        chunkFileNames: 'assets/index.js',
+        // Use manualChunks to bundle framer-motion with vendor
+        manualChunks: {
+          vendor: ['react', 'react-dom', 'framer-motion']
+        },
+        chunkFileNames: 'assets/[name].js',
         assetFileNames: 'assets/[name][extname]'
       }
     }
