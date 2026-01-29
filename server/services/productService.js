@@ -265,9 +265,17 @@ export function getProductCount(filters = {}) {
 }
 
 /**
- * Get all categories (config table)
+ * Get all categories (config table) - returns just category names for frontend
  */
 export function getCategories() {
+  const stmt = db.prepare('SELECT name FROM categories WHERE enabled = 1 ORDER BY name');
+  return stmt.all().map(cat => cat.name).filter(Boolean);
+}
+
+/**
+ * Get all categories with full details (for admin)
+ */
+export function getCategoriesAdmin() {
   const stmt = db.prepare('SELECT * FROM categories ORDER BY name');
   return stmt.all().map(cat => ({
     ...cat,

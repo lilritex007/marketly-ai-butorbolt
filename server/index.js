@@ -16,6 +16,7 @@ import {
   deleteProduct,
   getProductCount,
   getCategories,
+  getCategoriesAdmin,
   getMainCategories,
   toggleCategory,
   getStatistics
@@ -366,7 +367,8 @@ app.patch('/api/admin/categories/:name', async (req, res) => {
 
     toggleCategory(req.params.name, enabled);
     
-    const categories = getCategories();
+    // Return full category objects for admin
+    const categories = getCategoriesAdmin();
     res.json({ categories });
   } catch (error) {
     console.error('Error updating category:', error);
