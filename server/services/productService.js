@@ -3,7 +3,10 @@ import { EXCLUDED_MAIN_CATEGORIES } from '../config/excludedCategories.js';
 
 /**
  * Get all products (with optional filtering)
- * When showInAI is true, products in EXCLUDED_MAIN_CATEGORIES are filtered out
+ * When showInAI is true:
+ *   - Products in EXCLUDED_MAIN_CATEGORIES are filtered out
+ *   - Products with price = 0 are filtered out (invalid price)
+ * Out of stock products ARE included (shown with "Készlethiány" label)
  * Never throws: returns [] on error.
  */
 export function getProducts(filters = {}) {
@@ -32,11 +35,17 @@ export function getProducts(filters = {}) {
       params.push(showInAI ? 1 : 0);
     }
 
+    // Exclude 0 Ft products from AI shop display (invalid price)
+    if (showInAI) {
+      query += ' AND price > 0';
+    }
+
     if (showInAI && EXCLUDED_MAIN_CATEGORIES.length > 0) {
       query += ` AND (CASE WHEN category_path IS NOT NULL AND category_path != '' AND instr(category_path, '|') > 0 THEN trim(substr(category_path, 1, instr(category_path, '|') - 1)) ELSE category END) NOT IN (${EXCLUDED_MAIN_CATEGORIES.map(() => '?').join(',')})`;
       params.push(...EXCLUDED_MAIN_CATEGORIES);
     }
 
+    // Note: inStock filter is optional - out of stock products ARE included by default
     if (inStock !== undefined) {
       query += ' AND in_stock = ?';
       params.push(inStock ? 1 : 0);
@@ -230,11 +239,17 @@ export function getProductCount(filters = {}) {
       params.push(showInAI ? 1 : 0);
     }
 
+    // Exclude 0 Ft products from AI shop count
+    if (showInAI) {
+      query += ' AND price > 0';
+    }
+
     if (showInAI && EXCLUDED_MAIN_CATEGORIES.length > 0) {
       query += ` AND (CASE WHEN category_path IS NOT NULL AND category_path != '' AND instr(category_path, '|') > 0 THEN trim(substr(category_path, 1, instr(category_path, '|') - 1)) ELSE category END) NOT IN (${EXCLUDED_MAIN_CATEGORIES.map(() => '?').join(',')})`;
       params.push(...EXCLUDED_MAIN_CATEGORIES);
     }
 
+    // Note: inStock filter is optional - out of stock products ARE counted by default
     if (inStock !== undefined) {
       query += ' AND in_stock = ?';
       params.push(inStock ? 1 : 0);
