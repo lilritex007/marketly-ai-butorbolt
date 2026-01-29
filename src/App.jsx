@@ -62,7 +62,7 @@ const GOOGLE_API_KEY = import.meta.env.VITE_GOOGLE_API_KEY || "AIzaSyDZV-fAFVCvh
 const WEBSHOP_DOMAIN = "https://www.marketly.hu";
 const SHOP_ID = "81697"; 
 
-const INITIAL_PAGE_SIZE = 2000;
+const INITIAL_PAGE_SIZE = 10000; // Load more products initially for better search/filter
 const DISPLAY_BATCH = 48;
 
 /* --- 2. SEGÉDFÜGGVÉNYEK --- */
