@@ -1150,25 +1150,18 @@ const App = () => {
                 <CategorySwipe
                   categories={categories
                     .map((cat, idx) => {
-                      // Count products in this category from full filtered list
+                      // Count total products in this category from FULL products list (not filtered)
                       const totalInCategory = cat === "Összes" 
-                        ? filteredAndSortedProducts.length 
-                        : filteredAndSortedProducts.filter(p => p.category === cat).length;
+                        ? products.length 
+                        : products.filter(p => p.category === cat).length;
                       
                       // Skip categories with 0 products (except "Összes")
                       if (totalInCategory === 0 && cat !== "Összes") return null;
                       
-                      // Count how many of this category are currently displayed
-                      const displayedProducts = filteredAndSortedProducts.slice(0, visibleCount);
-                      const displayedInCategory = cat === "Összes"
-                        ? displayedProducts.length
-                        : displayedProducts.filter(p => p.category === cat).length;
-                      
                       return {
                         id: cat,
                         name: cat,
-                        displayedCount: displayedInCategory,
-                        totalCount: totalInCategory,
+                        count: totalInCategory,
                         icon: cat === "Összes" ? "🏠" : idx % 6 === 0 ? "🛋️" : idx % 6 === 1 ? "🪑" : idx % 6 === 2 ? "🛏️" : idx % 6 === 3 ? "🪞" : idx % 6 === 4 ? "💡" : "📦"
                       };
                     })
@@ -1176,6 +1169,9 @@ const App = () => {
                   }
                   activeCategory={categoryFilter}
                   onCategoryChange={handleCategoryChange}
+                  // Pass current display info for active category
+                  displayedCount={Math.min(visibleCount, filteredAndSortedProducts.length)}
+                  totalCount={filteredAndSortedProducts.length}
                 />
 
                 {/* Loading State */}

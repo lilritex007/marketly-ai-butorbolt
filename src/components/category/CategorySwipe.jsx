@@ -7,7 +7,7 @@ import { ChevronLeft, ChevronRight, Home, Sparkles } from 'lucide-react';
  * Mobile: Swipe gestures
  * Desktop: Click navigation + keyboard
  */
-const CategorySwipe = ({ categories, activeCategory, onCategoryChange }) => {
+const CategorySwipe = ({ categories, activeCategory, onCategoryChange, displayedCount, totalCount }) => {
   const [touchStart, setTouchStart] = useState(null);
   const [touchEnd, setTouchEnd] = useState(null);
   const [direction, setDirection] = useState(0);
@@ -176,9 +176,12 @@ const CategorySwipe = ({ categories, activeCategory, onCategoryChange }) => {
                 {categories[activeCategoryIndex]?.name}
               </h4>
 
-              {/* Category Count - displayed / total */}
+              {/* Category Count - displayed / total for active category */}
               <p className="text-sm text-gray-500">
-                {categories[activeCategoryIndex]?.displayedCount || 0} / {categories[activeCategoryIndex]?.totalCount || 0} termék
+                <span className="font-semibold text-indigo-600">{displayedCount || 0}</span>
+                {' / '}
+                <span>{totalCount || categories[activeCategoryIndex]?.count || 0}</span>
+                {' termék'}
               </p>
             </motion.div>
           </AnimatePresence>
