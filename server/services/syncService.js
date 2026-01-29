@@ -128,29 +128,16 @@ export async function syncProductsFromUnas(options = {}) {
 
     console.log('✅ Login successful, token received');
 
-    // STEP 2: Pre-load enabled categories (if filtering needed)
+    // STEP 2: NO category filtering during sync - sync ALL products
+    // Category filtering happens at DISPLAY time (via EXCLUDED_MAIN_CATEGORIES in productService)
     let enabledCategories = null;
     if (categories && Array.isArray(categories) && categories.length > 0) {
+      // Only filter if explicitly requested (manual sync with specific categories)
       enabledCategories = new Set(categories);
-      console.log(`🔍 Filtering by ${categories.length} specified categories`);
-    } else if (!categories) {
-      // Load enabled categories from database (ONLY if categories exist)
-      const categoriesStmt = db.prepare('SELECT COUNT(*) as count FROM categories');
-      const catCount = categoriesStmt.get().count;
-      
-      if (catCount > 0) {
-        const enabledCatsStmt = db.prepare('SELECT name FROM categories WHERE enabled = 1');
-        const dbCategories = enabledCatsStmt.all();
-        if (dbCategories.length > 0) {
-          enabledCategories = new Set(dbCategories.map(c => c.name));
-          console.log(`🔍 Filtering by ${dbCategories.length} enabled categories from database`);
-        } else {
-          console.log('⚠️ No enabled categories in database - no products will be synced');
-        }
-      } else {
-        // First sync - accept all products
-        console.log('🆕 First sync - accepting all categories');
-      }
+      console.log(`🔍 Manual sync: Filtering by ${categories.length} specified categories`);
+    } else {
+      // Normal sync - accept ALL products, no category filtering
+      console.log('📦 Syncing ALL products (no category filter)');
     }
 
     // STEP 3: Fetch and save products in batches (MEMORY EFFICIENT)
