@@ -370,15 +370,8 @@ app.use((err, req, res, next) => {
 });
 
 // ==================== START SERVER ====================
-// #region agent log
-import fs from 'fs';
-try{fs.appendFileSync('c:\\Users\\Kis Riti\\Desktop\\Marketly-AI-Butor-shop\\.cursor\\debug.log',JSON.stringify({location:'server/index.js:337',message:'Attempting to start server',data:{PORT:PORT,env_PORT:process.env.PORT},timestamp:Date.now(),sessionId:'debug-session',runId:'initial',hypothesisId:'H1'})+'\n');}catch(e){}
-// #endregion
 
 app.listen(PORT, () => {
-  // #region agent log
-  try{fs.appendFileSync('c:\\Users\\Kis Riti\\Desktop\\Marketly-AI-Butor-shop\\.cursor\\debug.log',JSON.stringify({location:'server/index.js:338',message:'Server started successfully',data:{PORT:PORT,url:'http://localhost:'+PORT},timestamp:Date.now(),sessionId:'debug-session',runId:'initial',hypothesisId:'H1'})+'\n');}catch(e){}
-  // #endregion
   console.log(`🚀 Marketly AI Bútor Shop Server running on port ${PORT}`);
   console.log(`📊 Database-backed product management enabled`);
   console.log(`🔗 UNAS API URL: ${process.env.UNAS_API_URL || 'NOT CONFIGURED'}`);
@@ -399,10 +392,11 @@ app.listen(PORT, () => {
   console.log('    PATCH  /api/admin/categories/:name - Toggle category');
   console.log('');
   
-  // Kezdeti auto-sync (nem blokkol, hiba nem dönti le a szervert)
+  // Kezdeti sync induláskor (mindig lefut, threshold 0)
   setTimeout(() => {
-    console.log('🔄 Running initial auto-sync...');
-    autoSync(60).catch(err => console.error('Initial sync error:', err));
+    console.log('🔄 Running initial auto-sync on startup...');
+    // Use threshold 0 to force sync on every deploy/restart
+    autoSync(0).catch(err => console.error('Initial sync error:', err));
   }, 2000);
 
   // Opcionális időzített sync (pl. napi): SYNC_CRON_HOURS=24
