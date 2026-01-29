@@ -755,7 +755,7 @@ const App = () => {
   const hasMoreProductsRef = useRef(hasMoreProducts);
   const isLoadingMoreRef = useRef(isLoadingMore);
   visibleCountRef.current = visibleCount;
-  filteredLengthRef.current = filteredAndSortedProducts.length;
+  // filteredLengthRef.current updated below after filteredAndSortedProducts is defined
   hasMoreProductsRef.current = hasMoreProducts;
   isLoadingMoreRef.current = isLoadingMore;
   const [wishlist, setWishlist] = useLocalStorage('mkt_wishlist', []);
@@ -899,6 +899,9 @@ const App = () => {
       if (sortOption === 'price-desc') result = [...result].sort((a, b) => (b.price || 0) - (a.price || 0));
       return result;
   }, [products, searchQuery, categoryFilter, sortOption, advancedFilters]);
+
+  // Update ref after filteredAndSortedProducts is defined
+  filteredLengthRef.current = filteredAndSortedProducts.length;
 
   // Infinite scroll: show first visibleCount items; when sentinel visible, show more or load from API
   const displayedProducts = filteredAndSortedProducts.slice(0, visibleCount);
