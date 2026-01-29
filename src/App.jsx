@@ -1094,14 +1094,15 @@ const App = () => {
               <CategoryPage
                 category={categoryFilter}
                 products={filteredAndSortedProducts}
+                allCategories={categories}
                 onBack={() => handleCategoryChange("Összes")}
                 onProductClick={handleProductView}
                 onWishlistToggle={toggleWishlist}
+                onCategoryChange={handleCategoryChange}
                 wishlist={wishlist}
                 onAskAI={() => setShowStyleQuiz(true)}
                 visibleCount={visibleCount}
                 onLoadMore={handleLoadMore}
-                hasMore={hasMoreToShow}
               />
             ) : (
             <section id="products-section" className="container-app section-padding">
