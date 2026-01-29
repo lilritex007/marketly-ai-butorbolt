@@ -176,9 +176,9 @@ const CategorySwipe = ({ categories, activeCategory, onCategoryChange }) => {
                 {categories[activeCategoryIndex]?.name}
               </h4>
 
-              {/* Category Count */}
+              {/* Category Count - displayed / total */}
               <p className="text-sm text-gray-500">
-                {categories[activeCategoryIndex]?.count || 0} termék
+                {categories[activeCategoryIndex]?.displayedCount || 0} / {categories[activeCategoryIndex]?.totalCount || 0} termék
               </p>
             </motion.div>
           </AnimatePresence>
