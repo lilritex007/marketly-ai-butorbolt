@@ -54,18 +54,17 @@ export const EnhancedProductCard = ({
             onToggleWishlist(product.id); 
           }} 
           className={`
-            p-2.5 rounded-full shadow-lg backdrop-blur-sm transition-all transform 
+            p-2.5 min-h-[44px] min-w-[44px] flex items-center justify-center rounded-full shadow-lg backdrop-blur-sm transition-all transform 
             ${isWishlisted 
               ? 'bg-red-500 text-white scale-110' 
               : 'bg-white/90 text-gray-600 hover:bg-red-50 hover:text-red-500 hover:scale-110'
             }
           `}
-          aria-label="Hozzáadás kívánságlistához"
+          aria-label={isWishlisted ? 'Eltávolítás a kívánságlistáról' : 'Hozzáadás kívánságlistához'}
         >
           <Heart className={`w-4 h-4 ${isWishlisted ? 'fill-current' : ''} transition-transform ${isWishlisted ? 'animate-ping-once' : ''}`} />
         </button>
         
-        {/* Comparison Button */}
         {onToggleComparison && (
           <button
             onClick={(e) => {
@@ -73,14 +72,13 @@ export const EnhancedProductCard = ({
               onToggleComparison(product);
             }}
             className={`
-              p-2.5 rounded-full shadow-lg backdrop-blur-sm transition-all transform hover:scale-110
+              p-2.5 min-h-[44px] min-w-[44px] flex items-center justify-center rounded-full shadow-lg backdrop-blur-sm transition-all transform hover:scale-110
               ${isInComparison
                 ? 'bg-indigo-500 text-white'
                 : 'bg-white/90 text-gray-600 hover:bg-indigo-50 hover:text-indigo-600'
               }
             `}
-            aria-label="Összehasonlítás"
-            title={isInComparison ? 'Eltávolítás az összehasonlításból' : 'Hozzáadás az összehasonlításhoz'}
+            aria-label={isInComparison ? 'Eltávolítás az összehasonlításból' : 'Hozzáadás az összehasonlításhoz'}
           >
             <ArrowLeftRight className="w-4 h-4" />
           </button>
@@ -96,7 +94,7 @@ export const EnhancedProductCard = ({
                 url: product.link
               });
             }}
-            className="p-2.5 rounded-full bg-white/90 text-gray-600 hover:bg-indigo-50 hover:text-indigo-600 shadow-lg backdrop-blur-sm transition-all transform hover:scale-110 animate-slide-in-down"
+            className="p-2.5 min-h-[44px] min-w-[44px] flex items-center justify-center rounded-full bg-white/90 text-gray-600 hover:bg-indigo-50 hover:text-indigo-600 shadow-lg backdrop-blur-sm transition-all transform hover:scale-110 animate-slide-in-down"
             aria-label="Megosztás"
           >
             <Share2 className="w-4 h-4" />
@@ -141,7 +139,7 @@ export const EnhancedProductCard = ({
         
         {/* Stock label */}
         <div className="absolute bottom-3 left-3">
-          <StockBadge inStock={product.inStock} count={product.stockCount} />
+          <StockBadge inStock={product.inStock ?? product.in_stock} count={product.stockCount} />
         </div>
         
         {/* Hover overlay with quick view */}

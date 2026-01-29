@@ -122,39 +122,24 @@ export const AdvancedFilters = ({
     filters.priceMax < priceRange.max
   ].filter(Boolean).length;
 
-  return (
+  const panelContent = (
     <>
-      {/* Filter Toggle Button */}
-      <button
-        onClick={() => setIsOpen(!isOpen)}
-        className="relative px-4 py-2 border-2 border-gray-200 rounded-xl hover:border-indigo-500 transition-all flex items-center gap-2 font-medium"
-      >
-        <Filter className="w-4 h-4" />
-        <span>Szűrők</span>
-        {activeFilterCount > 0 && (
-          <span className="absolute -top-2 -right-2 bg-indigo-600 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
-            {activeFilterCount}
-          </span>
-        )}
-      </button>
+      <div className="p-4 border-b border-gray-200 flex justify-between items-center shrink-0">
+        <h3 className="font-bold text-lg flex items-center gap-2">
+          <Filter className="w-5 h-5 text-indigo-600" />
+          Szűrők
+        </h3>
+        <button
+          type="button"
+          onClick={() => setIsOpen(false)}
+          className="p-2 min-w-[44px] min-h-[44px] flex items-center justify-center hover:bg-gray-100 rounded-lg transition-colors"
+          aria-label="Szűrők bezárása"
+        >
+          <X className="w-5 h-5 text-gray-600" />
+        </button>
+      </div>
 
-      {/* Filter Panel */}
-      {isOpen && (
-        <div className="absolute top-full right-0 mt-2 w-80 bg-white rounded-2xl shadow-2xl border border-gray-200 z-50 animate-fade-in-down">
-          <div className="p-4 border-b border-gray-200 flex justify-between items-center">
-            <h3 className="font-bold text-lg flex items-center gap-2">
-              <Filter className="w-5 h-5 text-indigo-600" />
-              Szűrők
-            </h3>
-            <button
-              onClick={() => setIsOpen(false)}
-              className="p-1 hover:bg-gray-100 rounded-lg transition-colors"
-            >
-              <X className="w-5 h-5 text-gray-600" />
-            </button>
-          </div>
-
-          <div className="p-4 space-y-6 max-h-96 overflow-y-auto">
+      <div className="p-4 space-y-6 max-h-[60vh] md:max-h-96 overflow-y-auto custom-scrollbar flex-1 min-h-0">
             {/* Price Range */}
             <div>
               <label className="flex items-center gap-2 text-sm font-bold text-gray-700 mb-3">
@@ -234,31 +219,69 @@ export const AdvancedFilters = ({
                 </div>
               </div>
             )}
-          </div>
+      </div>
 
-          {/* Footer */}
-          <div className="p-4 border-t border-gray-200 flex flex-wrap gap-2">
-            <button
-              onClick={clearFilters}
-              className="flex-1 min-w-[80px] px-4 py-2 border border-gray-300 rounded-xl text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
-            >
-              Törlés
-            </button>
-            {hasRestorableFilters && (
-              <button
-                onClick={restorePreviousFilters}
-                className="flex-1 min-w-[80px] px-4 py-2 border border-indigo-300 rounded-xl text-sm font-medium text-indigo-700 hover:bg-indigo-50 transition-colors"
-              >
-                Visszaállítás
-              </button>
-            )}
-            <button
-              onClick={() => setIsOpen(false)}
-              className="flex-1 min-w-[80px] px-4 py-2 bg-indigo-600 text-white rounded-xl text-sm font-bold hover:bg-indigo-700 transition-colors"
-            >
-              Alkalmaz
-            </button>
+      {/* Footer */}
+      <div className="p-4 border-t border-gray-200 flex flex-wrap gap-2 shrink-0">
+        <button
+          type="button"
+          onClick={clearFilters}
+          className="flex-1 min-w-[80px] px-4 py-3 min-h-[44px] border border-gray-300 rounded-xl text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+        >
+          Törlés
+        </button>
+        {hasRestorableFilters && (
+          <button
+            type="button"
+            onClick={restorePreviousFilters}
+            className="flex-1 min-w-[80px] px-4 py-3 min-h-[44px] border border-indigo-300 rounded-xl text-sm font-medium text-indigo-700 hover:bg-indigo-50 transition-colors"
+          >
+            Visszaállítás
+          </button>
+        )}
+        <button
+          type="button"
+          onClick={() => setIsOpen(false)}
+          className="flex-1 min-w-[80px] px-4 py-3 min-h-[44px] bg-indigo-600 text-white rounded-xl text-sm font-bold hover:bg-indigo-700 transition-colors"
+        >
+          Alkalmaz
+        </button>
+      </div>
+    </>
+  );
+
+  return (
+    <>
+      {/* Filter Toggle Button */}
+      <button
+        type="button"
+        onClick={() => setIsOpen(!isOpen)}
+        className="relative px-4 py-2 min-h-[44px] border-2 border-gray-200 rounded-xl hover:border-indigo-500 transition-all flex items-center gap-2 font-medium"
+        aria-label="Szűrők megnyitása"
+      >
+        <Filter className="w-4 h-4" />
+        <span>Szűrők</span>
+        {activeFilterCount > 0 && (
+          <span className="absolute -top-2 -right-2 bg-indigo-600 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
+            {activeFilterCount}
+          </span>
+        )}
+      </button>
+
+      {/* Mobile: full-screen overlay + bottom sheet */}
+      {isOpen && (
+        <div className="fixed inset-0 z-50 flex items-end md:hidden" role="dialog" aria-label="Szűrők">
+          <div className="absolute inset-0 bg-black/50" onClick={() => setIsOpen(false)} aria-hidden="true" />
+          <div className="relative w-full max-h-[85vh] bg-white rounded-t-2xl shadow-2xl flex flex-col animate-fade-in-down">
+            {panelContent}
           </div>
+        </div>
+      )}
+
+      {/* Desktop: dropdown panel */}
+      {isOpen && (
+        <div className="hidden md:block absolute top-full right-0 mt-2 w-80 bg-white rounded-2xl shadow-2xl border border-gray-200 z-50 animate-fade-in-down">
+          {panelContent}
         </div>
       )}
     </>

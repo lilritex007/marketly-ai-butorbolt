@@ -287,7 +287,7 @@ Formázd szépen, emoji-kkal, barátságosan!
                         className="bg-white rounded-lg overflow-hidden border border-gray-200 hover:shadow-lg transition-shadow cursor-pointer"
                       >
                         <img
-                          src={product.mainImage || '/placeholder.png'}
+                          src={product.mainImage || product.images?.[0] || '/placeholder.png'}
                           alt={product.name}
                           className="w-full h-24 object-cover"
                         />
@@ -303,6 +303,9 @@ Formázd szépen, emoji-kkal, barátságosan!
                     ))}
                   </div>
                 </div>
+              )}
+              {styleDNA && recommendations.length === 0 && (
+                <p className="text-gray-500 text-center py-4">Nincs egyező ajánlat a katalógusban. Böngéssz tovább a termékek között!</p>
               )}
 
               {/* Actions */}

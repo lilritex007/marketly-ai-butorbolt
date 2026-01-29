@@ -64,12 +64,12 @@ export const ModernHero = ({ onExplore, onTryAI }) => {
         />
       </div>
 
-      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
+      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16 lg:py-20">
         <div className="text-center">
           {/* Floating Badge */}
-          <div className="inline-flex items-center px-6 py-3 bg-white/80 backdrop-blur-sm rounded-full shadow-lg border border-indigo-100 mb-8 animate-float">
-            <Sparkles className="w-5 h-5 text-indigo-600 mr-2 animate-pulse" />
-            <span className="text-sm font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
+          <div className="inline-flex items-center px-4 sm:px-6 py-2.5 sm:py-3 bg-white/80 backdrop-blur-sm rounded-full shadow-lg border border-indigo-100 mb-6 sm:mb-8 animate-float">
+            <Sparkles className="w-4 h-4 sm:w-5 sm:h-5 text-indigo-600 mr-2 animate-pulse" />
+            <span className="text-xs sm:text-sm font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
               AI-Powered Furniture Shopping
             </span>
             <span className="ml-2 px-2 py-0.5 bg-green-100 text-green-700 text-xs font-bold rounded-full">
@@ -77,8 +77,8 @@ export const ModernHero = ({ onExplore, onTryAI }) => {
             </span>
           </div>
 
-          {/* Main Heading */}
-          <h1 className="text-6xl sm:text-7xl lg:text-8xl font-extrabold mb-8 leading-tight">
+          {/* Main Heading - smaller base for small screens */}
+          <h1 className="text-4xl xs:text-5xl sm:text-6xl lg:text-7xl xl:text-8xl font-extrabold mb-6 sm:mb-8 leading-tight">
             <span className="block text-gray-900 mb-2">Találd meg az</span>
             <span className="block bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 bg-clip-text text-transparent animate-gradient">
               ideális bútort
@@ -87,16 +87,16 @@ export const ModernHero = ({ onExplore, onTryAI }) => {
           </h1>
 
           {/* Subheading */}
-          <p className="text-xl sm:text-2xl text-gray-600 max-w-3xl mx-auto mb-12 leading-relaxed">
+          <p className="text-base sm:text-xl lg:text-2xl text-gray-600 max-w-3xl mx-auto mb-8 sm:mb-12 leading-relaxed px-1">
             Forradalmi AI technológia találkozik a bútorvásárlással. 
             <span className="font-semibold text-indigo-600"> Fotózz, tervezz, vásárolj</span> - minden egy helyen.
           </p>
 
-          {/* CTA Buttons */}
-          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-16">
+          {/* CTA Buttons - full width on mobile, tap-friendly */}
+          <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center items-stretch sm:items-center mb-10 sm:mb-16">
             <button
               onClick={onTryAI}
-              className="group relative px-8 py-4 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-2xl font-bold text-lg shadow-2xl hover:shadow-indigo-500/50 transition-all transform hover:-translate-y-1 hover:scale-105 overflow-hidden"
+              className="group relative w-full sm:w-auto px-6 py-3 min-h-[44px] sm:px-8 sm:py-4 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-2xl font-bold text-base sm:text-lg shadow-2xl hover:shadow-indigo-500/50 transition-all transform hover:-translate-y-1 hover:scale-105 overflow-hidden flex items-center justify-center"
             >
               <span className="relative z-10 flex items-center">
                 <Sparkles className="w-5 h-5 mr-2" />
@@ -108,7 +108,7 @@ export const ModernHero = ({ onExplore, onTryAI }) => {
 
             <button
               onClick={onExplore}
-              className="px-8 py-4 bg-white text-gray-900 rounded-2xl font-bold text-lg shadow-lg hover:shadow-xl transition-all transform hover:-translate-y-1 border-2 border-gray-200 hover:border-indigo-300 flex items-center"
+              className="w-full sm:w-auto px-6 py-3 min-h-[44px] sm:px-8 sm:py-4 bg-white text-gray-900 rounded-2xl font-bold text-base sm:text-lg shadow-lg hover:shadow-xl transition-all transform hover:-translate-y-1 border-2 border-gray-200 hover:border-indigo-300 flex items-center justify-center"
             >
               Kollekció megtekintése
               <ChevronRight className="w-5 h-5 ml-2" />
@@ -116,7 +116,7 @@ export const ModernHero = ({ onExplore, onTryAI }) => {
           </div>
 
           {/* Stats */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 max-w-4xl mx-auto">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-8 max-w-4xl mx-auto">
             {[
               { icon: Package, value: '170K+', label: 'Termék' },
               { icon: Users, value: '50K+', label: 'Elégedett vásárló' },
@@ -125,11 +125,11 @@ export const ModernHero = ({ onExplore, onTryAI }) => {
             ].map((stat, idx) => (
               <div 
                 key={idx} 
-                className="bg-white/60 backdrop-blur-sm rounded-2xl p-6 border border-white/20 shadow-lg hover:shadow-xl transition-all transform hover:-translate-y-1"
+                className="bg-white/60 backdrop-blur-sm rounded-2xl p-4 sm:p-6 border border-white/20 shadow-lg hover:shadow-xl transition-all transform hover:-translate-y-1"
               >
-                <stat.icon className="w-8 h-8 text-indigo-600 mx-auto mb-2" />
-                <div className="text-3xl font-extrabold text-gray-900 mb-1">{stat.value}</div>
-                <div className="text-sm text-gray-600 font-medium">{stat.label}</div>
+                <stat.icon className="w-6 h-6 sm:w-8 sm:h-8 text-indigo-600 mx-auto mb-2" />
+                <div className="text-xl sm:text-3xl font-extrabold text-gray-900 mb-1">{stat.value}</div>
+                <div className="text-xs sm:text-sm text-gray-600 font-medium">{stat.label}</div>
               </div>
             ))}
           </div>

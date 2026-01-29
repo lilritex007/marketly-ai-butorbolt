@@ -266,17 +266,30 @@ Formázd szépen, rövid bekezdésekben, barátságos hangnemben.
                       animate={{ opacity: 1, y: 0 }}
                       className="space-y-6"
                     >
-                      {/* Analysis Text */}
-                      <div className="bg-gradient-to-br from-purple-50 to-pink-50 rounded-xl p-6">
+                      {/* Analysis Text (or error) */}
+                      <div className={`rounded-xl p-6 ${analysis.startsWith('❌') ? 'bg-red-50' : 'bg-gradient-to-br from-purple-50 to-pink-50'}`}>
                         <div className="flex items-center gap-2 mb-4">
-                          <CheckCircle className="w-6 h-6 text-green-500" />
+                          {analysis.startsWith('❌') ? (
+                            <X className="w-6 h-6 text-red-500" />
+                          ) : (
+                            <CheckCircle className="w-6 h-6 text-green-500" />
+                          )}
                           <h3 className="text-xl font-bold text-gray-800">
-                            Elemzés Eredménye
+                            {analysis.startsWith('❌') ? 'Hiba' : 'Elemzés Eredménye'}
                           </h3>
                         </div>
                         <div className="prose prose-sm max-w-none text-gray-700 whitespace-pre-wrap">
                           {analysis}
                         </div>
+                        {analysis.startsWith('❌') && (
+                          <button
+                            type="button"
+                            onClick={analyzeRoom}
+                            className="mt-4 px-6 py-3 min-h-[44px] bg-purple-600 text-white rounded-xl font-semibold hover:bg-purple-700 transition-colors"
+                          >
+                            Újrapróbálás
+                          </button>
+                        )}
                       </div>
 
                       {/* Product Recommendations */}
@@ -319,9 +332,13 @@ Formázd szépen, rövid bekezdésekben, barátságos hangnemben.
                           </div>
                         </div>
                       )}
+                      {analysis && !analysis.startsWith('❌') && recommendations.length === 0 && (
+                        <p className="text-gray-500 text-center py-4">Nincs egyező ajánlat a katalógusban. Próbálj másik fotót vagy böngéssz a termékek között!</p>
+                      )}
 
                       {/* Try Again Button */}
                       <button
+                        type="button"
                         onClick={resetAnalysis}
                         className="
                           w-full py-3 rounded-xl

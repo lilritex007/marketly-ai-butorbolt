@@ -2,6 +2,13 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Central layout container */
+@layer components {
+  .container-app {
+    @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 2xl:px-10;
+  }
+}
+
 /* Custom scrollbar */
 .custom-scrollbar::-webkit-scrollbar {
   width: 8px;

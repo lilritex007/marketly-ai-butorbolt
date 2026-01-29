@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
-import { ShoppingCart, Camera, MessageCircle, X, Send, Plus, Move, Trash2, Home, ZoomIn, ZoomOut, Upload, Settings, Link as LinkIcon, FileText, RefreshCw, AlertCircle, Database, Lock, Search, ChevronLeft, ChevronRight, Filter, Heart, ArrowDownUp, Info, Check, Star, Truck, ShieldCheck, Phone, ArrowRight, Mail, Eye, Sparkles, Lightbulb, Image as ImageIcon, MousePointer2 } from 'lucide-react';
+import { ShoppingCart, Camera, MessageCircle, X, Send, Plus, Move, Trash2, Home, ZoomIn, ZoomOut, Upload, Settings, Link as LinkIcon, FileText, RefreshCw, AlertCircle, Database, Lock, Search, ChevronLeft, ChevronRight, Filter, Heart, ArrowDownUp, Info, Check, Star, Truck, ShieldCheck, Phone, ArrowRight, Mail, Eye, Sparkles, Lightbulb, Image as ImageIcon, MousePointer2, Menu } from 'lucide-react';
 import { AnimatePresence } from 'framer-motion';
 import { fetchUnasProducts, refreshUnasProducts } from './services/unasApi';
 
@@ -26,6 +26,7 @@ import LiveSocialProof from './components/ux/LiveSocialProof';
 // Landing Components
 import { ModernHero, AIFeaturesShowcase } from './components/landing/ModernHero';
 import { SocialProof, LiveShowcase, InteractiveCTA } from './components/landing/ShowcaseSections';
+import { Footer } from './components/landing/Footer';
 
 // Product Components
 import { EnhancedProductCard } from './components/product/EnhancedProductCard';
@@ -199,39 +200,101 @@ const parseCSV = (csvText) => {
 
 // --- 3. KOMPONENSEK ---
 
-const Navbar = ({ activeTab, setActiveTab, wishlistCount }) => (
-  <nav id="mkt-butorbolt-navbar" className="bg-white/90 backdrop-blur-md sticky top-0 z-50 border-b border-gray-100 transition-all duration-300">
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div className="flex justify-between items-center h-20">
-        <div className="flex items-center cursor-pointer group" onClick={() => setActiveTab('shop')}>
-          <div className="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center text-white mr-3 transform group-hover:rotate-12 transition-transform duration-300 shadow-lg shadow-indigo-200">
-            <Home className="h-6 w-6" />
-          </div>
-          <div>
-            <span className="font-extrabold text-2xl text-gray-900 tracking-tight">Marketly</span>
-            <span className="text-indigo-600 font-bold text-2xl">.AI</span>
-          </div>
-        </div>
+const Navbar = ({ activeTab, setActiveTab, wishlistCount }) => {
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
-        <div className="hidden md:flex items-center space-x-8">
-          <button onClick={() => setActiveTab('shop')} className={`text-sm font-medium transition-colors ${activeTab === 'shop' ? 'text-indigo-600' : 'text-gray-500 hover:text-gray-900'}`}>Főoldal</button>
-          <button onClick={() => setActiveTab('visual-search')} className={`flex items-center text-sm font-medium transition-colors ${activeTab === 'visual-search' ? 'text-indigo-600' : 'text-gray-500 hover:text-gray-900'}`}><Camera className="w-4 h-4 mr-1.5" /> Képkereső</button>
-          <button onClick={() => setActiveTab('room-planner')} className={`flex items-center text-sm font-medium transition-colors ${activeTab === 'room-planner' ? 'text-indigo-600' : 'text-gray-500 hover:text-gray-900'}`}><Move className="w-4 h-4 mr-1.5" /> Szobatervező</button>
-        </div>
+  const closeMobileMenu = () => setMobileMenuOpen(false);
+  const setTabAndClose = (tab) => {
+    setActiveTab(tab);
+    closeMobileMenu();
+  };
 
-        <div className="flex items-center space-x-4">
-            <div className="relative p-2 text-gray-600 hover:text-red-500 cursor-pointer transition-colors group">
-                <Heart className={`h-6 w-6 transition-transform group-hover:scale-110 ${wishlistCount > 0 ? 'fill-red-500 text-red-500' : ''}`} />
-                {wishlistCount > 0 && <span className="absolute top-0 right-0 inline-flex items-center justify-center px-1.5 py-0.5 text-xs font-bold leading-none text-white transform translate-x-1/4 -translate-y-1/4 bg-red-500 rounded-full">{wishlistCount}</span>}
+  return (
+    <nav id="mkt-butorbolt-navbar" className="bg-white/90 backdrop-blur-md sticky top-0 z-50 border-b border-gray-100 transition-all duration-300">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex justify-between items-center min-h-[4rem] h-20">
+          <div className="flex items-center cursor-pointer group" onClick={() => setActiveTab('shop')}>
+            <div className="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center text-white mr-3 transform group-hover:rotate-12 transition-transform duration-300 shadow-lg shadow-indigo-200">
+              <Home className="h-6 w-6" />
             </div>
-            <a href={WEBSHOP_DOMAIN} target="_blank" rel="noopener noreferrer" className="hidden sm:block bg-gray-900 text-white px-6 py-2.5 rounded-full text-sm font-bold hover:bg-gray-800 transition-all shadow-md hover:shadow-lg transform hover:-translate-y-0.5">
-                Belépés
+            <div>
+              <span className="font-extrabold text-2xl text-gray-900 tracking-tight">Marketly</span>
+              <span className="text-indigo-600 font-bold text-2xl">.AI</span>
+            </div>
+          </div>
+
+          <div className="hidden md:flex items-center space-x-8">
+            <button onClick={() => setActiveTab('shop')} className={`text-sm font-medium transition-colors ${activeTab === 'shop' ? 'text-indigo-600' : 'text-gray-500 hover:text-gray-900'}`}>Főoldal</button>
+            <button onClick={() => setActiveTab('visual-search')} className={`flex items-center text-sm font-medium transition-colors ${activeTab === 'visual-search' ? 'text-indigo-600' : 'text-gray-500 hover:text-gray-900'}`}><Camera className="w-4 h-4 mr-1.5" /> Képkereső</button>
+            <button onClick={() => setActiveTab('room-planner')} className={`flex items-center text-sm font-medium transition-colors ${activeTab === 'room-planner' ? 'text-indigo-600' : 'text-gray-500 hover:text-gray-900'}`}><Move className="w-4 h-4 mr-1.5" /> Szobatervező</button>
+          </div>
+
+          <div className="flex items-center space-x-2 sm:space-x-4">
+            <div className="relative p-2 min-w-[44px] min-h-[44px] flex items-center justify-center text-gray-600 hover:text-red-500 cursor-pointer transition-colors group" aria-label="Kívánságlista">
+              <Heart className={`h-6 w-6 transition-transform group-hover:scale-110 ${wishlistCount > 0 ? 'fill-red-500 text-red-500' : ''}`} />
+              {wishlistCount > 0 && <span className="absolute top-0 right-0 inline-flex items-center justify-center px-1.5 py-0.5 text-xs font-bold leading-none text-white transform translate-x-1/4 -translate-y-1/4 bg-red-500 rounded-full">{wishlistCount}</span>}
+            </div>
+            <button
+              type="button"
+              className="md:hidden p-2 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-xl text-gray-600 hover:bg-gray-100 transition-colors"
+              onClick={() => setMobileMenuOpen(true)}
+              aria-label="Menü megnyitása"
+            >
+              <Menu className="w-6 h-6" />
+            </button>
+            <a href={WEBSHOP_DOMAIN} target="_blank" rel="noopener noreferrer" className="hidden sm:block bg-gray-900 text-white px-6 py-2.5 rounded-full text-sm font-bold hover:bg-gray-800 transition-all shadow-md hover:shadow-lg transform hover:-translate-y-0.5 min-h-[44px] flex items-center">
+              Belépés
             </a>
+          </div>
         </div>
       </div>
-    </div>
-  </nav>
-);
+
+      {/* Mobile menu overlay / drawer */}
+      <AnimatePresence>
+        {mobileMenuOpen && (
+          <>
+            <div
+              className="fixed inset-0 bg-black/50 z-40 md:hidden"
+              onClick={closeMobileMenu}
+              aria-hidden="true"
+            />
+            <div
+              className="fixed top-0 right-0 bottom-0 w-full max-w-sm bg-white shadow-2xl z-50 md:hidden flex flex-col animate-fade-in"
+              role="dialog"
+              aria-label="Navigációs menü"
+            >
+              <div className="flex justify-between items-center p-4 border-b border-gray-100">
+                <span className="font-bold text-lg text-gray-900">Menü</span>
+                <button
+                  type="button"
+                  className="p-2 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-xl text-gray-600 hover:bg-gray-100"
+                  onClick={closeMobileMenu}
+                  aria-label="Menü bezárása"
+                >
+                  <X className="w-6 h-6" />
+                </button>
+              </div>
+              <nav className="p-4 flex flex-col gap-2">
+                <button onClick={() => setTabAndClose('shop')} className={`flex items-center gap-3 w-full px-4 py-3 min-h-[44px] rounded-xl text-left font-medium transition-colors ${activeTab === 'shop' ? 'bg-indigo-50 text-indigo-600' : 'text-gray-700 hover:bg-gray-50'}`}>
+                  <Home className="w-5 h-5" /> Főoldal
+                </button>
+                <button onClick={() => setTabAndClose('visual-search')} className={`flex items-center gap-3 w-full px-4 py-3 min-h-[44px] rounded-xl text-left font-medium transition-colors ${activeTab === 'visual-search' ? 'bg-indigo-50 text-indigo-600' : 'text-gray-700 hover:bg-gray-50'}`}>
+                  <Camera className="w-5 h-5" /> Képkereső
+                </button>
+                <button onClick={() => setTabAndClose('room-planner')} className={`flex items-center gap-3 w-full px-4 py-3 min-h-[44px] rounded-xl text-left font-medium transition-colors ${activeTab === 'room-planner' ? 'bg-indigo-50 text-indigo-600' : 'text-gray-700 hover:bg-gray-50'}`}>
+                  <Move className="w-5 h-5" /> Szobatervező
+                </button>
+                <a href={WEBSHOP_DOMAIN} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 w-full px-4 py-3 min-h-[44px] rounded-xl text-left font-medium bg-gray-900 text-white hover:bg-gray-800 transition-colors mt-4" onClick={closeMobileMenu}>
+                  Belépés a webshopba
+                </a>
+              </nav>
+            </div>
+          </>
+        )}
+      </AnimatePresence>
+    </nav>
+  );
+};
 
 const FileLoaderBar = ({ onFileLoad, onUnasRefresh, isLoadingUnas, lastUpdated, unasError }) => {
     const fileInputRef = useRef(null);
@@ -458,7 +521,7 @@ const ProductModal = ({ product, isOpen, onClose }) => {
                 <div className="md:w-1/2 p-8 overflow-y-auto custom-scrollbar">
                     <div className="flex items-center gap-2 mb-3">
                         <span className="bg-indigo-50 text-indigo-700 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide">{product.category}</span>
-                        {product.inStock ? 
+                        {product.inStock ?? product.in_stock ? 
                             <span className="text-green-600 text-xs font-bold flex items-center bg-green-50 px-2 py-1 rounded-full"><Check className="w-3 h-3 mr-1" /> Raktáron</span> : 
                             <span className="text-red-500 text-xs font-bold bg-red-50 px-2 py-1 rounded-full">Készlethiány</span>
                         }
@@ -629,8 +692,11 @@ const VisualSearch = ({ products }) => {
           </div>
         )}
       </div>
+      {!isAnalyzing && selectedImage && searchResults.length === 0 && (
+        <p className="text-center text-gray-600 py-6">Nincs találat a feltöltött kép alapján. Próbálj másik fotót vagy böngéssz a kategóriákban.</p>
+      )}
       {searchResults.length > 0 && (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">{searchResults.map(product => (<div key={product.id} className="border p-4 rounded"><img src={product.images?.[0]} alt="" className="h-32 mx-auto object-contain" /><p className="font-bold mt-2 truncate">{product.name}</p><p>{formatPrice(product.price)}</p></div>))}</div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">{searchResults.map(product => (<div key={product.id} className="border border-gray-200 p-4 rounded-xl hover:shadow-lg transition-shadow"><img src={product.images?.[0]} alt={product.name} className="h-32 mx-auto object-contain" /><p className="font-bold mt-2 truncate">{product.name}</p><p>{formatPrice(product.price)}</p></div>))}</div>
       )}
     </div>
   );
@@ -1009,12 +1075,13 @@ const App = () => {
             />
             <Features />
             
-            <div id="products-section" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-                <div className="flex flex-col md:flex-row justify-between items-end mb-8 gap-4">
-                    <h2 className="text-3xl font-bold">Termékek {!isLoadingUnas && <span className="text-gray-400 text-xl ml-2">({filteredAndSortedProducts.length})</span>}</h2>
-                    <div className="w-full md:w-auto flex items-center gap-3">
-                      {/* Smart Search with AI & Voice Search */}
-                      <div className="flex-1 md:flex-initial flex items-center gap-2">
+            <div id="products-section" className="container-app py-10">
+                {/* Sticky products header: search + filters + sort */}
+                <div className="sticky top-20 z-40 bg-white/95 backdrop-blur-sm py-4 -mx-4 px-4 sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8 2xl:-mx-10 2xl:px-10 mb-6 shadow-sm">
+                  <div className="flex flex-col md:flex-row justify-between items-end gap-4">
+                    <h2 className="text-2xl sm:text-3xl font-bold">Termékek {!isLoadingUnas && <span className="text-gray-400 text-lg sm:text-xl ml-2">({filteredAndSortedProducts.length})</span>}</h2>
+                    <div className="w-full md:w-auto flex flex-wrap items-center gap-3">
+                      <div className="flex-1 md:flex-initial flex items-center gap-2 min-w-0">
                         <SmartSearch 
                           products={products}
                           onSearch={(query) => setSearchQuery(query)}
@@ -1025,7 +1092,6 @@ const App = () => {
                           className="group"
                         />
                       </div>
-                      {/* Advanced Filters */}
                       <div className="relative">
                         <AdvancedFilters
                           products={products}
@@ -1035,13 +1101,15 @@ const App = () => {
                       </div>
                       <select 
                         onChange={(e) => setSortOption(e.target.value)} 
-                        className="px-4 py-3 border-2 border-gray-200 rounded-2xl focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 outline-none transition-all"
+                        className="px-4 py-3 min-h-[44px] border-2 border-gray-200 rounded-2xl focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 outline-none transition-all"
+                        aria-label="Rendezés"
                       >
                         <option value="default">Rendezés</option>
                         <option value="price-asc">Ár ↑</option>
                         <option value="price-desc">Ár ↓</option>
                       </select>
                     </div>
+                  </div>
                 </div>
                 
                 {/* Category Swipe Navigation */}
@@ -1060,7 +1128,7 @@ const App = () => {
                 {isLoadingUnas && (
                   <div className="space-y-4">
                     <p className="text-sm text-gray-500 text-center font-medium">Termékek betöltése...</p>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-4 sm:gap-6">
                       {[...Array(8)].map((_, i) => (
                         <ProductCardSkeleton key={`skeleton-${i}`} />
                       ))}
@@ -1068,8 +1136,24 @@ const App = () => {
                   </div>
                 )}
 
-                {/* Empty State */}
-                {!isLoadingUnas && displayedProducts.length === 0 && (
+                {/* API Error State */}
+                {!isLoadingUnas && unasError && (
+                  <div className="flex flex-col items-center justify-center py-16 px-4 text-center">
+                    <AlertCircle className="w-16 h-16 text-red-500 mb-4" />
+                    <h3 className="text-xl font-bold text-gray-900 mb-2">Nem sikerült betölteni a termékeket</h3>
+                    <p className="text-gray-600 mb-6 max-w-md">Próbáld később, vagy ellenőrizd a kapcsolatot.</p>
+                    <button
+                      type="button"
+                      onClick={() => loadUnasData(false)}
+                      className="px-6 py-3 min-h-[44px] bg-indigo-600 text-white rounded-xl font-bold hover:bg-indigo-700 transition-colors"
+                    >
+                      Újrapróbálás
+                    </button>
+                  </div>
+                )}
+
+                {/* Empty State (no error, just no products) */}
+                {!isLoadingUnas && !unasError && displayedProducts.length === 0 && (
                   <EmptyState 
                     type="products"
                     action="Minden kategória megtekintése"
@@ -1079,7 +1163,7 @@ const App = () => {
 
                 {/* Products Grid */}
                 {!isLoadingUnas && displayedProducts.length > 0 && (
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-4 sm:gap-6">
                       {displayedProducts.map(product => (
                           <div 
                             key={product.id}
@@ -1100,7 +1184,7 @@ const App = () => {
                 )}
                 
                 {/* Infinite scroll: load more when sentinel visible */}
-                {!isLoadingUnas && displayedProducts.length > 0 && (
+                {!isLoadingUnas && !unasError && displayedProducts.length > 0 && (
                   <div ref={loadMoreSentinelRef} className="py-8 flex justify-center min-h-[80px]">
                     {isLoadingMore && (
                       <div className="flex flex-col items-center gap-2">
@@ -1137,6 +1221,8 @@ const App = () => {
         {activeTab === 'visual-search' && <VisualSearch products={products} onAddToCart={() => {}} />}
         {activeTab === 'room-planner' && <RoomPlanner products={products} />}
       </main>
+
+      <Footer />
 
       <ProductModal product={selectedProduct} isOpen={!!selectedProduct} onClose={() => setSelectedProduct(null)} />
       

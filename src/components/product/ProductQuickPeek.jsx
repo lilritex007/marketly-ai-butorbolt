@@ -73,8 +73,10 @@ const ProductQuickPeek = ({ product, isOpen, onClose, onAddToCart }) => {
                   <h3 className="text-lg font-bold text-gray-900">Gyors előnézet</h3>
                 </div>
                 <button
+                  type="button"
                   onClick={onClose}
-                  className="p-2 hover:bg-white rounded-lg transition-colors"
+                  className="p-2 min-h-[44px] min-w-[44px] flex items-center justify-center hover:bg-white rounded-lg transition-colors"
+                  aria-label="Bezárás"
                 >
                   <X className="w-5 h-5 text-gray-600" />
                 </button>
