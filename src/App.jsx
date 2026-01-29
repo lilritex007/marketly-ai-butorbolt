@@ -62,7 +62,7 @@ const GOOGLE_API_KEY = import.meta.env.VITE_GOOGLE_API_KEY || "AIzaSyDZV-fAFVCvh
 const WEBSHOP_DOMAIN = "https://www.marketly.hu";
 const SHOP_ID = "81697"; 
 
-const INITIAL_PAGE_SIZE = 50000; // Products loaded from API per batch (larger for better coverage)
+// NO LIMIT - load ALL products from API
 const DISPLAY_BATCH = 48; // Products rendered per "Tovább" click
 
 /* --- 2. SEGÉDFÜGGVÉNYEK --- */
@@ -822,24 +822,21 @@ const App = () => {
   };
   
   // Initial load: first batch only for fast display. Background refresh: silent, replace current data.
+  // Load ALL products from API (no limit)
   const loadUnasData = useCallback(async (silent = false) => {
     if (!silent) {
       setIsLoadingUnas(true);
       setUnasError(null);
     }
     try {
-      const limit = silent && products.length > 0 ? Math.max(INITIAL_PAGE_SIZE, products.length) : INITIAL_PAGE_SIZE;
-      const data = await fetchUnasProducts({ limit, offset: 0 });
+      // NO LIMIT - fetch ALL products from backend
+      const data = await fetchUnasProducts({});
       const list = data.products || [];
+      setProducts(list);
+      setTotalProductsCount(data.total ?? list.length);
+      setHasMoreProducts(false); // All products loaded, no more to fetch
       if (!silent) {
-        setProducts(list);
-        setTotalProductsCount(data.total ?? list.length);
-        setHasMoreProducts((data.total ?? 0) > list.length);
         setVisibleCount(DISPLAY_BATCH);
-      } else if (list.length > 0) {
-        setProducts(list);
-        setTotalProductsCount(data.total ?? list.length);
-        setHasMoreProducts((data.total ?? 0) > list.length);
       }
       setLastUpdated(data.lastSync || data.lastUpdated);
       if (list.length > 0) {
@@ -853,27 +850,12 @@ const App = () => {
     } finally {
       if (!silent) setIsLoadingUnas(false);
     }
-  }, [products.length]);
+  }, []);
 
-  // Load more products from API when user needs more
+  // No longer needed - all products loaded at once
   const loadMoreProducts = useCallback(async () => {
-    if (isLoadingMore || !hasMoreProducts || products.length >= totalProductsCount) return;
-    setIsLoadingMore(true);
-    try {
-      const data = await fetchUnasProducts({ limit: INITIAL_PAGE_SIZE, offset: products.length });
-      const list = data.products || [];
-      if (list.length > 0) {
-        setProducts(prev => [...prev, ...list]);
-        setHasMoreProducts(products.length + list.length < (data.total ?? 0));
-      } else {
-        setHasMoreProducts(false);
-      }
-    } catch (_) {
-      setHasMoreProducts(false);
-    } finally {
-      setIsLoadingMore(false);
-    }
-  }, [isLoadingMore, hasMoreProducts, products.length, totalProductsCount]);
+    // All products already loaded
+  }, []);
 
   const loadUnasDataRef = useRef(loadUnasData);
   loadUnasDataRef.current = loadUnasData;
@@ -927,12 +909,11 @@ const App = () => {
     }
   }, [loadMoreProducts]);
 
+  // Get ALL categories from ALL products (no sampling, no limit)
   const categories = useMemo(() => {
       const seen = new Set();
-      const step = Math.max(1, Math.floor(products.length / 500));
-      for (let i = 0; i < products.length && seen.size < 200; i += step) {
-        const c = products[i]?.category;
-        if (c) seen.add(c);
+      for (const p of products) {
+        if (p?.category) seen.add(p.category);
       }
       return ['Összes', ...[...seen].sort()];
   }, [products]);
