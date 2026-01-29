@@ -62,7 +62,7 @@ const GOOGLE_API_KEY = import.meta.env.VITE_GOOGLE_API_KEY || "AIzaSyDZV-fAFVCvh
 const WEBSHOP_DOMAIN = "https://www.marketly.hu";
 const SHOP_ID = "81697"; 
 
-const INITIAL_PAGE_SIZE = 10000; // Load more products initially for better search/filter
+const INITIAL_PAGE_SIZE = 0; // 0 = load ALL products (no limit)
 const DISPLAY_BATCH = 48; // Products shown per "load more" click
 
 /* --- 2. SEGÉDFÜGGVÉNYEK --- */
@@ -828,9 +828,11 @@ const App = () => {
       setUnasError(null);
     }
     try {
-      const offset = silent ? 0 : 0;
-      const limit = silent && products.length > 0 ? Math.max(INITIAL_PAGE_SIZE, products.length) : INITIAL_PAGE_SIZE;
-      const data = await fetchUnasProducts({ limit, offset });
+      // If INITIAL_PAGE_SIZE is 0, don't send limit (backend returns ALL)
+      const fetchOptions = INITIAL_PAGE_SIZE > 0 
+        ? { limit: silent && products.length > 0 ? Math.max(INITIAL_PAGE_SIZE, products.length) : INITIAL_PAGE_SIZE, offset: 0 }
+        : {}; // No limit = all products
+      const data = await fetchUnasProducts(fetchOptions);
       const list = data.products || [];
       if (!silent) {
         setProducts(list);
@@ -856,8 +858,9 @@ const App = () => {
     }
   }, [products.length]);
 
-  // Load more from API when user scrolls to bottom
+  // Load more from API (only needed if INITIAL_PAGE_SIZE > 0, otherwise all loaded initially)
   const loadMoreProducts = useCallback(async () => {
+    if (INITIAL_PAGE_SIZE === 0) return; // All products already loaded
     if (isLoadingMore || !hasMoreProducts || products.length >= totalProductsCount) return;
     setIsLoadingMore(true);
     try {
