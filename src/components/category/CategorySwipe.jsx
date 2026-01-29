@@ -2,9 +2,9 @@ import React, { useState, useRef, useEffect } from 'react';
 import { ChevronDown, ChevronUp, ChevronLeft, ChevronRight, Grid3X3 } from 'lucide-react';
 
 /**
- * CategorySwipe - Beautiful Responsive Category Navigation
- * - Mobile: Horizontal scroll with fade edges
- * - Desktop: Collapsible grid with smooth animations
+ * CategorySwipe - Golden Standard Responsive Category Navigation
+ * Typography: Mobile 13-14px, Tablet 14px, Desktop 14-15px
+ * Touch targets: 44px minimum
  */
 const CategorySwipe = ({ categories, activeCategory, onCategoryChange, displayedCount }) => {
   const [isExpanded, setIsExpanded] = useState(false);
@@ -12,13 +12,11 @@ const CategorySwipe = ({ categories, activeCategory, onCategoryChange, displayed
   const [canScrollRight, setCanScrollRight] = useState(true);
   const scrollRef = useRef(null);
   
-  // Find active category data
   const activeData = categories.find(c => c.id === activeCategory);
   const activeTotalCount = activeData?.totalCount || 0;
   
-  // Visible categories config
-  const MOBILE_VISIBLE = 20;
-  const DESKTOP_VISIBLE = 16;
+  const VISIBLE_MOBILE = 15;
+  const VISIBLE_DESKTOP = 18;
   const [isMobile, setIsMobile] = useState(false);
   
   useEffect(() => {
@@ -28,16 +26,15 @@ const CategorySwipe = ({ categories, activeCategory, onCategoryChange, displayed
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
   
-  const visibleCount = isMobile ? MOBILE_VISIBLE : DESKTOP_VISIBLE;
+  const visibleCount = isMobile ? VISIBLE_MOBILE : VISIBLE_DESKTOP;
   const visibleCategories = isExpanded ? categories : categories.slice(0, visibleCount);
   const hasMore = categories.length > visibleCount;
   
-  // Update scroll indicators
   const updateScrollIndicators = () => {
     if (scrollRef.current) {
       const { scrollLeft, scrollWidth, clientWidth } = scrollRef.current;
-      setCanScrollLeft(scrollLeft > 10);
-      setCanScrollRight(scrollLeft < scrollWidth - clientWidth - 10);
+      setCanScrollLeft(scrollLeft > 5);
+      setCanScrollRight(scrollLeft < scrollWidth - clientWidth - 5);
     }
   };
   
@@ -52,83 +49,75 @@ const CategorySwipe = ({ categories, activeCategory, onCategoryChange, displayed
   
   const scroll = (direction) => {
     if (scrollRef.current) {
-      const scrollAmount = scrollRef.current.clientWidth * 0.6;
       scrollRef.current.scrollBy({ 
-        left: direction === 'left' ? -scrollAmount : scrollAmount, 
+        left: direction === 'left' ? -200 : 200, 
         behavior: 'smooth' 
       });
     }
   };
 
-  // Scroll active category into view
   useEffect(() => {
     if (scrollRef.current && isMobile) {
       const activeEl = scrollRef.current.querySelector(`[data-category="${activeCategory}"]`);
-      if (activeEl) {
-        activeEl.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
-      }
+      activeEl?.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
     }
   }, [activeCategory, isMobile]);
 
   return (
-    <div className="bg-white rounded-2xl lg:rounded-3xl shadow-sm border border-gray-100 mb-6 sm:mb-8 overflow-hidden">
+    <div className="bg-white rounded-xl sm:rounded-2xl lg:rounded-3xl shadow-sm border border-gray-100 mb-4 sm:mb-6 lg:mb-8 overflow-hidden">
       {/* Header */}
-      <div className="px-3 sm:px-4 py-3 sm:py-4 bg-gradient-to-r from-indigo-50/80 via-purple-50/50 to-pink-50/30 border-b border-gray-100">
+      <div className="px-3 sm:px-4 lg:px-5 py-3 sm:py-4 bg-gradient-to-r from-indigo-50/80 via-purple-50/50 to-pink-50/30 border-b border-gray-100">
         <div className="flex items-center justify-between gap-3">
-          <div className="flex items-center gap-2 min-w-0">
-            <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-indigo-100 flex items-center justify-center shrink-0">
+          <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-indigo-100 flex items-center justify-center shrink-0">
               <Grid3X3 className="w-4 h-4 sm:w-5 sm:h-5 text-indigo-600" />
             </div>
             <div className="min-w-0">
-              <h3 className="text-sm sm:text-base font-bold text-gray-900 truncate">Kategóriák</h3>
-              <p className="text-xs text-gray-500 hidden sm:block">{categories.length} kategória</p>
+              <h3 className="text-sm sm:text-base lg:text-lg font-bold text-gray-900">Kategóriák</h3>
+              <p className="text-xs sm:text-sm text-gray-500 hidden sm:block">{categories.length} kategória</p>
             </div>
           </div>
           
-          {/* Active category counter */}
+          {/* Counter */}
           <div className="text-right shrink-0">
-            <div className="text-xs sm:text-sm text-gray-600">
+            <div className="text-sm sm:text-base text-gray-700">
               <span className="font-bold text-indigo-600">{displayedCount?.toLocaleString('hu-HU') || 0}</span>
               <span className="text-gray-400 mx-1">/</span>
               <span className="font-semibold">{activeTotalCount.toLocaleString('hu-HU')}</span>
             </div>
-            <p className="text-[10px] sm:text-xs text-gray-400">termék látható</p>
+            <p className="text-[11px] sm:text-xs text-gray-400">termék látható</p>
           </div>
         </div>
       </div>
 
       {/* Mobile: Horizontal Scroll */}
       <div className="md:hidden relative">
-        {/* Scroll fade indicators */}
         {canScrollLeft && (
-          <div className="absolute left-0 top-0 bottom-0 w-8 bg-gradient-to-r from-white to-transparent z-10 pointer-events-none" />
+          <>
+            <div className="absolute left-0 top-0 bottom-0 w-6 bg-gradient-to-r from-white to-transparent z-10 pointer-events-none" />
+            <button
+              onClick={() => scroll('left')}
+              className="absolute left-1 top-1/2 -translate-y-1/2 z-20 w-8 h-8 bg-white rounded-full shadow-md flex items-center justify-center"
+            >
+              <ChevronLeft className="w-4 h-4 text-gray-600" />
+            </button>
+          </>
         )}
         {canScrollRight && (
-          <div className="absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-white to-transparent z-10 pointer-events-none" />
+          <>
+            <div className="absolute right-0 top-0 bottom-0 w-6 bg-gradient-to-l from-white to-transparent z-10 pointer-events-none" />
+            <button
+              onClick={() => scroll('right')}
+              className="absolute right-1 top-1/2 -translate-y-1/2 z-20 w-8 h-8 bg-white rounded-full shadow-md flex items-center justify-center"
+            >
+              <ChevronRight className="w-4 h-4 text-gray-600" />
+            </button>
+          </>
         )}
         
-        {/* Scroll buttons */}
-        {canScrollLeft && (
-          <button
-            onClick={() => scroll('left')}
-            className="absolute left-1 top-1/2 -translate-y-1/2 z-20 w-7 h-7 bg-white/90 rounded-full shadow-md flex items-center justify-center"
-          >
-            <ChevronLeft className="w-4 h-4 text-gray-600" />
-          </button>
-        )}
-        {canScrollRight && (
-          <button
-            onClick={() => scroll('right')}
-            className="absolute right-1 top-1/2 -translate-y-1/2 z-20 w-7 h-7 bg-white/90 rounded-full shadow-md flex items-center justify-center"
-          >
-            <ChevronRight className="w-4 h-4 text-gray-600" />
-          </button>
-        )}
-        
-        {/* Scrollable container */}
         <div 
           ref={scrollRef}
-          className="flex gap-2 overflow-x-auto py-3 px-3 scrollbar-hide scroll-smooth"
+          className="flex gap-2 overflow-x-auto py-3 px-3 scrollbar-hide"
         >
           {visibleCategories.map((category) => (
             <button
@@ -136,10 +125,10 @@ const CategorySwipe = ({ categories, activeCategory, onCategoryChange, displayed
               data-category={category.id}
               onClick={() => onCategoryChange(category.id)}
               className={`
-                shrink-0 px-3 py-2 rounded-xl text-xs font-semibold transition-all whitespace-nowrap
+                shrink-0 px-3 py-2.5 min-h-[44px] rounded-xl text-[13px] font-semibold transition-all whitespace-nowrap
                 ${category.id === activeCategory
-                  ? 'bg-indigo-600 text-white shadow-md shadow-indigo-200'
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200 active:scale-95'
+                  ? 'bg-indigo-600 text-white shadow-md'
+                  : 'bg-gray-100 text-gray-700 active:bg-gray-200'
                 }
               `}
             >
@@ -151,25 +140,25 @@ const CategorySwipe = ({ categories, activeCategory, onCategoryChange, displayed
           {hasMore && !isExpanded && (
             <button
               onClick={() => setIsExpanded(true)}
-              className="shrink-0 px-3 py-2 rounded-xl text-xs font-semibold bg-indigo-50 text-indigo-600 whitespace-nowrap"
+              className="shrink-0 px-3 py-2.5 min-h-[44px] rounded-xl text-[13px] font-semibold bg-indigo-50 text-indigo-600 whitespace-nowrap"
             >
-              +{categories.length - visibleCount} több
+              +{categories.length - visibleCount}
             </button>
           )}
         </div>
       </div>
 
       {/* Desktop: Grid Layout */}
-      <div className="hidden md:block p-4">
-        <div className="flex flex-wrap gap-2">
+      <div className="hidden md:block p-4 lg:p-5">
+        <div className="flex flex-wrap gap-2 lg:gap-2.5">
           {visibleCategories.map((category) => (
             <button
               key={category.id}
               onClick={() => onCategoryChange(category.id)}
               className={`
-                px-3 lg:px-4 py-2 rounded-xl text-xs lg:text-sm font-medium transition-all
+                px-3.5 lg:px-4 py-2 lg:py-2.5 rounded-xl text-sm lg:text-[15px] font-medium transition-all
                 ${category.id === activeCategory
-                  ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-200/50 scale-105'
+                  ? 'bg-indigo-600 text-white shadow-lg scale-[1.02]'
                   : 'bg-gray-50 text-gray-700 hover:bg-gray-100 hover:shadow-sm'
                 }
               `}
@@ -180,20 +169,19 @@ const CategorySwipe = ({ categories, activeCategory, onCategoryChange, displayed
           ))}
         </div>
 
-        {/* Expand/Collapse Button */}
         {hasMore && (
           <button
             onClick={() => setIsExpanded(!isExpanded)}
-            className="mt-4 w-full py-2.5 text-sm text-indigo-600 hover:text-indigo-800 font-semibold flex items-center justify-center gap-1.5 transition-colors rounded-xl hover:bg-indigo-50"
+            className="mt-4 w-full py-3 text-sm lg:text-base text-indigo-600 hover:text-indigo-700 font-semibold flex items-center justify-center gap-1.5 transition-colors rounded-xl hover:bg-indigo-50"
           >
             {isExpanded ? (
               <>
-                <ChevronUp className="w-4 h-4" />
-                Kevesebb kategória
+                <ChevronUp className="w-4 h-4 lg:w-5 lg:h-5" />
+                Kevesebb
               </>
             ) : (
               <>
-                <ChevronDown className="w-4 h-4" />
+                <ChevronDown className="w-4 h-4 lg:w-5 lg:h-5" />
                 Mind a {categories.length} kategória
               </>
             )}
