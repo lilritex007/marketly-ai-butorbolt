@@ -154,24 +154,42 @@
    ANIMATIONS
    ======================================== */
 
+/* Basic Animations */
 @keyframes fade-in {
   from { opacity: 0; }
   to { opacity: 1; }
 }
 
 @keyframes fade-in-up {
-  from { opacity: 0; transform: translateY(10px); }
+  from { opacity: 0; transform: translateY(20px); }
   to { opacity: 1; transform: translateY(0); }
 }
 
 @keyframes fade-in-down {
-  from { opacity: 0; transform: translateY(-10px); }
+  from { opacity: 0; transform: translateY(-20px); }
   to { opacity: 1; transform: translateY(0); }
 }
 
+@keyframes fade-in-left {
+  from { opacity: 0; transform: translateX(-20px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes fade-in-right {
+  from { opacity: 0; transform: translateX(20px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
 @keyframes scale-in {
-  from { opacity: 0; transform: scale(0.95); }
+  from { opacity: 0; transform: scale(0.9); }
   to { opacity: 1; transform: scale(1); }
+}
+
+@keyframes scale-in-bounce {
+  0% { opacity: 0; transform: scale(0.3); }
+  50% { transform: scale(1.05); }
+  70% { transform: scale(0.95); }
+  100% { opacity: 1; transform: scale(1); }
 }
 
 @keyframes blob {
@@ -185,14 +203,190 @@
   50% { transform: translateY(-10px); }
 }
 
-.animate-fade-in { animation: fade-in 0.3s ease-out; }
-.animate-fade-in-up { animation: fade-in-up 0.3s ease-out; }
-.animate-fade-in-down { animation: fade-in-down 0.3s ease-out; }
-.animate-scale-in { animation: scale-in 0.2s ease-out; }
+/* Shimmer for skeletons */
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+/* Pulse ring for buttons */
+@keyframes pulse-ring {
+  0% { transform: scale(1); opacity: 1; }
+  100% { transform: scale(1.5); opacity: 0; }
+}
+
+/* Scroll indicator */
+@keyframes scroll {
+  0% { transform: translateY(0); opacity: 1; }
+  100% { transform: translateY(6px); opacity: 0; }
+}
+
+/* Gradient animation */
+@keyframes gradient {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+
+/* Shake for errors */
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  10%, 30%, 50%, 70%, 90% { transform: translateX(-4px); }
+  20%, 40%, 60%, 80% { transform: translateX(4px); }
+}
+
+/* Bounce subtle */
+@keyframes bounce-subtle {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-5px); }
+}
+
+/* Spin slow for decorative elements */
+@keyframes spin-slow {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* Animation Classes */
+.animate-fade-in { animation: fade-in 0.3s ease-out forwards; }
+.animate-fade-in-up { animation: fade-in-up 0.4s ease-out forwards; }
+.animate-fade-in-down { animation: fade-in-down 0.4s ease-out forwards; }
+.animate-fade-in-left { animation: fade-in-left 0.4s ease-out forwards; }
+.animate-fade-in-right { animation: fade-in-right 0.4s ease-out forwards; }
+.animate-scale-in { animation: scale-in 0.25s ease-out forwards; }
+.animate-scale-in-bounce { animation: scale-in-bounce 0.5s ease-out forwards; }
 .animate-blob { animation: blob 7s infinite; }
 .animate-float { animation: float 3s ease-in-out infinite; }
+.animate-shimmer { animation: shimmer 1.5s ease-in-out infinite; }
+.animate-pulse-ring { animation: pulse-ring 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
+.animate-scroll { animation: scroll 2s ease-in-out infinite; }
+.animate-gradient { 
+  background-size: 200% 200%;
+  animation: gradient 3s ease infinite; 
+}
+.animate-shake { animation: shake 0.5s ease-in-out; }
+.animate-bounce-subtle { animation: bounce-subtle 2s ease-in-out infinite; }
+.animate-spin-slow { animation: spin-slow 20s linear infinite; }
+
+/* Animation delays */
+.animation-delay-100 { animation-delay: 100ms; }
+.animation-delay-200 { animation-delay: 200ms; }
+.animation-delay-300 { animation-delay: 300ms; }
+.animation-delay-500 { animation-delay: 500ms; }
+.animation-delay-1000 { animation-delay: 1s; }
 .animation-delay-2000 { animation-delay: 2s; }
 .animation-delay-4000 { animation-delay: 4s; }
+
+/* Scroll-triggered animations (used with JS observer) */
+.scroll-animate {
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+}
+
+.scroll-animate.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.scroll-animate-left {
+  opacity: 0;
+  transform: translateX(-30px);
+  transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+}
+
+.scroll-animate-left.is-visible {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.scroll-animate-right {
+  opacity: 0;
+  transform: translateX(30px);
+  transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+}
+
+.scroll-animate-right.is-visible {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.scroll-animate-scale {
+  opacity: 0;
+  transform: scale(0.9);
+  transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+}
+
+.scroll-animate-scale.is-visible {
+  opacity: 1;
+  transform: scale(1);
+}
+
+/* ========================================
+   MICRO-INTERACTIONS
+   ======================================== */
+
+/* Button hover lift */
+#mkt-butorbolt-app .hover-lift {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+#mkt-butorbolt-app .hover-lift:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* Card hover effect */
+#mkt-butorbolt-app .hover-card {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+#mkt-butorbolt-app .hover-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.12);
+}
+
+/* Scale on tap (mobile) */
+#mkt-butorbolt-app .tap-scale {
+  transition: transform 0.1s ease;
+}
+
+#mkt-butorbolt-app .tap-scale:active {
+  transform: scale(0.97);
+}
+
+/* Glow effect on hover */
+#mkt-butorbolt-app .hover-glow {
+  transition: box-shadow 0.3s ease;
+}
+
+#mkt-butorbolt-app .hover-glow:hover {
+  box-shadow: 0 0 20px rgba(99, 102, 241, 0.4);
+}
+
+/* Icon spin on hover */
+#mkt-butorbolt-app .hover-spin:hover svg {
+  animation: spin-slow 2s linear infinite;
+}
+
+/* Underline slide animation */
+#mkt-butorbolt-app .underline-slide {
+  position: relative;
+}
+
+#mkt-butorbolt-app .underline-slide::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background: currentColor;
+  transition: width 0.3s ease;
+}
+
+#mkt-butorbolt-app .underline-slide:hover::after {
+  width: 100%;
+}
 
 /* ========================================
    UTILITIES

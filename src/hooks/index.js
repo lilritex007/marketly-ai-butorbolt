@@ -93,3 +93,9 @@ export const useIntersectionObserver = (options = {}) => {
 // Re-export from other hook files
 export { useToast } from './useToast';
 export { useInfiniteScroll, InfiniteScrollSentinel } from './useInfiniteScroll.jsx';
+export { 
+  useScrollAnimation, 
+  useStaggerAnimation, 
+  useParallax, 
+  useScrollProgress 
+} from './useScrollAnimation';

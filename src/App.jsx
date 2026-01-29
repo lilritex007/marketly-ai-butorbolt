@@ -4,10 +4,10 @@ import { ShoppingCart, Camera, MessageCircle, X, Send, Plus, Move, Trash2, Home,
 import { fetchUnasProducts, refreshUnasProducts, fetchCategories } from './services/unasApi';
 
 // New UI Components
-import { ProductCardSkeleton, ChatMessageSkeleton } from './components/ui/Skeleton';
-import { ToastContainer } from './components/ui/Toast';
-import { EmptyState } from './components/ui/EmptyState';
-import { AIBadge } from './components/ui/Badge';
+import { ProductCardSkeleton, ProductGridSkeleton, CategorySkeleton } from './components/ui/Skeleton';
+import { ToastProvider, useToast } from './components/ui/Toast';
+import { NoSearchResults, NoFilterResults, ErrorState } from './components/ui/EmptyState';
+import { SmartBadges } from './components/ui/Badge';
 
 // AI Components
 import { AIShowcase, AIOnboarding } from './components/ai/AIShowcase';
@@ -48,7 +48,6 @@ import SmartNewsletterPopup from './components/marketing/SmartNewsletterPopup';
 import ARProductPreview from './components/ar/ARProductPreview';
 
 // Hooks
-import { useToast } from './hooks/useToast';
 import { useLocalStorage } from './hooks/index';
 // useInfiniteScroll removed - using manual "Load More" button instead
 
@@ -958,14 +957,12 @@ const App = () => {
   }, [products]);
 
   return (
+    <ToastProvider>
     <div id="mkt-butorbolt-app" className="min-h-screen bg-white font-sans text-gray-900">
       {/* Scroll Progress Bar */}
       <ScrollProgress />
       
       <Navbar activeTab={activeTab} setActiveTab={setActiveTab} wishlistCount={wishlist.length} />
-      
-      {/* Toast Notifications */}
-      <ToastContainer toasts={toast.toasts} removeToast={toast.removeToast} />
       
       {/* AI Onboarding */}
       <AIOnboarding 
@@ -1178,23 +1175,32 @@ const App = () => {
 
                 {/* Empty State (no error, just no products) */}
                 {!isLoadingUnas && !unasError && displayedProducts.length === 0 && (
-                  <EmptyState 
-                    type="products"
-                    action="Minden kategória megtekintése"
-                    onAction={() => handleCategoryChange("Összes")}
-                  />
+                  searchQuery ? (
+                    <NoSearchResults 
+                      query={searchQuery}
+                      onClear={() => { setSearchQuery(''); handleServerSearch(''); }}
+                    />
+                  ) : (
+                    <NoFilterResults 
+                      onClearFilters={() => {
+                        handleCategoryChange("Összes");
+                        setAdvancedFilters({});
+                      }}
+                    />
+                  )
                 )}
 
-                {/* Products Grid - Responsive */}
+                {/* Products Grid - Responsive with Scroll Animations */}
                 {!isLoadingUnas && displayedProducts.length > 0 && (
                   <div className="product-grid">
-                    {displayedProducts.map(product => (
+                    {displayedProducts.map((product, index) => (
                       <EnhancedProductCard 
                         key={product.id}
                         product={product} 
                         onToggleWishlist={toggleWishlist} 
                         isWishlisted={wishlist.includes(product.id)} 
                         onQuickView={handleProductView}
+                        index={index}
                       />
                     ))}
                   </div>
@@ -1325,6 +1331,7 @@ const App = () => {
         }}
       />
     </div>
+    </ToastProvider>
   );
 };
 
