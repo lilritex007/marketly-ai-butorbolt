@@ -42,17 +42,12 @@ const AIRoomDesigner = ({ products, onProductRecommendations }) => {
       // Convert image to base64 (remove data URL prefix)
       const base64Image = imagePreview.split(',')[1];
 
-      const prompt = `
-Elemezd ezt a szobát és adj részletes stílus elemzést magyarul:
+      const prompt = `Elemezd röviden ezt a szobát magyarul:
+1. Stílus (Modern/Skandináv/Vintage/stb.)
+2. Domináns színek
+3. Mit javasolsz bútorként? (2-3 konkrét bútor)
 
-1. **Stílus kategória**: Mi a domináns stílus? (pl. Modern, Skandináv, Indusztriális, Vintage, Minimalist, Bohém, stb.)
-2. **Színpaletta**: Milyen színek dominálnak?
-3. **Hangulat**: Milyen érzést kelt a tér?
-4. **Hiányosságok**: Mi hiányzik vagy mit lehetne fejleszteni?
-5. **Bútor ajánlások**: Konkrétan milyen bútorok lennének ideálisak? (3-5 db)
-
-Formázd szépen, rövid bekezdésekben, barátságos hangnemben.
-`;
+Max 4-5 mondat, barátságos hangnemben.`;
 
       const response = await fetch(
         `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GOOGLE_API_KEY}`,
@@ -65,47 +60,68 @@ Formázd szépen, rövid bekezdésekben, barátságos hangnemben.
                 { text: prompt },
                 {
                   inline_data: {
-                    mime_type: selectedImage.type,
+                    mime_type: selectedImage.type || 'image/jpeg',
                     data: base64Image
                   }
                 }
               ]
             }],
             generationConfig: {
-              temperature: 0.8,
-              maxOutputTokens: 800,
+              temperature: 0.7,
+              maxOutputTokens: 400,
             }
           })
         }
       );
 
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        console.error('Gemini Vision API error:', response.status, errorData);
+        throw new Error(`API hiba: ${response.status}`);
+      }
+
       const data = await response.json();
-      const aiAnalysis = data.candidates?.[0]?.content?.parts?.[0]?.text || 
-        'Nem sikerült elemezni a képet. Próbálj meg egy másik fotót!';
+      
+      if (data.error) {
+        console.error('Gemini error:', data.error);
+        throw new Error(data.error.message || 'API hiba');
+      }
+
+      const aiAnalysis = data.candidates?.[0]?.content?.parts?.[0]?.text;
+      
+      if (!aiAnalysis) {
+        throw new Error('Az AI nem tudta elemezni a képet');
+      }
 
       setAnalysis(aiAnalysis);
 
-      // Find matching products based on analysis (simple keyword matching)
-      const keywords = aiAnalysis.toLowerCase();
-      const matchedProducts = products
-        .filter(p => {
-          const productText = `${p.name} ${p.shortDescription} ${p.category}`.toLowerCase();
-          return keywords.includes('modern') && productText.includes('modern') ||
-                 keywords.includes('skandináv') && productText.includes('skandináv') ||
-                 keywords.includes('kanapé') && productText.includes('kanapé') ||
-                 keywords.includes('fotel') && productText.includes('fotel') ||
-                 keywords.includes('asztal') && productText.includes('asztal');
-        })
-        .slice(0, 6);
+      // Find matching products based on analysis keywords
+      if (products && products.length > 0) {
+        const keywords = aiAnalysis.toLowerCase();
+        const searchTerms = ['kanapé', 'fotel', 'asztal', 'szék', 'ágy', 'polc', 'szekrény', 'komód', 'lámpa'];
+        
+        const matchedProducts = products
+          .filter(p => {
+            const productText = `${p.name || ''} ${p.shortDescription || ''} ${p.category || ''}`.toLowerCase();
+            return searchTerms.some(term => 
+              keywords.includes(term) && productText.includes(term)
+            ) || (
+              (keywords.includes('modern') && productText.includes('modern')) ||
+              (keywords.includes('skandináv') && productText.includes('skandináv'))
+            );
+          })
+          .slice(0, 6);
 
-      setRecommendations(matchedProducts);
+        setRecommendations(matchedProducts);
 
-      if (onProductRecommendations) {
-        onProductRecommendations(matchedProducts);
+        if (onProductRecommendations && matchedProducts.length > 0) {
+          onProductRecommendations(matchedProducts);
+        }
       }
 
     } catch (error) {
-      setAnalysis('Hiba történt az elemzés közben. Kérlek próbáld újra!');
+      console.error('Room analysis error:', error);
+      setAnalysis(`Hiba történt: ${error.message}. Próbálj egy másik fotót feltölteni!`);
     } finally {
       setIsAnalyzing(false);
     }

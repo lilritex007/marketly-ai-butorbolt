@@ -52,30 +52,19 @@ const AIChatAssistant = ({ products }) => {
     setIsLoading(true);
 
     try {
-      // Prepare product context for Gemini
-      const productContext = products.slice(0, 50).map(p => ({
-        name: p.name,
-        category: p.category,
-        price: p.salePrice || p.price,
-        description: p.shortDescription,
-        id: p.id
-      }));
+      // Prepare product context for Gemini - only use products if available
+      const productContext = products && products.length > 0 
+        ? products.slice(0, 20).map(p => `- ${p.name} (${p.category || 'Egyéb'}) - ${(p.salePrice || p.price || 0).toLocaleString('hu-HU')} Ft`).join('\n')
+        : 'Jelenleg nincs elérhető terméklista.';
 
-      const prompt = `
-Te egy segítőkész AI asszisztens vagy egy bútoráruházban. A felhasználó kérdése: "${userMessage}"
+      const prompt = `Te egy barátságos és segítőkész AI bútor szakértő vagy a Marketly webshopban.
 
-Elérhető termékek (minta):
-${JSON.stringify(productContext.slice(0, 10), null, 2)}
+A felhasználó üzenete: "${userMessage}"
 
-Add meg a választ:
-1. Értsd meg pontosan mit keres a felhasználó
-2. Ajánlj konkrét termékeket (ha releváns)
-3. Adj hasznos tanácsokat
-4. Legyél barátságos és segítőkész
-5. Magyar nyelven válaszolj
+Néhány termék a kínálatból:
+${productContext}
 
-Ha konkrét termékeket ajánlasz, hivatkozz a nevükre.
-`;
+Válaszolj magyarul, maximum 2-3 mondatban. Legyél segítőkész és barátságos. Ha bútort keres, ajánlj konkrét típusokat vagy stílusokat.`;
 
       const response = await fetch(
         `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GOOGLE_API_KEY}`,
@@ -83,20 +72,35 @@ Ha konkrét termékeket ajánlasz, hivatkozz a nevükre.
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            contents: [{
-              parts: [{ text: prompt }]
-            }],
+            contents: [{ parts: [{ text: prompt }] }],
             generationConfig: {
               temperature: 0.7,
-              maxOutputTokens: 500,
+              maxOutputTokens: 300,
             }
           })
         }
       );
 
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        console.error('Gemini API error:', response.status, errorData);
+        throw new Error(`API hiba: ${response.status}`);
+      }
+
       const data = await response.json();
-      const aiResponse = data.candidates?.[0]?.content?.parts?.[0]?.text || 
-        'Elnézést, nem tudtam feldolgozni a kérésedet. Próbálj meg másképp megfogalmazni!';
+      
+      // Check for API errors in response
+      if (data.error) {
+        console.error('Gemini returned error:', data.error);
+        throw new Error(data.error.message || 'API hiba');
+      }
+
+      const aiResponse = data.candidates?.[0]?.content?.parts?.[0]?.text;
+      
+      if (!aiResponse) {
+        console.error('No response from Gemini:', data);
+        throw new Error('Üres válasz az AI-tól');
+      }
 
       // Add AI response
       setMessages(prev => [...prev, {
@@ -106,9 +110,10 @@ Ha konkrét termékeket ajánlasz, hivatkozz a nevükre.
       }]);
 
     } catch (error) {
+      console.error('Chat error:', error);
       setMessages(prev => [...prev, {
         role: 'assistant',
-        content: 'Hoppá, valami hiba történt. Kérlek próbáld újra később!',
+        content: `Sajnos hiba történt: ${error.message}. Próbáld újra!`,
         timestamp: new Date()
       }]);
     } finally {

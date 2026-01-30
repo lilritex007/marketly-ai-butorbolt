@@ -102,19 +102,14 @@ const AIStyleQuiz = ({ products, onRecommendations, onClose }) => {
     setIsAnalyzing(true);
 
     try {
-      const prompt = `
-Te egy AI interior design szakértő vagy. A felhasználó elvégzett egy stílus kvízt:
+      const prompt = `Te egy lakberendező szakértő vagy. Röviden (2 mondat) jellemezd a felhasználó stílusát:
+- Stílus: ${allAnswers.space}
+- Színek: ${allAnswers.colors}  
+- Budget: ${allAnswers.budget}
+- Prioritás: ${allAnswers.priority}
+- Helyiség: ${allAnswers.room}
 
-**Válaszok:**
-1. Jelenlegi stílus: ${allAnswers.space}
-2. Kedvenc színek: ${allAnswers.colors}
-3. Budget: ${allAnswers.budget}
-4. Prioritás: ${allAnswers.priority}
-5. Helyiség: ${allAnswers.room}
-
-Készíts egy rövid (2-3 mondat) "Style DNA" profilt magyarul. Legyél barátságos és informatív.
-Ne használj emojikat.
-`;
+Válaszolj magyarul, barátságosan, max 2 mondatban.`;
 
       const response = await fetch(
         `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GOOGLE_API_KEY}`,
@@ -123,16 +118,38 @@ Ne használj emojikat.
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             contents: [{ parts: [{ text: prompt }] }],
-            generationConfig: { temperature: 0.7, maxOutputTokens: 300 }
+            generationConfig: { temperature: 0.7, maxOutputTokens: 200 }
           })
         }
       );
 
-      const data = await response.json();
-      const result = data.candidates?.[0]?.content?.parts?.[0]?.text || 
-        'Modern stíluskedvelő vagy, aki a funkcionalitást és az esztétikát egyaránt értékeli.';
+      if (!response.ok) {
+        console.error('Gemini API error:', response.status);
+        throw new Error('API hiba');
+      }
 
-      setStyleDNA(result);
+      const data = await response.json();
+      
+      if (data.error) {
+        console.error('Gemini error:', data.error);
+        throw new Error(data.error.message || 'API hiba');
+      }
+
+      const result = data.candidates?.[0]?.content?.parts?.[0]?.text;
+      
+      if (result) {
+        setStyleDNA(result);
+      } else {
+        // Fallback to local style DNA generation
+        const styleMap = {
+          modern: 'Modern, letisztult',
+          scandinavian: 'Skandináv, világos',
+          industrial: 'Indusztriális, nyers',
+          vintage: 'Vintage, retro',
+          bohemian: 'Bohém, színes'
+        };
+        setStyleDNA(`${styleMap[allAnswers.space] || 'Egyedi'} stílusú vagy, aki a ${allAnswers.priority === 'comfort' ? 'kényelmet' : allAnswers.priority === 'design' ? 'dizájnt' : 'funkcionalitást'} helyezi előtérbe.`);
+      }
 
       // Generate recommendations based on answers
       const matchedProducts = findMatchingProducts(allAnswers);
@@ -143,7 +160,13 @@ Ne használj emojikat.
       }
 
     } catch (error) {
-      setStyleDNA('Hiba történt az elemzés közben. Próbáld újra később!');
+      console.error('Style quiz error:', error);
+      // Fallback style DNA
+      setStyleDNA('Egyedi ízlésvilágod van! A kvíz alapján személyre szabott ajánlatokat készítettünk neked.');
+      
+      // Still show product recommendations
+      const matchedProducts = findMatchingProducts(allAnswers);
+      setRecommendations(matchedProducts);
     } finally {
       setIsAnalyzing(false);
     }
