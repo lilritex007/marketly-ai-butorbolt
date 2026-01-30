@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
-import { ShoppingCart, Camera, MessageCircle, X, Send, Plus, Move, Trash2, Home, ZoomIn, ZoomOut, Upload, Settings, Link as LinkIcon, FileText, RefreshCw, AlertCircle, Database, Lock, Search, ChevronLeft, ChevronRight, Filter, Heart, ArrowDownUp, Info, Check, Star, Truck, ShieldCheck, Phone, ArrowRight, Mail, Eye, Sparkles, Lightbulb, Image as ImageIcon, MousePointer2, Menu, Bot } from 'lucide-react';
+import { ShoppingCart, Camera, MessageCircle, X, Send, Plus, Move, Trash2, Home, ZoomIn, ZoomOut, Upload, Settings, Link as LinkIcon, FileText, RefreshCw, AlertCircle, Database, Lock, Search, ChevronLeft, ChevronRight, Filter, Heart, ArrowDownUp, Info, Check, Star, Truck, ShieldCheck, Phone, ArrowRight, Mail, Eye, Sparkles, Lightbulb, Image as ImageIcon, MousePointer2, Menu, Bot, Moon, Sun, Clock, Gift, Zap, TrendingUp, Instagram, Facebook, MapPin, Sofa, Lamp, BedDouble, Armchair, Grid3X3, ExternalLink, Timer, ChevronDown } from 'lucide-react';
 // framer-motion removed due to Vite production build TDZ issues
 import { fetchUnasProducts, refreshUnasProducts, fetchCategories } from './services/unasApi';
 
@@ -201,9 +201,55 @@ const parseCSV = (csvText) => {
 
 // --- 3. KOMPONENSEK ---
 
-const Navbar = ({ activeTab, setActiveTab, wishlistCount, productCount = 0, onScrollToProducts }) => {
+// Announcement bar messages for rotation
+const ANNOUNCEMENT_MESSAGES = [
+  { icon: Truck, text: 'Ingyenes szállítás 50.000 Ft felett', highlight: 'Ingyenes' },
+  { icon: Gift, text: 'Első rendelésre 10% kedvezmény: ELSO10', highlight: 'ELSO10' },
+  { icon: Zap, text: 'AI-alapú bútorajánlatok - Csak Neked!', highlight: 'AI' },
+  { icon: TrendingUp, text: 'Több mint 90.000 termék egy helyen', highlight: '90.000' },
+  { icon: Star, text: '4.9★ értékelés 10.000+ vásárlótól', highlight: '4.9★' },
+];
+
+// Popular categories for mega menu and mobile
+const POPULAR_CATEGORIES = [
+  { id: 'kanapek', name: 'Kanapék', icon: Sofa, color: 'from-blue-500 to-indigo-600' },
+  { id: 'agyak', name: 'Ágyak', icon: BedDouble, color: 'from-purple-500 to-pink-600' },
+  { id: 'fotelek', name: 'Fotelek', icon: Armchair, color: 'from-orange-500 to-red-600' },
+  { id: 'lampak', name: 'Lámpák', icon: Lamp, color: 'from-yellow-500 to-orange-600' },
+  { id: 'szekrenyek', name: 'Szekrények', icon: Grid3X3, color: 'from-green-500 to-teal-600' },
+  { id: 'asztalok', name: 'Asztalok', icon: Grid3X3, color: 'from-cyan-500 to-blue-600' },
+];
+
+const Navbar = ({ activeTab, setActiveTab, wishlistCount, productCount = 0, onScrollToProducts, recentlyViewed = [], categories = [] }) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
+  const [announcementIndex, setAnnouncementIndex] = useState(0);
+  const [isDarkMode, setIsDarkMode] = useState(false);
+  const [showMegaMenu, setShowMegaMenu] = useState(false);
+  const [isReturningUser, setIsReturningUser] = useState(false);
+  const [userName, setUserName] = useState('');
+  const [mobileMenuClosing, setMobileMenuClosing] = useState(false);
+  const [touchStartX, setTouchStartX] = useState(0);
+  const mobileMenuRef = useRef(null);
+
+  // Check for returning user
+  useEffect(() => {
+    const lastVisit = localStorage.getItem('mkt_last_visit');
+    const savedName = localStorage.getItem('mkt_user_name');
+    if (lastVisit) {
+      setIsReturningUser(true);
+      if (savedName) setUserName(savedName);
+    }
+    localStorage.setItem('mkt_last_visit', Date.now().toString());
+  }, []);
+
+  // Rotating announcement messages
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setAnnouncementIndex(prev => (prev + 1) % ANNOUNCEMENT_MESSAGES.length);
+    }, 4000);
+    return () => clearInterval(interval);
+  }, []);
 
   // Scroll detection for navbar shrink effect
   useEffect(() => {
@@ -224,7 +270,45 @@ const Navbar = ({ activeTab, setActiveTab, wishlistCount, productCount = 0, onSc
     return () => { document.body.style.overflow = ''; };
   }, [mobileMenuOpen]);
 
-  const closeMobileMenu = () => setMobileMenuOpen(false);
+  // Dark mode toggle
+  useEffect(() => {
+    if (isDarkMode) {
+      document.getElementById('mkt-butorbolt-app')?.classList.add('dark-mode');
+    } else {
+      document.getElementById('mkt-butorbolt-app')?.classList.remove('dark-mode');
+    }
+  }, [isDarkMode]);
+
+  // Swipe gesture handling for mobile menu
+  const handleTouchStart = (e) => {
+    setTouchStartX(e.touches[0].clientX);
+  };
+
+  const handleTouchEnd = (e) => {
+    const touchEndX = e.changedTouches[0].clientX;
+    const diff = touchEndX - touchStartX;
+    // Swipe right to close (diff > 80px)
+    if (diff > 80) {
+      closeMobileMenu();
+    }
+  };
+
+  const closeMobileMenu = () => {
+    // Haptic feedback
+    if (navigator.vibrate) navigator.vibrate(10);
+    setMobileMenuClosing(true);
+    setTimeout(() => {
+      setMobileMenuOpen(false);
+      setMobileMenuClosing(false);
+    }, 300);
+  };
+
+  const openMobileMenu = () => {
+    // Haptic feedback
+    if (navigator.vibrate) navigator.vibrate(10);
+    setMobileMenuOpen(true);
+  };
+
   const setTabAndClose = (tab) => {
     setActiveTab(tab);
     closeMobileMenu();
@@ -236,22 +320,59 @@ const Navbar = ({ activeTab, setActiveTab, wishlistCount, productCount = 0, onSc
     { id: 'room-planner', label: 'Szobatervező', icon: Move, isAI: true, desc: 'Tervezd meg a szobád' },
   ];
 
+  const currentAnnouncement = ANNOUNCEMENT_MESSAGES[announcementIndex];
+
   return (
     <>
-      {/* Top announcement bar - LARGER */}
-      <div className="bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 text-white py-3 sm:py-3.5 px-4 text-center relative overflow-hidden">
+      {/* Animated Announcement Bar */}
+      <div className="bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 text-white py-2.5 sm:py-3 px-4 text-center relative overflow-hidden">
         <div className="absolute inset-0 opacity-20" style={{backgroundImage: 'radial-gradient(circle, rgba(255,255,255,0.3) 1px, transparent 1px)', backgroundSize: '16px 16px'}} />
-        <div className="relative flex items-center justify-center gap-2 sm:gap-3 flex-wrap">
-          <Sparkles className="w-5 h-5 animate-pulse" />
-          <span className="text-base sm:text-lg font-bold">🎉 AI Bútorbolt</span>
-          <span className="hidden sm:inline text-base">•</span>
-          <span className="hidden sm:inline text-base font-semibold">{productCount > 0 ? `${productCount.toLocaleString('hu-HU')}+ termék` : 'Betöltés...'}</span>
-          <span className="hidden md:inline">•</span>
-          <span className="hidden md:inline text-base">Ingyenes szállítás 50.000 Ft felett</span>
+        
+        {/* Animated message */}
+        <div className="relative flex items-center justify-center gap-2 sm:gap-3">
+          <div 
+            key={announcementIndex}
+            className="flex items-center gap-2 sm:gap-3 animate-fade-in"
+          >
+            <currentAnnouncement.icon className="w-4 h-4 sm:w-5 sm:h-5" />
+            <span className="text-sm sm:text-base font-medium">
+              {currentAnnouncement.text.split(currentAnnouncement.highlight).map((part, i, arr) => (
+                <React.Fragment key={i}>
+                  {part}
+                  {i < arr.length - 1 && (
+                    <span className="font-bold bg-white/20 px-1.5 py-0.5 rounded mx-1">
+                      {currentAnnouncement.highlight}
+                    </span>
+                  )}
+                </React.Fragment>
+              ))}
+            </span>
+          </div>
+          
+          {/* Progress dots */}
+          <div className="hidden sm:flex items-center gap-1 ml-4">
+            {ANNOUNCEMENT_MESSAGES.map((_, i) => (
+              <div 
+                key={i} 
+                className={`w-1.5 h-1.5 rounded-full transition-all duration-300 ${
+                  i === announcementIndex ? 'bg-white w-4' : 'bg-white/40'
+                }`}
+              />
+            ))}
+          </div>
         </div>
       </div>
 
-      {/* Main navbar - LARGER */}
+      {/* Returning User Greeting */}
+      {isReturningUser && (
+        <div className="bg-gradient-to-r from-green-50 to-emerald-50 border-b border-green-100 py-2 px-4 text-center">
+          <span className="text-sm text-green-800 font-medium">
+            👋 Üdv újra{userName ? `, ${userName}` : ''}! Örülünk, hogy visszatértél!
+          </span>
+        </div>
+      )}
+
+      {/* Main navbar */}
       <nav 
         id="mkt-butorbolt-navbar" 
         className={`
@@ -263,61 +384,109 @@ const Navbar = ({ activeTab, setActiveTab, wishlistCount, productCount = 0, onSc
         `}
       >
         <div className="w-full max-w-[2000px] mx-auto px-4 sm:px-6 lg:px-10 xl:px-16">
-          <div className={`flex justify-between items-center transition-all duration-300 ${isScrolled ? 'h-18 lg:h-20' : 'h-20 lg:h-24'}`}>
+          <div className={`flex justify-between items-center transition-all duration-300 ${isScrolled ? 'h-16 lg:h-18' : 'h-18 lg:h-22'}`}>
             
-            {/* Logo - LARGER */}
+            {/* Logo */}
             <div className="flex items-center cursor-pointer group" onClick={() => setActiveTab('shop')}>
               <div className={`
                 relative bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 rounded-xl sm:rounded-2xl 
                 flex items-center justify-center text-white mr-3 sm:mr-4
                 transform group-hover:scale-105 group-hover:rotate-3 transition-all duration-300 
                 shadow-lg shadow-indigo-300/50 group-hover:shadow-xl group-hover:shadow-purple-400/50
-                ${isScrolled ? 'w-12 h-12 sm:w-14 sm:h-14' : 'w-14 h-14 sm:w-16 sm:h-16'}
+                ${isScrolled ? 'w-11 h-11 sm:w-12 sm:h-12' : 'w-12 h-12 sm:w-14 sm:h-14'}
               `}>
-                <Home className={`${isScrolled ? 'w-6 h-6 sm:w-7 sm:h-7' : 'w-7 h-7 sm:w-8 sm:h-8'}`} />
-                <div className="absolute -top-1 -right-1 w-5 h-5 bg-green-400 rounded-full border-2 border-white flex items-center justify-center">
-                  <Sparkles className="w-2.5 h-2.5 text-white" />
+                <Home className={`${isScrolled ? 'w-5 h-5 sm:w-6 sm:h-6' : 'w-6 h-6 sm:w-7 sm:h-7'}`} />
+                <div className="absolute -top-1 -right-1 w-4 h-4 bg-green-400 rounded-full border-2 border-white flex items-center justify-center">
+                  <Sparkles className="w-2 h-2 text-white" />
                 </div>
               </div>
               <div className="flex flex-col">
                 <div className="flex items-baseline">
-                  <span className={`font-black text-gray-900 tracking-tight transition-all ${isScrolled ? 'text-2xl sm:text-3xl' : 'text-3xl sm:text-4xl'}`}>
+                  <span className={`font-black text-gray-900 tracking-tight transition-all ${isScrolled ? 'text-xl sm:text-2xl' : 'text-2xl sm:text-3xl'}`}>
                     Marketly
                   </span>
-                  <span className={`font-black bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent transition-all ${isScrolled ? 'text-2xl sm:text-3xl' : 'text-3xl sm:text-4xl'}`}>
+                  <span className={`font-black bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent transition-all ${isScrolled ? 'text-xl sm:text-2xl' : 'text-2xl sm:text-3xl'}`}>
                     .AI
                   </span>
                 </div>
-                <span className="text-xs sm:text-sm text-gray-500 font-semibold tracking-widest -mt-0.5">
+                <span className="text-[10px] sm:text-xs text-gray-500 font-semibold tracking-widest -mt-0.5">
                   BÚTORBOLT
                 </span>
               </div>
             </div>
 
-            {/* Desktop Navigation - LARGER */}
+            {/* Desktop Navigation with Mega Menu */}
             <div className="hidden lg:flex items-center gap-2 xl:gap-3">
+              {/* Categories Dropdown */}
+              <div 
+                className="relative"
+                onMouseEnter={() => setShowMegaMenu(true)}
+                onMouseLeave={() => setShowMegaMenu(false)}
+              >
+                <button className="flex items-center gap-2 px-4 xl:px-5 py-2.5 xl:py-3 rounded-xl text-gray-600 hover:text-gray-900 hover:bg-gray-100 font-bold text-base transition-all">
+                  <Grid3X3 className="w-5 h-5" />
+                  <span>Kategóriák</span>
+                  <ChevronDown className={`w-4 h-4 transition-transform ${showMegaMenu ? 'rotate-180' : ''}`} />
+                </button>
+
+                {/* Mega Menu Dropdown */}
+                {showMegaMenu && (
+                  <div className="absolute top-full left-0 mt-2 w-[500px] bg-white rounded-2xl shadow-2xl border border-gray-100 p-6 animate-fade-in-up z-50">
+                    <div className="grid grid-cols-3 gap-3">
+                      {POPULAR_CATEGORIES.map((cat) => (
+                        <button
+                          key={cat.id}
+                          onClick={() => {
+                            setActiveTab('shop');
+                            setShowMegaMenu(false);
+                          }}
+                          className="flex flex-col items-center gap-2 p-4 rounded-xl hover:bg-gray-50 transition-all group"
+                        >
+                          <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${cat.color} flex items-center justify-center text-white group-hover:scale-110 transition-transform`}>
+                            <cat.icon className="w-6 h-6" />
+                          </div>
+                          <span className="text-sm font-semibold text-gray-700">{cat.name}</span>
+                        </button>
+                      ))}
+                    </div>
+                    <div className="mt-4 pt-4 border-t border-gray-100">
+                      <button 
+                        onClick={() => {
+                          setActiveTab('shop');
+                          setShowMegaMenu(false);
+                        }}
+                        className="w-full flex items-center justify-center gap-2 py-3 text-indigo-600 hover:bg-indigo-50 rounded-xl font-semibold transition-all"
+                      >
+                        Összes kategória megtekintése
+                        <ArrowRight className="w-4 h-4" />
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+
               {navItems.map((item) => (
                 <button
                   key={item.id}
                   onClick={() => setActiveTab(item.id)}
                   className={`
-                    relative flex items-center gap-2.5 xl:gap-3 px-5 xl:px-6 py-3 xl:py-3.5 rounded-xl xl:rounded-2xl
-                    font-bold text-base xl:text-lg transition-all duration-200
+                    relative flex items-center gap-2 xl:gap-2.5 px-4 xl:px-5 py-2.5 xl:py-3 rounded-xl
+                    font-bold text-base transition-all duration-200
                     ${activeTab === item.id
                       ? 'bg-gradient-to-r from-indigo-500 to-purple-600 text-white shadow-lg shadow-indigo-300/50'
                       : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
                     }
                   `}
                 >
-                  <item.icon className="w-5 h-5 xl:w-6 xl:h-6" />
+                  <item.icon className="w-5 h-5" />
                   <span>{item.label}</span>
                   {item.isAI && activeTab !== item.id && (
-                    <span className="px-2 py-0.5 text-xs font-bold bg-gradient-to-r from-indigo-100 to-purple-100 text-indigo-600 rounded-full">
+                    <span className="px-1.5 py-0.5 text-[10px] font-bold bg-gradient-to-r from-indigo-100 to-purple-100 text-indigo-600 rounded-full">
                       AI
                     </span>
                   )}
                   {item.badge && activeTab !== item.id && (
-                    <span className="px-2 py-0.5 text-xs font-bold bg-green-100 text-green-700 rounded-full">
+                    <span className="px-1.5 py-0.5 text-[10px] font-bold bg-green-100 text-green-700 rounded-full">
                       {item.badge}
                     </span>
                   )}
@@ -325,194 +494,303 @@ const Navbar = ({ activeTab, setActiveTab, wishlistCount, productCount = 0, onSc
               ))}
             </div>
 
-            {/* Right side actions - LARGER */}
-            <div className="flex items-center gap-3 sm:gap-4">
+            {/* Right side actions */}
+            <div className="flex items-center gap-2 sm:gap-3">
               
-              {/* Quick search button (desktop) */}
-              <button
-                onClick={() => {
-                  const productsSection = document.getElementById('products-section');
-                  productsSection?.scrollIntoView({ behavior: 'smooth' });
-                }}
-                className="hidden md:flex items-center gap-2.5 px-5 py-3 bg-gray-100 hover:bg-gray-200 rounded-xl lg:rounded-2xl text-gray-600 hover:text-gray-900 transition-all group"
+              {/* Progressive Search (appears when scrolled on desktop) */}
+              {isScrolled && (
+                <button
+                  onClick={() => {
+                    const productsSection = document.getElementById('products-section');
+                    productsSection?.scrollIntoView({ behavior: 'smooth' });
+                  }}
+                  className="hidden lg:flex items-center gap-2 px-4 py-2.5 bg-gray-100 hover:bg-gray-200 rounded-xl text-gray-600 hover:text-gray-900 transition-all"
+                >
+                  <Search className="w-5 h-5" />
+                  <span className="text-sm font-semibold">Keresés</span>
+                </button>
+              )}
+
+              {/* Dark Mode Toggle */}
+              <button 
+                onClick={() => setIsDarkMode(!isDarkMode)}
+                className="hidden sm:flex p-2.5 sm:p-3 min-w-[44px] min-h-[44px] items-center justify-center text-gray-600 hover:text-gray-900 rounded-xl hover:bg-gray-100 transition-all"
+                aria-label={isDarkMode ? 'Világos mód' : 'Sötét mód'}
               >
-                <Search className="w-5 h-5 lg:w-6 lg:h-6" />
-                <span className="text-base lg:text-lg font-semibold">Keresés</span>
-                <kbd className="hidden xl:inline-flex items-center gap-1 px-2 py-0.5 bg-white rounded-lg text-sm text-gray-400 border border-gray-200">
-                  ⌘K
-                </kbd>
+                {isDarkMode ? <Sun className="w-5 h-5 sm:w-6 sm:h-6" /> : <Moon className="w-5 h-5 sm:w-6 sm:h-6" />}
               </button>
 
-              {/* Wishlist - LARGER */}
+              {/* Wishlist */}
               <button 
-                className="relative p-3 sm:p-3.5 min-w-[52px] min-h-[52px] flex items-center justify-center text-gray-600 hover:text-red-500 rounded-xl hover:bg-red-50 transition-all group"
+                className="relative p-2.5 sm:p-3 min-w-[44px] min-h-[44px] flex items-center justify-center text-gray-600 hover:text-red-500 rounded-xl hover:bg-red-50 transition-all group"
                 aria-label="Kívánságlista"
               >
-                <Heart className={`w-6 h-6 sm:w-7 sm:h-7 transition-all group-hover:scale-110 ${wishlistCount > 0 ? 'fill-red-500 text-red-500' : ''}`} />
+                <Heart className={`w-5 h-5 sm:w-6 sm:h-6 transition-all group-hover:scale-110 ${wishlistCount > 0 ? 'fill-red-500 text-red-500' : ''}`} />
                 {wishlistCount > 0 && (
-                  <span className="absolute -top-1 -right-1 min-w-[24px] h-6 flex items-center justify-center px-2 text-sm font-bold text-white bg-red-500 rounded-full shadow-lg animate-scale-in">
+                  <span className="absolute -top-1 -right-1 min-w-[20px] h-5 flex items-center justify-center px-1.5 text-xs font-bold text-white bg-red-500 rounded-full shadow-lg animate-scale-in">
                     {wishlistCount}
                   </span>
                 )}
               </button>
 
-              {/* Mobile menu button - LARGER */}
+              {/* Mobile menu button */}
               <button
                 type="button"
-                className="lg:hidden p-3 min-w-[52px] min-h-[52px] flex items-center justify-center rounded-xl bg-gradient-to-r from-indigo-500 to-purple-600 text-white shadow-lg hover:shadow-xl transition-all"
-                onClick={() => setMobileMenuOpen(true)}
+                className="lg:hidden p-2.5 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-xl bg-gradient-to-r from-indigo-500 to-purple-600 text-white shadow-lg hover:shadow-xl transition-all"
+                onClick={openMobileMenu}
                 aria-label="Menü megnyitása"
               >
-                <Menu className="w-7 h-7" />
+                <Menu className="w-6 h-6" />
               </button>
 
-              {/* CTA Button - LARGER */}
+              {/* CTA Button */}
               <a 
                 href={WEBSHOP_DOMAIN} 
                 target="_blank" 
                 rel="noopener noreferrer" 
-                className="hidden sm:flex items-center gap-2.5 bg-gradient-to-r from-gray-900 to-gray-800 hover:from-gray-800 hover:to-gray-700 text-white px-6 lg:px-8 py-3 lg:py-3.5 rounded-xl lg:rounded-2xl text-base lg:text-lg font-bold transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+                className="hidden md:flex items-center gap-2 bg-gradient-to-r from-gray-900 to-gray-800 hover:from-gray-800 hover:to-gray-700 text-white px-5 lg:px-6 py-2.5 lg:py-3 rounded-xl text-sm lg:text-base font-bold transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
               >
                 <span>Fő webshop</span>
-                <ArrowRight className="w-5 h-5 lg:w-6 lg:h-6" />
+                <ExternalLink className="w-4 h-4" />
               </a>
             </div>
           </div>
         </div>
       </nav>
 
-      {/* FULL SCREEN Mobile menu - accounts for 40px UNAS bottom nav */}
+      {/* ENHANCED Mobile Menu - Slide-in with swipe gesture */}
       {mobileMenuOpen && (
         <div
-          className="fixed inset-0 z-[200] lg:hidden"
-          style={{ bottom: '40px' }} /* UNAS bottom nav space */
+          ref={mobileMenuRef}
+          className={`fixed inset-0 z-[200] lg:hidden ${mobileMenuClosing ? 'animate-slide-out-right' : 'animate-slide-in-right'}`}
+          style={{ bottom: '40px' }}
           role="dialog"
           aria-label="Navigációs menü"
+          onTouchStart={handleTouchStart}
+          onTouchEnd={handleTouchEnd}
         >
-          {/* Full screen gradient background */}
+          {/* Gradient background */}
           <div className="absolute inset-0 bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-600" />
           
-          {/* Decorative elements */}
+          {/* Animated floating shapes */}
           <div className="absolute inset-0 overflow-hidden pointer-events-none">
-            <div className="absolute top-16 left-10 w-64 h-64 bg-white/10 rounded-full blur-3xl" />
-            <div className="absolute bottom-20 right-10 w-80 h-80 bg-pink-400/20 rounded-full blur-3xl" />
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-purple-400/10 rounded-full blur-3xl" />
+            <div className="absolute top-10 left-5 w-48 h-48 bg-white/10 rounded-full blur-3xl animate-float-slow" />
+            <div className="absolute bottom-32 right-5 w-64 h-64 bg-pink-400/15 rounded-full blur-3xl animate-float-medium" />
+            <div className="absolute top-1/3 right-1/4 w-32 h-32 bg-yellow-400/10 rounded-full blur-2xl animate-float-fast" />
           </div>
           
-          {/* Content - with safe area for bottom nav */}
-          <div className="relative h-full flex flex-col text-white p-5 sm:p-6">
+          {/* Content */}
+          <div className="relative h-full flex flex-col text-white p-4 sm:p-5 overflow-y-auto">
             
-            {/* Header - compact */}
-            <div className="flex justify-between items-center mb-6">
+            {/* Header */}
+            <div className="flex justify-between items-center mb-4">
               <div className="flex items-center gap-3">
-                <div className="w-12 h-12 bg-white/20 backdrop-blur-xl rounded-xl flex items-center justify-center">
-                  <Home className="w-6 h-6" />
+                <div className="w-11 h-11 bg-white/20 backdrop-blur-xl rounded-xl flex items-center justify-center">
+                  <Home className="w-5 h-5" />
                 </div>
                 <div>
                   <div className="flex items-baseline">
-                    <span className="font-black text-2xl">Marketly</span>
-                    <span className="font-black text-2xl text-white/80">.AI</span>
+                    <span className="font-black text-xl">Marketly</span>
+                    <span className="font-black text-xl text-white/80">.AI</span>
                   </div>
-                  <p className="text-xs text-white/60 font-medium tracking-wider">BÚTORBOLT</p>
+                  <p className="text-[10px] text-white/60 font-medium tracking-wider">BÚTORBOLT</p>
                 </div>
               </div>
               <button
                 type="button"
-                className="p-3 min-w-[48px] min-h-[48px] flex items-center justify-center rounded-xl bg-white/10 hover:bg-white/20 backdrop-blur-xl transition-colors"
+                className="p-2.5 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-xl bg-white/10 hover:bg-white/20 backdrop-blur-xl transition-colors"
                 onClick={closeMobileMenu}
                 aria-label="Menü bezárása"
               >
-                <X className="w-7 h-7" />
+                <X className="w-6 h-6" />
               </button>
             </div>
 
-            {/* Navigation items - optimized for space */}
-            <nav className="flex-1 flex flex-col justify-center">
-              <div className="space-y-3">
-                {navItems.map((item, index) => (
+            {/* Quick Actions Row */}
+            <div className="flex gap-2 mb-4">
+              <button 
+                onClick={() => {
+                  closeMobileMenu();
+                  setTimeout(() => {
+                    document.getElementById('products-section')?.scrollIntoView({ behavior: 'smooth' });
+                  }, 350);
+                }}
+                className="flex-1 flex items-center justify-center gap-2 py-3 bg-white/10 backdrop-blur-xl rounded-xl font-semibold"
+              >
+                <Search className="w-5 h-5" />
+                <span>Keresés</span>
+              </button>
+              <button className="flex-1 flex items-center justify-center gap-2 py-3 bg-white/10 backdrop-blur-xl rounded-xl font-semibold relative">
+                <Heart className={`w-5 h-5 ${wishlistCount > 0 ? 'fill-white' : ''}`} />
+                <span>Kedvencek</span>
+                {wishlistCount > 0 && (
+                  <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 rounded-full text-xs flex items-center justify-center font-bold">
+                    {wishlistCount}
+                  </span>
+                )}
+              </button>
+            </div>
+
+            {/* Popular Categories Grid */}
+            <div className="mb-4">
+              <p className="text-xs text-white/60 font-semibold uppercase tracking-wider mb-2">Népszerű kategóriák</p>
+              <div className="grid grid-cols-3 gap-2">
+                {POPULAR_CATEGORIES.slice(0, 6).map((cat) => (
                   <button
-                    key={item.id}
-                    onClick={() => setTabAndClose(item.id)}
-                    className={`
-                      w-full flex items-center gap-4 px-5 py-4 rounded-2xl text-left transition-all
-                      ${activeTab === item.id
-                        ? 'bg-white text-gray-900 shadow-2xl scale-[1.02]'
-                        : 'bg-white/10 hover:bg-white/20 backdrop-blur-xl'
-                      }
-                    `}
-                    style={{ animationDelay: `${index * 100}ms` }}
+                    key={cat.id}
+                    onClick={() => setTabAndClose('shop')}
+                    className="flex flex-col items-center gap-1.5 py-3 bg-white/10 backdrop-blur-xl rounded-xl hover:bg-white/20 transition-all"
                   >
-                    <div className={`
-                      w-12 h-12 rounded-xl flex items-center justify-center shrink-0
-                      ${activeTab === item.id 
-                        ? 'bg-gradient-to-br from-indigo-500 to-purple-600 text-white' 
-                        : 'bg-white/20'
-                      }
-                    `}>
-                      <item.icon className="w-6 h-6" />
+                    <div className={`w-9 h-9 rounded-lg bg-gradient-to-br ${cat.color} flex items-center justify-center`}>
+                      <cat.icon className="w-5 h-5" />
                     </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2">
-                        <span className={`text-lg font-bold ${activeTab === item.id ? 'text-gray-900' : 'text-white'}`}>
-                          {item.label}
-                        </span>
-                        {item.isAI && (
-                          <span className={`px-2 py-0.5 text-[10px] font-bold rounded-full ${
-                            activeTab === item.id 
-                              ? 'bg-gradient-to-r from-indigo-100 to-purple-100 text-indigo-600' 
-                              : 'bg-white/20 text-white'
-                          }`}>
-                            AI
-                          </span>
-                        )}
-                        {item.badge && (
-                          <span className={`px-2 py-0.5 text-[10px] font-bold rounded-full ${
-                            activeTab === item.id 
-                              ? 'bg-green-100 text-green-700' 
-                              : 'bg-white/20 text-white'
-                          }`}>
-                            {item.badge}
-                          </span>
-                        )}
-                      </div>
-                      <p className={`text-xs ${activeTab === item.id ? 'text-gray-500' : 'text-white/60'}`}>
-                        {item.desc}
-                      </p>
-                    </div>
-                    <ChevronRight className={`w-5 h-5 shrink-0 ${activeTab === item.id ? 'text-indigo-600' : 'text-white/40'}`} />
+                    <span className="text-[11px] font-semibold">{cat.name}</span>
                   </button>
                 ))}
               </div>
-            </nav>
+            </div>
 
-            {/* Bottom section - compact */}
-            <div className="space-y-3 mt-4">
-              {/* Stats row - smaller */}
+            {/* Main Navigation */}
+            <div className="space-y-2 mb-4">
+              <p className="text-xs text-white/60 font-semibold uppercase tracking-wider mb-2">Navigáció</p>
+              {navItems.map((item, index) => (
+                <button
+                  key={item.id}
+                  onClick={() => setTabAndClose(item.id)}
+                  className={`
+                    w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left transition-all
+                    ${activeTab === item.id
+                      ? 'bg-white text-gray-900 shadow-2xl'
+                      : 'bg-white/10 hover:bg-white/20 backdrop-blur-xl'
+                    }
+                  `}
+                  style={{ animationDelay: `${index * 50}ms` }}
+                >
+                  <div className={`
+                    w-10 h-10 rounded-lg flex items-center justify-center shrink-0
+                    ${activeTab === item.id 
+                      ? 'bg-gradient-to-br from-indigo-500 to-purple-600 text-white' 
+                      : 'bg-white/20'
+                    }
+                  `}>
+                    <item.icon className="w-5 h-5" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2">
+                      <span className={`text-base font-bold ${activeTab === item.id ? 'text-gray-900' : 'text-white'}`}>
+                        {item.label}
+                      </span>
+                      {item.isAI && (
+                        <span className={`px-1.5 py-0.5 text-[9px] font-bold rounded-full ${
+                          activeTab === item.id 
+                            ? 'bg-indigo-100 text-indigo-600' 
+                            : 'bg-white/20 text-white'
+                        }`}>
+                          AI
+                        </span>
+                      )}
+                    </div>
+                    <p className={`text-[11px] ${activeTab === item.id ? 'text-gray-500' : 'text-white/60'}`}>
+                      {item.desc}
+                    </p>
+                  </div>
+                  <ChevronRight className={`w-4 h-4 shrink-0 ${activeTab === item.id ? 'text-indigo-600' : 'text-white/40'}`} />
+                </button>
+              ))}
+            </div>
+
+            {/* Recently Viewed (if any) */}
+            {recentlyViewed && recentlyViewed.length > 0 && (
+              <div className="mb-4">
+                <p className="text-xs text-white/60 font-semibold uppercase tracking-wider mb-2 flex items-center gap-1.5">
+                  <Clock className="w-3.5 h-3.5" />
+                  Utoljára nézett
+                </p>
+                <div className="flex gap-2 overflow-x-auto pb-2 -mx-1 px-1">
+                  {recentlyViewed.slice(0, 4).map((product) => (
+                    <div key={product.id} className="shrink-0 w-20">
+                      <div className="w-20 h-20 bg-white/10 backdrop-blur-xl rounded-lg overflow-hidden mb-1">
+                        <img 
+                          src={fixUrl(product.imageUrl)} 
+                          alt={product.name}
+                          className="w-full h-full object-cover"
+                          loading="lazy"
+                        />
+                      </div>
+                      <p className="text-[10px] text-white/80 truncate">{product.name}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Bottom Section */}
+            <div className="mt-auto space-y-3">
+              {/* Dark Mode Toggle */}
+              <button 
+                onClick={() => setIsDarkMode(!isDarkMode)}
+                className="w-full flex items-center justify-between px-4 py-3 bg-white/10 backdrop-blur-xl rounded-xl"
+              >
+                <div className="flex items-center gap-3">
+                  {isDarkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+                  <span className="font-semibold">{isDarkMode ? 'Világos mód' : 'Sötét mód'}</span>
+                </div>
+                <div className={`w-10 h-6 rounded-full transition-colors ${isDarkMode ? 'bg-indigo-400' : 'bg-white/30'}`}>
+                  <div className={`w-5 h-5 bg-white rounded-full mt-0.5 transition-transform ${isDarkMode ? 'translate-x-4.5 ml-0.5' : 'translate-x-0.5'}`} />
+                </div>
+              </button>
+
+              {/* Contact Row */}
+              <div className="flex gap-2">
+                <a href="tel:+36123456789" className="flex-1 flex items-center justify-center gap-2 py-2.5 bg-white/10 backdrop-blur-xl rounded-xl text-sm font-semibold">
+                  <Phone className="w-4 h-4" />
+                  Hívás
+                </a>
+                <a href="mailto:info@marketly.hu" className="flex-1 flex items-center justify-center gap-2 py-2.5 bg-white/10 backdrop-blur-xl rounded-xl text-sm font-semibold">
+                  <Mail className="w-4 h-4" />
+                  Email
+                </a>
+              </div>
+
+              {/* Social Links */}
+              <div className="flex justify-center gap-3">
+                <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" className="p-2.5 bg-white/10 backdrop-blur-xl rounded-xl hover:bg-white/20 transition-colors">
+                  <Instagram className="w-5 h-5" />
+                </a>
+                <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" className="p-2.5 bg-white/10 backdrop-blur-xl rounded-xl hover:bg-white/20 transition-colors">
+                  <Facebook className="w-5 h-5" />
+                </a>
+                <a href="https://maps.google.com" target="_blank" rel="noopener noreferrer" className="p-2.5 bg-white/10 backdrop-blur-xl rounded-xl hover:bg-white/20 transition-colors">
+                  <MapPin className="w-5 h-5" />
+                </a>
+              </div>
+
+              {/* Stats Row */}
               <div className="grid grid-cols-3 gap-2">
-                <div className="bg-white/10 backdrop-blur-xl rounded-xl p-3 text-center">
-                  <p className="text-xl font-bold">{productCount > 0 ? `${(productCount/1000).toFixed(0)}K+` : '...'}</p>
-                  <p className="text-[10px] text-white/60">Termék</p>
+                <div className="bg-white/10 backdrop-blur-xl rounded-xl p-2.5 text-center">
+                  <p className="text-lg font-bold">{productCount > 0 ? `${(productCount/1000).toFixed(0)}K+` : '...'}</p>
+                  <p className="text-[9px] text-white/60">Termék</p>
                 </div>
-                <div className="bg-white/10 backdrop-blur-xl rounded-xl p-3 text-center">
-                  <p className="text-xl font-bold">24/7</p>
-                  <p className="text-[10px] text-white/60">AI Support</p>
+                <div className="bg-white/10 backdrop-blur-xl rounded-xl p-2.5 text-center">
+                  <p className="text-lg font-bold">24/7</p>
+                  <p className="text-[9px] text-white/60">AI Support</p>
                 </div>
-                <div className="bg-white/10 backdrop-blur-xl rounded-xl p-3 text-center">
-                  <p className="text-xl font-bold">4.9★</p>
-                  <p className="text-[10px] text-white/60">Értékelés</p>
+                <div className="bg-white/10 backdrop-blur-xl rounded-xl p-2.5 text-center">
+                  <p className="text-lg font-bold">4.9★</p>
+                  <p className="text-[9px] text-white/60">Értékelés</p>
                 </div>
               </div>
 
-              {/* CTA Button - compact */}
+              {/* CTA Button */}
               <a 
                 href={WEBSHOP_DOMAIN} 
                 target="_blank" 
                 rel="noopener noreferrer" 
-                className="flex items-center justify-center gap-2.5 w-full px-5 py-4 rounded-xl font-bold text-base bg-white text-gray-900 hover:bg-gray-100 transition-all shadow-2xl"
+                className="flex items-center justify-center gap-2 w-full px-4 py-3.5 rounded-xl font-bold text-base bg-white text-gray-900 hover:bg-gray-100 transition-all shadow-2xl"
                 onClick={closeMobileMenu}
               >
                 Vissza a fő webshopba
-                <ArrowRight className="w-5 h-5" />
+                <ExternalLink className="w-4 h-4" />
               </a>
             </div>
           </div>
