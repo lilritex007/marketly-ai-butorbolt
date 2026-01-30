@@ -262,7 +262,7 @@ app.post('/api/ai/generate', async (req, res) => {
     console.log('[Gemini] Text generation request, prompt length:', prompt.length);
 
     const response = await fetch(
-      `${GEMINI_API_URL}/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`,
+      `${GEMINI_API_URL}/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`,
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -337,7 +337,7 @@ app.post('/api/ai/analyze-image', async (req, res) => {
     console.log('[Gemini Vision] Image analysis request');
 
     const response = await fetch(
-      `${GEMINI_API_URL}/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`,
+      `${GEMINI_API_URL}/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`,
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -413,7 +413,7 @@ app.get('/api/ai/health', async (req, res) => {
 
   try {
     const response = await fetch(
-      `${GEMINI_API_URL}/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`,
+      `${GEMINI_API_URL}/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`,
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -440,7 +440,7 @@ app.get('/api/ai/health', async (req, res) => {
       success: true, 
       configured: true,
       message: text || 'AI responding',
-      model: 'gemini-1.5-flash'
+      model: 'gemini-2.0-flash'
     });
 
   } catch (error) {

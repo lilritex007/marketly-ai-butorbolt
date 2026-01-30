@@ -222,7 +222,7 @@ const AIDebugPanel = ({ onClose }) => {
               </div>
               <div className="flex justify-between">
                 <span className="text-gray-500">AI Model:</span>
-                <code className="bg-gray-200 px-2 py-0.5 rounded text-xs">gemini-1.5-flash</code>
+                <code className="bg-gray-200 px-2 py-0.5 rounded text-xs">gemini-2.0-flash</code>
               </div>
               <div className="flex justify-between">
                 <span className="text-gray-500">API Key:</span>
