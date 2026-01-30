@@ -66,7 +66,7 @@ export const ModernHero = ({ onExplore, onTryAI }) => {
       </div>
 
       {/* FULLSCREEN: Edge-to-edge, LARGE elements for enjoyable browsing */}
-      <div className="relative z-10 w-full max-w-[2000px] mx-auto px-4 sm:px-6 lg:px-10 xl:px-16 py-12 sm:py-16 lg:py-24 xl:py-28">
+      <div className="relative z-10 w-full max-w-[2000px] mx-auto px-4 sm:px-6 lg:px-10 xl:px-16 py-8 sm:py-12 lg:py-16 xl:py-20">
         <div className="text-center">
           {/* Floating Badge - VISIBLE and prominent */}
           <div className="inline-flex items-center px-4 sm:px-6 py-2.5 sm:py-3 bg-white/80 backdrop-blur-sm rounded-full shadow-lg border border-indigo-100 mb-6 sm:mb-8 lg:mb-10 animate-float">
@@ -201,9 +201,9 @@ export const AIFeaturesShowcase = ({ onFeatureClick }) => {
   }, []);
 
   return (
-    <div className="py-16 sm:py-20 lg:py-28 xl:py-32 bg-gradient-to-b from-white to-gray-50">
+    <div className="py-8 sm:py-10 lg:py-14 xl:py-16 bg-gradient-to-b from-white to-gray-50">
       <div className="w-full max-w-[2000px] mx-auto px-4 sm:px-6 lg:px-10 xl:px-16">
-        <div className="text-center mb-12 sm:mb-16 lg:mb-20 xl:mb-24">
+        <div className="text-center mb-6 sm:mb-8 lg:mb-12">
           <div className="inline-flex items-center px-5 py-2.5 lg:px-6 lg:py-3 bg-indigo-100 rounded-full mb-5 lg:mb-6">
             <Sparkles className="w-5 h-5 lg:w-6 lg:h-6 text-indigo-600 mr-2" />
             <span className="text-base lg:text-lg xl:text-xl font-bold text-indigo-600">AI Powered Features</span>

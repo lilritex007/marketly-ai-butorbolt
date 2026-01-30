@@ -47,7 +47,7 @@ export const SocialProof = () => {
   };
 
   return (
-    <div className="py-10 sm:py-14 lg:py-20 xl:py-24 bg-white">
+    <div className="py-6 sm:py-8 lg:py-12 xl:py-14 bg-white">
       <div className="w-full max-w-[2000px] mx-auto px-3 sm:px-6 lg:px-10 xl:px-16">
         {/* Happy Customers Counter - MOBILE-FRIENDLY */}
         <div className="text-center mb-8 sm:mb-12 lg:mb-16 xl:mb-20">
@@ -172,7 +172,7 @@ export const LiveShowcase = ({ products = [], onProductClick }) => {
   const goPrev = () => setCurrentIndex((prev) => (prev - 1 + showcaseProducts.length) % showcaseProducts.length);
 
   return (
-    <div className="py-10 sm:py-16 lg:py-24 xl:py-28 bg-gradient-to-b from-gray-50 to-white overflow-hidden">
+    <div className="py-6 sm:py-10 lg:py-14 xl:py-16 bg-gradient-to-b from-gray-50 to-white overflow-hidden">
       <div className="w-full max-w-[2000px] mx-auto px-3 sm:px-6 lg:px-10 xl:px-16">
         <div className="text-center mb-6 sm:mb-10 lg:mb-14">
           <div className="inline-flex items-center px-3 py-1.5 sm:px-4 sm:py-2 lg:px-5 lg:py-2.5 bg-green-100 rounded-full mb-3 sm:mb-4 lg:mb-6">
@@ -283,7 +283,7 @@ export const LiveShowcase = ({ products = [], onProductClick }) => {
  */
 export const InteractiveCTA = ({ onGetStarted }) => {
   return (
-    <div className="py-10 sm:py-16 lg:py-24 xl:py-28 bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-600 relative overflow-hidden">
+    <div className="py-8 sm:py-10 lg:py-14 xl:py-16 bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-600 relative overflow-hidden">
       {/* Animated Background */}
       <div className="absolute inset-0 opacity-20">
         <div className="absolute top-0 left-0 w-48 sm:w-72 lg:w-96 h-48 sm:h-72 lg:h-96 bg-white rounded-full filter blur-3xl animate-blob" />
@@ -315,7 +315,14 @@ export const InteractiveCTA = ({ onGetStarted }) => {
             <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6 ml-2 group-hover:translate-x-1 transition-transform" />
           </button>
 
-          <button className="w-full sm:w-auto px-5 py-3 sm:px-7 sm:py-3.5 lg:px-8 lg:py-4 bg-white/10 backdrop-blur-sm text-white rounded-xl font-bold text-sm sm:text-base lg:text-lg border-2 border-white/30 hover:bg-white/20 transition-all">
+          <button 
+            onClick={() => {
+              const aiSection = document.querySelector('[data-ai-features]');
+              if (aiSection) aiSection.scrollIntoView({ behavior: 'smooth' });
+              else window.scrollTo({ top: 0, behavior: 'smooth' });
+            }}
+            className="w-full sm:w-auto px-5 py-3 sm:px-7 sm:py-3.5 lg:px-8 lg:py-4 bg-white/10 backdrop-blur-sm text-white rounded-xl font-bold text-sm sm:text-base lg:text-lg border-2 border-white/30 hover:bg-white/20 transition-all"
+          >
             Tudj meg többet
           </button>
         </div>

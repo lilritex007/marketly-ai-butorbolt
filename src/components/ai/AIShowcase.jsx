@@ -42,7 +42,7 @@ export const AIShowcase = () => {
   ];
 
   return (
-    <div className="relative bg-gradient-to-br from-purple-600 via-indigo-600 to-blue-600 text-white py-8 sm:py-12 lg:py-20 xl:py-24 mb-6 sm:mb-10 lg:mb-14 overflow-hidden">
+    <div className="relative bg-gradient-to-br from-purple-600 via-indigo-600 to-blue-600 text-white py-6 sm:py-8 lg:py-12 xl:py-14 mb-4 sm:mb-6 lg:mb-8 overflow-hidden">
       {/* Animated background */}
       <div className="absolute inset-0 opacity-20">
         <div className="absolute top-0 left-0 w-48 sm:w-72 lg:w-96 h-48 sm:h-72 lg:h-96 bg-white rounded-full mix-blend-multiply filter blur-3xl animate-blob"></div>
