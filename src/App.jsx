@@ -607,7 +607,7 @@ const Navbar = ({ activeTab, setActiveTab, wishlistCount, productCount = 0, onSc
             </div>
 
             {/* Quick Actions Row */}
-            <div className="flex gap-2 mb-4">
+            <div className="flex gap-3 mb-5">
               <button 
                 onClick={() => {
                   closeMobileMenu();
@@ -615,12 +615,12 @@ const Navbar = ({ activeTab, setActiveTab, wishlistCount, productCount = 0, onSc
                     document.getElementById('products-section')?.scrollIntoView({ behavior: 'smooth' });
                   }, 350);
                 }}
-                className="flex-1 flex items-center justify-center gap-2 py-3 bg-white/10 backdrop-blur-xl rounded-xl font-semibold"
+                className="flex-1 flex items-center justify-center gap-2 py-3.5 bg-white/15 backdrop-blur-xl rounded-xl font-bold text-base"
               >
                 <Search className="w-5 h-5" />
                 <span>Keresés</span>
               </button>
-              <button className="flex-1 flex items-center justify-center gap-2 py-3 bg-white/10 backdrop-blur-xl rounded-xl font-semibold relative">
+              <button className="flex-1 flex items-center justify-center gap-2 py-3.5 bg-white/15 backdrop-blur-xl rounded-xl font-bold text-base relative">
                 <Heart className={`w-5 h-5 ${wishlistCount > 0 ? 'fill-white' : ''}`} />
                 <span>Kedvencek</span>
                 {wishlistCount > 0 && (
@@ -632,33 +632,33 @@ const Navbar = ({ activeTab, setActiveTab, wishlistCount, productCount = 0, onSc
             </div>
 
             {/* Popular Categories Grid */}
-            <div className="mb-4">
-              <p className="text-xs text-white/60 font-semibold uppercase tracking-wider mb-2">Népszerű kategóriák</p>
+            <div className="mb-5">
+              <p className="text-sm text-white/70 font-bold uppercase tracking-wider mb-3">Népszerű kategóriák</p>
               <div className="grid grid-cols-3 gap-2">
                 {POPULAR_CATEGORIES.slice(0, 6).map((cat) => (
                   <button
                     key={cat.id}
                     onClick={() => setTabAndClose('shop')}
-                    className="flex flex-col items-center gap-1.5 py-3 bg-white/10 backdrop-blur-xl rounded-xl hover:bg-white/20 transition-all"
+                    className="flex flex-col items-center gap-2 py-3 bg-white/10 backdrop-blur-xl rounded-xl hover:bg-white/20 transition-all"
                   >
-                    <div className={`w-9 h-9 rounded-lg bg-gradient-to-br ${cat.color} flex items-center justify-center`}>
+                    <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${cat.color} flex items-center justify-center`}>
                       <cat.icon className="w-5 h-5" />
                     </div>
-                    <span className="text-[11px] font-semibold">{cat.name}</span>
+                    <span className="text-xs font-bold">{cat.name}</span>
                   </button>
                 ))}
               </div>
             </div>
 
             {/* Main Navigation */}
-            <div className="space-y-2 mb-4">
-              <p className="text-xs text-white/60 font-semibold uppercase tracking-wider mb-2">Navigáció</p>
+            <div className="space-y-2.5 mb-5">
+              <p className="text-sm text-white/70 font-bold uppercase tracking-wider mb-3">Navigáció</p>
               {navItems.map((item, index) => (
                 <button
                   key={item.id}
                   onClick={() => setTabAndClose(item.id)}
                   className={`
-                    w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left transition-all
+                    w-full flex items-center gap-4 px-4 py-3.5 rounded-xl text-left transition-all
                     ${activeTab === item.id
                       ? 'bg-white text-gray-900 shadow-2xl'
                       : 'bg-white/10 hover:bg-white/20 backdrop-blur-xl'
@@ -667,7 +667,7 @@ const Navbar = ({ activeTab, setActiveTab, wishlistCount, productCount = 0, onSc
                   style={{ animationDelay: `${index * 50}ms` }}
                 >
                   <div className={`
-                    w-10 h-10 rounded-lg flex items-center justify-center shrink-0
+                    w-11 h-11 rounded-xl flex items-center justify-center shrink-0
                     ${activeTab === item.id 
                       ? 'bg-gradient-to-br from-indigo-500 to-purple-600 text-white' 
                       : 'bg-white/20'
@@ -677,11 +677,11 @@ const Navbar = ({ activeTab, setActiveTab, wishlistCount, productCount = 0, onSc
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2">
-                      <span className={`text-base font-bold ${activeTab === item.id ? 'text-gray-900' : 'text-white'}`}>
+                      <span className={`text-lg font-bold ${activeTab === item.id ? 'text-gray-900' : 'text-white'}`}>
                         {item.label}
                       </span>
                       {item.isAI && (
-                        <span className={`px-1.5 py-0.5 text-[9px] font-bold rounded-full ${
+                        <span className={`px-2 py-0.5 text-[10px] font-bold rounded-full ${
                           activeTab === item.id 
                             ? 'bg-indigo-100 text-indigo-600' 
                             : 'bg-white/20 text-white'
@@ -690,11 +690,11 @@ const Navbar = ({ activeTab, setActiveTab, wishlistCount, productCount = 0, onSc
                         </span>
                       )}
                     </div>
-                    <p className={`text-[11px] ${activeTab === item.id ? 'text-gray-500' : 'text-white/60'}`}>
+                    <p className={`text-sm ${activeTab === item.id ? 'text-gray-500' : 'text-white/60'}`}>
                       {item.desc}
                     </p>
                   </div>
-                  <ChevronRight className={`w-4 h-4 shrink-0 ${activeTab === item.id ? 'text-indigo-600' : 'text-white/40'}`} />
+                  <ChevronRight className={`w-5 h-5 shrink-0 ${activeTab === item.id ? 'text-indigo-600' : 'text-white/40'}`} />
                 </button>
               ))}
             </div>

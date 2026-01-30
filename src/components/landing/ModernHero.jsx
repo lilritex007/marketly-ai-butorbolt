@@ -94,11 +94,11 @@ export const ModernHero = ({ onExplore, onTryAI }) => {
             <span className="font-semibold text-indigo-600"> Fotózz, tervezz, vásárolj</span> - minden egy helyen.
           </p>
 
-          {/* CTA Buttons - FULL WIDTH on mobile, LARGE touch targets */}
-          <div className="flex flex-col sm:flex-row gap-4 sm:gap-5 lg:gap-6 justify-center items-stretch sm:items-center mb-10 sm:mb-14 lg:mb-20 px-2">
+          {/* CTA Buttons - COMPACT but readable */}
+          <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center items-stretch sm:items-center mb-10 sm:mb-14 lg:mb-20 px-3">
             <button
               onClick={onTryAI}
-              className="group relative w-full sm:w-auto px-8 py-5 min-h-[60px] sm:px-10 sm:py-5 lg:px-12 lg:py-6 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-2xl font-bold text-lg sm:text-xl lg:text-2xl shadow-2xl hover:shadow-indigo-500/50 transition-all transform hover:-translate-y-1 hover:scale-105 overflow-hidden flex items-center justify-center"
+              className="group relative w-full sm:w-auto px-6 py-3.5 sm:px-8 sm:py-4 lg:px-10 lg:py-4 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-xl font-bold text-base sm:text-lg lg:text-xl shadow-xl hover:shadow-indigo-500/50 transition-all transform hover:-translate-y-1 overflow-hidden flex items-center justify-center"
             >
               <span className="relative z-10 flex items-center">
                 <Sparkles className="w-5 h-5 sm:w-6 sm:h-6 lg:w-7 lg:h-7 mr-2.5" />
@@ -110,10 +110,10 @@ export const ModernHero = ({ onExplore, onTryAI }) => {
 
             <button
               onClick={onExplore}
-              className="w-full sm:w-auto px-8 py-5 min-h-[60px] sm:px-10 sm:py-5 lg:px-12 lg:py-6 bg-white text-gray-900 rounded-2xl font-bold text-lg sm:text-xl lg:text-2xl shadow-lg hover:shadow-xl transition-all transform hover:-translate-y-1 border-2 border-gray-200 hover:border-indigo-300 flex items-center justify-center"
+              className="w-full sm:w-auto px-6 py-3.5 sm:px-8 sm:py-4 lg:px-10 lg:py-4 bg-white text-gray-900 rounded-xl font-bold text-base sm:text-lg lg:text-xl shadow-lg hover:shadow-xl transition-all transform hover:-translate-y-1 border-2 border-gray-200 hover:border-indigo-300 flex items-center justify-center"
             >
               Kollekció megtekintése
-              <ChevronRight className="w-6 h-6 sm:w-6 sm:h-6 lg:w-7 lg:h-7 ml-2" />
+              <ChevronRight className="w-5 h-5 sm:w-5 sm:h-5 lg:w-6 lg:h-6 ml-2" />
             </button>
           </div>
 

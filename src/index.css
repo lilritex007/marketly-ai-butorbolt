@@ -85,20 +85,20 @@
      LARGER elements for enjoyable browsing
      ======================================== */
   
-  /* Main container - ZERO PADDING on mobile for TRUE fullscreen */
+  /* Main container - minimal padding for rounded corners */
   .container-app {
     width: 100%;
     max-width: 2000px;
     margin-left: auto;
     margin-right: auto;
-    padding-left: 0;   /* ZERO on mobile */
-    padding-right: 0;
+    padding-left: 0.5rem;   /* 8px - just enough for rounded corners */
+    padding-right: 0.5rem;
   }
   
   @media (min-width: 640px) {
     .container-app {
-      padding-left: 0.75rem;
-      padding-right: 0.75rem;
+      padding-left: 1rem;
+      padding-right: 1rem;
     }
   }
   
@@ -123,16 +123,16 @@
     }
   }
 
-  /* Product grid - MINIMAL gaps, MAXIMUM card size */
+  /* Product grid - small gaps for rounded corners to show */
   .product-grid {
     display: grid;
-    gap: 2px;  /* Minimal gap on mobile - cards fill screen */
+    gap: 0.5rem;  /* 8px - enough for rounded corners */
     grid-template-columns: repeat(2, 1fr);
   }
   
   @media (min-width: 640px) {
     .product-grid {
-      gap: 0.5rem;
+      gap: 0.75rem;
     }
   }
   

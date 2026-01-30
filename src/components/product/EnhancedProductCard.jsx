@@ -76,8 +76,8 @@ export const EnhancedProductCard = ({
     <article 
       ref={cardRef}
       className={`
-        group relative bg-white rounded-none sm:rounded-xl lg:rounded-2xl overflow-hidden 
-        border-r border-b border-gray-100 sm:border sm:shadow-sm h-full flex flex-col
+        group relative bg-white rounded-xl sm:rounded-2xl lg:rounded-2xl overflow-hidden 
+        border border-gray-100 shadow-sm h-full flex flex-col
         hover-card tap-scale
         ${isVisible ? 'opacity-100' : 'opacity-0 translate-y-3'}
       `}
@@ -163,46 +163,46 @@ export const EnhancedProductCard = ({
         </div>
       </div>
 
-      {/* Content Section - GENEROUS sizing for easy reading */}
-      <div className="p-3 sm:p-4 lg:p-5 xl:p-6 flex flex-col flex-1">
-        {/* Category */}
-        <span className="text-[11px] sm:text-xs lg:text-sm font-semibold text-indigo-600 uppercase tracking-wide mb-1 lg:mb-2 truncate">
+      {/* Content Section - LARGE, readable text */}
+      <div className="p-3 sm:p-4 lg:p-5 flex flex-col flex-1">
+        {/* Category - visible */}
+        <span className="text-xs sm:text-xs lg:text-sm font-bold text-indigo-600 uppercase tracking-wide mb-1 truncate">
           {product.category}
         </span>
         
-        {/* Product Name - READABLE on all screens */}
+        {/* Product Name - LARGE and bold */}
         <h3 
           onClick={() => onQuickView?.(product)} 
-          className="text-sm sm:text-base lg:text-lg xl:text-xl font-bold text-gray-900 line-clamp-2 leading-snug cursor-pointer hover:text-indigo-600 transition-colors mb-2 lg:mb-3" 
+          className="text-base sm:text-lg lg:text-xl font-bold text-gray-900 line-clamp-2 leading-tight cursor-pointer hover:text-indigo-600 transition-colors mb-2" 
           title={product.name}
         >
           {product.name}
         </h3>
         
-        {/* Price Section - PROMINENT */}
-        <div className="mt-auto pt-2 sm:pt-3 lg:pt-4 border-t border-gray-100">
-          <div className="flex justify-between items-end gap-2">
+        {/* Price Section - BIG */}
+        <div className="mt-auto pt-2 border-t border-gray-100">
+          <div className="flex justify-between items-center gap-2">
             <div className="min-w-0">
               {discount > 0 && (
-                <span className="text-xs sm:text-sm lg:text-base text-gray-400 line-through block">
+                <span className="text-sm sm:text-sm text-gray-400 line-through block">
                   {formatPrice(product.price)}
                 </span>
               )}
-              <span className={`text-base sm:text-lg lg:text-xl xl:text-2xl font-extrabold ${discount > 0 ? 'text-red-600' : 'text-gray-900'}`}>
+              <span className={`text-lg sm:text-xl lg:text-2xl font-black ${discount > 0 ? 'text-red-600' : 'text-gray-900'}`}>
                 {formatPrice(displayPrice)}
               </span>
             </div>
             
-            {/* Quick View Button - LARGE touch target */}
+            {/* Quick View Button - compact but touchable */}
             <button 
               onClick={(e) => { 
                 e.stopPropagation(); 
                 onQuickView?.(product); 
               }} 
-              className="shrink-0 w-10 h-10 sm:w-11 sm:h-11 lg:w-12 lg:h-12 flex items-center justify-center bg-indigo-100 text-indigo-600 rounded-full hover:bg-indigo-600 hover:text-white transition-all hover-lift tap-scale"
+              className="shrink-0 w-10 h-10 lg:w-11 lg:h-11 flex items-center justify-center bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 transition-all tap-scale"
               aria-label="Részletek"
             >
-              <Eye className="w-5 h-5 lg:w-6 lg:h-6" />
+              <Eye className="w-5 h-5" />
             </button>
           </div>
         </div>
