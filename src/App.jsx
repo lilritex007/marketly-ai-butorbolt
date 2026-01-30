@@ -204,7 +204,6 @@ const parseCSV = (csvText) => {
 const Navbar = ({ activeTab, setActiveTab, wishlistCount, productCount = 0, onScrollToProducts }) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
-  const [showSearch, setShowSearch] = useState(false);
 
   // Scroll detection for navbar shrink effect
   useEffect(() => {
@@ -215,6 +214,16 @@ const Navbar = ({ activeTab, setActiveTab, wishlistCount, productCount = 0, onSc
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  // Prevent body scroll when mobile menu is open
+  useEffect(() => {
+    if (mobileMenuOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => { document.body.style.overflow = ''; };
+  }, [mobileMenuOpen]);
+
   const closeMobileMenu = () => setMobileMenuOpen(false);
   const setTabAndClose = (tab) => {
     setActiveTab(tab);
@@ -222,28 +231,27 @@ const Navbar = ({ activeTab, setActiveTab, wishlistCount, productCount = 0, onSc
   };
 
   const navItems = [
-    { id: 'shop', label: 'Termékek', icon: ShoppingCart, badge: productCount > 0 ? `${(productCount/1000).toFixed(0)}K+` : null },
-    { id: 'visual-search', label: 'AI Képkereső', icon: Camera, isAI: true },
-    { id: 'room-planner', label: 'Szobatervező', icon: Move, isAI: true },
+    { id: 'shop', label: 'Termékek', icon: ShoppingCart, badge: productCount > 0 ? `${(productCount/1000).toFixed(0)}K+` : null, desc: 'Böngéssz a kínálatban' },
+    { id: 'visual-search', label: 'AI Képkereső', icon: Camera, isAI: true, desc: 'Fotózz és keress' },
+    { id: 'room-planner', label: 'Szobatervező', icon: Move, isAI: true, desc: 'Tervezd meg a szobád' },
   ];
 
   return (
     <>
-      {/* Top announcement bar */}
-      <div className="bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 text-white py-2.5 px-4 text-center text-sm font-medium relative overflow-hidden">
+      {/* Top announcement bar - LARGER */}
+      <div className="bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 text-white py-3 sm:py-3.5 px-4 text-center relative overflow-hidden">
         <div className="absolute inset-0 opacity-20" style={{backgroundImage: 'radial-gradient(circle, rgba(255,255,255,0.3) 1px, transparent 1px)', backgroundSize: '16px 16px'}} />
-        <div className="relative flex items-center justify-center gap-2 flex-wrap">
-          <Sparkles className="w-4 h-4 animate-pulse" />
-          <span className="hidden sm:inline">🎉 AI-powered bútorvásárlás</span>
-          <span className="sm:hidden">🎉 AI Bútorbolt</span>
+        <div className="relative flex items-center justify-center gap-2 sm:gap-3 flex-wrap">
+          <Sparkles className="w-5 h-5 animate-pulse" />
+          <span className="text-base sm:text-lg font-bold">🎉 AI Bútorbolt</span>
+          <span className="hidden sm:inline text-base">•</span>
+          <span className="hidden sm:inline text-base font-semibold">{productCount > 0 ? `${productCount.toLocaleString('hu-HU')}+ termék` : 'Betöltés...'}</span>
           <span className="hidden md:inline">•</span>
-          <span className="hidden md:inline font-bold">{productCount > 0 ? `${productCount.toLocaleString('hu-HU')}+ termék` : 'Töltés...'}</span>
-          <span className="hidden lg:inline">•</span>
-          <span className="hidden lg:inline">Ingyenes szállítás 50.000 Ft felett</span>
+          <span className="hidden md:inline text-base">Ingyenes szállítás 50.000 Ft felett</span>
         </div>
       </div>
 
-      {/* Main navbar */}
+      {/* Main navbar - LARGER */}
       <nav 
         id="mkt-butorbolt-navbar" 
         className={`
@@ -255,61 +263,61 @@ const Navbar = ({ activeTab, setActiveTab, wishlistCount, productCount = 0, onSc
         `}
       >
         <div className="w-full max-w-[2000px] mx-auto px-4 sm:px-6 lg:px-10 xl:px-16">
-          <div className={`flex justify-between items-center transition-all duration-300 ${isScrolled ? 'h-16 lg:h-18' : 'h-18 lg:h-22'}`}>
+          <div className={`flex justify-between items-center transition-all duration-300 ${isScrolled ? 'h-18 lg:h-20' : 'h-20 lg:h-24'}`}>
             
-            {/* Logo */}
+            {/* Logo - LARGER */}
             <div className="flex items-center cursor-pointer group" onClick={() => setActiveTab('shop')}>
               <div className={`
-                relative bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 rounded-xl lg:rounded-2xl 
-                flex items-center justify-center text-white mr-3 lg:mr-4
+                relative bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 rounded-xl sm:rounded-2xl 
+                flex items-center justify-center text-white mr-3 sm:mr-4
                 transform group-hover:scale-105 group-hover:rotate-3 transition-all duration-300 
                 shadow-lg shadow-indigo-300/50 group-hover:shadow-xl group-hover:shadow-purple-400/50
-                ${isScrolled ? 'w-10 h-10 lg:w-12 lg:h-12' : 'w-11 h-11 lg:w-14 lg:h-14'}
+                ${isScrolled ? 'w-12 h-12 sm:w-14 sm:h-14' : 'w-14 h-14 sm:w-16 sm:h-16'}
               `}>
-                <Home className={`${isScrolled ? 'w-5 h-5 lg:w-6 lg:h-6' : 'w-6 h-6 lg:w-7 lg:h-7'}`} />
-                <div className="absolute -top-1 -right-1 w-4 h-4 bg-green-400 rounded-full border-2 border-white flex items-center justify-center">
-                  <Sparkles className="w-2 h-2 text-white" />
+                <Home className={`${isScrolled ? 'w-6 h-6 sm:w-7 sm:h-7' : 'w-7 h-7 sm:w-8 sm:h-8'}`} />
+                <div className="absolute -top-1 -right-1 w-5 h-5 bg-green-400 rounded-full border-2 border-white flex items-center justify-center">
+                  <Sparkles className="w-2.5 h-2.5 text-white" />
                 </div>
               </div>
               <div className="flex flex-col">
                 <div className="flex items-baseline">
-                  <span className={`font-black text-gray-900 tracking-tight transition-all ${isScrolled ? 'text-xl lg:text-2xl' : 'text-2xl lg:text-3xl'}`}>
+                  <span className={`font-black text-gray-900 tracking-tight transition-all ${isScrolled ? 'text-2xl sm:text-3xl' : 'text-3xl sm:text-4xl'}`}>
                     Marketly
                   </span>
-                  <span className={`font-black bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent transition-all ${isScrolled ? 'text-xl lg:text-2xl' : 'text-2xl lg:text-3xl'}`}>
+                  <span className={`font-black bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent transition-all ${isScrolled ? 'text-2xl sm:text-3xl' : 'text-3xl sm:text-4xl'}`}>
                     .AI
                   </span>
                 </div>
-                <span className="text-[10px] lg:text-xs text-gray-500 font-medium tracking-wide hidden sm:block -mt-0.5">
+                <span className="text-xs sm:text-sm text-gray-500 font-semibold tracking-widest -mt-0.5">
                   BÚTORBOLT
                 </span>
               </div>
             </div>
 
-            {/* Desktop Navigation */}
-            <div className="hidden lg:flex items-center gap-1 xl:gap-2">
+            {/* Desktop Navigation - LARGER */}
+            <div className="hidden lg:flex items-center gap-2 xl:gap-3">
               {navItems.map((item) => (
                 <button
                   key={item.id}
                   onClick={() => setActiveTab(item.id)}
                   className={`
-                    relative flex items-center gap-2 xl:gap-2.5 px-4 xl:px-5 py-2.5 xl:py-3 rounded-xl xl:rounded-2xl
-                    font-semibold text-sm xl:text-base transition-all duration-200
+                    relative flex items-center gap-2.5 xl:gap-3 px-5 xl:px-6 py-3 xl:py-3.5 rounded-xl xl:rounded-2xl
+                    font-bold text-base xl:text-lg transition-all duration-200
                     ${activeTab === item.id
                       ? 'bg-gradient-to-r from-indigo-500 to-purple-600 text-white shadow-lg shadow-indigo-300/50'
                       : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
                     }
                   `}
                 >
-                  <item.icon className="w-4 h-4 xl:w-5 xl:h-5" />
+                  <item.icon className="w-5 h-5 xl:w-6 xl:h-6" />
                   <span>{item.label}</span>
                   {item.isAI && activeTab !== item.id && (
-                    <span className="px-1.5 py-0.5 text-[10px] font-bold bg-gradient-to-r from-indigo-100 to-purple-100 text-indigo-600 rounded-full">
+                    <span className="px-2 py-0.5 text-xs font-bold bg-gradient-to-r from-indigo-100 to-purple-100 text-indigo-600 rounded-full">
                       AI
                     </span>
                   )}
                   {item.badge && activeTab !== item.id && (
-                    <span className="px-1.5 py-0.5 text-[10px] font-bold bg-green-100 text-green-700 rounded-full">
+                    <span className="px-2 py-0.5 text-xs font-bold bg-green-100 text-green-700 rounded-full">
                       {item.badge}
                     </span>
                   )}
@@ -317,8 +325,8 @@ const Navbar = ({ activeTab, setActiveTab, wishlistCount, productCount = 0, onSc
               ))}
             </div>
 
-            {/* Right side actions */}
-            <div className="flex items-center gap-2 sm:gap-3 lg:gap-4">
+            {/* Right side actions - LARGER */}
+            <div className="flex items-center gap-3 sm:gap-4">
               
               {/* Quick search button (desktop) */}
               <button
@@ -326,157 +334,188 @@ const Navbar = ({ activeTab, setActiveTab, wishlistCount, productCount = 0, onSc
                   const productsSection = document.getElementById('products-section');
                   productsSection?.scrollIntoView({ behavior: 'smooth' });
                 }}
-                className="hidden md:flex items-center gap-2 px-4 py-2.5 bg-gray-100 hover:bg-gray-200 rounded-xl lg:rounded-2xl text-gray-600 hover:text-gray-900 transition-all group"
+                className="hidden md:flex items-center gap-2.5 px-5 py-3 bg-gray-100 hover:bg-gray-200 rounded-xl lg:rounded-2xl text-gray-600 hover:text-gray-900 transition-all group"
               >
-                <Search className="w-4 h-4 lg:w-5 lg:h-5" />
-                <span className="text-sm lg:text-base font-medium">Keresés</span>
-                <kbd className="hidden xl:inline-flex items-center gap-1 px-2 py-0.5 bg-white rounded-lg text-xs text-gray-400 border border-gray-200">
+                <Search className="w-5 h-5 lg:w-6 lg:h-6" />
+                <span className="text-base lg:text-lg font-semibold">Keresés</span>
+                <kbd className="hidden xl:inline-flex items-center gap-1 px-2 py-0.5 bg-white rounded-lg text-sm text-gray-400 border border-gray-200">
                   ⌘K
                 </kbd>
               </button>
 
-              {/* Wishlist */}
+              {/* Wishlist - LARGER */}
               <button 
-                className="relative p-2.5 lg:p-3 min-w-[44px] min-h-[44px] flex items-center justify-center text-gray-600 hover:text-red-500 rounded-xl hover:bg-red-50 transition-all group"
+                className="relative p-3 sm:p-3.5 min-w-[52px] min-h-[52px] flex items-center justify-center text-gray-600 hover:text-red-500 rounded-xl hover:bg-red-50 transition-all group"
                 aria-label="Kívánságlista"
               >
-                <Heart className={`w-5 h-5 lg:w-6 lg:h-6 transition-all group-hover:scale-110 ${wishlistCount > 0 ? 'fill-red-500 text-red-500' : ''}`} />
+                <Heart className={`w-6 h-6 sm:w-7 sm:h-7 transition-all group-hover:scale-110 ${wishlistCount > 0 ? 'fill-red-500 text-red-500' : ''}`} />
                 {wishlistCount > 0 && (
-                  <span className="absolute -top-0.5 -right-0.5 min-w-[20px] h-5 flex items-center justify-center px-1.5 text-xs font-bold text-white bg-red-500 rounded-full shadow-lg animate-scale-in">
+                  <span className="absolute -top-1 -right-1 min-w-[24px] h-6 flex items-center justify-center px-2 text-sm font-bold text-white bg-red-500 rounded-full shadow-lg animate-scale-in">
                     {wishlistCount}
                   </span>
                 )}
               </button>
 
-              {/* Mobile menu button */}
+              {/* Mobile menu button - LARGER */}
               <button
                 type="button"
-                className="lg:hidden p-2.5 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-xl text-gray-600 hover:bg-gray-100 transition-colors"
+                className="lg:hidden p-3 min-w-[52px] min-h-[52px] flex items-center justify-center rounded-xl bg-gradient-to-r from-indigo-500 to-purple-600 text-white shadow-lg hover:shadow-xl transition-all"
                 onClick={() => setMobileMenuOpen(true)}
                 aria-label="Menü megnyitása"
               >
-                <Menu className="w-6 h-6" />
+                <Menu className="w-7 h-7" />
               </button>
 
-              {/* CTA Button */}
+              {/* CTA Button - LARGER */}
               <a 
                 href={WEBSHOP_DOMAIN} 
                 target="_blank" 
                 rel="noopener noreferrer" 
-                className="hidden sm:flex items-center gap-2 bg-gradient-to-r from-gray-900 to-gray-800 hover:from-gray-800 hover:to-gray-700 text-white px-5 lg:px-6 py-2.5 lg:py-3 rounded-xl lg:rounded-2xl text-sm lg:text-base font-bold transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 min-h-[44px]"
+                className="hidden sm:flex items-center gap-2.5 bg-gradient-to-r from-gray-900 to-gray-800 hover:from-gray-800 hover:to-gray-700 text-white px-6 lg:px-8 py-3 lg:py-3.5 rounded-xl lg:rounded-2xl text-base lg:text-lg font-bold transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
               >
                 <span>Fő webshop</span>
-                <ArrowRight className="w-4 h-4 lg:w-5 lg:h-5" />
+                <ArrowRight className="w-5 h-5 lg:w-6 lg:h-6" />
               </a>
             </div>
           </div>
         </div>
       </nav>
 
-      {/* Mobile menu drawer */}
+      {/* FULL SCREEN Mobile menu */}
       {mobileMenuOpen && (
-        <>
-          <div
-            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100] lg:hidden animate-fade-in"
-            onClick={closeMobileMenu}
-            aria-hidden="true"
-          />
-          <div
-            className="fixed top-0 right-0 bottom-0 w-full max-w-sm bg-white shadow-2xl z-[101] lg:hidden flex flex-col animate-fade-in-right"
-            role="dialog"
-            aria-label="Navigációs menü"
-          >
-            {/* Mobile menu header */}
-            <div className="flex justify-between items-center p-5 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 text-white">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-white/20 backdrop-blur rounded-xl flex items-center justify-center">
-                  <Home className="w-5 h-5" />
+        <div
+          className="fixed inset-0 z-[200] lg:hidden"
+          role="dialog"
+          aria-label="Navigációs menü"
+        >
+          {/* Full screen gradient background */}
+          <div className="absolute inset-0 bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-600" />
+          
+          {/* Decorative elements */}
+          <div className="absolute inset-0 overflow-hidden pointer-events-none">
+            <div className="absolute top-20 left-10 w-64 h-64 bg-white/10 rounded-full blur-3xl" />
+            <div className="absolute bottom-40 right-10 w-80 h-80 bg-pink-400/20 rounded-full blur-3xl" />
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-purple-400/10 rounded-full blur-3xl" />
+          </div>
+          
+          {/* Content */}
+          <div className="relative h-full flex flex-col text-white p-6 sm:p-8">
+            
+            {/* Header */}
+            <div className="flex justify-between items-center mb-10">
+              <div className="flex items-center gap-4">
+                <div className="w-14 h-14 bg-white/20 backdrop-blur-xl rounded-2xl flex items-center justify-center">
+                  <Home className="w-7 h-7" />
                 </div>
                 <div>
-                  <span className="font-bold text-lg">Marketly.AI</span>
-                  <p className="text-xs text-white/70">Bútorbolt</p>
+                  <div className="flex items-baseline">
+                    <span className="font-black text-3xl">Marketly</span>
+                    <span className="font-black text-3xl text-white/80">.AI</span>
+                  </div>
+                  <p className="text-sm text-white/60 font-medium tracking-wider">BÚTORBOLT</p>
                 </div>
               </div>
               <button
                 type="button"
-                className="p-2 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-xl bg-white/10 hover:bg-white/20 transition-colors"
+                className="p-4 min-w-[56px] min-h-[56px] flex items-center justify-center rounded-2xl bg-white/10 hover:bg-white/20 backdrop-blur-xl transition-colors"
                 onClick={closeMobileMenu}
                 aria-label="Menü bezárása"
               >
-                <X className="w-6 h-6" />
+                <X className="w-8 h-8" />
               </button>
             </div>
 
-            {/* Mobile menu content */}
-            <div className="flex-1 overflow-y-auto p-5">
-              <nav className="flex flex-col gap-2">
-                {navItems.map((item) => (
+            {/* Navigation items */}
+            <nav className="flex-1 flex flex-col justify-center -mt-10">
+              <div className="space-y-4">
+                {navItems.map((item, index) => (
                   <button
                     key={item.id}
                     onClick={() => setTabAndClose(item.id)}
                     className={`
-                      flex items-center gap-4 w-full px-4 py-4 min-h-[56px] rounded-2xl text-left font-semibold transition-all
+                      w-full flex items-center gap-5 px-6 py-5 rounded-3xl text-left transition-all
                       ${activeTab === item.id
-                        ? 'bg-gradient-to-r from-indigo-500 to-purple-600 text-white shadow-lg'
-                        : 'text-gray-700 hover:bg-gray-100'
+                        ? 'bg-white text-gray-900 shadow-2xl scale-[1.02]'
+                        : 'bg-white/10 hover:bg-white/20 backdrop-blur-xl'
                       }
                     `}
+                    style={{ animationDelay: `${index * 100}ms` }}
                   >
                     <div className={`
-                      w-10 h-10 rounded-xl flex items-center justify-center
-                      ${activeTab === item.id ? 'bg-white/20' : 'bg-gray-100'}
+                      w-14 h-14 rounded-2xl flex items-center justify-center
+                      ${activeTab === item.id 
+                        ? 'bg-gradient-to-br from-indigo-500 to-purple-600 text-white' 
+                        : 'bg-white/20'
+                      }
                     `}>
-                      <item.icon className={`w-5 h-5 ${activeTab === item.id ? 'text-white' : 'text-gray-600'}`} />
+                      <item.icon className="w-7 h-7" />
                     </div>
                     <div className="flex-1">
-                      <span className="block">{item.label}</span>
-                      {item.isAI && (
-                        <span className="text-xs opacity-70">Mesterséges intelligencia</span>
-                      )}
+                      <div className="flex items-center gap-3">
+                        <span className={`text-xl font-bold ${activeTab === item.id ? 'text-gray-900' : 'text-white'}`}>
+                          {item.label}
+                        </span>
+                        {item.isAI && (
+                          <span className={`px-2.5 py-1 text-xs font-bold rounded-full ${
+                            activeTab === item.id 
+                              ? 'bg-gradient-to-r from-indigo-100 to-purple-100 text-indigo-600' 
+                              : 'bg-white/20 text-white'
+                          }`}>
+                            AI
+                          </span>
+                        )}
+                        {item.badge && (
+                          <span className={`px-2.5 py-1 text-xs font-bold rounded-full ${
+                            activeTab === item.id 
+                              ? 'bg-green-100 text-green-700' 
+                              : 'bg-white/20 text-white'
+                          }`}>
+                            {item.badge}
+                          </span>
+                        )}
+                      </div>
+                      <p className={`text-sm mt-0.5 ${activeTab === item.id ? 'text-gray-500' : 'text-white/60'}`}>
+                        {item.desc}
+                      </p>
                     </div>
-                    {item.badge && (
-                      <span className={`px-2 py-1 text-xs font-bold rounded-full ${activeTab === item.id ? 'bg-white/20 text-white' : 'bg-green-100 text-green-700'}`}>
-                        {item.badge}
-                      </span>
-                    )}
+                    <ChevronRight className={`w-6 h-6 ${activeTab === item.id ? 'text-indigo-600' : 'text-white/40'}`} />
                   </button>
                 ))}
-              </nav>
+              </div>
+            </nav>
 
-              {/* Mobile stats */}
-              <div className="mt-6 p-4 bg-gradient-to-br from-indigo-50 to-purple-50 rounded-2xl">
-                <div className="flex items-center gap-3 mb-3">
-                  <Sparkles className="w-5 h-5 text-indigo-600" />
-                  <span className="font-bold text-gray-900">AI Bútorbolt</span>
+            {/* Bottom section */}
+            <div className="space-y-4">
+              {/* Stats row */}
+              <div className="grid grid-cols-3 gap-3">
+                <div className="bg-white/10 backdrop-blur-xl rounded-2xl p-4 text-center">
+                  <p className="text-2xl font-bold">{productCount > 0 ? `${(productCount/1000).toFixed(0)}K+` : '...'}</p>
+                  <p className="text-xs text-white/60 mt-1">Termék</p>
                 </div>
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="bg-white rounded-xl p-3 text-center">
-                    <p className="text-xl font-bold text-indigo-600">{productCount > 0 ? `${(productCount/1000).toFixed(0)}K+` : '...'}</p>
-                    <p className="text-xs text-gray-500">Termék</p>
-                  </div>
-                  <div className="bg-white rounded-xl p-3 text-center">
-                    <p className="text-xl font-bold text-purple-600">24/7</p>
-                    <p className="text-xs text-gray-500">AI Support</p>
-                  </div>
+                <div className="bg-white/10 backdrop-blur-xl rounded-2xl p-4 text-center">
+                  <p className="text-2xl font-bold">24/7</p>
+                  <p className="text-xs text-white/60 mt-1">AI Support</p>
+                </div>
+                <div className="bg-white/10 backdrop-blur-xl rounded-2xl p-4 text-center">
+                  <p className="text-2xl font-bold">4.9★</p>
+                  <p className="text-xs text-white/60 mt-1">Értékelés</p>
                 </div>
               </div>
-            </div>
 
-            {/* Mobile menu footer */}
-            <div className="p-5 border-t border-gray-100 bg-gray-50">
+              {/* CTA Button */}
               <a 
                 href={WEBSHOP_DOMAIN} 
                 target="_blank" 
                 rel="noopener noreferrer" 
-                className="flex items-center justify-center gap-2 w-full px-4 py-4 min-h-[56px] rounded-2xl font-bold bg-gradient-to-r from-gray-900 to-gray-800 text-white hover:from-gray-800 hover:to-gray-700 transition-all shadow-lg"
+                className="flex items-center justify-center gap-3 w-full px-6 py-5 rounded-2xl font-bold text-lg bg-white text-gray-900 hover:bg-gray-100 transition-all shadow-2xl"
                 onClick={closeMobileMenu}
               >
                 Vissza a fő webshopba
-                <ArrowRight className="w-5 h-5" />
+                <ArrowRight className="w-6 h-6" />
               </a>
             </div>
           </div>
-        </>
+        </div>
       )}
     </>
   );
