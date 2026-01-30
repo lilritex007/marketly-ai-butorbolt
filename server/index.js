@@ -233,6 +233,225 @@ app.get('/api/stats', async (req, res) => {
   }
 });
 
+// ==================== AI API (Gemini Proxy) ====================
+
+const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
+const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models';
+
+/**
+ * AI Text Generation - Gemini Proxy
+ * POST /api/ai/generate
+ * Body: { prompt, temperature?, maxTokens? }
+ */
+app.post('/api/ai/generate', async (req, res) => {
+  if (!GEMINI_API_KEY) {
+    console.error('❌ GEMINI_API_KEY not configured');
+    return res.status(500).json({ 
+      success: false, 
+      error: 'AI service not configured. Please add GEMINI_API_KEY to environment variables.' 
+    });
+  }
+
+  try {
+    const { prompt, temperature = 0.7, maxTokens = 500 } = req.body;
+
+    if (!prompt) {
+      return res.status(400).json({ success: false, error: 'Prompt is required' });
+    }
+
+    console.log('[Gemini] Text generation request, prompt length:', prompt.length);
+
+    const response = await fetch(
+      `${GEMINI_API_URL}/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contents: [{ parts: [{ text: prompt }] }],
+          generationConfig: {
+            temperature,
+            maxOutputTokens: maxTokens,
+            topP: 0.95,
+            topK: 40,
+          },
+          safetySettings: [
+            { category: 'HARM_CATEGORY_HARASSMENT', threshold: 'BLOCK_NONE' },
+            { category: 'HARM_CATEGORY_HATE_SPEECH', threshold: 'BLOCK_NONE' },
+            { category: 'HARM_CATEGORY_SEXUALLY_EXPLICIT', threshold: 'BLOCK_NONE' },
+            { category: 'HARM_CATEGORY_DANGEROUS_CONTENT', threshold: 'BLOCK_NONE' },
+          ],
+        }),
+      }
+    );
+
+    const data = await response.json();
+
+    if (!response.ok || data.error) {
+      console.error('[Gemini] API error:', data.error || response.status);
+      return res.status(response.status || 500).json({ 
+        success: false, 
+        error: data.error?.message || `Gemini API error: ${response.status}` 
+      });
+    }
+
+    const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
+    
+    if (!text) {
+      console.error('[Gemini] No text in response');
+      return res.status(500).json({ success: false, error: 'No response from AI' });
+    }
+
+    console.log('[Gemini] Success, response length:', text.length);
+    res.json({ success: true, text });
+
+  } catch (error) {
+    console.error('[Gemini] Server error:', error);
+    res.status(500).json({ 
+      success: false, 
+      error: `Server error: ${error.message}` 
+    });
+  }
+});
+
+/**
+ * AI Image Analysis - Gemini Vision Proxy
+ * POST /api/ai/analyze-image
+ * Body: { imageBase64, mimeType, prompt }
+ */
+app.post('/api/ai/analyze-image', async (req, res) => {
+  if (!GEMINI_API_KEY) {
+    console.error('❌ GEMINI_API_KEY not configured');
+    return res.status(500).json({ 
+      success: false, 
+      error: 'AI service not configured. Please add GEMINI_API_KEY to environment variables.' 
+    });
+  }
+
+  try {
+    const { imageBase64, mimeType = 'image/jpeg', prompt } = req.body;
+
+    if (!imageBase64 || !prompt) {
+      return res.status(400).json({ success: false, error: 'Image and prompt are required' });
+    }
+
+    console.log('[Gemini Vision] Image analysis request');
+
+    const response = await fetch(
+      `${GEMINI_API_URL}/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contents: [{
+            parts: [
+              { text: prompt },
+              {
+                inline_data: {
+                  mime_type: mimeType,
+                  data: imageBase64
+                }
+              }
+            ]
+          }],
+          generationConfig: {
+            temperature: 0.7,
+            maxOutputTokens: 500,
+            topP: 0.95,
+            topK: 40,
+          },
+          safetySettings: [
+            { category: 'HARM_CATEGORY_HARASSMENT', threshold: 'BLOCK_NONE' },
+            { category: 'HARM_CATEGORY_HATE_SPEECH', threshold: 'BLOCK_NONE' },
+            { category: 'HARM_CATEGORY_SEXUALLY_EXPLICIT', threshold: 'BLOCK_NONE' },
+            { category: 'HARM_CATEGORY_DANGEROUS_CONTENT', threshold: 'BLOCK_NONE' },
+          ],
+        }),
+      }
+    );
+
+    const data = await response.json();
+
+    if (!response.ok || data.error) {
+      console.error('[Gemini Vision] API error:', data.error || response.status);
+      return res.status(response.status || 500).json({ 
+        success: false, 
+        error: data.error?.message || `Gemini API error: ${response.status}` 
+      });
+    }
+
+    const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
+    
+    if (!text) {
+      console.error('[Gemini Vision] No text in response');
+      return res.status(500).json({ success: false, error: 'No response from AI' });
+    }
+
+    console.log('[Gemini Vision] Success, response length:', text.length);
+    res.json({ success: true, text });
+
+  } catch (error) {
+    console.error('[Gemini Vision] Server error:', error);
+    res.status(500).json({ 
+      success: false, 
+      error: `Server error: ${error.message}` 
+    });
+  }
+});
+
+/**
+ * AI Health Check - Test if Gemini API is working
+ * GET /api/ai/health
+ */
+app.get('/api/ai/health', async (req, res) => {
+  if (!GEMINI_API_KEY) {
+    return res.json({ 
+      success: false, 
+      configured: false,
+      error: 'GEMINI_API_KEY not set in environment variables' 
+    });
+  }
+
+  try {
+    const response = await fetch(
+      `${GEMINI_API_URL}/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contents: [{ parts: [{ text: 'Say hello in Hungarian, one word only.' }] }],
+          generationConfig: { maxOutputTokens: 10 },
+        }),
+      }
+    );
+
+    const data = await response.json();
+    
+    if (!response.ok || data.error) {
+      return res.json({ 
+        success: false, 
+        configured: true,
+        error: data.error?.message || `HTTP ${response.status}` 
+      });
+    }
+
+    const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
+    
+    res.json({ 
+      success: true, 
+      configured: true,
+      message: text || 'AI responding',
+      model: 'gemini-1.5-flash'
+    });
+
+  } catch (error) {
+    res.json({ 
+      success: false, 
+      configured: true,
+      error: error.message 
+    });
+  }
+});
+
 // ==================== ADMIN API ====================
 
 /**

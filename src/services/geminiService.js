@@ -1,207 +1,136 @@
 /**
- * Gemini AI Service - Központi AI szolgáltatás
- * Minden AI hívás itt történik, egységes hibakezeléssel
+ * Gemini AI Service - Frontend service for AI calls
+ * All calls go through our backend proxy for security
+ * The API key is stored on the server, NOT in the frontend
  */
 
-const GEMINI_API_KEY = 'AIzaSyDZV-fAFVCvh4Ad2lKlARMdtHoZWNRwZQA';
-const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models';
-
-// Model nevek - a legstabilabb modellek
-const MODELS = {
-  TEXT: 'gemini-1.5-flash',      // Szöveges kérésekhez
-  VISION: 'gemini-1.5-flash',    // Képelemzéshez (támogatja a vision-t is)
-};
+// Backend API URL - automatically detects if we're on the Railway server or localhost
+const API_BASE = window.MARKETLY_CONFIG?.apiBase || 
+  (window.location.hostname === 'localhost' 
+    ? 'http://localhost:3001/api' 
+    : 'https://marketly-ai-butorbolt-production.up.railway.app/api');
 
 /**
- * Szöveges AI válasz generálása
- * @param {string} prompt - A kérdés vagy utasítás
- * @param {object} options - Opcionális beállítások
+ * Generate text response from AI
+ * @param {string} prompt - The prompt to send to AI
+ * @param {object} options - Optional settings (temperature, maxTokens)
  * @returns {Promise<{success: boolean, text?: string, error?: string}>}
  */
 export async function generateText(prompt, options = {}) {
   const { temperature = 0.7, maxTokens = 500 } = options;
   
-  console.log('[Gemini] Szöveges kérés indítása...', { promptLength: prompt.length });
+  console.log('[AI Service] Sending text generation request...');
   
   try {
-    const response = await fetch(
-      `${GEMINI_API_URL}/${MODELS.TEXT}:generateContent?key=${GEMINI_API_KEY}`,
-      {
-        method: 'POST',
-        headers: { 
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          contents: [{ 
-            parts: [{ text: prompt }] 
-          }],
-          generationConfig: {
-            temperature,
-            maxOutputTokens: maxTokens,
-            topP: 0.95,
-            topK: 40,
-          },
-          safetySettings: [
-            { category: 'HARM_CATEGORY_HARASSMENT', threshold: 'BLOCK_NONE' },
-            { category: 'HARM_CATEGORY_HATE_SPEECH', threshold: 'BLOCK_NONE' },
-            { category: 'HARM_CATEGORY_SEXUALLY_EXPLICIT', threshold: 'BLOCK_NONE' },
-            { category: 'HARM_CATEGORY_DANGEROUS_CONTENT', threshold: 'BLOCK_NONE' },
-          ],
-        }),
-      }
-    );
+    const response = await fetch(`${API_BASE}/ai/generate`, {
+      method: 'POST',
+      headers: { 
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        prompt,
+        temperature,
+        maxTokens,
+      }),
+    });
 
     const data = await response.json();
     
-    // Részletes hibakezelés
-    if (!response.ok) {
-      console.error('[Gemini] HTTP hiba:', response.status, data);
+    if (!response.ok || !data.success) {
+      console.error('[AI Service] Error:', data.error);
       return { 
         success: false, 
-        error: data.error?.message || `HTTP ${response.status}` 
-      };
-    }
-    
-    if (data.error) {
-      console.error('[Gemini] API hiba:', data.error);
-      return { 
-        success: false, 
-        error: data.error.message || 'Ismeretlen API hiba' 
+        error: data.error || `HTTP ${response.status}` 
       };
     }
 
-    // Válasz kinyerése
-    const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
-    
-    if (!text) {
-      console.error('[Gemini] Üres válasz:', data);
-      
-      // Ellenőrizzük, hogy blokkolva lett-e
-      const blockReason = data.candidates?.[0]?.finishReason;
-      if (blockReason === 'SAFETY') {
-        return { success: false, error: 'A válasz biztonsági okokból blokkolva lett.' };
-      }
-      
-      return { success: false, error: 'Az AI nem adott választ.' };
-    }
-
-    console.log('[Gemini] Sikeres válasz:', text.substring(0, 100) + '...');
-    return { success: true, text };
+    console.log('[AI Service] Success, response received');
+    return { success: true, text: data.text };
 
   } catch (error) {
-    console.error('[Gemini] Hálózati hiba:', error);
+    console.error('[AI Service] Network error:', error);
     return { 
       success: false, 
-      error: `Hálózati hiba: ${error.message}` 
+      error: `Network error: ${error.message}` 
     };
   }
 }
 
 /**
- * Kép elemzése AI-val
- * @param {string} base64Image - Base64 kódolt kép (data URL prefix nélkül)
- * @param {string} mimeType - Kép típusa (pl. 'image/jpeg')
- * @param {string} prompt - Az elemzési utasítás
+ * Analyze image with AI
+ * @param {string} base64Image - Base64 encoded image (without data URL prefix)
+ * @param {string} mimeType - Image MIME type (e.g., 'image/jpeg')
+ * @param {string} prompt - The analysis prompt
  * @returns {Promise<{success: boolean, text?: string, error?: string}>}
  */
 export async function analyzeImage(base64Image, mimeType, prompt) {
-  console.log('[Gemini] Képelemzés indítása...', { mimeType, promptLength: prompt.length });
+  console.log('[AI Service] Sending image analysis request...');
   
   try {
-    const response = await fetch(
-      `${GEMINI_API_URL}/${MODELS.VISION}:generateContent?key=${GEMINI_API_KEY}`,
-      {
-        method: 'POST',
-        headers: { 
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          contents: [{
-            parts: [
-              { text: prompt },
-              {
-                inline_data: {
-                  mime_type: mimeType,
-                  data: base64Image
-                }
-              }
-            ]
-          }],
-          generationConfig: {
-            temperature: 0.7,
-            maxOutputTokens: 500,
-            topP: 0.95,
-            topK: 40,
-          },
-          safetySettings: [
-            { category: 'HARM_CATEGORY_HARASSMENT', threshold: 'BLOCK_NONE' },
-            { category: 'HARM_CATEGORY_HATE_SPEECH', threshold: 'BLOCK_NONE' },
-            { category: 'HARM_CATEGORY_SEXUALLY_EXPLICIT', threshold: 'BLOCK_NONE' },
-            { category: 'HARM_CATEGORY_DANGEROUS_CONTENT', threshold: 'BLOCK_NONE' },
-          ],
-        }),
-      }
-    );
+    const response = await fetch(`${API_BASE}/ai/analyze-image`, {
+      method: 'POST',
+      headers: { 
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        imageBase64: base64Image,
+        mimeType,
+        prompt,
+      }),
+    });
 
     const data = await response.json();
     
-    if (!response.ok) {
-      console.error('[Gemini Vision] HTTP hiba:', response.status, data);
+    if (!response.ok || !data.success) {
+      console.error('[AI Service] Error:', data.error);
       return { 
         success: false, 
-        error: data.error?.message || `HTTP ${response.status}` 
-      };
-    }
-    
-    if (data.error) {
-      console.error('[Gemini Vision] API hiba:', data.error);
-      return { 
-        success: false, 
-        error: data.error.message || 'Ismeretlen API hiba' 
+        error: data.error || `HTTP ${response.status}` 
       };
     }
 
-    const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
-    
-    if (!text) {
-      console.error('[Gemini Vision] Üres válasz:', data);
-      return { success: false, error: 'Az AI nem tudta elemezni a képet.' };
-    }
-
-    console.log('[Gemini Vision] Sikeres elemzés:', text.substring(0, 100) + '...');
-    return { success: true, text };
+    console.log('[AI Service] Image analysis success');
+    return { success: true, text: data.text };
 
   } catch (error) {
-    console.error('[Gemini Vision] Hálózati hiba:', error);
+    console.error('[AI Service] Network error:', error);
     return { 
       success: false, 
-      error: `Hálózati hiba: ${error.message}` 
+      error: `Network error: ${error.message}` 
     };
   }
 }
 
 /**
- * API kapcsolat tesztelése
- * @returns {Promise<{success: boolean, message: string}>}
+ * Test AI connection
+ * @returns {Promise<{success: boolean, message?: string, error?: string}>}
  */
 export async function testConnection() {
-  console.log('[Gemini] API teszt indítása...');
+  console.log('[AI Service] Testing connection...');
   
-  const result = await generateText('Mondj egy rövid magyar köszöntést!', { maxTokens: 50 });
-  
-  if (result.success) {
-    console.log('[Gemini] API teszt sikeres!');
-    return { success: true, message: `API működik! Válasz: ${result.text}` };
-  } else {
-    console.error('[Gemini] API teszt sikertelen:', result.error);
-    return { success: false, message: `API hiba: ${result.error}` };
+  try {
+    const response = await fetch(`${API_BASE}/ai/health`);
+    const data = await response.json();
+    
+    if (data.success) {
+      console.log('[AI Service] Connection OK:', data.message);
+      return { success: true, message: data.message };
+    } else {
+      console.error('[AI Service] Connection failed:', data.error);
+      return { success: false, error: data.error };
+    }
+
+  } catch (error) {
+    console.error('[AI Service] Connection test failed:', error);
+    return { 
+      success: false, 
+      error: `Cannot reach server: ${error.message}` 
+    };
   }
 }
 
-// Exportáljuk a default objektumot is
 export default {
   generateText,
   analyzeImage,
   testConnection,
-  GEMINI_API_KEY,
 };

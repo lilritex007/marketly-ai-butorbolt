@@ -1,131 +1,94 @@
-import React, { useState } from 'react';
-import { Loader2, CheckCircle, XCircle, AlertTriangle, Copy, ExternalLink } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Loader2, CheckCircle, XCircle, AlertTriangle, ExternalLink, Server, Shield } from 'lucide-react';
+import { testConnection, generateText } from '../../services/geminiService';
 
 /**
  * AI Debug Panel - Tesztelő panel az AI API működésének ellenőrzésére
- * Ez a komponens segít diagnosztizálni az AI problémákat
+ * Most már a backend proxy-n keresztül tesztel (biztonságos!)
  */
 const AIDebugPanel = ({ onClose }) => {
+  const [healthStatus, setHealthStatus] = useState(null); // null, 'checking', 'ok', 'error'
+  const [healthMessage, setHealthMessage] = useState('');
   const [testStatus, setTestStatus] = useState('idle'); // idle, testing, success, error
   const [testResult, setTestResult] = useState(null);
   const [errorDetails, setErrorDetails] = useState(null);
 
-  const API_KEY = 'AIzaSyDZV-fAFVCvh4Ad2lKlARMdtHoZWNRwZQA';
-  const API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent';
+  // Auto-check health on open
+  useEffect(() => {
+    checkHealth();
+  }, []);
 
-  const runAPITest = async () => {
+  const checkHealth = async () => {
+    setHealthStatus('checking');
+    const result = await testConnection();
+    
+    if (result.success) {
+      setHealthStatus('ok');
+      setHealthMessage(result.message || 'AI connected');
+    } else {
+      setHealthStatus('error');
+      setHealthMessage(result.error || 'Connection failed');
+    }
+  };
+
+  const runFullTest = async () => {
     setTestStatus('testing');
     setTestResult(null);
     setErrorDetails(null);
 
-    console.log('=== AI API TESZT INDÍTÁSA ===');
-    console.log('API Kulcs:', API_KEY.substring(0, 10) + '...');
-    console.log('API URL:', API_URL);
+    console.log('=== AI FULL TEST ===');
 
     try {
-      const response = await fetch(`${API_URL}?key=${API_KEY}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          contents: [{
-            parts: [{ text: 'Mondj egy rövid magyar köszöntést!' }]
-          }],
-          generationConfig: {
-            temperature: 0.7,
-            maxOutputTokens: 100,
-          }
-        })
-      });
+      const result = await generateText(
+        'Mondj egy rövid magyar köszöntést, 1 mondat!', 
+        { temperature: 0.8, maxTokens: 100 }
+      );
 
-      console.log('HTTP Status:', response.status);
-      console.log('HTTP Status Text:', response.statusText);
-
-      const data = await response.json();
-      console.log('API Válasz:', JSON.stringify(data, null, 2));
-
-      if (!response.ok) {
-        setTestStatus('error');
-        setErrorDetails({
-          httpStatus: response.status,
-          httpStatusText: response.statusText,
-          apiError: data.error || data,
-          suggestion: getErrorSuggestion(response.status, data)
-        });
-        return;
-      }
-
-      if (data.error) {
-        setTestStatus('error');
-        setErrorDetails({
-          apiError: data.error,
-          suggestion: getErrorSuggestion(null, data)
-        });
-        return;
-      }
-
-      const aiText = data.candidates?.[0]?.content?.parts?.[0]?.text;
-      
-      if (aiText) {
+      if (result.success && result.text) {
         setTestStatus('success');
-        setTestResult(aiText);
-        console.log('✅ API TESZT SIKERES!');
-        console.log('AI Válasz:', aiText);
+        setTestResult(result.text);
+        console.log('✅ AI TESZT SIKERES:', result.text);
       } else {
         setTestStatus('error');
         setErrorDetails({
-          message: 'Az API válaszolt, de nem adott szöveget',
-          rawResponse: data,
-          suggestion: 'A válasz formátuma nem megfelelő. Lehet, hogy a tartalom blokkolva lett.'
+          message: result.error || 'Ismeretlen hiba',
+          suggestion: getSuggestion(result.error)
         });
+        console.error('❌ AI TESZT HIBA:', result.error);
       }
 
     } catch (error) {
-      console.error('❌ API TESZT HIBA:', error);
+      console.error('❌ TESZT EXCEPTION:', error);
       setTestStatus('error');
       setErrorDetails({
         message: error.message,
-        type: error.name,
-        suggestion: getNetworkErrorSuggestion(error)
+        suggestion: 'Hálózati hiba. Ellenőrizd, hogy a szerver fut-e.'
       });
     }
   };
 
-  const getErrorSuggestion = (httpStatus, data) => {
-    if (httpStatus === 400) {
-      return 'Rossz kérés formátum. Ellenőrizd a prompt-ot.';
+  const getSuggestion = (error) => {
+    if (!error) return 'Ismeretlen hiba történt.';
+    
+    const e = error.toLowerCase();
+    
+    if (e.includes('api_key') || e.includes('invalid') || e.includes('401') || e.includes('403')) {
+      return 'Az API kulcs érvénytelen vagy nincs beállítva a Railway-en. Ellenőrizd a GEMINI_API_KEY környezeti változót!';
     }
-    if (httpStatus === 401 || httpStatus === 403) {
-      return 'Az API kulcs érvénytelen vagy nincs engedélyezve. Menj a Google AI Studio-ba és ellenőrizd a kulcsot!';
+    if (e.includes('not configured') || e.includes('not set')) {
+      return 'A GEMINI_API_KEY nincs beállítva a Railway szerveren. Menj a Railway dashboard-ra és add hozzá!';
     }
-    if (httpStatus === 404) {
-      return 'A model nem található. Lehet, hogy a gemini-1.5-flash nem elérhető.';
+    if (e.includes('network') || e.includes('fetch')) {
+      return 'Nem sikerült kapcsolódni a szerverhez. Lehet, hogy a Railway szerver nem fut.';
     }
-    if (httpStatus === 429) {
+    if (e.includes('429') || e.includes('quota') || e.includes('rate')) {
       return 'Túl sok kérés! Várj egy percet és próbáld újra.';
     }
-    if (httpStatus === 500 || httpStatus === 503) {
-      return 'Google szerver hiba. Próbáld újra később.';
+    if (e.includes('500') || e.includes('server')) {
+      return 'Szerver hiba. Nézd meg a Railway logokat!';
     }
-    if (data?.error?.message) {
-      return data.error.message;
-    }
-    return 'Ismeretlen hiba. Nézd meg a konzolt (F12) részletekért.';
-  };
-
-  const getNetworkErrorSuggestion = (error) => {
-    if (error.message.includes('Failed to fetch')) {
-      return 'Hálózati hiba vagy CORS probléma. Ellenőrizd az internet kapcsolatot.';
-    }
-    if (error.message.includes('NetworkError')) {
-      return 'Nincs internet kapcsolat vagy a Google szerverek nem elérhetők.';
-    }
-    return 'Hálózati hiba történt. Ellenőrizd az internet kapcsolatot.';
-  };
-
-  const copyToClipboard = (text) => {
-    navigator.clipboard.writeText(text);
+    
+    return 'Ellenőrizd a Railway logokat a részletekért.';
   };
 
   return (
@@ -134,22 +97,25 @@ const AIDebugPanel = ({ onClose }) => {
       onClick={onClose}
     >
       <div 
-        className="bg-white rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-2xl"
+        className="bg-white rounded-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto shadow-2xl"
         onClick={e => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="bg-gradient-to-r from-orange-500 to-red-500 p-5 text-white">
+        <div className="bg-gradient-to-r from-indigo-600 to-purple-600 p-5 text-white">
           <div className="flex items-center justify-between">
             <div>
               <h2 className="text-xl font-bold flex items-center gap-2">
-                <AlertTriangle className="w-6 h-6" />
+                <Server className="w-6 h-6" />
                 AI Debug Panel
               </h2>
-              <p className="text-white/80 text-sm mt-1">Gemini API kapcsolat tesztelése</p>
+              <p className="text-white/80 text-sm mt-1 flex items-center gap-1">
+                <Shield className="w-4 h-4" />
+                Biztonságos backend proxy
+              </p>
             </div>
             <button 
               onClick={onClose}
-              className="p-2 hover:bg-white/20 rounded-full transition-colors"
+              className="p-2 hover:bg-white/20 rounded-full transition-colors text-xl"
             >
               ✕
             </button>
@@ -157,60 +123,73 @@ const AIDebugPanel = ({ onClose }) => {
         </div>
 
         <div className="p-5 space-y-5">
-          {/* API Info */}
-          <div className="bg-gray-50 rounded-xl p-4 space-y-2">
-            <h3 className="font-bold text-gray-800">API Konfiguráció</h3>
-            <div className="space-y-1 text-sm">
-              <div className="flex justify-between">
-                <span className="text-gray-500">API Kulcs:</span>
-                <div className="flex items-center gap-2">
-                  <code className="bg-gray-200 px-2 py-0.5 rounded">{API_KEY.substring(0, 15)}...</code>
-                  <button 
-                    onClick={() => copyToClipboard(API_KEY)}
-                    className="p-1 hover:bg-gray-200 rounded"
-                    title="Másolás"
-                  >
-                    <Copy className="w-4 h-4 text-gray-500" />
-                  </button>
+          {/* Health Check Status */}
+          <div className={`rounded-xl p-4 ${
+            healthStatus === 'ok' ? 'bg-green-50 border border-green-200' :
+            healthStatus === 'error' ? 'bg-red-50 border border-red-200' :
+            'bg-gray-50 border border-gray-200'
+          }`}>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                {healthStatus === 'checking' && <Loader2 className="w-5 h-5 animate-spin text-gray-500" />}
+                {healthStatus === 'ok' && <CheckCircle className="w-5 h-5 text-green-500" />}
+                {healthStatus === 'error' && <XCircle className="w-5 h-5 text-red-500" />}
+                {healthStatus === null && <AlertTriangle className="w-5 h-5 text-gray-400" />}
+                
+                <div>
+                  <p className="font-bold text-gray-800">Backend Kapcsolat</p>
+                  <p className={`text-sm ${
+                    healthStatus === 'ok' ? 'text-green-600' :
+                    healthStatus === 'error' ? 'text-red-600' :
+                    'text-gray-500'
+                  }`}>
+                    {healthStatus === 'checking' ? 'Ellenőrzés...' :
+                     healthStatus === 'ok' ? `✓ ${healthMessage}` :
+                     healthStatus === 'error' ? `✗ ${healthMessage}` :
+                     'Nincs ellenőrizve'}
+                  </p>
                 </div>
               </div>
-              <div className="flex justify-between">
-                <span className="text-gray-500">Model:</span>
-                <code className="bg-gray-200 px-2 py-0.5 rounded">gemini-1.5-flash</code>
-              </div>
+              <button
+                onClick={checkHealth}
+                disabled={healthStatus === 'checking'}
+                className="px-3 py-1.5 bg-white rounded-lg text-sm font-medium shadow-sm hover:shadow transition-all disabled:opacity-50"
+              >
+                Újra
+              </button>
             </div>
           </div>
 
-          {/* Test Button */}
+          {/* Full Test Button */}
           <button
-            onClick={runAPITest}
+            onClick={runFullTest}
             disabled={testStatus === 'testing'}
             className="w-full py-4 rounded-xl bg-gradient-to-r from-indigo-500 to-purple-600 text-white font-bold text-lg shadow-lg hover:shadow-xl transition-all disabled:opacity-50 flex items-center justify-center gap-3"
           >
             {testStatus === 'testing' ? (
               <>
                 <Loader2 className="w-6 h-6 animate-spin" />
-                API Teszt folyamatban...
+                AI Teszt folyamatban...
               </>
             ) : (
               <>
-                🧪 API Teszt Futtatása
+                🧪 Teljes AI Teszt
               </>
             )}
           </button>
 
-          {/* Results */}
-          {testStatus === 'success' && (
+          {/* Test Results */}
+          {testStatus === 'success' && testResult && (
             <div className="bg-green-50 border border-green-200 rounded-xl p-5">
               <div className="flex items-center gap-2 mb-3">
                 <CheckCircle className="w-6 h-6 text-green-500" />
-                <h3 className="font-bold text-green-800">✅ API Működik!</h3>
+                <h3 className="font-bold text-green-800">✅ AI Működik!</h3>
               </div>
               <div className="bg-white rounded-lg p-3 border border-green-200">
                 <p className="text-gray-700">{testResult}</p>
               </div>
               <p className="mt-3 text-sm text-green-700">
-                Az AI API megfelelően működik. Ha az app-okban mégsem működik, lehet, hogy más hiba van.
+                Az AI backend helyesen működik. Az appok most már használhatják az AI-t!
               </p>
             </div>
           )}
@@ -219,72 +198,72 @@ const AIDebugPanel = ({ onClose }) => {
             <div className="bg-red-50 border border-red-200 rounded-xl p-5">
               <div className="flex items-center gap-2 mb-3">
                 <XCircle className="w-6 h-6 text-red-500" />
-                <h3 className="font-bold text-red-800">❌ API Hiba!</h3>
+                <h3 className="font-bold text-red-800">❌ Hiba!</h3>
               </div>
               
-              <div className="space-y-3">
-                {errorDetails.httpStatus && (
-                  <div className="text-sm">
-                    <span className="text-red-600 font-medium">HTTP Státusz: </span>
-                    <code className="bg-red-100 px-2 py-0.5 rounded">{errorDetails.httpStatus} {errorDetails.httpStatusText}</code>
-                  </div>
-                )}
-                
-                {errorDetails.message && (
-                  <div className="text-sm">
-                    <span className="text-red-600 font-medium">Hiba: </span>
-                    <span className="text-gray-700">{errorDetails.message}</span>
-                  </div>
-                )}
+              <div className="bg-white rounded-lg p-3 border border-red-200 mb-3">
+                <p className="text-red-700 text-sm">{errorDetails.message}</p>
+              </div>
 
-                {errorDetails.apiError && (
-                  <div className="bg-red-100 rounded-lg p-3 text-xs overflow-x-auto">
-                    <pre>{JSON.stringify(errorDetails.apiError, null, 2)}</pre>
-                  </div>
-                )}
-
-                <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3 mt-3">
-                  <p className="text-yellow-800 font-medium">💡 Javaslat:</p>
-                  <p className="text-yellow-700 text-sm mt-1">{errorDetails.suggestion}</p>
-                </div>
+              <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3">
+                <p className="text-yellow-800 font-medium text-sm">💡 Javaslat:</p>
+                <p className="text-yellow-700 text-sm mt-1">{errorDetails.suggestion}</p>
               </div>
             </div>
           )}
 
+          {/* Configuration Info */}
+          <div className="bg-gray-50 rounded-xl p-4">
+            <h3 className="font-bold text-gray-800 mb-3">⚙️ Konfiguráció</h3>
+            <div className="space-y-2 text-sm">
+              <div className="flex justify-between">
+                <span className="text-gray-500">Backend:</span>
+                <code className="bg-gray-200 px-2 py-0.5 rounded text-xs">Railway Server</code>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-500">AI Model:</span>
+                <code className="bg-gray-200 px-2 py-0.5 rounded text-xs">gemini-1.5-flash</code>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-500">API Key:</span>
+                <code className="bg-green-100 text-green-700 px-2 py-0.5 rounded text-xs">🔒 Szerveren tárolva</code>
+              </div>
+            </div>
+          </div>
+
           {/* Help Links */}
-          <div className="border-t border-gray-200 pt-5">
-            <h3 className="font-bold text-gray-800 mb-3">🔧 Hibaelhárítás</h3>
+          <div className="border-t border-gray-200 pt-4">
+            <h3 className="font-bold text-gray-800 mb-3">🔧 Ha nem működik</h3>
             <div className="space-y-2">
+              <a 
+                href="https://railway.app/dashboard" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="flex items-center justify-between p-3 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors"
+              >
+                <span className="text-blue-700 font-medium">Railway Dashboard - Logok</span>
+                <ExternalLink className="w-5 h-5 text-blue-500" />
+              </a>
               <a 
                 href="https://aistudio.google.com/app/apikey" 
                 target="_blank" 
                 rel="noopener noreferrer"
                 className="flex items-center justify-between p-3 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors"
               >
-                <span className="text-blue-700 font-medium">Google AI Studio - API kulcs kezelése</span>
-                <ExternalLink className="w-5 h-5 text-blue-500" />
-              </a>
-              <a 
-                href="https://console.cloud.google.com/apis/credentials" 
-                target="_blank" 
-                rel="noopener noreferrer"
-                className="flex items-center justify-between p-3 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors"
-              >
-                <span className="text-blue-700 font-medium">Google Cloud Console - API beállítások</span>
+                <span className="text-blue-700 font-medium">Google AI Studio - Új API kulcs</span>
                 <ExternalLink className="w-5 h-5 text-blue-500" />
               </a>
             </div>
           </div>
 
           {/* Instructions */}
-          <div className="bg-gray-50 rounded-xl p-4 text-sm">
-            <h4 className="font-bold text-gray-800 mb-2">📋 Ha nem működik az API:</h4>
-            <ol className="list-decimal list-inside space-y-1.5 text-gray-600">
-              <li>Nyisd meg a <strong>Google AI Studio</strong>-t a fenti linkről</li>
-              <li>Jelentkezz be a Google fiókoddal</li>
-              <li>Menj az <strong>API Keys</strong> menüpontra</li>
-              <li>Hozz létre egy <strong>új API kulcsot</strong> vagy ellenőrizd a meglévőt</li>
-              <li>Másold be ide az új kulcsot és add meg nekem</li>
+          <div className="bg-indigo-50 rounded-xl p-4 text-sm">
+            <h4 className="font-bold text-indigo-800 mb-2">📋 Checklist</h4>
+            <ol className="list-decimal list-inside space-y-1.5 text-indigo-700">
+              <li>Railway-en van <strong>GEMINI_API_KEY</strong> változó?</li>
+              <li>Az API kulcs <strong>aktív</strong> a Google AI Studio-ban?</li>
+              <li>A Railway deploy <strong>sikeresen lefutott</strong>?</li>
+              <li>A szerver <strong>fut</strong> (nem "sleeping")?</li>
             </ol>
           </div>
         </div>
