@@ -2,10 +2,31 @@
  * Marketly AI Shop Loader
  * Dinamikusan betölti a React appot a Railway backend-ről.
  * FIX URL - minden deploy után azonnal él, nincs CDN cache!
+ * FONTOS: Csak a megadott oldalakon fut le!
  */
 (function() {
   'use strict';
 
+  // ============================================
+  // URL ELLENŐRZÉS - Csak ezeken az oldalakon tölt be
+  // ============================================
+  var ALLOWED_PATHS = [
+    '/butorbolt',
+    '/butorbolt/',
+    '/ai-butorbolt',
+    '/ai-butorbolt/'
+  ];
+  
+  var currentPath = window.location.pathname.toLowerCase();
+  var isAllowedPage = ALLOWED_PATHS.some(function(path) {
+    return currentPath === path || currentPath.startsWith(path + '?');
+  });
+  
+  if (!isAllowedPage) {
+    console.log('⏭️ AI Shop Loader: Nem megfelelő oldal (' + currentPath + '), kihagyva.');
+    return; // Kilép a scriptből, nem tölt be semmit
+  }
+  
   console.log('🚀 AI Shop Loader starting...');
 
   // Railway backend URL - ez fix, deploy után azonnal frissül
