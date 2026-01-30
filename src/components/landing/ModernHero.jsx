@@ -94,26 +94,26 @@ export const ModernHero = ({ onExplore, onTryAI }) => {
             <span className="font-semibold text-indigo-600"> Fotózz, tervezz, vásárolj</span> - minden egy helyen.
           </p>
 
-          {/* CTA Buttons - COMPACT but readable */}
-          <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center items-stretch sm:items-center mb-10 sm:mb-14 lg:mb-20 px-3">
+          {/* CTA Buttons - BALANCED and readable */}
+          <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 lg:gap-5 justify-center items-stretch sm:items-center mb-10 sm:mb-14 lg:mb-20 px-3">
             <button
               onClick={onTryAI}
-              className="group relative w-full sm:w-auto px-6 py-3.5 sm:px-8 sm:py-4 lg:px-10 lg:py-4 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-xl font-bold text-base sm:text-lg lg:text-xl shadow-xl hover:shadow-indigo-500/50 transition-all transform hover:-translate-y-1 overflow-hidden flex items-center justify-center"
+              className="group relative w-full sm:w-auto px-6 py-3.5 sm:px-8 sm:py-4 lg:px-12 lg:py-5 xl:px-14 xl:py-5 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-xl lg:rounded-2xl font-bold text-base sm:text-lg lg:text-xl xl:text-2xl shadow-xl hover:shadow-indigo-500/50 transition-all transform hover:-translate-y-1 overflow-hidden flex items-center justify-center"
             >
               <span className="relative z-10 flex items-center">
-                <Sparkles className="w-5 h-5 sm:w-6 sm:h-6 lg:w-7 lg:h-7 mr-2.5" />
+                <Sparkles className="w-5 h-5 sm:w-6 sm:h-6 lg:w-6 lg:h-6 xl:w-7 xl:h-7 mr-2.5" />
                 Próbáld ki az AI-t
-                <ArrowRight className="w-5 h-5 sm:w-6 sm:h-6 lg:w-7 lg:h-7 ml-2.5 group-hover:translate-x-1 transition-transform" />
+                <ArrowRight className="w-5 h-5 sm:w-6 sm:h-6 lg:w-6 lg:h-6 xl:w-7 xl:h-7 ml-2.5 group-hover:translate-x-1 transition-transform" />
               </span>
               <div className="absolute inset-0 bg-gradient-to-r from-purple-600 to-pink-600 opacity-0 group-hover:opacity-100 transition-opacity" />
             </button>
 
             <button
               onClick={onExplore}
-              className="w-full sm:w-auto px-6 py-3.5 sm:px-8 sm:py-4 lg:px-10 lg:py-4 bg-white text-gray-900 rounded-xl font-bold text-base sm:text-lg lg:text-xl shadow-lg hover:shadow-xl transition-all transform hover:-translate-y-1 border-2 border-gray-200 hover:border-indigo-300 flex items-center justify-center"
+              className="w-full sm:w-auto px-6 py-3.5 sm:px-8 sm:py-4 lg:px-12 lg:py-5 xl:px-14 xl:py-5 bg-white text-gray-900 rounded-xl lg:rounded-2xl font-bold text-base sm:text-lg lg:text-xl xl:text-2xl shadow-lg hover:shadow-xl transition-all transform hover:-translate-y-1 border-2 border-gray-200 hover:border-indigo-300 flex items-center justify-center"
             >
               Kollekció megtekintése
-              <ChevronRight className="w-5 h-5 sm:w-5 sm:h-5 lg:w-6 lg:h-6 ml-2" />
+              <ChevronRight className="w-5 h-5 sm:w-5 sm:h-5 lg:w-6 lg:h-6 xl:w-7 xl:h-7 ml-2" />
             </button>
           </div>
 
@@ -203,15 +203,15 @@ export const AIFeaturesShowcase = ({ onFeatureClick }) => {
   return (
     <div className="py-16 sm:py-20 lg:py-28 xl:py-32 bg-gradient-to-b from-white to-gray-50">
       <div className="w-full max-w-[2000px] mx-auto px-4 sm:px-6 lg:px-10 xl:px-16">
-        <div className="text-center mb-12 sm:mb-16 lg:mb-20">
-          <div className="inline-flex items-center px-5 py-2.5 bg-indigo-100 rounded-full mb-5">
-            <Sparkles className="w-5 h-5 text-indigo-600 mr-2" />
-            <span className="text-base lg:text-lg font-bold text-indigo-600">AI Powered Features</span>
+        <div className="text-center mb-12 sm:mb-16 lg:mb-20 xl:mb-24">
+          <div className="inline-flex items-center px-5 py-2.5 lg:px-6 lg:py-3 bg-indigo-100 rounded-full mb-5 lg:mb-6">
+            <Sparkles className="w-5 h-5 lg:w-6 lg:h-6 text-indigo-600 mr-2" />
+            <span className="text-base lg:text-lg xl:text-xl font-bold text-indigo-600">AI Powered Features</span>
           </div>
-          <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold text-gray-900 mb-5">
+          <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-extrabold text-gray-900 mb-5 lg:mb-6">
             Mesterséges intelligencia a <span className="bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">szolgálatodban</span>
           </h2>
-          <p className="text-lg sm:text-xl lg:text-2xl text-gray-600 max-w-4xl mx-auto">
+          <p className="text-lg sm:text-xl lg:text-2xl xl:text-3xl text-gray-600 max-w-5xl mx-auto leading-relaxed">
             Használd ki a legmodernebb AI technológiát a tökéletes bútor megtalálásához
           </p>
         </div>
@@ -230,34 +230,34 @@ export const AIFeaturesShowcase = ({ onFeatureClick }) => {
             >
               <div className={`absolute inset-0 bg-gradient-to-br ${feature.color} rounded-3xl blur-xl opacity-50 group-hover:opacity-75 transition-opacity`} />
               
-              <div className="relative bg-white rounded-3xl p-7 sm:p-8 lg:p-10 shadow-xl border border-gray-100 hover:shadow-2xl transition-all">
+              <div className="relative bg-white rounded-3xl p-7 sm:p-8 lg:p-10 xl:p-12 shadow-xl border border-gray-100 hover:shadow-2xl transition-all">
                 {/* Icon */}
-                <div className={`w-16 h-16 sm:w-18 sm:h-18 lg:w-20 lg:h-20 bg-gradient-to-br ${feature.color} rounded-2xl flex items-center justify-center mb-6 lg:mb-8 transform group-hover:rotate-6 transition-transform`}>
-                  <feature.icon className="w-8 h-8 sm:w-9 sm:h-9 lg:w-10 lg:h-10 text-white" />
+                <div className={`w-16 h-16 sm:w-18 sm:h-18 lg:w-20 lg:h-20 xl:w-24 xl:h-24 bg-gradient-to-br ${feature.color} rounded-2xl xl:rounded-3xl flex items-center justify-center mb-6 lg:mb-8 transform group-hover:rotate-6 transition-transform`}>
+                  <feature.icon className="w-8 h-8 sm:w-9 sm:h-9 lg:w-10 lg:h-10 xl:w-12 xl:h-12 text-white" />
                 </div>
 
                 {/* Title */}
-                <h3 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900 mb-3 lg:mb-4">{feature.title}</h3>
+                <h3 className="text-xl sm:text-2xl lg:text-3xl xl:text-4xl font-bold text-gray-900 mb-3 lg:mb-4">{feature.title}</h3>
 
                 {/* Description */}
-                <p className="text-base sm:text-lg lg:text-xl text-gray-600 mb-6 lg:mb-8 leading-relaxed">{feature.description}</p>
+                <p className="text-base sm:text-lg lg:text-xl xl:text-2xl text-gray-600 mb-6 lg:mb-8 leading-relaxed">{feature.description}</p>
 
                 {/* Demo Flow */}
-                <div className="bg-gray-50 rounded-xl p-4 lg:p-5 mb-5 lg:mb-6">
+                <div className="bg-gray-50 rounded-xl lg:rounded-2xl p-4 lg:p-5 xl:p-6 mb-5 lg:mb-6">
                   <DemoFlow steps={feature.demoSteps} />
                 </div>
 
                 {/* Stats */}
                 <div className="flex items-center justify-between">
-                  <span className="text-base lg:text-lg font-bold text-indigo-600">{feature.stats}</span>
-                  <ArrowRight className={`w-5 h-5 lg:w-6 lg:h-6 text-gray-400 group-hover:text-indigo-600 group-hover:translate-x-1 transition-all`} />
+                  <span className="text-base lg:text-lg xl:text-xl font-bold text-indigo-600">{feature.stats}</span>
+                  <ArrowRight className={`w-5 h-5 lg:w-6 lg:h-6 xl:w-7 xl:h-7 text-gray-400 group-hover:text-indigo-600 group-hover:translate-x-1 transition-all`} />
                 </div>
 
                 {/* Active Indicator */}
                 {activeFeature === idx && (
-                  <div className="absolute -top-2 -right-2 lg:-top-3 lg:-right-3">
-                    <div className="w-7 h-7 lg:w-8 lg:h-8 bg-green-500 rounded-full border-4 border-white animate-pulse flex items-center justify-center">
-                      <Check className="w-3.5 h-3.5 lg:w-4 lg:h-4 text-white" />
+                  <div className="absolute -top-2 -right-2 lg:-top-3 lg:-right-3 xl:-top-4 xl:-right-4">
+                    <div className="w-7 h-7 lg:w-8 lg:h-8 xl:w-10 xl:h-10 bg-green-500 rounded-full border-4 border-white animate-pulse flex items-center justify-center">
+                      <Check className="w-3.5 h-3.5 lg:w-4 lg:h-4 xl:w-5 xl:h-5 text-white" />
                     </div>
                   </div>
                 )}

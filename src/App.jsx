@@ -548,10 +548,10 @@ const Navbar = ({ activeTab, setActiveTab, wishlistCount, productCount = 0, onSc
                 href={WEBSHOP_DOMAIN} 
                 target="_blank" 
                 rel="noopener noreferrer" 
-                className="hidden md:flex items-center gap-2 bg-gradient-to-r from-gray-900 to-gray-800 hover:from-gray-800 hover:to-gray-700 text-white px-5 lg:px-6 py-2.5 lg:py-3 rounded-xl text-sm lg:text-base font-bold transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+                className="hidden md:flex items-center gap-2 bg-gradient-to-r from-gray-900 to-gray-800 hover:from-gray-800 hover:to-gray-700 text-white px-5 lg:px-7 xl:px-8 py-2.5 lg:py-3.5 xl:py-4 rounded-xl lg:rounded-2xl text-sm lg:text-base xl:text-lg font-bold transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
               >
                 <span>Fő webshop</span>
-                <ExternalLink className="w-4 h-4" />
+                <ExternalLink className="w-4 h-4 lg:w-5 lg:h-5" />
               </a>
             </div>
           </div>
@@ -893,34 +893,34 @@ const Hero = ({ onExplore }) => (
 );
 
 const Features = () => (
-    <div className="bg-white py-16 border-b border-gray-100">
+    <div className="bg-white py-16 lg:py-20 xl:py-24 border-b border-gray-100">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                <div className="flex items-center p-6 bg-gray-50 rounded-2xl">
-                    <div className="w-12 h-12 bg-blue-100 text-blue-600 rounded-xl flex items-center justify-center mr-4">
-                        <Truck className="w-6 h-6" />
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8 xl:gap-10">
+                <div className="flex items-center p-6 lg:p-8 xl:p-10 bg-gray-50 rounded-2xl xl:rounded-3xl">
+                    <div className="w-14 h-14 lg:w-16 lg:h-16 xl:w-20 xl:h-20 bg-blue-100 text-blue-600 rounded-xl lg:rounded-2xl flex items-center justify-center mr-4 lg:mr-5 xl:mr-6 shrink-0">
+                        <Truck className="w-7 h-7 lg:w-8 lg:h-8 xl:w-10 xl:h-10" />
                     </div>
                     <div>
-                        <h3 className="font-bold text-gray-900">Ingyenes Szállítás</h3>
-                        <p className="text-sm text-gray-500">Minden 50.000 Ft feletti rendelésnél.</p>
+                        <h3 className="font-bold text-gray-900 text-lg lg:text-xl xl:text-2xl">Ingyenes Szállítás</h3>
+                        <p className="text-sm lg:text-base xl:text-lg text-gray-500 mt-1">Minden 50.000 Ft feletti rendelésnél.</p>
                     </div>
                 </div>
-                <div className="flex items-center p-6 bg-gray-50 rounded-2xl">
-                    <div className="w-12 h-12 bg-green-100 text-green-600 rounded-xl flex items-center justify-center mr-4">
-                        <ShieldCheck className="w-6 h-6" />
+                <div className="flex items-center p-6 lg:p-8 xl:p-10 bg-gray-50 rounded-2xl xl:rounded-3xl">
+                    <div className="w-14 h-14 lg:w-16 lg:h-16 xl:w-20 xl:h-20 bg-green-100 text-green-600 rounded-xl lg:rounded-2xl flex items-center justify-center mr-4 lg:mr-5 xl:mr-6 shrink-0">
+                        <ShieldCheck className="w-7 h-7 lg:w-8 lg:h-8 xl:w-10 xl:h-10" />
                     </div>
                     <div>
-                        <h3 className="font-bold text-gray-900">Garancia</h3>
-                        <p className="text-sm text-gray-500">Minden bútorra teljes körű garancia.</p>
+                        <h3 className="font-bold text-gray-900 text-lg lg:text-xl xl:text-2xl">Garancia</h3>
+                        <p className="text-sm lg:text-base xl:text-lg text-gray-500 mt-1">Minden bútorra teljes körű garancia.</p>
                     </div>
                 </div>
-                <div className="flex items-center p-6 bg-gray-50 rounded-2xl">
-                    <div className="w-12 h-12 bg-purple-100 text-purple-600 rounded-xl flex items-center justify-center mr-4">
-                        <Phone className="w-6 h-6" />
+                <div className="flex items-center p-6 lg:p-8 xl:p-10 bg-gray-50 rounded-2xl xl:rounded-3xl">
+                    <div className="w-14 h-14 lg:w-16 lg:h-16 xl:w-20 xl:h-20 bg-purple-100 text-purple-600 rounded-xl lg:rounded-2xl flex items-center justify-center mr-4 lg:mr-5 xl:mr-6 shrink-0">
+                        <Phone className="w-7 h-7 lg:w-8 lg:h-8 xl:w-10 xl:h-10" />
                     </div>
                     <div>
-                        <h3 className="font-bold text-gray-900">Ügyfélszolgálat</h3>
-                        <p className="text-sm text-gray-500">Szakértő segítség minden nap.</p>
+                        <h3 className="font-bold text-gray-900 text-lg lg:text-xl xl:text-2xl">Ügyfélszolgálat</h3>
+                        <p className="text-sm lg:text-base xl:text-lg text-gray-500 mt-1">Szakértő segítség minden nap.</p>
                     </div>
                 </div>
             </div>
@@ -929,27 +929,27 @@ const Features = () => (
 );
 
 const Testimonials = () => (
-    <div className="bg-gray-50 py-16 mb-16">
+    <div className="bg-gray-50 py-16 lg:py-20 xl:py-24 mb-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-            <h2 className="text-3xl font-bold text-gray-900 mb-12">Mit mondanak rólunk?</h2>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <h2 className="text-3xl lg:text-4xl xl:text-5xl font-bold text-gray-900 mb-12 lg:mb-16">Mit mondanak rólunk?</h2>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8 xl:gap-10">
                 {[
                     { name: "Kovács Anna", text: "Az AI segítségével találtam meg a kanapét, ami pont illik a függönyhöz.", role: "Lakberendező" },
                     { name: "Nagy Péter", text: "Gyors szállítás, és a minőség is kiváló. A képkereső funkció nagyon hasznos.", role: "Vásárló" },
                     { name: "Szabó Éva", text: "Végre egy webshop, ahol nem kell órákig görgetni. Az asszisztens azonnal segített.", role: "Vásárló" }
                 ].map((t, i) => (
-                    <div key={i} className="bg-white p-8 rounded-2xl shadow-sm hover:shadow-md transition-shadow text-left">
-                        <div className="flex text-yellow-400 mb-4">
-                            {[...Array(5)].map((_, i) => <Star key={i} className="w-4 h-4 fill-current" />)}
+                    <div key={i} className="bg-white p-8 lg:p-10 xl:p-12 rounded-2xl xl:rounded-3xl shadow-sm hover:shadow-lg transition-shadow text-left">
+                        <div className="flex text-yellow-400 mb-4 lg:mb-5">
+                            {[...Array(5)].map((_, i) => <Star key={i} className="w-5 h-5 lg:w-6 lg:h-6 fill-current" />)}
                         </div>
-                        <p className="text-gray-600 mb-6 italic">"{t.text}"</p>
+                        <p className="text-gray-600 mb-6 lg:mb-8 italic text-base lg:text-lg xl:text-xl leading-relaxed">"{t.text}"</p>
                         <div className="flex items-center">
-                            <div className="w-10 h-10 bg-indigo-100 rounded-full flex items-center justify-center font-bold text-indigo-600 mr-3">
+                            <div className="w-12 h-12 lg:w-14 lg:h-14 xl:w-16 xl:h-16 bg-indigo-100 rounded-full flex items-center justify-center font-bold text-indigo-600 text-lg lg:text-xl xl:text-2xl mr-4">
                                 {t.name.charAt(0)}
                             </div>
                             <div>
-                                <h4 className="font-bold text-gray-900">{t.name}</h4>
-                                <p className="text-xs text-gray-500">{t.role}</p>
+                                <h4 className="font-bold text-gray-900 text-base lg:text-lg xl:text-xl">{t.name}</h4>
+                                <p className="text-sm lg:text-base text-gray-500">{t.role}</p>
                             </div>
                         </div>
                     </div>
@@ -1617,13 +1617,13 @@ const App = () => {
             ) : (
             <section id="products-section" className="container-app section-padding">
                 {/* Sticky products header - PROMINENT */}
-                <div className="sticky top-16 sm:top-20 z-40 mx-0 sm:-mx-4 lg:-mx-8 px-3 sm:px-4 lg:px-8 py-3 sm:py-4 lg:py-5 mb-3 sm:mb-4 lg:mb-8 bg-white/95 backdrop-blur-md border-b border-gray-100 shadow-sm">
+                <div className="sticky top-16 sm:top-20 z-40 mx-0 sm:-mx-4 lg:-mx-8 xl:-mx-10 px-3 sm:px-4 lg:px-8 xl:px-10 py-3 sm:py-4 lg:py-5 xl:py-6 mb-3 sm:mb-4 lg:mb-8 bg-white/95 backdrop-blur-md border-b border-gray-100 shadow-sm">
                   <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-4 lg:gap-6">
                     {/* Title & Count */}
-                    <div className="flex items-baseline gap-2 sm:gap-3">
-                      <h2 className="text-xl sm:text-2xl lg:text-3xl xl:text-4xl font-bold text-gray-900">Termékek</h2>
+                    <div className="flex items-baseline gap-2 sm:gap-3 lg:gap-4">
+                      <h2 className="text-xl sm:text-2xl lg:text-3xl xl:text-4xl 2xl:text-5xl font-bold text-gray-900">Termékek</h2>
                       {!isLoadingUnas && (
-                        <span className="text-sm sm:text-base lg:text-lg xl:text-xl text-gray-500">
+                        <span className="text-sm sm:text-base lg:text-lg xl:text-xl 2xl:text-2xl text-gray-500">
                           <span className="font-semibold text-indigo-600">{products.length.toLocaleString('hu-HU')}</span> db
                         </span>
                       )}
@@ -1631,7 +1631,7 @@ const App = () => {
                     
                     {/* Search & Filters */}
                     <div className="w-full sm:w-auto flex items-center gap-2 sm:gap-3 lg:gap-4">
-                      <div className="flex-1 sm:flex-initial sm:w-64 lg:w-80 xl:w-96">
+                      <div className="flex-1 sm:flex-initial sm:w-64 lg:w-80 xl:w-[420px] 2xl:w-[500px]">
                         <SmartSearch 
                           products={products}
                           onSearch={handleServerSearch}
@@ -1645,7 +1645,7 @@ const App = () => {
                       />
                       <select 
                         onChange={(e) => setSortOption(e.target.value)} 
-                        className="hidden sm:block px-4 lg:px-5 py-3 min-h-[48px] text-sm sm:text-base lg:text-lg border-2 border-gray-200 rounded-xl bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 outline-none transition-all cursor-pointer"
+                        className="hidden sm:block px-4 lg:px-5 xl:px-6 py-3 lg:py-3.5 xl:py-4 min-h-[48px] lg:min-h-[52px] xl:min-h-[56px] text-sm sm:text-base lg:text-lg xl:text-xl border-2 border-gray-200 rounded-xl lg:rounded-2xl bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 outline-none transition-all cursor-pointer font-medium"
                         aria-label="Rendezés"
                       >
                         <option value="default">Rendezés</option>
