@@ -92,21 +92,21 @@ const CategoryHero = ({ category, productCount, theme, onBack }) => {
       {/* Gradient Overlay */}
       <div className={`absolute inset-0 bg-gradient-to-br ${theme.gradient}`} />
       
-      {/* Content */}
-      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 lg:py-16 text-white">
+      {/* Content - LARGER on desktop */}
+      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 xl:px-12 py-10 sm:py-16 lg:py-24 xl:py-32 text-white">
         <Breadcrumb category={category} onBack={onBack} />
         
-        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-6">
-          <div className="w-16 h-16 sm:w-20 sm:h-20 bg-white/20 backdrop-blur rounded-2xl flex items-center justify-center animate-scale-in">
-            <CategoryIcon className="w-8 h-8 sm:w-10 sm:h-10 text-white" />
+        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-5 sm:gap-8 lg:gap-10">
+          <div className="w-18 h-18 sm:w-24 sm:h-24 lg:w-32 lg:h-32 bg-white/20 backdrop-blur rounded-2xl lg:rounded-3xl flex items-center justify-center animate-scale-in">
+            <CategoryIcon className="w-9 h-9 sm:w-12 sm:h-12 lg:w-16 lg:h-16 text-white" />
           </div>
           
           <div className="animate-fade-in-up">
-            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-2">
+            <h1 className="text-3xl sm:text-5xl lg:text-6xl xl:text-7xl font-bold mb-2 lg:mb-4">
               {category}
             </h1>
-            <p className="text-white/80 text-base sm:text-lg">
-              <span className="font-semibold text-white">{productCount.toLocaleString('hu-HU')}</span> termék
+            <p className="text-white/80 text-base sm:text-lg lg:text-xl xl:text-2xl">
+              <span className="font-semibold text-white">{productCount.toLocaleString('hu-HU')}</span> termék ebben a kategóriában
             </p>
           </div>
         </div>
@@ -635,7 +635,7 @@ const CategoryPage = ({
     <div className="min-h-screen bg-gray-50">
       <CategoryHero category={category} productCount={products.length} theme={theme} onBack={onBack} />
       
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 xl:px-12 py-8 sm:py-10 lg:py-14">
         <AIBanner category={category} onAskAI={onAskAI} />
         <PriceStats products={products} />
         <FeaturedProducts products={products} onProductClick={onProductClick} onWishlistToggle={onWishlistToggle} wishlist={wishlist} />
