@@ -1,10 +1,11 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { MessageCircle, X, Send, Loader2, Sparkles, User, Bot, AlertCircle } from 'lucide-react';
+import React, { useState, useRef, useEffect, useMemo } from 'react';
+import { MessageCircle, X, Send, Loader2, Sparkles, User, Bot, AlertCircle, ExternalLink, ShoppingCart } from 'lucide-react';
 import { generateText } from '../../services/geminiService';
 
 /**
  * AIChatAssistant - Lebegő AI Chat Gemini-val
  * Természetes nyelvű termékkeresés és ajánlások
+ * Teljes termék adatbázis ismeretével
  */
 const AIChatAssistant = ({ products }) => {
   const [isOpen, setIsOpen] = useState(false);
@@ -19,6 +20,67 @@ const AIChatAssistant = ({ products }) => {
   const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
+
+  // Termék statisztikák előkészítése az AI számára
+  const productStats = useMemo(() => {
+    if (!products || products.length === 0) return null;
+
+    // Kategóriák összegyűjtése
+    const categories = {};
+    let minPrice = Infinity;
+    let maxPrice = 0;
+
+    products.forEach(p => {
+      const cat = p.category || 'Egyéb';
+      categories[cat] = (categories[cat] || 0) + 1;
+      const price = p.salePrice || p.price || 0;
+      if (price > 0) {
+        minPrice = Math.min(minPrice, price);
+        maxPrice = Math.max(maxPrice, price);
+      }
+    });
+
+    // Top kategóriák
+    const topCategories = Object.entries(categories)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 15)
+      .map(([name, count]) => `${name} (${count} db)`)
+      .join(', ');
+
+    return {
+      total: products.length,
+      categories: topCategories,
+      priceRange: `${minPrice.toLocaleString('hu-HU')} - ${maxPrice.toLocaleString('hu-HU')} Ft`
+    };
+  }, [products]);
+
+  // Keresés a termékek között
+  const searchProducts = (query) => {
+    if (!products || products.length === 0) return [];
+    
+    const terms = query.toLowerCase().split(/\s+/).filter(t => t.length > 2);
+    if (terms.length === 0) return [];
+
+    const scored = products.map(p => {
+      const name = (p.name || '').toLowerCase();
+      const category = (p.category || '').toLowerCase();
+      const desc = (p.description || '').toLowerCase();
+      
+      let score = 0;
+      terms.forEach(term => {
+        if (name.includes(term)) score += 10;
+        if (category.includes(term)) score += 5;
+        if (desc.includes(term)) score += 2;
+      });
+      return { product: p, score };
+    });
+
+    return scored
+      .filter(s => s.score > 0)
+      .sort((a, b) => b.score - a.score)
+      .slice(0, 8)
+      .map(s => s.product);
+  };
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -50,40 +112,51 @@ const AIChatAssistant = ({ products }) => {
     setIsLoading(true);
 
     try {
-      // Termék kontextus előkészítése
-      const productSample = products && products.length > 0 
-        ? products.slice(0, 15).map(p => 
-            `${p.name} - ${(p.salePrice || p.price || 0).toLocaleString('hu-HU')} Ft`
+      // Releváns termékek keresése a kérdés alapján
+      const relevantProducts = searchProducts(userMessage);
+      
+      // Termék lista formázása az AI számára
+      const productList = relevantProducts.length > 0
+        ? relevantProducts.map(p => 
+            `• ${p.name} - ${(p.salePrice || p.price || 0).toLocaleString('hu-HU')} Ft (${p.category || 'Egyéb'})`
           ).join('\n')
-        : 'Nincs elérhető termék.';
+        : 'Nincs pontos találat erre a keresésre.';
 
-      const prompt = `Te egy kedves és segítőkész AI bútor tanácsadó vagy a Marketly webshopban.
+      const prompt = `Te egy kedves és segítőkész AI bútor tanácsadó vagy a Marketly bútorwebshopban.
+
+WEBSHOP ADATOK:
+- Összes termék: ${productStats?.total || 0} db
+- Fő kategóriák: ${productStats?.categories || 'nincs adat'}
+- Ársáv: ${productStats?.priceRange || 'változó'}
 
 FELHASZNÁLÓ KÉRDÉSE: "${userMessage}"
 
-NÉHÁNY TERMÉK A KÍNÁLATBÓL:
-${productSample}
+RELEVÁNS TERMÉKEK A KERESÉS ALAPJÁN:
+${productList}
 
-SZABÁLYOK:
-- Válaszolj magyarul, 2-3 mondatban
-- Legyél barátságos és segítőkész
-- Ha bútort keres, adj konkrét javaslatokat
-- Ha nem értesz valamit, kérdezz vissza`;
+FELADATOD:
+1. Válaszolj magyarul, barátságosan, tegezve
+2. Ha vannak releváns termékek, ajánld őket konkrétan (név, ár)
+3. Ha nincs találat, javasolj hasonló kategóriákat vagy kérdezz rá a preferenciákra
+4. Maximum 3-4 mondat
+5. Legyél hasznos és szakértő`;
 
-      const result = await generateText(prompt, { temperature: 0.8, maxTokens: 300 });
+      const result = await generateText(prompt, { temperature: 0.7, maxTokens: 400 });
 
       if (result.success && result.text) {
         setMessages(prev => [...prev, {
           role: 'assistant',
           content: result.text,
-          timestamp: new Date()
+          timestamp: new Date(),
+          products: relevantProducts.slice(0, 4) // Csatold a termékeket
         }]);
       } else {
         // Fallback válasz API hiba esetén
         setMessages(prev => [...prev, {
           role: 'assistant',
-          content: getFallbackResponse(userMessage),
+          content: getFallbackResponse(userMessage, relevantProducts),
           timestamp: new Date(),
+          products: relevantProducts.slice(0, 4),
           isError: true
         }]);
       }
@@ -102,23 +175,27 @@ SZABÁLYOK:
   };
 
   // Fallback válaszok ha az API nem működik
-  const getFallbackResponse = (message) => {
+  const getFallbackResponse = (message, foundProducts) => {
+    if (foundProducts && foundProducts.length > 0) {
+      return `Találtam ${foundProducts.length} terméket a keresésed alapján! Nézd meg őket lent.`;
+    }
+
     const msg = message.toLowerCase();
     
     if (msg.includes('kanapé') || msg.includes('ülőgarnitúra')) {
-      return 'Kanapékat keresel? Nézd meg a "Kanapék" kategóriát a termékek között! Modern és klasszikus stílusokban is találsz remek darabokat.';
+      return 'Kanapékat keresel? Nézd meg a "Kanapék" kategóriát! Modern és klasszikus stílusokban is találsz remek darabokat.';
     }
     if (msg.includes('asztal') || msg.includes('étkező')) {
       return 'Asztalokat keresel? Az étkezőasztalok és dohányzóasztalok széles választékát találod a termékek között!';
     }
     if (msg.includes('szék') || msg.includes('fotel')) {
-      return 'Ülőalkalmatosságot keresel? Böngéssz a székek és fotelek között, biztosan találsz megfelelőt!';
+      return 'Ülőalkalmatosságot keresel? Böngéssz a székek és fotelek között!';
     }
     if (msg.includes('ágy') || msg.includes('matrac') || msg.includes('hálószoba')) {
       return 'Hálószobai bútorokat keresel? Az ágyak és matracok kategóriában remek választékot találsz!';
     }
     
-    return 'Szívesen segítek! Böngéssz a termékek között, vagy írd le pontosabban, milyen bútort keresel (pl. kanapé, asztal, szék).';
+    return 'Szívesen segítek! Írd le pontosabban, milyen bútort keresel (pl. "modern kanapé 200 ezer alatt").';
   };
 
   const handleKeyPress = (e) => {
@@ -134,6 +211,10 @@ SZABÁLYOK:
     'Skandináv stílusú bútorok',
     'Mit ajánlasz 150 ezer alatt?'
   ];
+
+  const formatPrice = (price) => {
+    return (price || 0).toLocaleString('hu-HU') + ' Ft';
+  };
 
   return (
     <>
@@ -163,7 +244,7 @@ SZABÁLYOK:
       {isOpen && (
         <div className="
           fixed bottom-[calc(1rem+44px)] md:bottom-6 right-2 md:right-6 z-50
-          w-[calc(100vw-1rem)] md:w-96 h-[calc(100vh-120px)] md:h-[550px] max-h-[80vh]
+          w-[calc(100vw-1rem)] md:w-[420px] h-[calc(100vh-120px)] md:h-[600px] max-h-[85vh]
           bg-white rounded-2xl shadow-2xl
           flex flex-col overflow-hidden border border-gray-200
         ">
@@ -177,7 +258,7 @@ SZABÁLYOK:
                 <h3 className="text-white font-semibold">AI Asszisztens</h3>
                 <p className="text-white/80 text-xs flex items-center gap-1">
                   <span className="w-2 h-2 bg-green-400 rounded-full" />
-                  Gemini AI
+                  {productStats ? `${productStats.total.toLocaleString()} termék` : 'Online'}
                 </p>
               </div>
             </div>
@@ -193,43 +274,68 @@ SZABÁLYOK:
           {/* Üzenetek */}
           <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-gray-50">
             {messages.map((message, index) => (
-              <div
-                key={index}
-                className={`flex gap-3 ${message.role === 'user' ? 'flex-row-reverse' : ''}`}
-              >
-                <div className={`
-                  w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0
-                  ${message.role === 'user' 
-                    ? 'bg-indigo-500' 
-                    : message.isError 
-                      ? 'bg-orange-500'
-                      : 'bg-gradient-to-br from-indigo-500 to-purple-600'
-                  }
-                `}>
-                  {message.role === 'user' ? (
-                    <User className="w-5 h-5 text-white" />
-                  ) : message.isError ? (
-                    <AlertCircle className="w-5 h-5 text-white" />
-                  ) : (
-                    <Bot className="w-5 h-5 text-white" />
-                  )}
+              <div key={index}>
+                <div className={`flex gap-3 ${message.role === 'user' ? 'flex-row-reverse' : ''}`}>
+                  <div className={`
+                    w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0
+                    ${message.role === 'user' 
+                      ? 'bg-indigo-500' 
+                      : message.isError 
+                        ? 'bg-orange-500'
+                        : 'bg-gradient-to-br from-indigo-500 to-purple-600'
+                    }
+                  `}>
+                    {message.role === 'user' ? (
+                      <User className="w-5 h-5 text-white" />
+                    ) : message.isError ? (
+                      <AlertCircle className="w-5 h-5 text-white" />
+                    ) : (
+                      <Bot className="w-5 h-5 text-white" />
+                    )}
+                  </div>
+
+                  <div className={`
+                    max-w-[85%] rounded-2xl p-3
+                    ${message.role === 'user'
+                      ? 'bg-indigo-500 text-white rounded-tr-sm'
+                      : 'bg-white text-gray-800 rounded-tl-sm shadow-sm'
+                    }
+                  `}>
+                    <p className="text-sm whitespace-pre-wrap leading-relaxed">{message.content}</p>
+                    <p className={`text-xs mt-1 ${message.role === 'user' ? 'text-indigo-200' : 'text-gray-400'}`}>
+                      {message.timestamp.toLocaleTimeString('hu-HU', { 
+                        hour: '2-digit', 
+                        minute: '2-digit' 
+                      })}
+                    </p>
+                  </div>
                 </div>
 
-                <div className={`
-                  max-w-[80%] rounded-2xl p-3
-                  ${message.role === 'user'
-                    ? 'bg-indigo-500 text-white rounded-tr-sm'
-                    : 'bg-white text-gray-800 rounded-tl-sm shadow-sm'
-                  }
-                `}>
-                  <p className="text-sm whitespace-pre-wrap">{message.content}</p>
-                  <p className={`text-xs mt-1 ${message.role === 'user' ? 'text-indigo-200' : 'text-gray-400'}`}>
-                    {message.timestamp.toLocaleTimeString('hu-HU', { 
-                      hour: '2-digit', 
-                      minute: '2-digit' 
-                    })}
-                  </p>
-                </div>
+                {/* Termék kártyák megjelenítése */}
+                {message.products && message.products.length > 0 && (
+                  <div className="ml-11 mt-2 grid grid-cols-2 gap-2">
+                    {message.products.map((product) => (
+                      <a
+                        key={product.id}
+                        href={`/termek/${product.id}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="bg-white rounded-xl p-2 shadow-sm border border-gray-100 hover:shadow-md hover:border-indigo-200 transition-all group"
+                      >
+                        <div className="aspect-square bg-gray-50 rounded-lg mb-2 overflow-hidden">
+                          <img
+                            src={product.images?.[0] || product.image || 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100"><rect fill="%23f3f4f6" width="100" height="100"/></svg>'}
+                            alt={product.name}
+                            className="w-full h-full object-contain group-hover:scale-105 transition-transform"
+                            onError={(e) => { e.target.src = 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100"><rect fill="%23f3f4f6" width="100" height="100"/></svg>'; }}
+                          />
+                        </div>
+                        <p className="text-xs font-medium text-gray-800 truncate">{product.name}</p>
+                        <p className="text-xs font-bold text-indigo-600">{formatPrice(product.salePrice || product.price)}</p>
+                      </a>
+                    ))}
+                  </div>
+                )}
               </div>
             ))}
 
@@ -241,7 +347,7 @@ SZABÁLYOK:
                 <div className="bg-white rounded-2xl rounded-tl-sm p-3 shadow-sm">
                   <div className="flex items-center gap-2">
                     <Loader2 className="w-5 h-5 text-indigo-500 animate-spin" />
-                    <span className="text-sm text-gray-500">Gondolkodom...</span>
+                    <span className="text-sm text-gray-500">Keresem a termékeket...</span>
                   </div>
                 </div>
               </div>

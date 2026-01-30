@@ -83,28 +83,63 @@ Válaszolj 4-5 mondatban, barátságos hangnemben, tegezve.`;
   };
 
   const findMatchingProducts = (analysisText) => {
-    const text = analysisText.toLowerCase();
-    const searchTerms = ['kanapé', 'fotel', 'asztal', 'szék', 'ágy', 'polc', 'szekrény', 'komód', 'lámpa', 'tükör'];
-    const styleTerms = ['modern', 'skandináv', 'minimalista', 'klasszikus', 'vintage', 'indusztriális'];
+    if (!products || products.length === 0) return [];
     
-    return products
-      .filter(p => {
-        const productText = `${p.name || ''} ${p.category || ''}`.toLowerCase();
-        
-        // Bútor típus egyezés
-        const hasTermMatch = searchTerms.some(term => 
-          text.includes(term) && productText.includes(term)
-        );
-        
-        // Stílus egyezés
-        const hasStyleMatch = styleTerms.some(style =>
-          text.includes(style) && productText.includes(style)
-        );
-        
-        return hasTermMatch || hasStyleMatch;
-      })
-      .sort(() => Math.random() - 0.5)
-      .slice(0, 6);
+    const text = analysisText.toLowerCase();
+    
+    // Bútor típusok és szinonimák
+    const furnitureTerms = {
+      'kanapé': ['kanapé', 'ülőgarnitúra', 'sofa', 'couch'],
+      'fotel': ['fotel', 'szék', 'armchair'],
+      'asztal': ['asztal', 'dohányzó', 'étkező', 'íróasztal', 'table'],
+      'ágy': ['ágy', 'franciaágy', 'matrac', 'bed'],
+      'szekrény': ['szekrény', 'gardrób', 'komód', 'tálaló', 'polc'],
+      'lámpa': ['lámpa', 'világítás', 'led'],
+    };
+    
+    // Stílusok
+    const styleTerms = ['modern', 'skandináv', 'minimalista', 'klasszikus', 'vintage', 'indusztriális', 'rusztikus', 'elegáns', 'letisztult'];
+    
+    // Színek
+    const colorTerms = ['fehér', 'fekete', 'szürke', 'barna', 'bézs', 'kék', 'zöld', 'natúr', 'fa'];
+    
+    // Kereső kifejezések kinyerése az elemzésből
+    const foundTerms = [];
+    
+    Object.entries(furnitureTerms).forEach(([key, synonyms]) => {
+      if (synonyms.some(s => text.includes(s))) {
+        foundTerms.push(...synonyms);
+      }
+    });
+    
+    styleTerms.forEach(s => { if (text.includes(s)) foundTerms.push(s); });
+    colorTerms.forEach(c => { if (text.includes(c)) foundTerms.push(c); });
+    
+    if (foundTerms.length === 0) {
+      // Ha nincs konkrét találat, adj random népszerű termékeket
+      return products
+        .filter(p => p.price > 0)
+        .sort(() => Math.random() - 0.5)
+        .slice(0, 6);
+    }
+    
+    // Termékek pontozása
+    const scored = products.map(p => {
+      const productText = `${p.name || ''} ${p.category || ''} ${p.description || ''}`.toLowerCase();
+      let score = 0;
+      
+      foundTerms.forEach(term => {
+        if (productText.includes(term)) score += 5;
+      });
+      
+      return { product: p, score };
+    });
+    
+    return scored
+      .filter(s => s.score > 0)
+      .sort((a, b) => b.score - a.score)
+      .slice(0, 8)
+      .map(s => s.product);
   };
 
   const resetAnalysis = () => {
