@@ -42,53 +42,53 @@ export const AIShowcase = () => {
   ];
 
   return (
-    <div className="relative bg-gradient-to-br from-purple-600 via-indigo-600 to-blue-600 text-white py-12 sm:py-16 lg:py-24 xl:py-28 mb-8 sm:mb-12 lg:mb-16 overflow-hidden">
+    <div className="relative bg-gradient-to-br from-purple-600 via-indigo-600 to-blue-600 text-white py-8 sm:py-12 lg:py-20 xl:py-24 mb-6 sm:mb-10 lg:mb-14 overflow-hidden">
       {/* Animated background */}
       <div className="absolute inset-0 opacity-20">
-        <div className="absolute top-0 left-0 w-72 sm:w-96 lg:w-[500px] h-72 sm:h-96 lg:h-[500px] bg-white rounded-full mix-blend-multiply filter blur-3xl animate-blob"></div>
-        <div className="absolute top-0 right-0 w-72 sm:w-96 lg:w-[500px] h-72 sm:h-96 lg:h-[500px] bg-purple-300 rounded-full mix-blend-multiply filter blur-3xl animate-blob animation-delay-2000"></div>
-        <div className="absolute bottom-0 left-1/2 w-72 sm:w-96 lg:w-[500px] h-72 sm:h-96 lg:h-[500px] bg-indigo-300 rounded-full mix-blend-multiply filter blur-3xl animate-blob animation-delay-4000"></div>
+        <div className="absolute top-0 left-0 w-48 sm:w-72 lg:w-96 h-48 sm:h-72 lg:h-96 bg-white rounded-full mix-blend-multiply filter blur-3xl animate-blob"></div>
+        <div className="absolute top-0 right-0 w-48 sm:w-72 lg:w-96 h-48 sm:h-72 lg:h-96 bg-purple-300 rounded-full mix-blend-multiply filter blur-3xl animate-blob animation-delay-2000"></div>
+        <div className="absolute bottom-0 left-1/2 w-48 sm:w-72 lg:w-96 h-48 sm:h-72 lg:h-96 bg-indigo-300 rounded-full mix-blend-multiply filter blur-3xl animate-blob animation-delay-4000"></div>
       </div>
 
       <button 
         onClick={handleDismiss}
-        className="absolute top-3 right-3 sm:top-4 sm:right-4 lg:top-6 lg:right-6 w-8 h-8 lg:w-10 lg:h-10 xl:w-12 xl:h-12 flex items-center justify-center text-white/70 hover:text-white hover:bg-white/10 rounded-full transition-colors z-10"
+        className="absolute top-2 right-2 sm:top-3 sm:right-3 lg:top-5 lg:right-5 w-8 h-8 lg:w-10 lg:h-10 flex items-center justify-center text-white/70 hover:text-white hover:bg-white/10 rounded-full transition-colors z-10"
         aria-label="Bezárás"
       >
-        <X className="w-5 h-5 lg:w-6 lg:h-6 xl:w-7 xl:h-7" />
+        <X className="w-5 h-5 lg:w-6 lg:h-6" />
       </button>
 
-      <div className="w-full max-w-[2000px] mx-auto px-4 sm:px-6 lg:px-10 xl:px-16 relative z-10">
-        <div className="text-center mb-8 sm:mb-12 lg:mb-16 xl:mb-20">
-          <div className="inline-flex items-center px-4 py-2 lg:px-6 lg:py-3 bg-white/20 backdrop-blur-sm rounded-full text-sm lg:text-base xl:text-lg font-bold mb-4 sm:mb-6 lg:mb-8">
-            <Sparkles className="w-4 h-4 lg:w-5 lg:h-5 xl:w-6 xl:h-6 mr-2 lg:mr-3 animate-pulse" />
+      <div className="w-full max-w-[2000px] mx-auto px-3 sm:px-6 lg:px-10 xl:px-16 relative z-10">
+        <div className="text-center mb-6 sm:mb-10 lg:mb-14">
+          <div className="inline-flex items-center px-3 py-1.5 sm:px-4 sm:py-2 lg:px-5 lg:py-2.5 bg-white/20 backdrop-blur-sm rounded-full text-xs sm:text-sm lg:text-base font-bold mb-3 sm:mb-4 lg:mb-6">
+            <Sparkles className="w-4 h-4 lg:w-5 lg:h-5 mr-2 animate-pulse" />
             AI-Powered Shopping
           </div>
-          <h2 className="text-2xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-extrabold mb-3 sm:mb-4 lg:mb-6">
+          <h2 className="text-xl sm:text-3xl lg:text-4xl xl:text-5xl font-extrabold mb-2 sm:mb-3 lg:mb-4">
             Találd meg az ideális bútort <br className="hidden md:block" />
             <span className="text-yellow-300">mesterséges intelligenciával</span>
           </h2>
-          <p className="text-base sm:text-xl lg:text-2xl xl:text-3xl text-white/90 max-w-4xl mx-auto leading-relaxed">
+          <p className="text-sm sm:text-base lg:text-xl xl:text-2xl text-white/90 max-w-3xl mx-auto leading-relaxed">
             Használd az AI asszisztensünket, képkeresőnket és szobatervezőnket.
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6 lg:gap-8 xl:gap-10">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-4 lg:gap-6 xl:gap-8">
           {features.map((item, idx) => (
             <div 
               key={idx}
-              className="bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl lg:rounded-3xl p-5 sm:p-6 lg:p-8 xl:p-10 hover:bg-white/20 transition-all transform hover:-translate-y-1 cursor-pointer group"
+              className="bg-white/10 backdrop-blur-md border border-white/20 rounded-xl sm:rounded-2xl lg:rounded-3xl p-4 sm:p-5 lg:p-6 xl:p-8 hover:bg-white/20 transition-all transform hover:-translate-y-1 cursor-pointer group"
             >
               <GradientIcon 
                 icon={item.icon} 
                 gradient={item.gradient}
                 size="lg"
-                className="mb-4 lg:mb-6 group-hover:scale-110 transition-transform"
+                className="mb-3 sm:mb-4 lg:mb-5 group-hover:scale-110 transition-transform"
               />
-              <h3 className="text-lg sm:text-xl lg:text-2xl xl:text-3xl font-bold mb-2 lg:mb-3">{item.title}</h3>
-              <p className="text-white/80 text-sm sm:text-base lg:text-lg xl:text-xl mb-4 lg:mb-6 leading-relaxed">{item.description}</p>
-              <div className="flex items-center text-sm lg:text-base xl:text-lg font-bold text-yellow-300 group-hover:text-yellow-200 transition-colors">
-                Próbáld ki <ArrowRight className="w-4 h-4 lg:w-5 lg:h-5 xl:w-6 xl:h-6 ml-1 lg:ml-2 group-hover:translate-x-1 transition-transform" />
+              <h3 className="text-base sm:text-lg lg:text-xl xl:text-2xl font-bold mb-1.5 sm:mb-2 lg:mb-3">{item.title}</h3>
+              <p className="text-white/80 text-xs sm:text-sm lg:text-base xl:text-lg mb-3 sm:mb-4 lg:mb-5 leading-relaxed">{item.description}</p>
+              <div className="flex items-center text-xs sm:text-sm lg:text-base font-bold text-yellow-300 group-hover:text-yellow-200 transition-colors">
+                Próbáld ki <ArrowRight className="w-4 h-4 lg:w-5 lg:h-5 ml-1 group-hover:translate-x-1 transition-transform" />
               </div>
             </div>
           ))}

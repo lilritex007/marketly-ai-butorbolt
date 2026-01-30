@@ -47,50 +47,50 @@ export const SocialProof = () => {
   };
 
   return (
-    <div className="py-16 sm:py-20 lg:py-28 xl:py-32 bg-white">
-      <div className="w-full max-w-[2000px] mx-auto px-4 sm:px-6 lg:px-10 xl:px-16">
-        {/* Happy Customers Counter - UNIFIED */}
-        <div className="text-center mb-12 sm:mb-16 lg:mb-20 xl:mb-24">
-          <div className="inline-flex items-center gap-2 lg:gap-3 mb-4 lg:mb-6 px-4 py-2 lg:px-5 lg:py-2.5 bg-indigo-50 rounded-full">
-            <Users className="w-5 h-5 lg:w-6 lg:h-6 xl:w-7 xl:h-7 text-indigo-600" />
-            <span className="text-sm lg:text-base xl:text-lg font-bold text-indigo-600 uppercase tracking-wide">
+    <div className="py-10 sm:py-14 lg:py-20 xl:py-24 bg-white">
+      <div className="w-full max-w-[2000px] mx-auto px-3 sm:px-6 lg:px-10 xl:px-16">
+        {/* Happy Customers Counter - MOBILE-FRIENDLY */}
+        <div className="text-center mb-8 sm:mb-12 lg:mb-16 xl:mb-20">
+          <div className="inline-flex items-center gap-2 mb-3 sm:mb-4 lg:mb-6 px-3 py-1.5 sm:px-4 sm:py-2 lg:px-5 lg:py-2.5 bg-indigo-50 rounded-full">
+            <Users className="w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6 text-indigo-600" />
+            <span className="text-xs sm:text-sm lg:text-base font-bold text-indigo-600 uppercase tracking-wide">
               Elégedett Vásárlóink
             </span>
           </div>
-          <div className="text-5xl sm:text-6xl lg:text-7xl xl:text-8xl 2xl:text-9xl font-extrabold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent mb-4 lg:mb-6">
+          <div className="text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-extrabold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent mb-2 sm:mb-3 lg:mb-4">
             {count.toLocaleString('hu-HU')}+
           </div>
-          <p className="text-lg sm:text-xl lg:text-2xl xl:text-3xl text-gray-600">
+          <p className="text-sm sm:text-base lg:text-xl xl:text-2xl text-gray-600">
             csatlakozott már a Marketly közösséghez
           </p>
         </div>
 
-        {/* Trust Badges - UNIFIED */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6 lg:gap-8 xl:gap-10">
+        {/* Trust Badges - COMPACT on mobile */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 lg:gap-6 xl:gap-8">
           {trustBadges.map((badge, idx) => (
             <div
               key={idx}
-              className="group relative bg-gradient-to-br from-gray-50 to-white rounded-2xl lg:rounded-3xl p-5 sm:p-6 lg:p-8 xl:p-10 border border-gray-100 hover:border-indigo-200 hover:shadow-xl transition-all transform hover:-translate-y-1"
+              className="group relative bg-gradient-to-br from-gray-50 to-white rounded-xl sm:rounded-2xl lg:rounded-3xl p-3 sm:p-4 lg:p-6 xl:p-8 border border-gray-100 hover:border-indigo-200 hover:shadow-xl transition-all transform hover:-translate-y-1"
             >
-              <div className={`w-12 h-12 sm:w-14 sm:h-14 lg:w-16 lg:h-16 xl:w-20 xl:h-20 bg-gradient-to-br ${colorClasses[badge.color]} rounded-xl lg:rounded-2xl flex items-center justify-center mb-3 sm:mb-4 lg:mb-5 xl:mb-6 transform group-hover:rotate-6 transition-transform`}>
-                <badge.icon className="w-6 h-6 sm:w-7 sm:h-7 lg:w-8 lg:h-8 xl:w-10 xl:h-10 text-white" />
+              <div className={`w-10 h-10 sm:w-12 sm:h-12 lg:w-14 lg:h-14 xl:w-16 xl:h-16 bg-gradient-to-br ${colorClasses[badge.color]} rounded-lg sm:rounded-xl lg:rounded-2xl flex items-center justify-center mb-2 sm:mb-3 lg:mb-4 transform group-hover:rotate-6 transition-transform`}>
+                <badge.icon className="w-5 h-5 sm:w-6 sm:h-6 lg:w-7 lg:h-7 xl:w-8 xl:h-8 text-white" />
               </div>
-              <h3 className="font-bold text-gray-900 text-base sm:text-lg lg:text-xl xl:text-2xl">{badge.label}</h3>
+              <h3 className="font-bold text-gray-900 text-xs sm:text-sm lg:text-base xl:text-lg leading-tight">{badge.label}</h3>
             </div>
           ))}
         </div>
 
-        {/* Star Rating - UNIFIED */}
-        <div className="mt-12 sm:mt-16 lg:mt-20 xl:mt-24 text-center">
-          <div className="flex justify-center items-center gap-1.5 sm:gap-2 lg:gap-3 mb-4 lg:mb-6">
+        {/* Star Rating - COMPACT on mobile */}
+        <div className="mt-8 sm:mt-12 lg:mt-16 xl:mt-20 text-center">
+          <div className="flex justify-center items-center gap-1 sm:gap-1.5 lg:gap-2 mb-2 sm:mb-3 lg:mb-4">
             {[...Array(5)].map((_, i) => (
-              <Star key={i} className="w-7 h-7 sm:w-8 sm:h-8 lg:w-10 lg:h-10 xl:w-12 xl:h-12 fill-yellow-400 text-yellow-400" />
+              <Star key={i} className="w-5 h-5 sm:w-6 sm:h-6 lg:w-8 lg:h-8 xl:w-10 xl:h-10 fill-yellow-400 text-yellow-400" />
             ))}
           </div>
-          <p className="text-xl sm:text-2xl lg:text-3xl xl:text-4xl font-bold text-gray-900 mb-2 lg:mb-3">
+          <p className="text-base sm:text-lg lg:text-2xl xl:text-3xl font-bold text-gray-900 mb-1 sm:mb-2">
             4.9 / 5.0 átlagos értékelés
           </p>
-          <p className="text-base sm:text-lg lg:text-xl xl:text-2xl text-gray-600">
+          <p className="text-sm sm:text-base lg:text-lg xl:text-xl text-gray-600">
             12,487 valós véleményből
           </p>
         </div>
@@ -100,37 +100,86 @@ export const SocialProof = () => {
 };
 
 /**
- * Live Product Showcase with Auto-Carousel
+ * Live Product Showcase with Swipeable Carousel
+ * - Random products on each load
+ * - Touch swipe support for mobile
+ * - Arrow navigation for desktop
+ * - Compact mobile cards
  */
 export const LiveShowcase = ({ products = [], onProductClick }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isHovered, setIsHovered] = useState(false);
+  const [touchStart, setTouchStart] = useState(null);
+  const [touchEnd, setTouchEnd] = useState(null);
+  const carouselRef = React.useRef(null);
 
-  // Sample products if none provided
-  const showcaseProducts = products.length > 0 ? products.slice(0, 6) : [
-    { id: 1, name: 'Skandináv Kanapé', price: 189900, image: 'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?auto=format&fit=crop&q=80&w=800', tag: 'Bestseller' },
-    { id: 2, name: 'Modern Fotel', price: 125000, image: 'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?auto=format&fit=crop&q=80&w=800', tag: 'ÚJ' },
-    { id: 3, name: 'Tölgy Asztal', price: 95000, image: 'https://images.unsplash.com/photo-1532372320572-cda25653a26d?auto=format&fit=crop&q=80&w=800', tag: 'Akció' }
-  ];
+  // Randomize and select products on each render
+  const showcaseProducts = React.useMemo(() => {
+    const tags = ['Bestseller', 'ÚJ', 'Akció', 'Népszerű', 'Top 10', 'Limitált'];
+    if (products.length > 0) {
+      // Shuffle and pick 6 random products
+      const shuffled = [...products].sort(() => Math.random() - 0.5);
+      return shuffled.slice(0, 6).map((p, i) => ({
+        ...p,
+        tag: tags[i % tags.length],
+        image: p.images?.[0] || p.image
+      }));
+    }
+    return [
+      { id: 1, name: 'Skandináv Kanapé', price: 189900, image: 'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?auto=format&fit=crop&q=80&w=800', tag: 'Bestseller' },
+      { id: 2, name: 'Modern Fotel', price: 125000, image: 'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?auto=format&fit=crop&q=80&w=800', tag: 'ÚJ' },
+      { id: 3, name: 'Tölgy Asztal', price: 95000, image: 'https://images.unsplash.com/photo-1532372320572-cda25653a26d?auto=format&fit=crop&q=80&w=800', tag: 'Akció' }
+    ];
+  }, [products]);
 
+  // Auto-rotate
   useEffect(() => {
     if (!isHovered) {
       const interval = setInterval(() => {
         setCurrentIndex((prev) => (prev + 1) % showcaseProducts.length);
-      }, 3000);
+      }, 4000);
       return () => clearInterval(interval);
     }
   }, [isHovered, showcaseProducts.length]);
 
+  // Touch handlers for swipe
+  const minSwipeDistance = 50;
+  
+  const onTouchStart = (e) => {
+    setTouchEnd(null);
+    setTouchStart(e.targetTouches[0].clientX);
+  };
+
+  const onTouchMove = (e) => {
+    setTouchEnd(e.targetTouches[0].clientX);
+  };
+
+  const onTouchEnd = () => {
+    if (!touchStart || !touchEnd) return;
+    const distance = touchStart - touchEnd;
+    const isLeftSwipe = distance > minSwipeDistance;
+    const isRightSwipe = distance < -minSwipeDistance;
+    
+    if (isLeftSwipe) {
+      setCurrentIndex((prev) => (prev + 1) % showcaseProducts.length);
+    }
+    if (isRightSwipe) {
+      setCurrentIndex((prev) => (prev - 1 + showcaseProducts.length) % showcaseProducts.length);
+    }
+  };
+
+  const goNext = () => setCurrentIndex((prev) => (prev + 1) % showcaseProducts.length);
+  const goPrev = () => setCurrentIndex((prev) => (prev - 1 + showcaseProducts.length) % showcaseProducts.length);
+
   return (
-    <div className="py-16 sm:py-20 lg:py-28 xl:py-32 bg-gradient-to-b from-gray-50 to-white overflow-hidden">
-      <div className="w-full max-w-[2000px] mx-auto px-4 sm:px-6 lg:px-10 xl:px-16">
-        <div className="text-center mb-12 sm:mb-16 lg:mb-20">
-          <div className="inline-flex items-center px-4 py-2 lg:px-5 lg:py-2.5 xl:px-6 xl:py-3 bg-green-100 rounded-full mb-4 lg:mb-6">
-            <TrendingUp className="w-4 h-4 lg:w-5 lg:h-5 xl:w-6 xl:h-6 text-green-600 mr-2 lg:mr-3" />
-            <span className="text-sm lg:text-base xl:text-lg font-bold text-green-600">Most népszerű</span>
+    <div className="py-10 sm:py-16 lg:py-24 xl:py-28 bg-gradient-to-b from-gray-50 to-white overflow-hidden">
+      <div className="w-full max-w-[2000px] mx-auto px-3 sm:px-6 lg:px-10 xl:px-16">
+        <div className="text-center mb-6 sm:mb-10 lg:mb-14">
+          <div className="inline-flex items-center px-3 py-1.5 sm:px-4 sm:py-2 lg:px-5 lg:py-2.5 bg-green-100 rounded-full mb-3 sm:mb-4 lg:mb-6">
+            <TrendingUp className="w-4 h-4 lg:w-5 lg:h-5 text-green-600 mr-2" />
+            <span className="text-xs sm:text-sm lg:text-base font-bold text-green-600">Most népszerű</span>
           </div>
-          <h2 className="text-3xl sm:text-4xl lg:text-5xl xl:text-6xl 2xl:text-7xl font-extrabold text-gray-900 mb-4">
+          <h2 className="text-2xl sm:text-3xl lg:text-4xl xl:text-5xl font-extrabold text-gray-900">
             Vásárlóink <span className="bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">kedvencei</span>
           </h2>
         </div>
@@ -140,70 +189,85 @@ export const LiveShowcase = ({ products = [], onProductClick }) => {
           onMouseEnter={() => setIsHovered(true)}
           onMouseLeave={() => setIsHovered(false)}
         >
-          {/* Carousel Container */}
-          <div className="flex gap-4 sm:gap-6 lg:gap-8 transition-transform duration-700 ease-in-out"
-            style={{ transform: `translateX(-${currentIndex * (100 / showcaseProducts.length)}%)` }}
+          {/* Navigation Arrows - Desktop */}
+          <button 
+            onClick={goPrev}
+            className="hidden md:flex absolute left-0 top-1/2 -translate-y-1/2 -translate-x-2 lg:-translate-x-4 z-20 w-10 h-10 lg:w-12 lg:h-12 xl:w-14 xl:h-14 bg-white shadow-lg rounded-full items-center justify-center text-gray-600 hover:text-indigo-600 hover:shadow-xl transition-all"
           >
-            {showcaseProducts.map((product, idx) => (
-              <div
-                key={product.id}
-                onClick={() => onProductClick?.(product)}
-                className="flex-shrink-0 w-full sm:w-1/2 lg:w-1/3 cursor-pointer group"
-              >
-                <div className="relative bg-white rounded-2xl lg:rounded-3xl overflow-hidden shadow-lg hover:shadow-2xl transition-all transform hover:-translate-y-2">
-                  {/* Tag */}
-                  <div className="absolute top-3 sm:top-4 lg:top-5 left-3 sm:left-4 lg:left-5 z-10">
-                    <span className="px-3 py-1.5 lg:px-4 lg:py-2 bg-gradient-to-r from-red-500 to-pink-500 text-white text-xs lg:text-sm xl:text-base font-bold rounded-full">
-                      {product.tag || 'Népszerű'}
-                    </span>
-                  </div>
+            <ArrowRight className="w-5 h-5 lg:w-6 lg:h-6 rotate-180" />
+          </button>
+          <button 
+            onClick={goNext}
+            className="hidden md:flex absolute right-0 top-1/2 -translate-y-1/2 translate-x-2 lg:translate-x-4 z-20 w-10 h-10 lg:w-12 lg:h-12 xl:w-14 xl:h-14 bg-white shadow-lg rounded-full items-center justify-center text-gray-600 hover:text-indigo-600 hover:shadow-xl transition-all"
+          >
+            <ArrowRight className="w-5 h-5 lg:w-6 lg:h-6" />
+          </button>
 
-                  {/* Image */}
-                  <div className="relative h-64 sm:h-72 lg:h-80 xl:h-96 overflow-hidden bg-gray-100">
-                    <img
-                      src={product.image || product.images?.[0]}
-                      alt={product.name}
-                      className="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-700"
-                      onError={(e) => {e.target.src = PLACEHOLDER_IMAGE}}
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity">
-                      <div className="absolute bottom-4 lg:bottom-6 left-4 lg:left-6 right-4 lg:right-6 flex items-center justify-between">
-                        <span className="text-white font-bold text-sm lg:text-base xl:text-lg flex items-center gap-2 lg:gap-3">
-                          <Eye className="w-4 h-4 lg:w-5 lg:h-5 xl:w-6 xl:h-6" />
-                          Részletek
+          {/* Carousel Container - Swipeable */}
+          <div 
+            ref={carouselRef}
+            className="overflow-hidden px-1"
+            onTouchStart={onTouchStart}
+            onTouchMove={onTouchMove}
+            onTouchEnd={onTouchEnd}
+          >
+            <div 
+              className="flex gap-3 sm:gap-4 lg:gap-6 transition-transform duration-500 ease-out"
+              style={{ transform: `translateX(-${currentIndex * (100 / 3)}%)` }}
+            >
+              {showcaseProducts.map((product, idx) => (
+                <div
+                  key={product.id || idx}
+                  onClick={() => onProductClick?.(product)}
+                  className="flex-shrink-0 w-[85%] sm:w-[48%] lg:w-[32%] cursor-pointer group"
+                >
+                  <div className="relative bg-white rounded-xl sm:rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-all transform hover:-translate-y-1">
+                    {/* Tag */}
+                    <div className="absolute top-2 sm:top-3 left-2 sm:left-3 z-10">
+                      <span className="px-2 py-1 sm:px-3 sm:py-1.5 bg-gradient-to-r from-red-500 to-pink-500 text-white text-[10px] sm:text-xs lg:text-sm font-bold rounded-full">
+                        {product.tag || 'Népszerű'}
+                      </span>
+                    </div>
+
+                    {/* Image - COMPACT on mobile */}
+                    <div className="relative h-40 sm:h-48 lg:h-56 xl:h-64 overflow-hidden bg-gray-100">
+                      <img
+                        src={product.image || product.images?.[0]}
+                        alt={product.name}
+                        className="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-500"
+                        onError={(e) => {e.target.src = PLACEHOLDER_IMAGE}}
+                        loading="lazy"
+                      />
+                    </div>
+
+                    {/* Content - COMPACT */}
+                    <div className="p-3 sm:p-4 lg:p-5">
+                      <h3 className="text-sm sm:text-base lg:text-lg xl:text-xl font-bold text-gray-900 mb-1.5 sm:mb-2 truncate group-hover:text-indigo-600 transition-colors">
+                        {product.name}
+                      </h3>
+                      <div className="flex items-center justify-between">
+                        <span className="text-base sm:text-lg lg:text-xl xl:text-2xl font-extrabold text-indigo-600">
+                          {new Intl.NumberFormat('hu-HU', { style: 'currency', currency: 'HUF', maximumFractionDigits: 0 }).format(product.price)}
                         </span>
-                        <ArrowRight className="w-5 h-5 lg:w-6 lg:h-6 xl:w-7 xl:h-7 text-white transform group-hover:translate-x-1 transition-transform" />
+                        <button className="w-8 h-8 sm:w-9 sm:h-9 lg:w-10 lg:h-10 bg-indigo-600 text-white rounded-full flex items-center justify-center hover:bg-indigo-700 transition-all">
+                          <Eye className="w-4 h-4 sm:w-5 sm:h-5" />
+                        </button>
                       </div>
                     </div>
                   </div>
-
-                  {/* Content */}
-                  <div className="p-4 sm:p-5 lg:p-6 xl:p-8">
-                    <h3 className="text-lg sm:text-xl lg:text-2xl xl:text-3xl font-bold text-gray-900 mb-2 lg:mb-3 group-hover:text-indigo-600 transition-colors">
-                      {product.name}
-                    </h3>
-                    <div className="flex items-center justify-between">
-                      <span className="text-xl sm:text-2xl lg:text-3xl xl:text-4xl font-extrabold text-indigo-600">
-                        {new Intl.NumberFormat('hu-HU', { style: 'currency', currency: 'HUF', maximumFractionDigits: 0 }).format(product.price)}
-                      </span>
-                      <button className="w-10 h-10 lg:w-12 lg:h-12 xl:w-14 xl:h-14 bg-indigo-600 text-white rounded-full lg:rounded-2xl flex items-center justify-center hover:bg-indigo-700 transform group-hover:rotate-90 transition-all">
-                        <ShoppingBag className="w-5 h-5 lg:w-6 lg:h-6 xl:w-7 xl:h-7" />
-                      </button>
-                    </div>
-                  </div>
                 </div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
 
           {/* Progress Dots */}
-          <div className="flex justify-center gap-2 lg:gap-3 mt-8 lg:mt-10 xl:mt-12">
+          <div className="flex justify-center gap-2 mt-4 sm:mt-6 lg:mt-8">
             {showcaseProducts.map((_, idx) => (
               <button
                 key={idx}
                 onClick={() => setCurrentIndex(idx)}
-                className={`h-2 lg:h-3 rounded-full transition-all ${
-                  currentIndex === idx ? 'w-10 lg:w-14 xl:w-16 bg-indigo-600' : 'w-2 lg:w-3 bg-gray-300 hover:bg-gray-400'
+                className={`h-2 rounded-full transition-all ${
+                  currentIndex === idx ? 'w-6 sm:w-8 lg:w-10 bg-indigo-600' : 'w-2 bg-gray-300 hover:bg-gray-400'
                 }`}
               />
             ))}
@@ -219,56 +283,56 @@ export const LiveShowcase = ({ products = [], onProductClick }) => {
  */
 export const InteractiveCTA = ({ onGetStarted }) => {
   return (
-    <div className="py-16 sm:py-20 lg:py-28 xl:py-36 bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-600 relative overflow-hidden">
+    <div className="py-10 sm:py-16 lg:py-24 xl:py-28 bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-600 relative overflow-hidden">
       {/* Animated Background */}
       <div className="absolute inset-0 opacity-20">
-        <div className="absolute top-0 left-0 w-72 sm:w-96 lg:w-[500px] h-72 sm:h-96 lg:h-[500px] bg-white rounded-full filter blur-3xl animate-blob" />
-        <div className="absolute top-0 right-0 w-72 sm:w-96 lg:w-[500px] h-72 sm:h-96 lg:h-[500px] bg-yellow-300 rounded-full filter blur-3xl animate-blob animation-delay-2000" />
-        <div className="absolute bottom-0 left-1/2 w-72 sm:w-96 lg:w-[500px] h-72 sm:h-96 lg:h-[500px] bg-pink-300 rounded-full filter blur-3xl animate-blob animation-delay-4000" />
+        <div className="absolute top-0 left-0 w-48 sm:w-72 lg:w-96 h-48 sm:h-72 lg:h-96 bg-white rounded-full filter blur-3xl animate-blob" />
+        <div className="absolute top-0 right-0 w-48 sm:w-72 lg:w-96 h-48 sm:h-72 lg:h-96 bg-yellow-300 rounded-full filter blur-3xl animate-blob animation-delay-2000" />
+        <div className="absolute bottom-0 left-1/2 w-48 sm:w-72 lg:w-96 h-48 sm:h-72 lg:h-96 bg-pink-300 rounded-full filter blur-3xl animate-blob animation-delay-4000" />
       </div>
 
       <div className="relative z-10 w-full max-w-5xl xl:max-w-6xl mx-auto px-4 sm:px-6 lg:px-10 xl:px-16 text-center">
-        <div className="inline-flex items-center px-4 py-2 lg:px-6 lg:py-3 bg-white/20 backdrop-blur-sm rounded-full mb-6 lg:mb-8">
-          <Sparkles className="w-4 h-4 lg:w-5 lg:h-5 xl:w-6 xl:h-6 text-white mr-2 lg:mr-3 animate-pulse" />
-          <span className="text-sm lg:text-base xl:text-lg font-bold text-white">Kezdd el ma!</span>
+        <div className="inline-flex items-center px-3 py-1.5 sm:px-4 sm:py-2 lg:px-5 lg:py-2.5 bg-white/20 backdrop-blur-sm rounded-full mb-4 sm:mb-6 lg:mb-8">
+          <Sparkles className="w-4 h-4 lg:w-5 lg:h-5 text-white mr-2 animate-pulse" />
+          <span className="text-xs sm:text-sm lg:text-base font-bold text-white">Kezdd el ma!</span>
         </div>
 
-        <h2 className="text-3xl sm:text-4xl lg:text-5xl xl:text-6xl 2xl:text-7xl font-extrabold text-white mb-5 lg:mb-8 leading-tight">
+        <h2 className="text-2xl sm:text-3xl lg:text-4xl xl:text-5xl font-extrabold text-white mb-4 sm:mb-6 lg:mb-8 leading-tight">
           Készen állsz a <br />
           <span className="text-yellow-300">tökéletes bútor</span> megtalálására?
         </h2>
 
-        <p className="text-lg sm:text-xl lg:text-2xl xl:text-3xl text-white/90 mb-10 lg:mb-14 xl:mb-16 max-w-4xl mx-auto leading-relaxed">
+        <p className="text-sm sm:text-base lg:text-xl xl:text-2xl text-white/90 mb-6 sm:mb-8 lg:mb-12 max-w-3xl mx-auto leading-relaxed">
           Csatlakozz 50.000+ elégedett vásárlónkhoz és fedezd fel, hogyan könnyítheti meg az AI a bútorvásárlást
         </p>
 
-        <div className="flex flex-col sm:flex-row gap-4 lg:gap-6 justify-center items-center">
+        <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 lg:gap-5 justify-center items-center">
           <button
             onClick={onGetStarted}
-            className="group px-6 py-3.5 sm:px-8 sm:py-4 lg:px-10 lg:py-5 xl:px-12 xl:py-6 bg-white text-indigo-600 rounded-xl lg:rounded-2xl font-bold text-base sm:text-lg lg:text-xl xl:text-2xl shadow-2xl hover:shadow-white/50 transition-all transform hover:-translate-y-1 flex items-center"
+            className="group w-full sm:w-auto px-5 py-3 sm:px-7 sm:py-3.5 lg:px-8 lg:py-4 bg-white text-indigo-600 rounded-xl font-bold text-sm sm:text-base lg:text-lg shadow-xl hover:shadow-white/50 transition-all transform hover:-translate-y-1 flex items-center justify-center"
           >
             Kezdjük el most
-            <ArrowRight className="w-5 h-5 lg:w-6 lg:h-6 xl:w-7 xl:h-7 ml-2 lg:ml-3 group-hover:translate-x-1 transition-transform" />
+            <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6 ml-2 group-hover:translate-x-1 transition-transform" />
           </button>
 
-          <button className="px-6 py-3.5 sm:px-8 sm:py-4 lg:px-10 lg:py-5 xl:px-12 xl:py-6 bg-white/10 backdrop-blur-sm text-white rounded-xl lg:rounded-2xl font-bold text-base sm:text-lg lg:text-xl xl:text-2xl border-2 border-white/30 hover:bg-white/20 transition-all">
+          <button className="w-full sm:w-auto px-5 py-3 sm:px-7 sm:py-3.5 lg:px-8 lg:py-4 bg-white/10 backdrop-blur-sm text-white rounded-xl font-bold text-sm sm:text-base lg:text-lg border-2 border-white/30 hover:bg-white/20 transition-all">
             Tudj meg többet
           </button>
         </div>
 
-        {/* Trust indicators - UNIFIED */}
-        <div className="mt-10 lg:mt-14 xl:mt-16 flex flex-wrap justify-center gap-6 sm:gap-8 lg:gap-10 xl:gap-12 text-white/80">
-          <div className="flex items-center gap-2 lg:gap-3">
-            <Check className="w-5 h-5 lg:w-6 lg:h-6 xl:w-7 xl:h-7" />
-            <span className="text-sm lg:text-base xl:text-lg font-medium">Ingyenes kipróbálás</span>
+        {/* Trust indicators - COMPACT on mobile */}
+        <div className="mt-6 sm:mt-8 lg:mt-12 flex flex-wrap justify-center gap-4 sm:gap-6 lg:gap-8 text-white/80">
+          <div className="flex items-center gap-1.5 sm:gap-2">
+            <Check className="w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6" />
+            <span className="text-xs sm:text-sm lg:text-base font-medium">Ingyenes kipróbálás</span>
           </div>
-          <div className="flex items-center gap-2 lg:gap-3">
-            <Check className="w-5 h-5 lg:w-6 lg:h-6 xl:w-7 xl:h-7" />
-            <span className="text-sm lg:text-base xl:text-lg font-medium">Nincs kártyaigény</span>
+          <div className="flex items-center gap-1.5 sm:gap-2">
+            <Check className="w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6" />
+            <span className="text-xs sm:text-sm lg:text-base font-medium">Nincs kártyaigény</span>
           </div>
-          <div className="flex items-center gap-2 lg:gap-3">
-            <Check className="w-5 h-5 lg:w-6 lg:h-6 xl:w-7 xl:h-7" />
-            <span className="text-sm lg:text-base xl:text-lg font-medium">24/7 support</span>
+          <div className="flex items-center gap-1.5 sm:gap-2">
+            <Check className="w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6" />
+            <span className="text-xs sm:text-sm lg:text-base font-medium">24/7 support</span>
           </div>
         </div>
       </div>
