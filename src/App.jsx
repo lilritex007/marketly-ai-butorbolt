@@ -1006,16 +1006,16 @@ const App = () => {
             />
             
             {/* AI Super Features Row */}
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-              <div className="text-center mb-8">
-                <div className="inline-flex items-center gap-2 px-4 py-2 bg-indigo-100 rounded-full mb-4">
-                  <Bot className="w-5 h-5 text-indigo-600" />
-                  <span className="text-sm font-bold text-indigo-600">AI Powered</span>
+            <div className="w-full max-w-[2000px] mx-auto px-4 sm:px-6 lg:px-10 xl:px-16 py-12 sm:py-16 lg:py-20">
+              <div className="text-center mb-10 lg:mb-14">
+                <div className="inline-flex items-center gap-2.5 px-5 py-2.5 bg-indigo-100 rounded-full mb-5">
+                  <Bot className="w-5 h-5 lg:w-6 lg:h-6 text-indigo-600" />
+                  <span className="text-base lg:text-lg font-bold text-indigo-600">AI Powered</span>
                 </div>
-                <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-3">
+                <h2 className="text-2xl sm:text-3xl lg:text-4xl xl:text-5xl font-bold text-gray-900 mb-4">
                   AI Szuper Funkciók
                 </h2>
-                <p className="text-gray-600">
+                <p className="text-lg lg:text-xl text-gray-600">
                   Próbáld ki a legújabb AI technológiáinkat!
                 </p>
               </div>
@@ -1107,21 +1107,21 @@ const App = () => {
             ) : (
             <section id="products-section" className="container-app section-padding">
                 {/* Sticky products header */}
-                <div className="sticky top-16 sm:top-20 z-40 -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8 py-3 sm:py-4 mb-4 sm:mb-6 bg-white/95 backdrop-blur-md border-b border-gray-100 shadow-sm">
-                  <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-4">
+                <div className="sticky top-16 sm:top-20 z-40 -mx-4 sm:-mx-6 lg:-mx-8 xl:-mx-10 px-4 sm:px-6 lg:px-8 xl:px-10 py-3 sm:py-4 lg:py-5 mb-4 sm:mb-6 lg:mb-8 bg-white/95 backdrop-blur-md border-b border-gray-100 shadow-sm">
+                  <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-4 lg:gap-6">
                     {/* Title & Count */}
-                    <div className="flex items-baseline gap-2 sm:gap-3">
-                      <h2 className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-900">Termékek</h2>
+                    <div className="flex items-baseline gap-2 sm:gap-3 lg:gap-4">
+                      <h2 className="text-xl sm:text-2xl lg:text-3xl xl:text-4xl font-bold text-gray-900">Termékek</h2>
                       {!isLoadingUnas && (
-                        <span className="text-[13px] sm:text-sm lg:text-base text-gray-500">
+                        <span className="text-sm sm:text-base lg:text-lg xl:text-xl text-gray-500">
                           <span className="font-semibold text-indigo-600">{products.length.toLocaleString('hu-HU')}</span> db
                         </span>
                       )}
                     </div>
                     
                     {/* Search & Filters */}
-                    <div className="w-full sm:w-auto flex items-center gap-2 sm:gap-3">
-                      <div className="flex-1 sm:flex-initial sm:w-56 lg:w-72">
+                    <div className="w-full sm:w-auto flex items-center gap-2 sm:gap-3 lg:gap-4">
+                      <div className="flex-1 sm:flex-initial sm:w-64 lg:w-80 xl:w-96">
                         <SmartSearch 
                           products={products}
                           onSearch={handleServerSearch}
@@ -1135,7 +1135,7 @@ const App = () => {
                       />
                       <select 
                         onChange={(e) => setSortOption(e.target.value)} 
-                        className="hidden sm:block px-3 lg:px-4 py-2.5 min-h-[44px] text-[13px] sm:text-sm lg:text-[15px] border-2 border-gray-200 rounded-xl bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 outline-none transition-all cursor-pointer"
+                        className="hidden sm:block px-4 lg:px-5 py-3 min-h-[48px] text-sm sm:text-base lg:text-lg border-2 border-gray-200 rounded-xl bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 outline-none transition-all cursor-pointer"
                         aria-label="Rendezés"
                       >
                         <option value="default">Rendezés</option>
@@ -1225,23 +1225,23 @@ const App = () => {
                 
                 {/* Load More Button */}
                 {!isLoadingUnas && !unasError && displayedProducts.length > 0 && (
-                  <div className="py-6 sm:py-8 lg:py-10 flex flex-col items-center gap-3">
+                  <div className="py-8 sm:py-10 lg:py-14 flex flex-col items-center gap-4">
                     {hasMoreToShow ? (
                       <button
                         onClick={handleLoadMore}
-                        className="px-5 sm:px-6 lg:px-8 py-3 sm:py-3.5 min-h-[44px] bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-semibold rounded-xl lg:rounded-2xl
+                        className="px-6 sm:px-8 lg:px-10 py-3.5 sm:py-4 lg:py-5 min-h-[48px] lg:min-h-[56px] bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-semibold rounded-xl lg:rounded-2xl
                                    hover:from-indigo-700 hover:to-purple-700 transition-all duration-200
                                    shadow-lg hover:shadow-xl active:scale-[0.98]
-                                   flex items-center gap-2 sm:gap-3 text-[14px] sm:text-[15px] lg:text-base"
+                                   flex items-center gap-3 sm:gap-4 text-base sm:text-lg lg:text-xl"
                       >
                         <span>Több termék</span>
-                        <span className="px-2 sm:px-2.5 py-0.5 sm:py-1 bg-white/20 rounded-md sm:rounded-lg text-[12px] sm:text-[13px]">
+                        <span className="px-3 sm:px-3.5 py-1 sm:py-1.5 bg-white/20 rounded-lg text-sm sm:text-base">
                           {displayedProducts.length.toLocaleString('hu-HU')} / {filteredAndSortedProducts.length.toLocaleString('hu-HU')}
                         </span>
                       </button>
                     ) : (
-                      <div className="flex items-center gap-2 text-[13px] sm:text-sm text-gray-400">
-                        <svg className="w-4 h-4 sm:w-5 sm:h-5 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <div className="flex items-center gap-2.5 text-sm sm:text-base lg:text-lg text-gray-400">
+                        <svg className="w-5 h-5 sm:w-6 sm:h-6 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                         </svg>
                         <span>Minden termék ({displayedProducts.length.toLocaleString('hu-HU')} db)</span>
