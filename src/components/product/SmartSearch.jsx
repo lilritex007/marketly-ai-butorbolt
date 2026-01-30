@@ -73,9 +73,9 @@ export const SmartSearch = ({ products, onSearch, onSelectProduct }) => {
 
   return (
     <div ref={searchRef} className="relative w-full">
-      {/* Search Input - 44px minimum, larger on desktop */}
+      {/* Search Input - UNIFIED sizing scale */}
       <div className="relative">
-        <Search className="absolute left-3 sm:left-4 lg:left-5 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5 lg:w-6 lg:h-6 pointer-events-none" />
+        <Search className="absolute left-3 sm:left-4 lg:left-5 xl:left-6 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5 lg:w-6 lg:h-6 xl:w-7 xl:h-7 pointer-events-none" />
         <input
           ref={inputRef}
           type="text"
@@ -87,15 +87,15 @@ export const SmartSearch = ({ products, onSearch, onSelectProduct }) => {
           }}
           onFocus={() => setIsOpen(true)}
           onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
-          className="w-full h-12 sm:h-12 lg:h-14 xl:h-[60px] pl-11 sm:pl-12 lg:pl-14 pr-11 sm:pr-12 lg:pr-14 text-base sm:text-base lg:text-lg xl:text-xl border-2 border-gray-200 rounded-xl lg:rounded-2xl bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 outline-none transition-all placeholder:text-gray-400"
+          className="w-full h-12 sm:h-12 lg:h-14 xl:h-16 2xl:h-[72px] pl-11 sm:pl-12 lg:pl-14 xl:pl-16 pr-11 sm:pr-12 lg:pr-14 xl:pr-16 text-base sm:text-base lg:text-lg xl:text-xl 2xl:text-2xl border-2 border-gray-200 rounded-xl lg:rounded-2xl bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 outline-none transition-all placeholder:text-gray-400 font-medium"
         />
         {query && (
           <button
             onClick={clearSearch}
-            className="absolute right-2 sm:right-3 lg:right-4 top-1/2 -translate-y-1/2 w-9 h-9 lg:w-10 lg:h-10 flex items-center justify-center text-gray-400 hover:text-gray-600 rounded-full hover:bg-gray-100 transition-colors"
+            className="absolute right-2 sm:right-3 lg:right-4 xl:right-5 top-1/2 -translate-y-1/2 w-9 h-9 lg:w-10 lg:h-10 xl:w-12 xl:h-12 flex items-center justify-center text-gray-400 hover:text-gray-600 rounded-full hover:bg-gray-100 transition-colors"
             aria-label="Törlés"
           >
-            <X className="w-5 h-5 lg:w-6 lg:h-6" />
+            <X className="w-5 h-5 lg:w-6 lg:h-6 xl:w-7 xl:h-7" />
           </button>
         )}
       </div>

@@ -324,23 +324,23 @@ const Navbar = ({ activeTab, setActiveTab, wishlistCount, productCount = 0, onSc
 
   return (
     <>
-      {/* Animated Announcement Bar - FULL WIDTH, readable */}
-      <div className="bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 text-white py-2.5 sm:py-3 px-3 sm:px-4 text-center relative overflow-hidden">
+      {/* Animated Announcement Bar - UNIFIED sizing */}
+      <div className="bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 text-white py-2.5 sm:py-3 lg:py-4 px-3 sm:px-4 lg:px-6 text-center relative overflow-hidden">
         <div className="absolute inset-0 opacity-20" style={{backgroundImage: 'radial-gradient(circle, rgba(255,255,255,0.3) 1px, transparent 1px)', backgroundSize: '16px 16px'}} />
         
         {/* Animated message */}
-        <div className="relative flex items-center justify-center gap-2 sm:gap-3">
+        <div className="relative flex items-center justify-center gap-2 sm:gap-3 lg:gap-4">
           <div 
             key={announcementIndex}
-            className="flex items-center gap-2 sm:gap-3 animate-fade-in"
+            className="flex items-center gap-2 sm:gap-3 lg:gap-4 animate-fade-in"
           >
-            <currentAnnouncement.icon className="w-4 h-4 sm:w-5 sm:h-5 shrink-0" />
-            <span className="text-sm sm:text-base font-medium">
+            <currentAnnouncement.icon className="w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6 shrink-0" />
+            <span className="text-sm sm:text-base lg:text-lg xl:text-xl font-medium">
               {currentAnnouncement.text.split(currentAnnouncement.highlight).map((part, i, arr) => (
                 <React.Fragment key={i}>
                   {part}
                   {i < arr.length - 1 && (
-                    <span className="font-bold bg-white/20 px-1.5 py-0.5 rounded mx-1 text-sm sm:text-base">
+                    <span className="font-bold bg-white/20 px-1.5 py-0.5 lg:px-2 lg:py-1 rounded mx-1 text-sm sm:text-base lg:text-lg xl:text-xl">
                       {currentAnnouncement.highlight}
                     </span>
                   )}
@@ -350,12 +350,12 @@ const Navbar = ({ activeTab, setActiveTab, wishlistCount, productCount = 0, onSc
           </div>
           
           {/* Progress dots */}
-          <div className="hidden sm:flex items-center gap-1 ml-4">
+          <div className="hidden sm:flex items-center gap-1 lg:gap-1.5 ml-4 lg:ml-6">
             {ANNOUNCEMENT_MESSAGES.map((_, i) => (
               <div 
                 key={i} 
-                className={`w-1.5 h-1.5 rounded-full transition-all duration-300 ${
-                  i === announcementIndex ? 'bg-white w-4' : 'bg-white/40'
+                className={`w-1.5 h-1.5 lg:w-2 lg:h-2 rounded-full transition-all duration-300 ${
+                  i === announcementIndex ? 'bg-white w-4 lg:w-6' : 'bg-white/40'
                 }`}
               />
             ))}
@@ -372,7 +372,7 @@ const Navbar = ({ activeTab, setActiveTab, wishlistCount, productCount = 0, onSc
         </div>
       )}
 
-      {/* Main navbar - FULL WIDTH, prominent */}
+      {/* Main navbar - UNIFIED sizing */}
       <nav 
         id="mkt-butorbolt-navbar" 
         className={`
@@ -383,56 +383,56 @@ const Navbar = ({ activeTab, setActiveTab, wishlistCount, productCount = 0, onSc
           }
         `}
       >
-        <div className="w-full max-w-[2000px] mx-auto px-3 sm:px-4 lg:px-10 xl:px-16">
-          <div className={`flex justify-between items-center transition-all duration-300 ${isScrolled ? 'h-16 sm:h-18 lg:h-20' : 'h-18 sm:h-20 lg:h-24'}`}>
+        <div className="w-full max-w-[2000px] mx-auto px-3 sm:px-4 lg:px-10 xl:px-16 2xl:px-20">
+          <div className={`flex justify-between items-center transition-all duration-300 ${isScrolled ? 'h-16 sm:h-18 lg:h-20 xl:h-24' : 'h-18 sm:h-20 lg:h-24 xl:h-28'}`}>
             
-            {/* Logo - PROMINENT on all screens */}
+            {/* Logo - UNIFIED scaling */}
             <div className="flex items-center cursor-pointer group" onClick={() => setActiveTab('shop')}>
               <div className={`
                 relative bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 rounded-xl sm:rounded-2xl 
-                flex items-center justify-center text-white mr-3 sm:mr-4
+                flex items-center justify-center text-white mr-3 sm:mr-4 lg:mr-5
                 transform group-hover:scale-105 group-hover:rotate-3 transition-all duration-300 
                 shadow-lg shadow-indigo-300/50 group-hover:shadow-xl
-                ${isScrolled ? 'w-11 h-11 sm:w-12 sm:h-12' : 'w-12 h-12 sm:w-14 sm:h-14'}
+                ${isScrolled ? 'w-11 h-11 sm:w-12 sm:h-12 lg:w-14 lg:h-14 xl:w-16 xl:h-16' : 'w-12 h-12 sm:w-14 sm:h-14 lg:w-16 lg:h-16 xl:w-20 xl:h-20'}
               `}>
-                <Home className={`${isScrolled ? 'w-5 h-5 sm:w-6 sm:h-6' : 'w-6 h-6 sm:w-7 sm:h-7'}`} />
-                <div className="absolute -top-1 -right-1 w-4 h-4 sm:w-5 sm:h-5 bg-green-400 rounded-full border-2 border-white flex items-center justify-center">
-                  <Sparkles className="w-2 h-2 sm:w-2.5 sm:h-2.5 text-white" />
+                <Home className={`${isScrolled ? 'w-5 h-5 sm:w-6 sm:h-6 lg:w-7 lg:h-7 xl:w-8 xl:h-8' : 'w-6 h-6 sm:w-7 sm:h-7 lg:w-8 lg:h-8 xl:w-10 xl:h-10'}`} />
+                <div className="absolute -top-1 -right-1 w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6 xl:w-7 xl:h-7 bg-green-400 rounded-full border-2 border-white flex items-center justify-center">
+                  <Sparkles className="w-2 h-2 sm:w-2.5 sm:h-2.5 lg:w-3 lg:h-3 xl:w-4 xl:h-4 text-white" />
                 </div>
               </div>
               <div className="flex flex-col">
                 <div className="flex items-baseline">
-                  <span className={`font-black text-gray-900 tracking-tight transition-all ${isScrolled ? 'text-xl sm:text-2xl' : 'text-2xl sm:text-3xl'}`}>
+                  <span className={`font-black text-gray-900 tracking-tight transition-all ${isScrolled ? 'text-xl sm:text-2xl lg:text-3xl xl:text-4xl' : 'text-2xl sm:text-3xl lg:text-4xl xl:text-5xl'}`}>
                     Marketly
                   </span>
-                  <span className={`font-black bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent transition-all ${isScrolled ? 'text-xl sm:text-2xl' : 'text-2xl sm:text-3xl'}`}>
+                  <span className={`font-black bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent transition-all ${isScrolled ? 'text-xl sm:text-2xl lg:text-3xl xl:text-4xl' : 'text-2xl sm:text-3xl lg:text-4xl xl:text-5xl'}`}>
                     .AI
                   </span>
                 </div>
-                <span className="text-[10px] sm:text-xs text-gray-500 font-semibold tracking-widest -mt-0.5">
+                <span className="text-[10px] sm:text-xs lg:text-sm xl:text-base text-gray-500 font-semibold tracking-widest -mt-0.5">
                   BÚTORBOLT
                 </span>
               </div>
             </div>
 
-            {/* Desktop Navigation with Mega Menu */}
-            <div className="hidden lg:flex items-center gap-2 xl:gap-3">
+            {/* Desktop Navigation with Mega Menu - UNIFIED */}
+            <div className="hidden lg:flex items-center gap-2 xl:gap-3 2xl:gap-4">
               {/* Categories Dropdown */}
               <div 
                 className="relative"
                 onMouseEnter={() => setShowMegaMenu(true)}
                 onMouseLeave={() => setShowMegaMenu(false)}
               >
-                <button className="flex items-center gap-2 px-4 xl:px-5 py-2.5 xl:py-3 rounded-xl text-gray-600 hover:text-gray-900 hover:bg-gray-100 font-bold text-base transition-all">
-                  <Grid3X3 className="w-5 h-5" />
+                <button className="flex items-center gap-2 xl:gap-3 px-4 xl:px-6 2xl:px-7 py-2.5 xl:py-3.5 2xl:py-4 rounded-xl xl:rounded-2xl text-gray-600 hover:text-gray-900 hover:bg-gray-100 font-bold text-base xl:text-lg 2xl:text-xl transition-all">
+                  <Grid3X3 className="w-5 h-5 xl:w-6 xl:h-6" />
                   <span>Kategóriák</span>
-                  <ChevronDown className={`w-4 h-4 transition-transform ${showMegaMenu ? 'rotate-180' : ''}`} />
+                  <ChevronDown className={`w-4 h-4 xl:w-5 xl:h-5 transition-transform ${showMegaMenu ? 'rotate-180' : ''}`} />
                 </button>
 
-                {/* Mega Menu Dropdown */}
+                {/* Mega Menu Dropdown - UNIFIED */}
                 {showMegaMenu && (
-                  <div className="absolute top-full left-0 mt-2 w-[500px] bg-white rounded-2xl shadow-2xl border border-gray-100 p-6 animate-fade-in-up z-50">
-                    <div className="grid grid-cols-3 gap-3">
+                  <div className="absolute top-full left-0 mt-2 w-[500px] xl:w-[600px] 2xl:w-[700px] bg-white rounded-2xl xl:rounded-3xl shadow-2xl border border-gray-100 p-6 xl:p-8 animate-fade-in-up z-50">
+                    <div className="grid grid-cols-3 gap-3 xl:gap-4">
                       {POPULAR_CATEGORIES.map((cat) => (
                         <button
                           key={cat.id}
@@ -440,25 +440,25 @@ const Navbar = ({ activeTab, setActiveTab, wishlistCount, productCount = 0, onSc
                             setActiveTab('shop');
                             setShowMegaMenu(false);
                           }}
-                          className="flex flex-col items-center gap-2 p-4 rounded-xl hover:bg-gray-50 transition-all group"
+                          className="flex flex-col items-center gap-2 xl:gap-3 p-4 xl:p-5 rounded-xl xl:rounded-2xl hover:bg-gray-50 transition-all group"
                         >
-                          <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${cat.color} flex items-center justify-center text-white group-hover:scale-110 transition-transform`}>
-                            <cat.icon className="w-6 h-6" />
+                          <div className={`w-12 h-12 xl:w-16 xl:h-16 2xl:w-20 2xl:h-20 rounded-xl xl:rounded-2xl bg-gradient-to-br ${cat.color} flex items-center justify-center text-white group-hover:scale-110 transition-transform`}>
+                            <cat.icon className="w-6 h-6 xl:w-8 xl:h-8 2xl:w-10 2xl:h-10" />
                           </div>
-                          <span className="text-sm font-semibold text-gray-700">{cat.name}</span>
+                          <span className="text-sm xl:text-base 2xl:text-lg font-semibold text-gray-700">{cat.name}</span>
                         </button>
                       ))}
                     </div>
-                    <div className="mt-4 pt-4 border-t border-gray-100">
+                    <div className="mt-4 xl:mt-6 pt-4 xl:pt-6 border-t border-gray-100">
                       <button 
                         onClick={() => {
                           setActiveTab('shop');
                           setShowMegaMenu(false);
                         }}
-                        className="w-full flex items-center justify-center gap-2 py-3 text-indigo-600 hover:bg-indigo-50 rounded-xl font-semibold transition-all"
+                        className="w-full flex items-center justify-center gap-2 xl:gap-3 py-3 xl:py-4 text-base xl:text-lg 2xl:text-xl text-indigo-600 hover:bg-indigo-50 rounded-xl xl:rounded-2xl font-bold transition-all"
                       >
                         Összes kategória megtekintése
-                        <ArrowRight className="w-4 h-4" />
+                        <ArrowRight className="w-4 h-4 xl:w-5 xl:h-5" />
                       </button>
                     </div>
                   </div>
@@ -470,23 +470,23 @@ const Navbar = ({ activeTab, setActiveTab, wishlistCount, productCount = 0, onSc
                   key={item.id}
                   onClick={() => setActiveTab(item.id)}
                   className={`
-                    relative flex items-center gap-2 xl:gap-2.5 px-4 xl:px-5 py-2.5 xl:py-3 rounded-xl
-                    font-bold text-base transition-all duration-200
+                    relative flex items-center gap-2 xl:gap-3 px-4 xl:px-6 2xl:px-7 py-2.5 xl:py-3.5 2xl:py-4 rounded-xl xl:rounded-2xl
+                    font-bold text-base xl:text-lg 2xl:text-xl transition-all duration-200
                     ${activeTab === item.id
                       ? 'bg-gradient-to-r from-indigo-500 to-purple-600 text-white shadow-lg shadow-indigo-300/50'
                       : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
                     }
                   `}
                 >
-                  <item.icon className="w-5 h-5" />
+                  <item.icon className="w-5 h-5 xl:w-6 xl:h-6" />
                   <span>{item.label}</span>
                   {item.isAI && activeTab !== item.id && (
-                    <span className="px-1.5 py-0.5 text-[10px] font-bold bg-gradient-to-r from-indigo-100 to-purple-100 text-indigo-600 rounded-full">
+                    <span className="px-2 py-0.5 xl:px-2.5 xl:py-1 text-[10px] xl:text-xs font-bold bg-gradient-to-r from-indigo-100 to-purple-100 text-indigo-600 rounded-full">
                       AI
                     </span>
                   )}
                   {item.badge && activeTab !== item.id && (
-                    <span className="px-1.5 py-0.5 text-[10px] font-bold bg-green-100 text-green-700 rounded-full">
+                    <span className="px-2 py-0.5 xl:px-2.5 xl:py-1 text-[10px] xl:text-xs font-bold bg-green-100 text-green-700 rounded-full">
                       {item.badge}
                     </span>
                   )}
@@ -494,8 +494,8 @@ const Navbar = ({ activeTab, setActiveTab, wishlistCount, productCount = 0, onSc
               ))}
             </div>
 
-            {/* Right side actions */}
-            <div className="flex items-center gap-2 sm:gap-3">
+            {/* Right side actions - UNIFIED */}
+            <div className="flex items-center gap-2 sm:gap-3 lg:gap-4">
               
               {/* Progressive Search (appears when scrolled on desktop) */}
               {isScrolled && (
@@ -504,30 +504,30 @@ const Navbar = ({ activeTab, setActiveTab, wishlistCount, productCount = 0, onSc
                     const productsSection = document.getElementById('products-section');
                     productsSection?.scrollIntoView({ behavior: 'smooth' });
                   }}
-                  className="hidden lg:flex items-center gap-2 px-4 py-2.5 bg-gray-100 hover:bg-gray-200 rounded-xl text-gray-600 hover:text-gray-900 transition-all"
+                  className="hidden lg:flex items-center gap-2 xl:gap-3 px-4 xl:px-5 py-2.5 xl:py-3 bg-gray-100 hover:bg-gray-200 rounded-xl xl:rounded-2xl text-gray-600 hover:text-gray-900 transition-all"
                 >
-                  <Search className="w-5 h-5" />
-                  <span className="text-sm font-semibold">Keresés</span>
+                  <Search className="w-5 h-5 xl:w-6 xl:h-6" />
+                  <span className="text-sm xl:text-base font-bold">Keresés</span>
                 </button>
               )}
 
               {/* Dark Mode Toggle */}
               <button 
                 onClick={() => setIsDarkMode(!isDarkMode)}
-                className="hidden sm:flex p-2.5 sm:p-3 min-w-[44px] min-h-[44px] items-center justify-center text-gray-600 hover:text-gray-900 rounded-xl hover:bg-gray-100 transition-all"
+                className="hidden sm:flex p-2.5 sm:p-3 lg:p-3.5 xl:p-4 min-w-[44px] min-h-[44px] lg:min-w-[52px] lg:min-h-[52px] xl:min-w-[56px] xl:min-h-[56px] items-center justify-center text-gray-600 hover:text-gray-900 rounded-xl xl:rounded-2xl hover:bg-gray-100 transition-all"
                 aria-label={isDarkMode ? 'Világos mód' : 'Sötét mód'}
               >
-                {isDarkMode ? <Sun className="w-5 h-5 sm:w-6 sm:h-6" /> : <Moon className="w-5 h-5 sm:w-6 sm:h-6" />}
+                {isDarkMode ? <Sun className="w-5 h-5 sm:w-6 sm:h-6 lg:w-7 lg:h-7" /> : <Moon className="w-5 h-5 sm:w-6 sm:h-6 lg:w-7 lg:h-7" />}
               </button>
 
               {/* Wishlist */}
               <button 
-                className="relative p-2.5 sm:p-3 min-w-[44px] min-h-[44px] flex items-center justify-center text-gray-600 hover:text-red-500 rounded-xl hover:bg-red-50 transition-all group"
+                className="relative p-2.5 sm:p-3 lg:p-3.5 xl:p-4 min-w-[44px] min-h-[44px] lg:min-w-[52px] lg:min-h-[52px] xl:min-w-[56px] xl:min-h-[56px] flex items-center justify-center text-gray-600 hover:text-red-500 rounded-xl xl:rounded-2xl hover:bg-red-50 transition-all group"
                 aria-label="Kívánságlista"
               >
-                <Heart className={`w-5 h-5 sm:w-6 sm:h-6 transition-all group-hover:scale-110 ${wishlistCount > 0 ? 'fill-red-500 text-red-500' : ''}`} />
+                <Heart className={`w-5 h-5 sm:w-6 sm:h-6 lg:w-7 lg:h-7 transition-all group-hover:scale-110 ${wishlistCount > 0 ? 'fill-red-500 text-red-500' : ''}`} />
                 {wishlistCount > 0 && (
-                  <span className="absolute -top-1 -right-1 min-w-[20px] h-5 flex items-center justify-center px-1.5 text-xs font-bold text-white bg-red-500 rounded-full shadow-lg animate-scale-in">
+                  <span className="absolute -top-1 -right-1 min-w-[20px] lg:min-w-[24px] h-5 lg:h-6 flex items-center justify-center px-1.5 lg:px-2 text-xs lg:text-sm font-bold text-white bg-red-500 rounded-full shadow-lg animate-scale-in">
                     {wishlistCount}
                   </span>
                 )}
@@ -543,15 +543,15 @@ const Navbar = ({ activeTab, setActiveTab, wishlistCount, productCount = 0, onSc
                 <Menu className="w-6 h-6" />
               </button>
 
-              {/* CTA Button */}
+              {/* CTA Button - UNIFIED */}
               <a 
                 href={WEBSHOP_DOMAIN} 
                 target="_blank" 
                 rel="noopener noreferrer" 
-                className="hidden md:flex items-center gap-2 bg-gradient-to-r from-gray-900 to-gray-800 hover:from-gray-800 hover:to-gray-700 text-white px-5 lg:px-7 xl:px-8 py-2.5 lg:py-3.5 xl:py-4 rounded-xl lg:rounded-2xl text-sm lg:text-base xl:text-lg font-bold transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+                className="hidden md:flex items-center gap-2 xl:gap-3 bg-gradient-to-r from-gray-900 to-gray-800 hover:from-gray-800 hover:to-gray-700 text-white px-5 lg:px-7 xl:px-9 2xl:px-10 py-2.5 lg:py-3.5 xl:py-4 2xl:py-5 rounded-xl lg:rounded-2xl text-sm lg:text-base xl:text-lg 2xl:text-xl font-bold transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
               >
                 <span>Fő webshop</span>
-                <ExternalLink className="w-4 h-4 lg:w-5 lg:h-5" />
+                <ExternalLink className="w-4 h-4 lg:w-5 lg:h-5 xl:w-6 xl:h-6" />
               </a>
             </div>
           </div>
