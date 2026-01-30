@@ -1,20 +1,16 @@
 import React, { useState } from 'react';
 import { 
-  Sparkles, ArrowRight, X, Loader2,
+  Sparkles, ArrowRight, X, Loader2, CheckCircle,
   Building2, TreePine, Factory, Clock, Palette,
   CircleDot, Leaf, Zap, Circle,
   DollarSign, Gem, Crown, Target,
   Sofa, Paintbrush, Shield, RefreshCw, TreeDeciduous,
   Tv, BedDouble, UtensilsCrossed, Briefcase, Home
 } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
-
-const GOOGLE_API_KEY = import.meta.env.VITE_GOOGLE_API_KEY || 'AIzaSyDZV-fAFVCvh4Ad2lKlARMdtHoZWNRwZQA';
+import { generateText } from '../../services/geminiService';
 
 /**
- * AIStyleQuiz - Personalized style quiz powered by Gemini
- * Creates user's "Style DNA" and personalized product recommendations
- * Modern icons instead of emojis
+ * AIStyleQuiz - Személyre szabott stílus kvíz Gemini AI-val
  */
 const AIStyleQuiz = ({ products, onRecommendations, onClose }) => {
   const [step, setStep] = useState(0);
@@ -42,20 +38,20 @@ const AIStyleQuiz = ({ products, onRecommendations, onClose }) => {
       icon: Palette,
       options: [
         { id: 'neutral', label: 'Semleges (Fehér, Bézs, Szürke)', icon: CircleDot, color: 'text-gray-500 bg-gray-50' },
-        { id: 'earth', label: 'Földszínek (Barna, Zöld, Terrakotta)', icon: Leaf, color: 'text-amber-700 bg-amber-50' },
-        { id: 'bold', label: 'Merész (Kék, Piros, Sárga)', icon: Zap, color: 'text-red-600 bg-red-50' },
-        { id: 'dark', label: 'Sötét (Fekete, Sötétkék, Antracit)', icon: Circle, color: 'text-gray-800 bg-gray-200' },
-        { id: 'pastel', label: 'Pasztell (Rózsaszín, Menta, Lila)', icon: Sparkles, color: 'text-purple-400 bg-purple-50' },
+        { id: 'earth', label: 'Földszínek (Barna, Zöld)', icon: Leaf, color: 'text-amber-700 bg-amber-50' },
+        { id: 'bold', label: 'Merész (Kék, Piros)', icon: Zap, color: 'text-red-600 bg-red-50' },
+        { id: 'dark', label: 'Sötét (Fekete, Antracit)', icon: Circle, color: 'text-gray-800 bg-gray-200' },
+        { id: 'pastel', label: 'Pasztell (Rózsaszín, Menta)', icon: Sparkles, color: 'text-purple-400 bg-purple-50' },
       ]
     },
     {
       id: 'budget',
-      question: 'Mi a preferált ár kategóriád?',
+      question: 'Mi a preferált árkategóriád?',
       icon: DollarSign,
       options: [
-        { id: 'budget', label: 'Költséghatékony (< 100k)', icon: DollarSign, color: 'text-green-600 bg-green-50' },
-        { id: 'mid', label: 'Középkategória (100-300k)', icon: Gem, color: 'text-blue-600 bg-blue-50' },
-        { id: 'premium', label: 'Prémium (> 300k)', icon: Crown, color: 'text-amber-600 bg-amber-50' },
+        { id: 'budget', label: 'Megfizethető (< 100k Ft)', icon: DollarSign, color: 'text-green-600 bg-green-50' },
+        { id: 'mid', label: 'Közép (100-300k Ft)', icon: Gem, color: 'text-blue-600 bg-blue-50' },
+        { id: 'premium', label: 'Prémium (> 300k Ft)', icon: Crown, color: 'text-amber-600 bg-amber-50' },
         { id: 'flexible', label: 'Rugalmas', icon: Target, color: 'text-indigo-600 bg-indigo-50' },
       ]
     },
@@ -89,96 +85,104 @@ const AIStyleQuiz = ({ products, onRecommendations, onClose }) => {
   const progress = ((step + 1) / questions.length) * 100;
 
   const handleAnswer = (optionId) => {
-    setAnswers(prev => ({ ...prev, [currentQuestion.id]: optionId }));
+    const newAnswers = { ...answers, [currentQuestion.id]: optionId };
+    setAnswers(newAnswers);
     
     if (step < questions.length - 1) {
-      setTimeout(() => setStep(step + 1), 300);
+      setTimeout(() => setStep(step + 1), 200);
     } else {
-      setTimeout(() => analyzeStyle({ ...answers, [currentQuestion.id]: optionId }), 500);
+      setTimeout(() => analyzeStyle(newAnswers), 300);
     }
   };
 
   const analyzeStyle = async (allAnswers) => {
     setIsAnalyzing(true);
 
+    // Termék ajánlások generálása (mindenképp)
+    const matchedProducts = findMatchingProducts(allAnswers);
+    setRecommendations(matchedProducts);
+
     try {
-      const prompt = `Te egy lakberendező szakértő vagy. Röviden (2 mondat) jellemezd a felhasználó stílusát:
-- Stílus: ${allAnswers.space}
-- Színek: ${allAnswers.colors}  
-- Budget: ${allAnswers.budget}
-- Prioritás: ${allAnswers.priority}
-- Helyiség: ${allAnswers.room}
-
-Válaszolj magyarul, barátságosan, max 2 mondatban.`;
-
-      const response = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GOOGLE_API_KEY}`,
-        {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            contents: [{ parts: [{ text: prompt }] }],
-            generationConfig: { temperature: 0.7, maxOutputTokens: 200 }
-          })
-        }
-      );
-
-      if (!response.ok) {
-        console.error('Gemini API error:', response.status);
-        throw new Error('API hiba');
-      }
-
-      const data = await response.json();
+      // Stílus leírások
+      const styleLabels = {
+        modern: 'modern, minimalista',
+        scandinavian: 'skandináv, világos',
+        industrial: 'indusztriális, loft',
+        vintage: 'vintage, retro',
+        bohemian: 'bohém, színes'
+      };
       
-      if (data.error) {
-        console.error('Gemini error:', data.error);
-        throw new Error(data.error.message || 'API hiba');
-      }
+      const colorLabels = {
+        neutral: 'semleges színeket',
+        earth: 'földszíneket',
+        bold: 'élénk színeket',
+        dark: 'sötét tónusokat',
+        pastel: 'pasztell árnyalatokat'
+      };
 
-      const result = data.candidates?.[0]?.content?.parts?.[0]?.text;
-      
-      if (result) {
-        setStyleDNA(result);
+      const priorityLabels = {
+        comfort: 'kényelmet',
+        design: 'designt',
+        durability: 'tartósságot',
+        versatility: 'sokoldalúságot',
+        eco: 'fenntarthatóságot'
+      };
+
+      const prompt = `Írj egy rövid (2 mondat) személyre szabott lakberendezési profilt az alábbi preferenciák alapján:
+- Stílus: ${styleLabels[allAnswers.space] || allAnswers.space}
+- Színek: ${colorLabels[allAnswers.colors] || allAnswers.colors}
+- Prioritás: ${priorityLabels[allAnswers.priority] || allAnswers.priority}
+
+Legyél barátságos, használj tegezést. Magyarul válaszolj.`;
+
+      const result = await generateText(prompt, { temperature: 0.8, maxTokens: 150 });
+
+      if (result.success && result.text) {
+        setStyleDNA(result.text);
       } else {
-        // Fallback to local style DNA generation
-        const styleMap = {
-          modern: 'Modern, letisztult',
-          scandinavian: 'Skandináv, világos',
-          industrial: 'Indusztriális, nyers',
-          vintage: 'Vintage, retro',
-          bohemian: 'Bohém, színes'
-        };
-        setStyleDNA(`${styleMap[allAnswers.space] || 'Egyedi'} stílusú vagy, aki a ${allAnswers.priority === 'comfort' ? 'kényelmet' : allAnswers.priority === 'design' ? 'dizájnt' : 'funkcionalitást'} helyezi előtérbe.`);
+        // Lokális fallback
+        setStyleDNA(getLocalStyleDNA(allAnswers));
       }
 
-      // Generate recommendations based on answers
-      const matchedProducts = findMatchingProducts(allAnswers);
-      setRecommendations(matchedProducts);
-      
-      if (onRecommendations) {
+      if (onRecommendations && matchedProducts.length > 0) {
         onRecommendations(matchedProducts);
       }
 
     } catch (error) {
-      console.error('Style quiz error:', error);
-      // Fallback style DNA
-      setStyleDNA('Egyedi ízlésvilágod van! A kvíz alapján személyre szabott ajánlatokat készítettünk neked.');
-      
-      // Still show product recommendations
-      const matchedProducts = findMatchingProducts(allAnswers);
-      setRecommendations(matchedProducts);
+      console.error('Quiz hiba:', error);
+      setStyleDNA(getLocalStyleDNA(allAnswers));
     } finally {
       setIsAnalyzing(false);
     }
   };
 
+  // Lokális stílus generálás (fallback)
+  const getLocalStyleDNA = (allAnswers) => {
+    const styleMap = {
+      modern: 'Modern, letisztult ízlésed van',
+      scandinavian: 'A skandináv egyszerűséget kedveled',
+      industrial: 'Az ipari, loft stílus híve vagy',
+      vintage: 'A vintage báj rajongója vagy',
+      bohemian: 'Egyedi, bohém stílusod van'
+    };
+
+    const priorityMap = {
+      comfort: 'a kényelmet',
+      design: 'az esztétikát',
+      durability: 'a minőséget',
+      versatility: 'a praktikumot',
+      eco: 'a környezettudatosságot'
+    };
+
+    return `${styleMap[allAnswers.space] || 'Egyedi ízlésed van'}, és ${priorityMap[allAnswers.priority] || 'a minőséget'} helyezed előtérbe. Remek választásokat találsz a kínálatunkban!`;
+  };
+
   const findMatchingProducts = (allAnswers) => {
     if (!products || products.length === 0) return [];
     
-    // Simple matching based on answers
     let filtered = [...products];
     
-    // Filter by budget
+    // Budget szűrés
     if (allAnswers.budget === 'budget') {
       filtered = filtered.filter(p => (p.salePrice || p.price) < 100000);
     } else if (allAnswers.budget === 'mid') {
@@ -190,7 +194,7 @@ Válaszolj magyarul, barátságosan, max 2 mondatban.`;
       filtered = filtered.filter(p => (p.salePrice || p.price) > 300000);
     }
 
-    // Filter by room type
+    // Helyiség szűrés
     const roomKeywords = {
       living: ['kanapé', 'fotel', 'dohányzó', 'tv', 'nappali', 'ülőgarnitúra'],
       bedroom: ['ágy', 'matrac', 'éjjeli', 'hálószoba', 'gardrób', 'komód'],
@@ -201,171 +205,161 @@ Válaszolj magyarul, barátságosan, max 2 mondatban.`;
     if (allAnswers.room && allAnswers.room !== 'all') {
       const keywords = roomKeywords[allAnswers.room] || [];
       if (keywords.length > 0) {
-        filtered = filtered.filter(p => 
+        const roomFiltered = filtered.filter(p => 
           keywords.some(kw => 
-            p.name.toLowerCase().includes(kw) || 
-            (p.category && p.category.toLowerCase().includes(kw))
+            (p.name || '').toLowerCase().includes(kw) || 
+            (p.category || '').toLowerCase().includes(kw)
           )
         );
+        if (roomFiltered.length > 0) {
+          filtered = roomFiltered;
+        }
       }
     }
 
-    // Return top matches
-    return filtered.slice(0, 12);
+    // Random sorrend és top 12
+    return filtered.sort(() => Math.random() - 0.5).slice(0, 12);
   };
 
   const QuestionIcon = currentQuestion?.icon || Home;
 
   return (
-    <AnimatePresence>
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        className="fixed inset-0 z-[70] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
-        onClick={onClose}
+    <div 
+      className="fixed inset-0 z-[70] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
+      onClick={onClose}
+    >
+      <div
+        className="bg-white rounded-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto shadow-2xl"
+        onClick={e => e.stopPropagation()}
       >
-        <motion.div
-          initial={{ scale: 0.9, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          exit={{ scale: 0.9, opacity: 0 }}
-          className="bg-white rounded-2xl sm:rounded-3xl w-full max-w-lg max-h-[90vh] overflow-y-auto shadow-2xl"
-          onClick={e => e.stopPropagation()}
-        >
-          {/* Header */}
-          <div className="bg-gradient-to-r from-indigo-600 to-purple-600 p-4 sm:p-6 relative">
-            <button
-              onClick={onClose}
-              className="absolute top-3 right-3 sm:top-4 sm:right-4 w-8 h-8 flex items-center justify-center text-white/80 hover:text-white hover:bg-white/10 rounded-full transition-colors"
-            >
-              <X className="w-5 h-5" />
-            </button>
-            
-            <div className="flex items-center gap-3 mb-3">
-              <div className="w-10 h-10 sm:w-12 sm:h-12 bg-white/20 rounded-xl flex items-center justify-center">
-                <Sparkles className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
+        {/* Header */}
+        <div className="bg-gradient-to-r from-indigo-600 to-purple-600 p-5 relative">
+          <button
+            onClick={onClose}
+            className="absolute top-3 right-3 w-8 h-8 flex items-center justify-center text-white/80 hover:text-white hover:bg-white/10 rounded-full transition-colors"
+          >
+            <X className="w-5 h-5" />
+          </button>
+          
+          <div className="flex items-center gap-3 mb-3">
+            <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center">
+              <Sparkles className="w-6 h-6 text-white" />
+            </div>
+            <div>
+              <h2 className="text-xl font-bold text-white">Style DNA Quiz</h2>
+              <p className="text-white/80 text-sm">Fedezd fel a stílusodat!</p>
+            </div>
+          </div>
+          
+          {/* Progress */}
+          {!styleDNA && !isAnalyzing && (
+            <div className="mt-4">
+              <div className="flex justify-between text-xs text-white/80 mb-1.5">
+                <span>Kérdés {step + 1}/{questions.length}</span>
+                <span>{Math.round(progress)}%</span>
               </div>
-              <div>
-                <h2 className="text-xl sm:text-2xl font-bold text-white">Style DNA Quiz</h2>
-                <p className="text-white/80 text-sm">Fedezd fel a stílusodat!</p>
+              <div className="h-2 bg-white/20 rounded-full overflow-hidden">
+                <div 
+                  className="h-full bg-white rounded-full transition-all duration-300"
+                  style={{ width: `${progress}%` }}
+                />
               </div>
             </div>
-            
-            {/* Progress */}
-            {!styleDNA && (
-              <div className="mt-4">
-                <div className="flex justify-between text-xs text-white/80 mb-1.5">
-                  <span>Kérdés {step + 1}/{questions.length}</span>
-                  <span>{Math.round(progress)}%</span>
-                </div>
-                <div className="h-2 bg-white/20 rounded-full overflow-hidden">
-                  <motion.div 
-                    className="h-full bg-white rounded-full"
-                    initial={{ width: 0 }}
-                    animate={{ width: `${progress}%` }}
-                    transition={{ duration: 0.3 }}
-                  />
-                </div>
-              </div>
-            )}
-          </div>
+          )}
+        </div>
 
-          {/* Content */}
-          <div className="p-4 sm:p-6">
-            {isAnalyzing ? (
-              <div className="py-12 text-center">
-                <Loader2 className="w-12 h-12 text-indigo-600 animate-spin mx-auto mb-4" />
-                <h3 className="text-lg font-bold text-gray-900 mb-2">Elemzés folyamatban...</h3>
-                <p className="text-gray-500 text-sm">Készül a Style DNA profilod</p>
+        {/* Content */}
+        <div className="p-5">
+          {isAnalyzing ? (
+            <div className="py-12 text-center">
+              <Loader2 className="w-12 h-12 text-indigo-600 animate-spin mx-auto mb-4" />
+              <h3 className="text-lg font-bold text-gray-900 mb-2">Elemzés folyamatban...</h3>
+              <p className="text-gray-500 text-sm">Az AI készíti a Style DNA profilodat</p>
+            </div>
+          ) : styleDNA ? (
+            <div className="space-y-5">
+              {/* Result */}
+              <div className="bg-gradient-to-br from-indigo-50 to-purple-50 rounded-xl p-5 border border-indigo-100">
+                <div className="flex items-center gap-2 mb-3">
+                  <CheckCircle className="w-5 h-5 text-green-500" />
+                  <h3 className="text-lg font-bold text-gray-900">A Te Style DNA-d</h3>
+                </div>
+                <p className="text-gray-700 leading-relaxed">{styleDNA}</p>
               </div>
-            ) : styleDNA ? (
-              <div className="space-y-6">
-                {/* Style DNA Result */}
-                <div className="bg-gradient-to-br from-indigo-50 to-purple-50 rounded-2xl p-5 sm:p-6 border border-indigo-100">
-                  <div className="flex items-center gap-2 mb-3">
-                    <Sparkles className="w-5 h-5 text-indigo-600" />
-                    <h3 className="text-lg font-bold text-gray-900">A Te Style DNA-d</h3>
+
+              {/* Recommendations */}
+              {recommendations.length > 0 && (
+                <div>
+                  <h4 className="text-sm font-bold text-gray-700 mb-3 flex items-center gap-2">
+                    <Target className="w-4 h-4 text-indigo-600" />
+                    Ajánlott termékek ({recommendations.length})
+                  </h4>
+                  <div className="grid grid-cols-3 gap-2">
+                    {recommendations.slice(0, 6).map((product) => (
+                      <div key={product.id} className="bg-gray-50 rounded-lg p-2 text-center">
+                        <img
+                          src={product.images?.[0] || '/placeholder.png'}
+                          alt={product.name}
+                          className="w-full aspect-square object-contain rounded bg-white mb-1"
+                          onError={(e) => { e.target.src = 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100"><rect fill="%23f3f4f6" width="100" height="100"/><text x="50%" y="50%" text-anchor="middle" dy=".3em" fill="%239ca3af" font-size="12">Kép</text></svg>'; }}
+                        />
+                        <p className="text-[10px] text-gray-600 truncate">{product.name}</p>
+                      </div>
+                    ))}
                   </div>
-                  <p className="text-gray-700 leading-relaxed">{styleDNA}</p>
                 </div>
+              )}
 
-                {/* Recommendations */}
-                {recommendations.length > 0 && (
-                  <div>
-                    <h4 className="text-sm font-bold text-gray-700 mb-3 flex items-center gap-2">
-                      <Target className="w-4 h-4 text-indigo-600" />
-                      Ajánlott termékek ({recommendations.length})
-                    </h4>
-                    <div className="grid grid-cols-3 gap-2">
-                      {recommendations.slice(0, 6).map((product) => (
-                        <div key={product.id} className="bg-gray-50 rounded-xl p-2 text-center">
-                          <img
-                            src={product.images?.[0] || '/placeholder.png'}
-                            alt={product.name}
-                            className="w-full aspect-square object-contain rounded-lg bg-white mb-1"
-                          />
-                          <p className="text-[10px] sm:text-xs text-gray-600 truncate">{product.name}</p>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                <button
-                  onClick={onClose}
-                  className="w-full bg-indigo-600 text-white py-3 rounded-xl font-bold hover:bg-indigo-700 transition-colors min-h-[44px]"
-                >
-                  Termékek megtekintése
-                </button>
+              <button
+                onClick={onClose}
+                className="w-full bg-indigo-600 text-white py-3 rounded-xl font-bold hover:bg-indigo-700 transition-colors"
+              >
+                Termékek megtekintése
+              </button>
+            </div>
+          ) : (
+            <div>
+              {/* Question */}
+              <div className="flex items-center gap-3 mb-5">
+                <div className="w-10 h-10 bg-indigo-100 rounded-xl flex items-center justify-center shrink-0">
+                  <QuestionIcon className="w-5 h-5 text-indigo-600" />
+                </div>
+                <h3 className="text-lg font-bold text-gray-900">{currentQuestion.question}</h3>
               </div>
-            ) : (
-              <div>
-                {/* Question */}
-                <div className="flex items-center gap-3 mb-4 sm:mb-6">
-                  <div className="w-10 h-10 bg-indigo-100 rounded-xl flex items-center justify-center shrink-0">
-                    <QuestionIcon className="w-5 h-5 text-indigo-600" />
-                  </div>
-                  <h3 className="text-lg sm:text-xl font-bold text-gray-900">{currentQuestion.question}</h3>
-                </div>
 
-                {/* Options */}
-                <div className="space-y-2 sm:space-y-3">
-                  {currentQuestion.options.map((option) => {
-                    const OptionIcon = option.icon;
-                    const isSelected = answers[currentQuestion.id] === option.id;
-                    
-                    return (
-                      <motion.button
-                        key={option.id}
-                        whileHover={{ scale: 1.01 }}
-                        whileTap={{ scale: 0.99 }}
-                        onClick={() => handleAnswer(option.id)}
-                        className={`
-                          w-full p-3 sm:p-4 rounded-xl border-2 text-left transition-all min-h-[44px]
-                          flex items-center gap-3
-                          ${isSelected 
-                            ? 'border-indigo-500 bg-indigo-50' 
-                            : 'border-gray-200 hover:border-indigo-300 hover:bg-gray-50'
-                          }
-                        `}
-                      >
-                        <div className={`w-9 h-9 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center shrink-0 ${option.color}`}>
-                          <OptionIcon className="w-4 h-4 sm:w-5 sm:h-5" />
-                        </div>
-                        <span className="text-sm sm:text-base font-medium text-gray-800 flex-1">{option.label}</span>
-                        {isSelected && (
-                          <ArrowRight className="w-5 h-5 text-indigo-600" />
-                        )}
-                      </motion.button>
-                    );
-                  })}
-                </div>
+              {/* Options */}
+              <div className="space-y-2">
+                {currentQuestion.options.map((option) => {
+                  const OptionIcon = option.icon;
+                  const isSelected = answers[currentQuestion.id] === option.id;
+                  
+                  return (
+                    <button
+                      key={option.id}
+                      onClick={() => handleAnswer(option.id)}
+                      className={`
+                        w-full p-3.5 rounded-xl border-2 text-left transition-all
+                        flex items-center gap-3
+                        ${isSelected 
+                          ? 'border-indigo-500 bg-indigo-50' 
+                          : 'border-gray-200 hover:border-indigo-300 hover:bg-gray-50'
+                        }
+                      `}
+                    >
+                      <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${option.color}`}>
+                        <OptionIcon className="w-5 h-5" />
+                      </div>
+                      <span className="text-sm font-medium text-gray-800 flex-1">{option.label}</span>
+                      {isSelected && <ArrowRight className="w-5 h-5 text-indigo-600" />}
+                    </button>
+                  );
+                })}
               </div>
-            )}
-          </div>
-        </motion.div>
-      </motion.div>
-    </AnimatePresence>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
   );
 };
 

@@ -1,28 +1,32 @@
 import React, { useState, useRef } from 'react';
-import { Camera, Upload, Loader2, Sparkles, CheckCircle, ArrowRight, X } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
-
-const GOOGLE_API_KEY = import.meta.env.VITE_GOOGLE_API_KEY || 'AIzaSyDZV-fAFVCvh4Ad2lKlARMdtHoZWNRwZQA';
+import { Camera, Upload, Loader2, Sparkles, CheckCircle, X, AlertCircle, RotateCcw } from 'lucide-react';
+import { analyzeImage } from '../../services/geminiService';
 
 /**
- * AIRoomDesigner - Upload room photo, AI analyzes style and recommends products
- * Uses Gemini Vision API for image understanding
+ * AIRoomDesigner - Szoba elemzés Gemini Vision AI-val
+ * Kép feltöltés és AI alapú stílus elemzés
  */
-const AIRoomDesigner = ({ products, onProductRecommendations }) => {
-  const [isOpen, setIsOpen] = useState(false);
+const AIRoomDesigner = ({ products, onProductRecommendations, onClose }) => {
   const [selectedImage, setSelectedImage] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [analysis, setAnalysis] = useState(null);
+  const [analysisError, setAnalysisError] = useState(null);
   const [recommendations, setRecommendations] = useState([]);
   const fileInputRef = useRef(null);
 
   const handleImageSelect = (e) => {
     const file = e.target.files?.[0];
     if (file && file.type.startsWith('image/')) {
-      setSelectedImage(file);
+      // Max 4MB ellenőrzés
+      if (file.size > 4 * 1024 * 1024) {
+        setAnalysisError('A kép túl nagy! Maximum 4MB engedélyezett.');
+        return;
+      }
       
-      // Create preview
+      setSelectedImage(file);
+      setAnalysisError(null);
+      
       const reader = new FileReader();
       reader.onloadend = () => {
         setImagePreview(reader.result);
@@ -36,345 +40,247 @@ const AIRoomDesigner = ({ products, onProductRecommendations }) => {
 
     setIsAnalyzing(true);
     setAnalysis(null);
+    setAnalysisError(null);
     setRecommendations([]);
 
     try {
-      // Convert image to base64 (remove data URL prefix)
+      // Base64 kinyerése (data URL prefix nélkül)
       const base64Image = imagePreview.split(',')[1];
+      const mimeType = selectedImage.type || 'image/jpeg';
 
-      const prompt = `Elemezd röviden ezt a szobát magyarul:
-1. Stílus (Modern/Skandináv/Vintage/stb.)
-2. Domináns színek
-3. Mit javasolsz bútorként? (2-3 konkrét bútor)
+      const prompt = `Elemezd ezt a szobafotót és adj rövid, hasznos tanácsokat magyarul:
 
-Max 4-5 mondat, barátságos hangnemben.`;
+1. Milyen stílusú a szoba? (pl. Modern, Skandináv, Klasszikus)
+2. Milyen színek dominálnak?
+3. Milyen bútorok illenének ide? (adj 2-3 konkrét javaslatot)
 
-      const response = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GOOGLE_API_KEY}`,
-        {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            contents: [{
-              parts: [
-                { text: prompt },
-                {
-                  inline_data: {
-                    mime_type: selectedImage.type || 'image/jpeg',
-                    data: base64Image
-                  }
-                }
-              ]
-            }],
-            generationConfig: {
-              temperature: 0.7,
-              maxOutputTokens: 400,
-            }
-          })
-        }
-      );
+Válaszolj 4-5 mondatban, barátságos hangnemben, tegezve.`;
 
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        console.error('Gemini Vision API error:', response.status, errorData);
-        throw new Error(`API hiba: ${response.status}`);
-      }
+      const result = await analyzeImage(base64Image, mimeType, prompt);
 
-      const data = await response.json();
-      
-      if (data.error) {
-        console.error('Gemini error:', data.error);
-        throw new Error(data.error.message || 'API hiba');
-      }
-
-      const aiAnalysis = data.candidates?.[0]?.content?.parts?.[0]?.text;
-      
-      if (!aiAnalysis) {
-        throw new Error('Az AI nem tudta elemezni a képet');
-      }
-
-      setAnalysis(aiAnalysis);
-
-      // Find matching products based on analysis keywords
-      if (products && products.length > 0) {
-        const keywords = aiAnalysis.toLowerCase();
-        const searchTerms = ['kanapé', 'fotel', 'asztal', 'szék', 'ágy', 'polc', 'szekrény', 'komód', 'lámpa'];
+      if (result.success && result.text) {
+        setAnalysis(result.text);
         
-        const matchedProducts = products
-          .filter(p => {
-            const productText = `${p.name || ''} ${p.shortDescription || ''} ${p.category || ''}`.toLowerCase();
-            return searchTerms.some(term => 
-              keywords.includes(term) && productText.includes(term)
-            ) || (
-              (keywords.includes('modern') && productText.includes('modern')) ||
-              (keywords.includes('skandináv') && productText.includes('skandináv'))
-            );
-          })
-          .slice(0, 6);
-
-        setRecommendations(matchedProducts);
-
-        if (onProductRecommendations && matchedProducts.length > 0) {
-          onProductRecommendations(matchedProducts);
+        // Termék ajánlások keresése
+        if (products && products.length > 0) {
+          const matchedProducts = findMatchingProducts(result.text);
+          setRecommendations(matchedProducts);
+          
+          if (onProductRecommendations && matchedProducts.length > 0) {
+            onProductRecommendations(matchedProducts);
+          }
         }
+      } else {
+        setAnalysisError(result.error || 'Nem sikerült elemezni a képet.');
       }
 
     } catch (error) {
-      console.error('Room analysis error:', error);
-      setAnalysis(`Hiba történt: ${error.message}. Próbálj egy másik fotót feltölteni!`);
+      console.error('Képelemzés hiba:', error);
+      setAnalysisError('Váratlan hiba történt. Próbálj másik képet!');
     } finally {
       setIsAnalyzing(false);
     }
+  };
+
+  const findMatchingProducts = (analysisText) => {
+    const text = analysisText.toLowerCase();
+    const searchTerms = ['kanapé', 'fotel', 'asztal', 'szék', 'ágy', 'polc', 'szekrény', 'komód', 'lámpa', 'tükör'];
+    const styleTerms = ['modern', 'skandináv', 'minimalista', 'klasszikus', 'vintage', 'indusztriális'];
+    
+    return products
+      .filter(p => {
+        const productText = `${p.name || ''} ${p.category || ''}`.toLowerCase();
+        
+        // Bútor típus egyezés
+        const hasTermMatch = searchTerms.some(term => 
+          text.includes(term) && productText.includes(term)
+        );
+        
+        // Stílus egyezés
+        const hasStyleMatch = styleTerms.some(style =>
+          text.includes(style) && productText.includes(style)
+        );
+        
+        return hasTermMatch || hasStyleMatch;
+      })
+      .sort(() => Math.random() - 0.5)
+      .slice(0, 6);
   };
 
   const resetAnalysis = () => {
     setSelectedImage(null);
     setImagePreview(null);
     setAnalysis(null);
+    setAnalysisError(null);
     setRecommendations([]);
   };
 
-  return (
-    <>
-      {/* Trigger Button */}
-      <button
-        onClick={() => setIsOpen(true)}
-        className="
-          px-6 py-3 rounded-xl
-          bg-gradient-to-r from-purple-500 to-pink-600
-          text-white font-semibold
-          shadow-lg hover:shadow-xl
-          transition-all duration-300
-          hover:scale-105
-          flex items-center gap-2
-        "
-      >
-        <Camera className="w-5 h-5" />
-        <span>AI Szoba Tervező</span>
-        <Sparkles className="w-4 h-4" />
-      </button>
+  const handleClose = () => {
+    resetAnalysis();
+    if (onClose) onClose();
+  };
 
-      {/* Modal */}
-      <AnimatePresence>
-        {isOpen && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
-            onClick={() => setIsOpen(false)}
+  return (
+    <div 
+      className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
+      onClick={handleClose}
+    >
+      <div
+        className="w-full max-w-2xl max-h-[90vh] overflow-y-auto bg-white rounded-2xl shadow-2xl"
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* Header */}
+        <div className="flex items-center justify-between p-5 border-b border-gray-100">
+          <div className="flex items-center gap-3">
+            <div className="p-2.5 bg-gradient-to-br from-purple-500 to-pink-600 rounded-xl">
+              <Camera className="w-6 h-6 text-white" />
+            </div>
+            <div>
+              <h2 className="text-xl font-bold text-gray-800">AI Szoba Tervező</h2>
+              <p className="text-sm text-gray-500">Töltsd fel a szobád fotóját!</p>
+            </div>
+          </div>
+          <button
+            onClick={handleClose}
+            className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-full transition-colors"
           >
-            <motion.div
-              initial={{ scale: 0.9, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.9, opacity: 0 }}
-              onClick={(e) => e.stopPropagation()}
-              className="
-                w-full max-w-4xl max-h-[90vh] overflow-y-auto
-                bg-white rounded-2xl shadow-2xl
-                p-6
-              "
+            <X className="w-6 h-6" />
+          </button>
+        </div>
+
+        <div className="p-5">
+          {/* Upload Area */}
+          {!imagePreview && (
+            <div
+              onClick={() => fileInputRef.current?.click()}
+              className="border-2 border-dashed border-gray-300 rounded-xl p-10 text-center cursor-pointer hover:border-purple-500 hover:bg-purple-50/30 transition-all"
             >
-              {/* Header */}
-              <div className="flex items-center justify-between mb-6">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 bg-gradient-to-br from-purple-500 to-pink-600 rounded-lg">
-                    <Camera className="w-6 h-6 text-white" />
-                  </div>
-                  <div>
-                    <h2 className="text-2xl font-bold text-gray-800">
-                      AI Szoba Tervező
-                    </h2>
-                    <p className="text-sm text-gray-500">
-                      Töltsd fel a szobád fotóját, és az AI megtervezi neked!
-                    </p>
-                  </div>
-                </div>
+              <Upload className="w-14 h-14 text-gray-400 mx-auto mb-4" />
+              <h3 className="text-lg font-semibold text-gray-700 mb-2">
+                Kattints vagy húzd ide a fotót
+              </h3>
+              <p className="text-sm text-gray-500">JPG, PNG vagy WEBP (max 4MB)</p>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/jpeg,image/png,image/webp"
+                onChange={handleImageSelect}
+                className="hidden"
+              />
+            </div>
+          )}
+
+          {/* Image Preview */}
+          {imagePreview && (
+            <div className="space-y-5">
+              <div className="relative rounded-xl overflow-hidden">
+                <img
+                  src={imagePreview}
+                  alt="Szoba előnézet"
+                  className="w-full h-56 object-cover"
+                />
                 <button
-                  onClick={() => setIsOpen(false)}
-                  className="text-gray-400 hover:text-gray-600 transition-colors"
+                  onClick={resetAnalysis}
+                  className="absolute top-3 right-3 p-2 bg-white/90 rounded-full hover:bg-white transition-colors shadow-lg"
                 >
-                  <X className="w-6 h-6" />
+                  <X className="w-5 h-5 text-gray-700" />
                 </button>
               </div>
 
-              {/* Upload Area */}
-              {!imagePreview && (
-                <div
-                  onClick={() => fileInputRef.current?.click()}
-                  className="
-                    border-2 border-dashed border-gray-300 rounded-xl
-                    p-12 text-center cursor-pointer
-                    hover:border-purple-500 hover:bg-purple-50/50
-                    transition-all duration-300
-                  "
+              {/* Analyze Button */}
+              {!analysis && !isAnalyzing && !analysisError && (
+                <button
+                  onClick={analyzeRoom}
+                  className="w-full py-4 rounded-xl bg-gradient-to-r from-purple-500 to-pink-600 text-white font-semibold text-lg shadow-lg hover:shadow-xl transition-all hover:scale-[1.02] flex items-center justify-center gap-3"
                 >
-                  <Upload className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-                  <h3 className="text-lg font-semibold text-gray-700 mb-2">
-                    Kattints vagy húzd ide a fotót
-                  </h3>
-                  <p className="text-sm text-gray-500">
-                    JPG, PNG vagy WEBP (max 10MB)
-                  </p>
-                  <input
-                    ref={fileInputRef}
-                    type="file"
-                    accept="image/*"
-                    onChange={handleImageSelect}
-                    className="hidden"
-                  />
+                  <Sparkles className="w-6 h-6" />
+                  AI Elemzés Indítása
+                </button>
+              )}
+
+              {/* Loading */}
+              {isAnalyzing && (
+                <div className="text-center py-8">
+                  <Loader2 className="w-12 h-12 text-purple-500 animate-spin mx-auto mb-4" />
+                  <p className="text-gray-600 font-medium">Az AI elemzi a szobádat...</p>
+                  <p className="text-gray-400 text-sm mt-1">Ez pár másodpercet vehet igénybe</p>
                 </div>
               )}
 
-              {/* Image Preview & Analysis */}
-              {imagePreview && (
-                <div className="space-y-6">
-                  {/* Preview */}
-                  <div className="relative rounded-xl overflow-hidden">
-                    <img
-                      src={imagePreview}
-                      alt="Room preview"
-                      className="w-full h-64 object-cover"
-                    />
-                    <button
-                      onClick={resetAnalysis}
-                      className="
-                        absolute top-4 right-4
-                        p-2 bg-white/90 rounded-full
-                        hover:bg-white transition-colors
-                      "
-                    >
-                      <X className="w-5 h-5 text-gray-700" />
-                    </button>
+              {/* Error */}
+              {analysisError && (
+                <div className="bg-red-50 rounded-xl p-5 text-center">
+                  <AlertCircle className="w-10 h-10 text-red-500 mx-auto mb-3" />
+                  <p className="text-red-700 font-medium mb-4">{analysisError}</p>
+                  <button
+                    onClick={analyzeRoom}
+                    className="px-6 py-2.5 bg-red-600 text-white rounded-lg font-semibold hover:bg-red-700 transition-colors inline-flex items-center gap-2"
+                  >
+                    <RotateCcw className="w-4 h-4" />
+                    Újrapróbálás
+                  </button>
+                </div>
+              )}
+
+              {/* Analysis Result */}
+              {analysis && (
+                <div className="space-y-5">
+                  <div className="bg-gradient-to-br from-purple-50 to-pink-50 rounded-xl p-5 border border-purple-100">
+                    <div className="flex items-center gap-2 mb-3">
+                      <CheckCircle className="w-5 h-5 text-green-500" />
+                      <h3 className="text-lg font-bold text-gray-800">Elemzés Eredménye</h3>
+                    </div>
+                    <p className="text-gray-700 whitespace-pre-wrap leading-relaxed">{analysis}</p>
                   </div>
 
-                  {/* Analyze Button */}
-                  {!analysis && !isAnalyzing && (
-                    <button
-                      onClick={analyzeRoom}
-                      className="
-                        w-full py-4 rounded-xl
-                        bg-gradient-to-r from-purple-500 to-pink-600
-                        text-white font-semibold text-lg
-                        shadow-lg hover:shadow-xl
-                        transition-all duration-300
-                        hover:scale-105
-                        flex items-center justify-center gap-3
-                      "
-                    >
-                      <Sparkles className="w-6 h-6" />
-                      AI Elemzés Indítása
-                    </button>
-                  )}
-
-                  {/* Loading */}
-                  {isAnalyzing && (
-                    <div className="text-center py-8">
-                      <Loader2 className="w-12 h-12 text-purple-500 animate-spin mx-auto mb-4" />
-                      <p className="text-gray-600">Az AI elemzi a szobádat...</p>
+                  {/* Product Recommendations */}
+                  {recommendations.length > 0 && (
+                    <div>
+                      <h3 className="text-lg font-bold text-gray-800 mb-3 flex items-center gap-2">
+                        <Sparkles className="w-5 h-5 text-purple-500" />
+                        Ajánlott Termékek ({recommendations.length})
+                      </h3>
+                      <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                        {recommendations.map((product) => (
+                          <div
+                            key={product.id}
+                            className="bg-white rounded-lg overflow-hidden border border-gray-200 hover:shadow-md transition-shadow"
+                          >
+                            <img
+                              src={product.images?.[0] || product.mainImage}
+                              alt={product.name}
+                              className="w-full h-28 object-cover bg-gray-100"
+                              onError={(e) => { e.target.src = 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100"><rect fill="%23f3f4f6" width="100" height="100"/></svg>'; }}
+                            />
+                            <div className="p-2.5">
+                              <h4 className="font-medium text-sm text-gray-800 line-clamp-1 mb-1">
+                                {product.name}
+                              </h4>
+                              <p className="text-base font-bold text-indigo-600">
+                                {(product.salePrice || product.price)?.toLocaleString('hu-HU')} Ft
+                              </p>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
                     </div>
                   )}
 
-                  {/* Analysis Results */}
-                  {analysis && (
-                    <motion.div
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      className="space-y-6"
-                    >
-                      {/* Analysis Text (or error) */}
-                      <div className={`rounded-xl p-6 ${analysis.includes('Hiba történt') ? 'bg-red-50' : 'bg-gradient-to-br from-purple-50 to-pink-50'}`}>
-                        <div className="flex items-center gap-2 mb-4">
-                          {analysis.includes('Hiba történt') ? (
-                            <X className="w-6 h-6 text-red-500" />
-                          ) : (
-                            <CheckCircle className="w-6 h-6 text-green-500" />
-                          )}
-                          <h3 className="text-xl font-bold text-gray-800">
-                            {analysis.includes('Hiba történt') ? 'Hiba' : 'Elemzés Eredménye'}
-                          </h3>
-                        </div>
-                        <div className="prose prose-sm max-w-none text-gray-700 whitespace-pre-wrap">
-                          {analysis}
-                        </div>
-                        {analysis.includes('Hiba történt') && (
-                          <button
-                            type="button"
-                            onClick={analyzeRoom}
-                            className="mt-4 px-6 py-3 min-h-[44px] bg-purple-600 text-white rounded-xl font-semibold hover:bg-purple-700 transition-colors"
-                          >
-                            Újrapróbálás
-                          </button>
-                        )}
-                      </div>
-
-                      {/* Product Recommendations */}
-                      {recommendations.length > 0 && (
-                        <div>
-                          <div className="flex items-center justify-between mb-4">
-                            <h3 className="text-xl font-bold text-gray-800">
-                              Ajánlott Termékek
-                            </h3>
-                            <span className="text-sm text-gray-500">
-                              {recommendations.length} találat
-                            </span>
-                          </div>
-                          <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                            {recommendations.map((product) => (
-                              <div
-                                key={product.id}
-                                className="
-                                  bg-white rounded-lg overflow-hidden
-                                  border border-gray-200
-                                  hover:shadow-lg transition-shadow
-                                  cursor-pointer
-                                "
-                              >
-                                <img
-                                  src={product.mainImage || '/placeholder.png'}
-                                  alt={product.name}
-                                  className="w-full h-32 object-cover"
-                                />
-                                <div className="p-3">
-                                  <h4 className="font-semibold text-sm text-gray-800 line-clamp-2 mb-1">
-                                    {product.name}
-                                  </h4>
-                                  <p className="text-lg font-bold text-indigo-600">
-                                    {(product.salePrice || product.price)?.toLocaleString('hu-HU')} Ft
-                                  </p>
-                                </div>
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                      )}
-                      {analysis && !analysis.includes('Hiba történt') && recommendations.length === 0 && (
-                        <p className="text-gray-500 text-center py-4">Nincs egyező ajánlat a katalógusban. Próbálj másik fotót vagy böngéssz a termékek között!</p>
-                      )}
-
-                      {/* Try Again Button */}
-                      <button
-                        type="button"
-                        onClick={resetAnalysis}
-                        className="
-                          w-full py-3 rounded-xl
-                          bg-gray-100 text-gray-700 font-semibold
-                          hover:bg-gray-200 transition-colors
-                          flex items-center justify-center gap-2
-                        "
-                      >
-                        <Upload className="w-5 h-5" />
-                        Új Fotó Feltöltése
-                      </button>
-                    </motion.div>
-                  )}
+                  {/* New Photo Button */}
+                  <button
+                    onClick={resetAnalysis}
+                    className="w-full py-3 rounded-xl bg-gray-100 text-gray-700 font-semibold hover:bg-gray-200 transition-colors flex items-center justify-center gap-2"
+                  >
+                    <Upload className="w-5 h-5" />
+                    Új Fotó Feltöltése
+                  </button>
                 </div>
               )}
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
   );
 };
 

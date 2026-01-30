@@ -1,19 +1,17 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { MessageCircle, X, Send, Loader2, Sparkles, User, Bot } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
-
-const GOOGLE_API_KEY = import.meta.env.VITE_GOOGLE_API_KEY || 'AIzaSyDZV-fAFVCvh4Ad2lKlARMdtHoZWNRwZQA';
+import { MessageCircle, X, Send, Loader2, Sparkles, User, Bot, AlertCircle } from 'lucide-react';
+import { generateText } from '../../services/geminiService';
 
 /**
- * AIChatAssistant - Floating AI Chat powered by Gemini
- * Natural language product search and recommendations
+ * AIChatAssistant - Lebegő AI Chat Gemini-val
+ * Természetes nyelvű termékkeresés és ajánlások
  */
 const AIChatAssistant = ({ products }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState([
     {
       role: 'assistant',
-      content: 'Szia! Segíthetek találni a tökéletes bútort. Mit keresel?',
+      content: 'Szia! 👋 Segíthetek megtalálni a tökéletes bútort. Mit keresel?',
       timestamp: new Date()
     }
   ]);
@@ -42,7 +40,7 @@ const AIChatAssistant = ({ products }) => {
     const userMessage = inputValue.trim();
     setInputValue('');
 
-    // Add user message
+    // User üzenet hozzáadása
     setMessages(prev => [...prev, {
       role: 'user',
       content: userMessage,
@@ -52,73 +50,75 @@ const AIChatAssistant = ({ products }) => {
     setIsLoading(true);
 
     try {
-      // Prepare product context for Gemini - only use products if available
-      const productContext = products && products.length > 0 
-        ? products.slice(0, 20).map(p => `- ${p.name} (${p.category || 'Egyéb'}) - ${(p.salePrice || p.price || 0).toLocaleString('hu-HU')} Ft`).join('\n')
-        : 'Jelenleg nincs elérhető terméklista.';
+      // Termék kontextus előkészítése
+      const productSample = products && products.length > 0 
+        ? products.slice(0, 15).map(p => 
+            `${p.name} - ${(p.salePrice || p.price || 0).toLocaleString('hu-HU')} Ft`
+          ).join('\n')
+        : 'Nincs elérhető termék.';
 
-      const prompt = `Te egy barátságos és segítőkész AI bútor szakértő vagy a Marketly webshopban.
+      const prompt = `Te egy kedves és segítőkész AI bútor tanácsadó vagy a Marketly webshopban.
 
-A felhasználó üzenete: "${userMessage}"
+FELHASZNÁLÓ KÉRDÉSE: "${userMessage}"
 
-Néhány termék a kínálatból:
-${productContext}
+NÉHÁNY TERMÉK A KÍNÁLATBÓL:
+${productSample}
 
-Válaszolj magyarul, maximum 2-3 mondatban. Legyél segítőkész és barátságos. Ha bútort keres, ajánlj konkrét típusokat vagy stílusokat.`;
+SZABÁLYOK:
+- Válaszolj magyarul, 2-3 mondatban
+- Legyél barátságos és segítőkész
+- Ha bútort keres, adj konkrét javaslatokat
+- Ha nem értesz valamit, kérdezz vissza`;
 
-      const response = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GOOGLE_API_KEY}`,
-        {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            contents: [{ parts: [{ text: prompt }] }],
-            generationConfig: {
-              temperature: 0.7,
-              maxOutputTokens: 300,
-            }
-          })
-        }
-      );
+      const result = await generateText(prompt, { temperature: 0.8, maxTokens: 300 });
 
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        console.error('Gemini API error:', response.status, errorData);
-        throw new Error(`API hiba: ${response.status}`);
+      if (result.success && result.text) {
+        setMessages(prev => [...prev, {
+          role: 'assistant',
+          content: result.text,
+          timestamp: new Date()
+        }]);
+      } else {
+        // Fallback válasz API hiba esetén
+        setMessages(prev => [...prev, {
+          role: 'assistant',
+          content: getFallbackResponse(userMessage),
+          timestamp: new Date(),
+          isError: true
+        }]);
       }
-
-      const data = await response.json();
-      
-      // Check for API errors in response
-      if (data.error) {
-        console.error('Gemini returned error:', data.error);
-        throw new Error(data.error.message || 'API hiba');
-      }
-
-      const aiResponse = data.candidates?.[0]?.content?.parts?.[0]?.text;
-      
-      if (!aiResponse) {
-        console.error('No response from Gemini:', data);
-        throw new Error('Üres válasz az AI-tól');
-      }
-
-      // Add AI response
-      setMessages(prev => [...prev, {
-        role: 'assistant',
-        content: aiResponse,
-        timestamp: new Date()
-      }]);
 
     } catch (error) {
-      console.error('Chat error:', error);
+      console.error('Chat hiba:', error);
       setMessages(prev => [...prev, {
         role: 'assistant',
-        content: `Sajnos hiba történt: ${error.message}. Próbáld újra!`,
-        timestamp: new Date()
+        content: 'Elnézést, technikai hiba történt. Próbáld újra!',
+        timestamp: new Date(),
+        isError: true
       }]);
     } finally {
       setIsLoading(false);
     }
+  };
+
+  // Fallback válaszok ha az API nem működik
+  const getFallbackResponse = (message) => {
+    const msg = message.toLowerCase();
+    
+    if (msg.includes('kanapé') || msg.includes('ülőgarnitúra')) {
+      return 'Kanapékat keresel? Nézd meg a "Kanapék" kategóriát a termékek között! Modern és klasszikus stílusokban is találsz remek darabokat.';
+    }
+    if (msg.includes('asztal') || msg.includes('étkező')) {
+      return 'Asztalokat keresel? Az étkezőasztalok és dohányzóasztalok széles választékát találod a termékek között!';
+    }
+    if (msg.includes('szék') || msg.includes('fotel')) {
+      return 'Ülőalkalmatosságot keresel? Böngéssz a székek és fotelek között, biztosan találsz megfelelőt!';
+    }
+    if (msg.includes('ágy') || msg.includes('matrac') || msg.includes('hálószoba')) {
+      return 'Hálószobai bútorokat keresel? Az ágyak és matracok kategóriában remek választékot találsz!';
+    }
+    
+    return 'Szívesen segítek! Böngéssz a termékek között, vagy írd le pontosabban, milyen bútort keresel (pl. kanapé, asztal, szék).';
   };
 
   const handleKeyPress = (e) => {
@@ -130,218 +130,189 @@ Válaszolj magyarul, maximum 2-3 mondatban. Legyél segítőkész és barátság
 
   const quickQuestions = [
     'Modern kanapékat keresek',
-    'Van olcsó étkezőasztalotok?',
-    'Skandináv stílusú bútorokat szeretnék',
-    'Ajánlasz valamit egy 150k budget alatt?'
+    'Olcsó étkezőasztalok?',
+    'Skandináv stílusú bútorok',
+    'Mit ajánlasz 150 ezer alatt?'
   ];
 
   return (
     <>
-      {/* Floating Chat Button */}
-      <AnimatePresence>
-        {!isOpen && (
-          <motion.button
-            initial={{ scale: 0 }}
-            animate={{ scale: 1 }}
-            exit={{ scale: 0 }}
-            whileHover={{ scale: 1.1 }}
-            whileTap={{ scale: 0.9 }}
-            onClick={() => setIsOpen(true)}
-            className="
-              fixed bottom-[calc(1.5rem+44px)] md:bottom-6 right-4 md:right-6 z-50
-              w-14 h-14 md:w-16 md:h-16 rounded-full
-              bg-gradient-to-br from-indigo-500 to-purple-600
-              text-white shadow-2xl
-              flex items-center justify-center
-              transition-all duration-300
-              hover:shadow-indigo-500/50
-            "
-            aria-label="AI Chat megnyitása"
-          >
-            <MessageCircle className="w-7 h-7" />
-            
-            {/* Pulse effect */}
-            <span className="absolute inset-0 rounded-full bg-indigo-500 opacity-0 animate-ping" />
-            
-            {/* Badge */}
-            <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 rounded-full flex items-center justify-center text-xs font-bold">
-              AI
-            </span>
-          </motion.button>
-        )}
-      </AnimatePresence>
+      {/* Lebegő Chat Gomb */}
+      {!isOpen && (
+        <button
+          onClick={() => setIsOpen(true)}
+          className="
+            fixed bottom-[calc(1.5rem+44px)] md:bottom-6 right-4 md:right-6 z-50
+            w-14 h-14 md:w-16 md:h-16 rounded-full
+            bg-gradient-to-br from-indigo-500 to-purple-600
+            text-white shadow-2xl
+            flex items-center justify-center
+            transition-all duration-300
+            hover:shadow-indigo-500/50 hover:scale-110
+          "
+          aria-label="AI Chat megnyitása"
+        >
+          <MessageCircle className="w-7 h-7" />
+          <span className="absolute -top-1 -right-1 w-5 h-5 bg-green-500 rounded-full flex items-center justify-center text-[10px] font-bold animate-pulse">
+            AI
+          </span>
+        </button>
+      )}
 
-      {/* Chat Window */}
-      <AnimatePresence>
-        {isOpen && (
-          <motion.div
-            initial={{ opacity: 0, y: 20, scale: 0.95 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 20, scale: 0.95 }}
-            transition={{ type: 'spring', stiffness: 300, damping: 25 }}
-            className="
-              fixed bottom-[calc(1rem+44px)] md:bottom-6 right-2 md:right-6 z-50
-              w-[calc(100vw-1rem)] md:w-96 h-[calc(100vh-120px)] md:h-[600px] max-h-[80vh]
-              bg-white rounded-2xl shadow-2xl
-              flex flex-col
-              overflow-hidden
-              border border-gray-200
-            "
-          >
-            {/* Header */}
-            <div className="bg-gradient-to-r from-indigo-500 to-purple-600 p-4 flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center">
-                  <Sparkles className="w-6 h-6 text-white" />
+      {/* Chat Ablak */}
+      {isOpen && (
+        <div className="
+          fixed bottom-[calc(1rem+44px)] md:bottom-6 right-2 md:right-6 z-50
+          w-[calc(100vw-1rem)] md:w-96 h-[calc(100vh-120px)] md:h-[550px] max-h-[80vh]
+          bg-white rounded-2xl shadow-2xl
+          flex flex-col overflow-hidden border border-gray-200
+        ">
+          {/* Header */}
+          <div className="bg-gradient-to-r from-indigo-500 to-purple-600 p-4 flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center">
+                <Sparkles className="w-6 h-6 text-white" />
+              </div>
+              <div>
+                <h3 className="text-white font-semibold">AI Asszisztens</h3>
+                <p className="text-white/80 text-xs flex items-center gap-1">
+                  <span className="w-2 h-2 bg-green-400 rounded-full" />
+                  Gemini AI
+                </p>
+              </div>
+            </div>
+            <button
+              onClick={() => setIsOpen(false)}
+              className="text-white/80 hover:text-white transition-colors p-2"
+              aria-label="Bezárás"
+            >
+              <X className="w-6 h-6" />
+            </button>
+          </div>
+
+          {/* Üzenetek */}
+          <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-gray-50">
+            {messages.map((message, index) => (
+              <div
+                key={index}
+                className={`flex gap-3 ${message.role === 'user' ? 'flex-row-reverse' : ''}`}
+              >
+                <div className={`
+                  w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0
+                  ${message.role === 'user' 
+                    ? 'bg-indigo-500' 
+                    : message.isError 
+                      ? 'bg-orange-500'
+                      : 'bg-gradient-to-br from-indigo-500 to-purple-600'
+                  }
+                `}>
+                  {message.role === 'user' ? (
+                    <User className="w-5 h-5 text-white" />
+                  ) : message.isError ? (
+                    <AlertCircle className="w-5 h-5 text-white" />
+                  ) : (
+                    <Bot className="w-5 h-5 text-white" />
+                  )}
                 </div>
-                <div>
-                  <h3 className="text-white font-semibold">AI Asszisztens</h3>
-                  <p className="text-white/80 text-xs flex items-center gap-1">
-                    <span className="w-2 h-2 bg-green-400 rounded-full animate-pulse" />
-                    Online
+
+                <div className={`
+                  max-w-[80%] rounded-2xl p-3
+                  ${message.role === 'user'
+                    ? 'bg-indigo-500 text-white rounded-tr-sm'
+                    : 'bg-white text-gray-800 rounded-tl-sm shadow-sm'
+                  }
+                `}>
+                  <p className="text-sm whitespace-pre-wrap">{message.content}</p>
+                  <p className={`text-xs mt-1 ${message.role === 'user' ? 'text-indigo-200' : 'text-gray-400'}`}>
+                    {message.timestamp.toLocaleTimeString('hu-HU', { 
+                      hour: '2-digit', 
+                      minute: '2-digit' 
+                    })}
                   </p>
                 </div>
               </div>
-              <button
-                onClick={() => setIsOpen(false)}
-                className="text-white/80 hover:text-white transition-colors"
-                aria-label="Bezárás"
-              >
-                <X className="w-6 h-6" />
-              </button>
-            </div>
+            ))}
 
-            {/* Messages */}
-            <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-gray-50">
-              {messages.map((message, index) => (
-                <motion.div
-                  key={index}
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: index * 0.1 }}
-                  className={`flex gap-3 ${message.role === 'user' ? 'flex-row-reverse' : ''}`}
-                >
-                  {/* Avatar */}
-                  <div className={`
-                    w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0
-                    ${message.role === 'user' 
-                      ? 'bg-indigo-500' 
-                      : 'bg-gradient-to-br from-indigo-500 to-purple-600'
-                    }
-                  `}>
-                    {message.role === 'user' ? (
-                      <User className="w-5 h-5 text-white" />
-                    ) : (
-                      <Bot className="w-5 h-5 text-white" />
-                    )}
-                  </div>
-
-                  {/* Message Bubble */}
-                  <div className={`
-                    max-w-[75%] rounded-2xl p-3
-                    ${message.role === 'user'
-                      ? 'bg-indigo-500 text-white rounded-tr-sm'
-                      : 'bg-white text-gray-800 rounded-tl-sm shadow-sm'
-                    }
-                  `}>
-                    <p className="text-sm whitespace-pre-wrap">{message.content}</p>
-                    <p className={`text-xs mt-1 ${message.role === 'user' ? 'text-indigo-200' : 'text-gray-400'}`}>
-                      {message.timestamp.toLocaleTimeString('hu-HU', { 
-                        hour: '2-digit', 
-                        minute: '2-digit' 
-                      })}
-                    </p>
-                  </div>
-                </motion.div>
-              ))}
-
-              {isLoading && (
-                <motion.div
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  className="flex gap-3"
-                >
-                  <div className="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center">
-                    <Bot className="w-5 h-5 text-white" />
-                  </div>
-                  <div className="bg-white rounded-2xl rounded-tl-sm p-3 shadow-sm">
+            {isLoading && (
+              <div className="flex gap-3">
+                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center">
+                  <Bot className="w-5 h-5 text-white" />
+                </div>
+                <div className="bg-white rounded-2xl rounded-tl-sm p-3 shadow-sm">
+                  <div className="flex items-center gap-2">
                     <Loader2 className="w-5 h-5 text-indigo-500 animate-spin" />
+                    <span className="text-sm text-gray-500">Gondolkodom...</span>
                   </div>
-                </motion.div>
-              )}
-
-              <div ref={messagesEndRef} />
-            </div>
-
-            {/* Quick Questions (if no messages yet) */}
-            {messages.length <= 1 && (
-              <div className="p-3 bg-white border-t border-gray-200">
-                <p className="text-xs text-gray-500 mb-2">Gyors kérdések:</p>
-                <div className="space-y-1">
-                  {quickQuestions.map((question, index) => (
-                    <button
-                      key={index}
-                      onClick={() => {
-                        setInputValue(question);
-                        inputRef.current?.focus();
-                      }}
-                      className="
-                        w-full text-left px-3 py-2 rounded-lg
-                        text-xs text-gray-700
-                        bg-gray-50 hover:bg-gray-100
-                        transition-colors
-                      "
-                    >
-                      {question}
-                    </button>
-                  ))}
                 </div>
               </div>
             )}
 
-            {/* Input */}
-            <div className="p-4 bg-white border-t border-gray-200">
-              <div className="flex gap-2">
-                <input
-                  ref={inputRef}
-                  type="text"
-                  value={inputValue}
-                  onChange={(e) => setInputValue(e.target.value)}
-                  onKeyPress={handleKeyPress}
-                  placeholder="Írj üzenetet..."
-                  className="
-                    flex-1 px-4 py-2 rounded-full
-                    bg-gray-100 text-gray-800
-                    focus:outline-none focus:ring-2 focus:ring-indigo-500
-                    text-sm
-                  "
-                  disabled={isLoading}
-                />
-                <button
-                  onClick={handleSendMessage}
-                  disabled={!inputValue.trim() || isLoading}
-                  className="
-                    w-10 h-10 rounded-full
-                    bg-gradient-to-br from-indigo-500 to-purple-600
-                    text-white
-                    flex items-center justify-center
-                    transition-all
-                    hover:scale-105
-                    disabled:opacity-50 disabled:cursor-not-allowed
-                  "
-                  aria-label="Küldés"
-                >
-                  {isLoading ? (
-                    <Loader2 className="w-5 h-5 animate-spin" />
-                  ) : (
-                    <Send className="w-5 h-5" />
-                  )}
-                </button>
+            <div ref={messagesEndRef} />
+          </div>
+
+          {/* Gyors kérdések */}
+          {messages.length <= 1 && (
+            <div className="p-3 bg-white border-t border-gray-100">
+              <p className="text-xs text-gray-500 mb-2">💡 Próbáld ki:</p>
+              <div className="flex flex-wrap gap-1.5">
+                {quickQuestions.map((question, index) => (
+                  <button
+                    key={index}
+                    onClick={() => {
+                      setInputValue(question);
+                      inputRef.current?.focus();
+                    }}
+                    className="px-3 py-1.5 text-xs bg-indigo-50 text-indigo-700 rounded-full hover:bg-indigo-100 transition-colors"
+                  >
+                    {question}
+                  </button>
+                ))}
               </div>
             </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+          )}
+
+          {/* Input */}
+          <div className="p-4 bg-white border-t border-gray-200">
+            <div className="flex gap-2">
+              <input
+                ref={inputRef}
+                type="text"
+                value={inputValue}
+                onChange={(e) => setInputValue(e.target.value)}
+                onKeyPress={handleKeyPress}
+                placeholder="Írj üzenetet..."
+                className="
+                  flex-1 px-4 py-3 rounded-full
+                  bg-gray-100 text-gray-800
+                  focus:outline-none focus:ring-2 focus:ring-indigo-500
+                  text-sm
+                "
+                disabled={isLoading}
+              />
+              <button
+                onClick={handleSendMessage}
+                disabled={!inputValue.trim() || isLoading}
+                className="
+                  w-12 h-12 rounded-full
+                  bg-gradient-to-br from-indigo-500 to-purple-600
+                  text-white
+                  flex items-center justify-center
+                  transition-all
+                  hover:scale-105
+                  disabled:opacity-50 disabled:cursor-not-allowed
+                "
+                aria-label="Küldés"
+              >
+                {isLoading ? (
+                  <Loader2 className="w-5 h-5 animate-spin" />
+                ) : (
+                  <Send className="w-5 h-5" />
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 };
