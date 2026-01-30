@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react'
 import { ShoppingCart, Camera, MessageCircle, X, Send, Plus, Move, Trash2, Home, ZoomIn, ZoomOut, Upload, Settings, Link as LinkIcon, FileText, RefreshCw, AlertCircle, Database, Lock, Search, ChevronLeft, ChevronRight, Filter, Heart, ArrowDownUp, Info, Check, Star, Truck, ShieldCheck, Phone, ArrowRight, Mail, Eye, Sparkles, Lightbulb, Image as ImageIcon, MousePointer2, Menu, Bot, Moon, Sun, Clock, Gift, Zap, TrendingUp, Instagram, Facebook, MapPin, Sofa, Lamp, BedDouble, Armchair, Grid3X3, ExternalLink, Timer, ChevronDown } from 'lucide-react';
 // framer-motion removed due to Vite production build TDZ issues
 import { fetchUnasProducts, refreshUnasProducts, fetchCategories } from './services/unasApi';
+import { trackProductView as trackProductViewPref, getPersonalizedRecommendations, getSimilarProducts } from './services/userPreferencesService';
 
 // New UI Components
 import { ProductCardSkeleton, ProductGridSkeleton, CategorySkeleton } from './components/ui/Skeleton';
@@ -1280,6 +1281,8 @@ const App = () => {
   const [showStyleQuiz, setShowStyleQuiz] = useState(false);
   const [showRoomDesigner, setShowRoomDesigner] = useState(false);
   const [showAIDebug, setShowAIDebug] = useState(false);
+  const [aiRecommendedProducts, setAiRecommendedProducts] = useState([]);
+  const [aiRecommendationLabel, setAiRecommendationLabel] = useState('');
   
   // Quick Peek & AR states
   const [quickPeekProduct, setQuickPeekProduct] = useState(null);
@@ -1296,11 +1299,75 @@ const App = () => {
   const toast = useToast();
   const comparison = useComparison();
   
-  // Track product views
+  // Track product views - both for RecentlyViewed component and user preferences
   const handleProductView = (product) => {
-    trackProductView(product);
+    trackProductView(product); // RecentlyViewed component
+    trackProductViewPref(product); // User preferences service (for AI personalization)
     setSelectedProduct(product);
   };
+  
+  // Handle AI recommended products - scroll to products and show them
+  // Accepts either: (product, allRecommended) OR (recommendedProducts, label)
+  const handleShowAIProducts = useCallback((firstArg, secondArg) => {
+    let recommendedProducts = [];
+    let label = 'AI ajánlások';
+    
+    // Check if first argument is a single product or an array
+    if (firstArg && !Array.isArray(firstArg) && firstArg.id) {
+      // Single product clicked - show it first, then add similar products
+      const clickedProduct = firstArg;
+      const allRecommended = secondArg || [];
+      
+      // Get similar products from the full products list
+      const similarProducts = products
+        .filter(p => {
+          if (p.id === clickedProduct.id) return false;
+          const clickedCat = (clickedProduct.category || '').toLowerCase();
+          const pCat = (p.category || '').toLowerCase();
+          // Same main category or similar price range
+          const sameCategory = clickedCat && pCat && pCat.includes(clickedCat.split(' > ')[0]);
+          const price = p.salePrice || p.price || 0;
+          const clickedPrice = clickedProduct.salePrice || clickedProduct.price || 0;
+          const similarPrice = clickedPrice > 0 && Math.abs(price - clickedPrice) / clickedPrice < 0.5;
+          return sameCategory || similarPrice;
+        })
+        .slice(0, 12);
+      
+      // Combine: clicked product + other recommendations + similar
+      recommendedProducts = [
+        clickedProduct,
+        ...allRecommended.filter(p => p.id !== clickedProduct.id),
+        ...similarProducts.filter(p => !allRecommended.some(r => r.id === p.id))
+      ].slice(0, 20);
+      
+      label = `"${clickedProduct.name.slice(0, 30)}..." és hasonló termékek`;
+    } else if (Array.isArray(firstArg)) {
+      // Array of products provided
+      recommendedProducts = firstArg;
+      label = typeof secondArg === 'string' ? secondArg : 'AI ajánlások';
+    }
+    
+    if (recommendedProducts.length === 0) return;
+    
+    setAiRecommendedProducts(recommendedProducts);
+    setAiRecommendationLabel(label);
+    setCategoryFilter('Összes'); // Reset category
+    setSearchQuery(''); // Reset search
+    
+    // Scroll to products section
+    setTimeout(() => {
+      const productsSection = document.getElementById('products-section');
+      if (productsSection) {
+        productsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    }, 100);
+  }, [products]);
+  
+  // Clear AI recommendations
+  const clearAIRecommendations = useCallback(() => {
+    setAiRecommendedProducts([]);
+    setAiRecommendationLabel('');
+  }, []);
 
   const toggleWishlist = (id) => {
     const isAdding = !wishlist.includes(id);
@@ -1430,8 +1497,11 @@ const App = () => {
   filteredLengthRef.current = filteredAndSortedProducts.length;
 
   // Show first visibleCount items from filtered products
-  const displayedProducts = filteredAndSortedProducts.slice(0, visibleCount);
-  const hasMoreToShow = visibleCount < filteredAndSortedProducts.length;
+  // If AI recommendations are active, show those instead
+  const displayedProducts = aiRecommendedProducts.length > 0 
+    ? aiRecommendedProducts 
+    : filteredAndSortedProducts.slice(0, visibleCount);
+  const hasMoreToShow = aiRecommendedProducts.length === 0 && visibleCount < filteredAndSortedProducts.length;
 
   // When sort/advanced filters change, reset visible window
   useEffect(() => {
@@ -1494,7 +1564,7 @@ const App = () => {
       <BackToTop />
       
       {/* AI Chat Assistant */}
-      <AIChatAssistant products={products} />
+      <AIChatAssistant products={products} onShowProducts={handleShowAIProducts} />
 
       <main id="mkt-butorbolt-main">
         {activeTab === 'shop' && (
@@ -1717,6 +1787,30 @@ const App = () => {
                       }}
                     />
                   )
+                )}
+
+                {/* AI Recommendations Banner */}
+                {aiRecommendedProducts.length > 0 && (
+                  <div className="mb-6 p-4 sm:p-5 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 rounded-2xl shadow-lg">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-white/20 flex items-center justify-center">
+                          <Sparkles className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
+                        </div>
+                        <div>
+                          <h3 className="text-white font-bold text-base sm:text-lg">{aiRecommendationLabel}</h3>
+                          <p className="text-white/80 text-sm">{aiRecommendedProducts.length} személyre szabott ajánlás</p>
+                        </div>
+                      </div>
+                      <button
+                        onClick={clearAIRecommendations}
+                        className="px-4 py-2 bg-white/20 hover:bg-white/30 text-white rounded-lg font-medium text-sm transition-colors flex items-center gap-2"
+                      >
+                        <X className="w-4 h-4" />
+                        <span className="hidden sm:inline">Összes termék</span>
+                      </button>
+                    </div>
+                  </div>
                 )}
 
                 {/* Products Grid - Responsive with Scroll Animations */}

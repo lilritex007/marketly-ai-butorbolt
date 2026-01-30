@@ -8,6 +8,7 @@ import {
   Tv, BedDouble, UtensilsCrossed, Briefcase, Home
 } from 'lucide-react';
 import { generateText } from '../../services/geminiService';
+import { saveStyleDNA, getPersonalizedRecommendations } from '../../services/userPreferencesService';
 
 /**
  * AIStyleQuiz - Személyre szabott stílus kvíz Gemini AI-val
@@ -98,8 +99,10 @@ const AIStyleQuiz = ({ products, onRecommendations, onClose }) => {
   const analyzeStyle = async (allAnswers) => {
     setIsAnalyzing(true);
 
-    // Termék ajánlások generálása (mindenképp)
-    const matchedProducts = findMatchingProducts(allAnswers);
+    // Személyre szabott ajánlások a user preferences service-ből
+    const matchedProducts = products && products.length > 0
+      ? getPersonalizedRecommendations(products, 12)
+      : findMatchingProducts(allAnswers);
     setRecommendations(matchedProducts);
 
     try {
@@ -137,12 +140,18 @@ Legyél barátságos, használj tegezést. Magyarul válaszolj.`;
 
       const result = await generateText(prompt, { temperature: 0.8, maxTokens: 150 });
 
+      let finalStyleDNA;
       if (result.success && result.text) {
-        setStyleDNA(result.text);
+        finalStyleDNA = result.text;
       } else {
         // Lokális fallback
-        setStyleDNA(getLocalStyleDNA(allAnswers));
+        finalStyleDNA = getLocalStyleDNA(allAnswers);
       }
+      
+      setStyleDNA(finalStyleDNA);
+      
+      // Style DNA mentése a localStorage-ba a jövőbeli ajánlásokhoz
+      saveStyleDNA(allAnswers, finalStyleDNA);
 
       if (onRecommendations && matchedProducts.length > 0) {
         onRecommendations(matchedProducts);
@@ -150,7 +159,9 @@ Legyél barátságos, használj tegezést. Magyarul válaszolj.`;
 
     } catch (error) {
       console.error('Quiz hiba:', error);
-      setStyleDNA(getLocalStyleDNA(allAnswers));
+      const fallbackDNA = getLocalStyleDNA(allAnswers);
+      setStyleDNA(fallbackDNA);
+      saveStyleDNA(allAnswers, fallbackDNA);
     } finally {
       setIsAnalyzing(false);
     }

@@ -1,0 +1,516 @@
+/**
+ * User Preferences Service
+ * Központi szolgáltatás a felhasználói viselkedés és preferenciák követésére
+ * localStorage-ban tárolja az adatokat
+ */
+
+const STORAGE_KEYS = {
+  VIEWED_PRODUCTS: 'mkt_viewed_products',
+  LIKED_PRODUCTS: 'mkt_liked_products',
+  DISLIKED_PRODUCTS: 'mkt_disliked_products',
+  SEARCH_HISTORY: 'mkt_search_history',
+  STYLE_DNA: 'mkt_style_dna',
+  AI_FEEDBACK: 'mkt_ai_feedback',
+  CHAT_CONTEXT: 'mkt_chat_context',
+  USER_PREFERENCES: 'mkt_user_preferences',
+};
+
+const MAX_ITEMS = {
+  VIEWED: 50,
+  LIKED: 100,
+  SEARCHES: 20,
+  FEEDBACK: 100,
+};
+
+// ==================== VIEWED PRODUCTS ====================
+
+/**
+ * Termék megtekintésének rögzítése
+ */
+export function trackProductView(product) {
+  if (!product?.id) return;
+  
+  const viewed = getViewedProducts();
+  
+  // Eltávolítjuk ha már volt, és az elejére tesszük
+  const filtered = viewed.filter(p => p.id !== product.id);
+  
+  const productData = {
+    id: product.id,
+    name: product.name,
+    price: product.salePrice || product.price,
+    category: product.category,
+    image: product.images?.[0] || product.image,
+    viewedAt: Date.now(),
+  };
+  
+  const updated = [productData, ...filtered].slice(0, MAX_ITEMS.VIEWED);
+  
+  try {
+    localStorage.setItem(STORAGE_KEYS.VIEWED_PRODUCTS, JSON.stringify(updated));
+  } catch (e) {
+    console.warn('Failed to save viewed products:', e);
+  }
+  
+  // Preferenciák frissítése a kategória alapján
+  updateCategoryPreference(product.category);
+}
+
+/**
+ * Megtekintett termékek lekérdezése
+ */
+export function getViewedProducts(limit = 20) {
+  try {
+    const data = localStorage.getItem(STORAGE_KEYS.VIEWED_PRODUCTS);
+    const parsed = data ? JSON.parse(data) : [];
+    return limit ? parsed.slice(0, limit) : parsed;
+  } catch (e) {
+    return [];
+  }
+}
+
+/**
+ * Legutóbbi megtekintett termék ID-k
+ */
+export function getRecentlyViewedIds(limit = 10) {
+  return getViewedProducts(limit).map(p => p.id);
+}
+
+// ==================== LIKED/DISLIKED PRODUCTS ====================
+
+/**
+ * Termék kedvelése
+ */
+export function likeProduct(productId) {
+  if (!productId) return;
+  
+  const liked = getLikedProducts();
+  if (!liked.includes(productId)) {
+    const updated = [productId, ...liked].slice(0, MAX_ITEMS.LIKED);
+    localStorage.setItem(STORAGE_KEYS.LIKED_PRODUCTS, JSON.stringify(updated));
+  }
+  
+  // Eltávolítás a disliked-ből
+  const disliked = getDislikedProducts();
+  if (disliked.includes(productId)) {
+    localStorage.setItem(
+      STORAGE_KEYS.DISLIKED_PRODUCTS, 
+      JSON.stringify(disliked.filter(id => id !== productId))
+    );
+  }
+}
+
+/**
+ * Termék elutasítása
+ */
+export function dislikeProduct(productId) {
+  if (!productId) return;
+  
+  const disliked = getDislikedProducts();
+  if (!disliked.includes(productId)) {
+    const updated = [productId, ...disliked].slice(0, MAX_ITEMS.LIKED);
+    localStorage.setItem(STORAGE_KEYS.DISLIKED_PRODUCTS, JSON.stringify(updated));
+  }
+  
+  // Eltávolítás a liked-ből
+  const liked = getLikedProducts();
+  if (liked.includes(productId)) {
+    localStorage.setItem(
+      STORAGE_KEYS.LIKED_PRODUCTS, 
+      JSON.stringify(liked.filter(id => id !== productId))
+    );
+  }
+}
+
+export function getLikedProducts() {
+  try {
+    const data = localStorage.getItem(STORAGE_KEYS.LIKED_PRODUCTS);
+    return data ? JSON.parse(data) : [];
+  } catch (e) {
+    return [];
+  }
+}
+
+export function getDislikedProducts() {
+  try {
+    const data = localStorage.getItem(STORAGE_KEYS.DISLIKED_PRODUCTS);
+    return data ? JSON.parse(data) : [];
+  } catch (e) {
+    return [];
+  }
+}
+
+export function isProductLiked(productId) {
+  return getLikedProducts().includes(productId);
+}
+
+// ==================== SEARCH HISTORY ====================
+
+/**
+ * Keresés rögzítése
+ */
+export function trackSearch(query) {
+  if (!query || query.length < 2) return;
+  
+  const searches = getSearchHistory();
+  const filtered = searches.filter(s => s.query.toLowerCase() !== query.toLowerCase());
+  
+  const updated = [
+    { query, timestamp: Date.now() },
+    ...filtered
+  ].slice(0, MAX_ITEMS.SEARCHES);
+  
+  localStorage.setItem(STORAGE_KEYS.SEARCH_HISTORY, JSON.stringify(updated));
+}
+
+export function getSearchHistory(limit = 10) {
+  try {
+    const data = localStorage.getItem(STORAGE_KEYS.SEARCH_HISTORY);
+    const parsed = data ? JSON.parse(data) : [];
+    return limit ? parsed.slice(0, limit) : parsed;
+  } catch (e) {
+    return [];
+  }
+}
+
+// ==================== STYLE DNA (Quiz Results) ====================
+
+/**
+ * Style DNA mentése a quiz eredményéből
+ */
+export function saveStyleDNA(quizAnswers, styleDNAText) {
+  const data = {
+    answers: quizAnswers,
+    styleDNA: styleDNAText,
+    savedAt: Date.now(),
+  };
+  
+  localStorage.setItem(STORAGE_KEYS.STYLE_DNA, JSON.stringify(data));
+}
+
+export function getStyleDNA() {
+  try {
+    const data = localStorage.getItem(STORAGE_KEYS.STYLE_DNA);
+    return data ? JSON.parse(data) : null;
+  } catch (e) {
+    return null;
+  }
+}
+
+// ==================== AI FEEDBACK ====================
+
+/**
+ * AI válasz visszajelzésének rögzítése
+ */
+export function trackAIFeedback(messageId, isPositive, context = {}) {
+  const feedback = getAIFeedback();
+  
+  const updated = [
+    {
+      messageId,
+      isPositive,
+      context,
+      timestamp: Date.now(),
+    },
+    ...feedback
+  ].slice(0, MAX_ITEMS.FEEDBACK);
+  
+  localStorage.setItem(STORAGE_KEYS.AI_FEEDBACK, JSON.stringify(updated));
+}
+
+export function getAIFeedback() {
+  try {
+    const data = localStorage.getItem(STORAGE_KEYS.AI_FEEDBACK);
+    return data ? JSON.parse(data) : [];
+  } catch (e) {
+    return [];
+  }
+}
+
+/**
+ * AI feedback statisztikák
+ */
+export function getAIFeedbackStats() {
+  const feedback = getAIFeedback();
+  const positive = feedback.filter(f => f.isPositive).length;
+  const negative = feedback.filter(f => !f.isPositive).length;
+  
+  return {
+    total: feedback.length,
+    positive,
+    negative,
+    satisfactionRate: feedback.length > 0 ? (positive / feedback.length * 100).toFixed(1) : 0,
+  };
+}
+
+// ==================== CHAT CONTEXT ====================
+
+/**
+ * Chat kontextus mentése (előző beszélgetések összefoglalója)
+ */
+export function saveChatContext(summary) {
+  const context = {
+    summary,
+    savedAt: Date.now(),
+  };
+  
+  localStorage.setItem(STORAGE_KEYS.CHAT_CONTEXT, JSON.stringify(context));
+}
+
+export function getChatContext() {
+  try {
+    const data = localStorage.getItem(STORAGE_KEYS.CHAT_CONTEXT);
+    return data ? JSON.parse(data) : null;
+  } catch (e) {
+    return null;
+  }
+}
+
+// ==================== USER PREFERENCES ====================
+
+/**
+ * Kategória preferencia frissítése
+ */
+function updateCategoryPreference(category) {
+  if (!category) return;
+  
+  const prefs = getUserPreferences();
+  const categories = prefs.categoryInterests || {};
+  
+  categories[category] = (categories[category] || 0) + 1;
+  
+  prefs.categoryInterests = categories;
+  prefs.lastUpdated = Date.now();
+  
+  localStorage.setItem(STORAGE_KEYS.USER_PREFERENCES, JSON.stringify(prefs));
+}
+
+export function getUserPreferences() {
+  try {
+    const data = localStorage.getItem(STORAGE_KEYS.USER_PREFERENCES);
+    return data ? JSON.parse(data) : { categoryInterests: {} };
+  } catch (e) {
+    return { categoryInterests: {} };
+  }
+}
+
+/**
+ * Top kategóriák a felhasználói érdeklődés alapján
+ */
+export function getTopCategories(limit = 5) {
+  const prefs = getUserPreferences();
+  const categories = prefs.categoryInterests || {};
+  
+  return Object.entries(categories)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, limit)
+    .map(([name]) => name);
+}
+
+// ==================== PERSONALIZED CONTEXT FOR AI ====================
+
+/**
+ * Személyre szabott kontextus generálása az AI számára
+ */
+export function getPersonalizedContext() {
+  const viewedProducts = getViewedProducts(5);
+  const likedProducts = getLikedProducts();
+  const topCategories = getTopCategories(3);
+  const styleDNA = getStyleDNA();
+  const searchHistory = getSearchHistory(5);
+  
+  let context = '';
+  
+  if (styleDNA?.styleDNA) {
+    context += `A felhasználó stílus profilja: ${styleDNA.styleDNA}\n`;
+  }
+  
+  if (topCategories.length > 0) {
+    context += `Kedvelt kategóriák: ${topCategories.join(', ')}\n`;
+  }
+  
+  if (viewedProducts.length > 0) {
+    context += `Nemrég nézett termékek: ${viewedProducts.map(p => p.name).join(', ')}\n`;
+  }
+  
+  if (searchHistory.length > 0) {
+    context += `Korábbi keresések: ${searchHistory.map(s => s.query).join(', ')}\n`;
+  }
+  
+  if (likedProducts.length > 0) {
+    context += `Kedvelt termékek száma: ${likedProducts.length}\n`;
+  }
+  
+  return context || 'Új felhasználó, nincs előzmény.';
+}
+
+/**
+ * Személyre szabott termék ajánlások
+ * Figyelembe veszi: megtekintett, kedvelt, kategória preferenciák
+ */
+export function getPersonalizedRecommendations(allProducts, limit = 12) {
+  if (!allProducts || allProducts.length === 0) return [];
+  
+  const viewedIds = getRecentlyViewedIds();
+  const likedIds = getLikedProducts();
+  const dislikedIds = getDislikedProducts();
+  const topCategories = getTopCategories(5);
+  const styleDNA = getStyleDNA();
+  
+  // Pontozzuk a termékeket
+  const scored = allProducts.map(product => {
+    let score = 0;
+    
+    // Ne ajánljunk olyat, amit már nézett vagy nem kedvelt
+    if (viewedIds.includes(product.id)) score -= 10;
+    if (dislikedIds.includes(product.id)) score -= 50;
+    if (likedIds.includes(product.id)) score += 20;
+    
+    // Kategória preferencia
+    const productCategory = product.category || '';
+    topCategories.forEach((cat, index) => {
+      if (productCategory.toLowerCase().includes(cat.toLowerCase())) {
+        score += (5 - index) * 5; // Első kategória +25, második +20, stb.
+      }
+    });
+    
+    // Style DNA alapú pontozás
+    if (styleDNA?.answers) {
+      const { space, colors, budget, priority, room } = styleDNA.answers;
+      const productText = `${product.name} ${product.category} ${product.description || ''}`.toLowerCase();
+      
+      // Stílus
+      const styleKeywords = {
+        modern: ['modern', 'minimalista', 'letisztult'],
+        scandinavian: ['skandináv', 'natúr', 'világos', 'fehér'],
+        industrial: ['indusztriális', 'loft', 'fém', 'ipari'],
+        vintage: ['vintage', 'retro', 'antik'],
+        bohemian: ['bohém', 'színes', 'mintás'],
+      };
+      
+      if (space && styleKeywords[space]) {
+        styleKeywords[space].forEach(kw => {
+          if (productText.includes(kw)) score += 10;
+        });
+      }
+      
+      // Budget
+      const price = product.salePrice || product.price || 0;
+      if (budget === 'budget' && price < 100000) score += 15;
+      if (budget === 'mid' && price >= 100000 && price <= 300000) score += 15;
+      if (budget === 'premium' && price > 300000) score += 15;
+      
+      // Szoba típus
+      const roomKeywords = {
+        living: ['kanapé', 'fotel', 'dohányzó', 'tv', 'nappali'],
+        bedroom: ['ágy', 'matrac', 'éjjeli', 'hálószoba'],
+        dining: ['étkező', 'asztal', 'szék'],
+        office: ['íróasztal', 'iroda', 'forgószék'],
+      };
+      
+      if (room && roomKeywords[room]) {
+        roomKeywords[room].forEach(kw => {
+          if (productText.includes(kw)) score += 10;
+        });
+      }
+    }
+    
+    // Kis random faktor a változatosságért
+    score += Math.random() * 5;
+    
+    return { product, score };
+  });
+  
+  // Top termékek visszaadása
+  return scored
+    .sort((a, b) => b.score - a.score)
+    .slice(0, limit)
+    .map(s => s.product);
+}
+
+/**
+ * Hasonló termékek keresése
+ */
+export function getSimilarProducts(product, allProducts, limit = 8) {
+  if (!product || !allProducts) return [];
+  
+  const dislikedIds = getDislikedProducts();
+  
+  const productName = (product.name || '').toLowerCase();
+  const productCategory = (product.category || '').toLowerCase();
+  const productPrice = product.salePrice || product.price || 0;
+  
+  // Kulcsszavak kinyerése a névből
+  const keywords = productName
+    .split(/[\s,\-\/]+/)
+    .filter(w => w.length > 3)
+    .slice(0, 5);
+  
+  const scored = allProducts
+    .filter(p => p.id !== product.id && !dislikedIds.includes(p.id))
+    .map(p => {
+      let score = 0;
+      const pName = (p.name || '').toLowerCase();
+      const pCategory = (p.category || '').toLowerCase();
+      const pPrice = p.salePrice || p.price || 0;
+      
+      // Ugyanaz a kategória
+      if (pCategory && productCategory && pCategory.includes(productCategory.split(' > ')[0])) {
+        score += 30;
+      }
+      
+      // Hasonló ár (±30%)
+      if (pPrice > 0 && productPrice > 0) {
+        const priceDiff = Math.abs(pPrice - productPrice) / productPrice;
+        if (priceDiff < 0.3) score += 20;
+        else if (priceDiff < 0.5) score += 10;
+      }
+      
+      // Kulcsszó egyezés
+      keywords.forEach(kw => {
+        if (pName.includes(kw)) score += 5;
+      });
+      
+      return { product: p, score };
+    });
+  
+  return scored
+    .filter(s => s.score > 0)
+    .sort((a, b) => b.score - a.score)
+    .slice(0, limit)
+    .map(s => s.product);
+}
+
+// ==================== CLEAR DATA ====================
+
+export function clearAllData() {
+  Object.values(STORAGE_KEYS).forEach(key => {
+    localStorage.removeItem(key);
+  });
+}
+
+export default {
+  trackProductView,
+  getViewedProducts,
+  getRecentlyViewedIds,
+  likeProduct,
+  dislikeProduct,
+  getLikedProducts,
+  getDislikedProducts,
+  isProductLiked,
+  trackSearch,
+  getSearchHistory,
+  saveStyleDNA,
+  getStyleDNA,
+  trackAIFeedback,
+  getAIFeedback,
+  getAIFeedbackStats,
+  saveChatContext,
+  getChatContext,
+  getUserPreferences,
+  getTopCategories,
+  getPersonalizedContext,
+  getPersonalizedRecommendations,
+  getSimilarProducts,
+  clearAllData,
+};

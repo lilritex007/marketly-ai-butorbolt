@@ -1,117 +1,119 @@
-import React, { useState, useEffect } from 'react';
-import { Sparkles, ArrowRight } from 'lucide-react';
+import React, { useState, useEffect, useMemo } from 'react';
+import { Sparkles, ThumbsUp, ThumbsDown, ArrowRight } from 'lucide-react';
 import { EnhancedProductCard } from './EnhancedProductCard';
-
-const GOOGLE_API_KEY = import.meta.env.VITE_GOOGLE_API_KEY || "AIzaSyDZV-fAFVCvh4Ad2lKlARMdtHoZWNRwZQA";
+import { generateText } from '../../services/geminiService';
+import { 
+  getSimilarProducts, 
+  likeProduct, 
+  dislikeProduct, 
+  isProductLiked,
+  getDislikedProducts 
+} from '../../services/userPreferencesService';
 
 /**
  * AI-Powered Similar Products Recommendation
+ * Uses user preferences and AI for personalized recommendations
  */
 export const SimilarProducts = ({ 
   currentProduct, 
   allProducts, 
   onToggleWishlist, 
-  wishlist, 
+  wishlist = [], 
   onQuickView,
   maxResults = 4 
 }) => {
   const [similarProducts, setSimilarProducts] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
-  const [useAI, setUseAI] = useState(true);
+  const [aiReason, setAiReason] = useState('');
 
   useEffect(() => {
     if (currentProduct && allProducts.length > 0) {
-      if (useAI) {
-        findSimilarWithAI();
-      } else {
-        findSimilarBasic();
-      }
+      findSimilarProducts();
     }
-  }, [currentProduct, allProducts, useAI]);
+  }, [currentProduct, allProducts]);
 
-  const findSimilarBasic = () => {
+  const findSimilarProducts = async () => {
+    setIsLoading(true);
+    setAiReason('');
+
+    try {
+      // Először próbáljuk a userPreferencesService-t (gyors, lokális)
+      const localSimilar = getSimilarProducts(currentProduct, allProducts, maxResults + 4);
+      
+      if (localSimilar.length >= maxResults) {
+        // Van elég lokális találat
+        setSimilarProducts(localSimilar.slice(0, maxResults));
+        setAiReason('Személyre szabott ajánlás a böngészési előzmények alapján');
+        setIsLoading(false);
+        return;
+      }
+
+      // Ha kevés lokális találat van, kérjünk AI-tól is segítséget
+      const productContext = allProducts
+        .filter(p => p.id !== currentProduct.id)
+        .slice(0, 30)
+        .map(p => `${p.name} (${p.category}) - ${(p.salePrice || p.price || 0).toLocaleString('hu-HU')} Ft`)
+        .join('\n');
+
+      const prompt = `A vásárló épp ezt nézi: "${currentProduct.name}" (${currentProduct.category})
+Ár: ${(currentProduct.salePrice || currentProduct.price || 0).toLocaleString('hu-HU')} Ft
+
+Elérhető termékek:
+${productContext}
+
+Ajánlj 4 hasonló terméket ami illik hozzá! 
+Válaszolj egyetlen mondatban, hogy MIÉRT passzolnak ezek.
+Csak az indoklást írd meg, ne a termékneveket!`;
+
+      const result = await generateText(prompt, { temperature: 0.7, maxTokens: 100 });
+      
+      if (result.success && result.text) {
+        setAiReason(result.text);
+      }
+
+      // Kombináljuk a lokális és egyszerű hasonlóságot
+      const combined = localSimilar.length > 0 
+        ? localSimilar 
+        : findBasicSimilar();
+      
+      setSimilarProducts(combined.slice(0, maxResults));
+
+    } catch (error) {
+      console.warn('Similar products error:', error);
+      setSimilarProducts(findBasicSimilar());
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const findBasicSimilar = () => {
     // Basic similarity: same category, similar price range
-    const priceRange = currentProduct.price * 0.3; // ±30%
+    const price = currentProduct.salePrice || currentProduct.price || 0;
+    const priceRange = price * 0.4; // ±40%
+    const dislikedIds = getDislikedProducts();
     
     const similar = allProducts
       .filter(p => 
         p.id !== currentProduct.id &&
-        p.category === currentProduct.category &&
-        Math.abs(p.price - currentProduct.price) <= priceRange
+        !dislikedIds.includes(p.id) &&
+        (p.category || '').includes((currentProduct.category || '').split(' > ')[0]) &&
+        Math.abs((p.salePrice || p.price || 0) - price) <= priceRange
       )
+      .sort(() => Math.random() - 0.5)
       .slice(0, maxResults);
 
-    setSimilarProducts(similar);
+    return similar;
   };
 
-  const findSimilarWithAI = async () => {
-    setIsLoading(true);
-    try {
-      // Get product IDs and basic info for AI
-      const productList = allProducts
-        .filter(p => p.id !== currentProduct.id)
-        .map(p => ({
-          id: p.id,
-          name: p.name,
-          category: p.category,
-          price: p.price,
-          params: p.params
-        }));
+  // Feedback kezelés
+  const handleLike = (productId) => {
+    likeProduct(productId);
+  };
 
-      const prompt = `Jelenlegi termék: "${currentProduct.name}"
-Kategória: ${currentProduct.category}
-Ár: ${currentProduct.price} Ft
-Paraméterek: ${currentProduct.params || 'Nincs'}
-
-Elérhető termékek (${productList.length} db):
-${productList.slice(0, 50).map(p => `- ID:${p.id} | ${p.name} (${p.category}) - ${p.price} Ft`).join('\n')}
-
-Adj vissza JSON-t a ${maxResults} LEGINKÁBB HASONLÓ termék ID-jével:
-{
-  "similarIds": [id1, id2, id3, id4],
-  "reason": "rövid indoklás"
-}
-
-Figyelj a stílusra, kategóriára, árkategóriára.`;
-
-      const response = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GOOGLE_API_KEY}`,
-        {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            contents: [{ parts: [{ text: prompt }] }],
-            generationConfig: { responseMimeType: "application/json" }
-          })
-        }
-      );
-
-      if (!response.ok) {
-        console.warn('Gemini API error, falling back to basic similarity');
-        findSimilarBasic();
-        return;
-      }
-
-      const data = await response.json();
-      const resultText = data.candidates?.[0]?.content?.parts?.[0]?.text || '{"similarIds":[]}';
-      const result = JSON.parse(resultText);
-
-      const similarIds = result.similarIds || [];
-      const similar = similarIds
-        .map(id => allProducts.find(p => p.id === id))
-        .filter(Boolean);
-
-      if (similar.length > 0) {
-        setSimilarProducts(similar);
-      } else {
-        findSimilarBasic();
-      }
-    } catch (error) {
-      console.warn('Similar products AI error:', error);
-      findSimilarBasic(); // Fallback to basic
-    } finally {
-      setIsLoading(false);
-    }
+  const handleDislike = (productId) => {
+    dislikeProduct(productId);
+    // Eltávolítjuk a listából
+    setSimilarProducts(prev => prev.filter(p => p.id !== productId));
   };
 
   if (similarProducts.length === 0 && !isLoading) {
@@ -119,55 +121,62 @@ Figyelj a stílusra, kategóriára, árkategóriára.`;
   }
 
   return (
-    <div className="bg-gradient-to-br from-purple-50 to-indigo-50 py-12 px-4 sm:px-6 lg:px-8 my-16 rounded-3xl">
+    <div className="bg-gradient-to-br from-purple-50 to-indigo-50 py-8 sm:py-12 px-4 sm:px-6 lg:px-8 my-8 sm:my-16 rounded-2xl sm:rounded-3xl">
       <div className="max-w-7xl mx-auto">
-        <div className="flex items-center justify-between mb-8">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6 sm:mb-8">
           <div>
             <div className="flex items-center gap-2 mb-2">
-              <Sparkles className="w-6 h-6 text-indigo-600" />
-              <h2 className="text-2xl sm:text-3xl font-bold text-gray-900">
-                Hasonló termékek
+              <Sparkles className="w-5 h-5 sm:w-6 sm:h-6 text-indigo-600" />
+              <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900">
+                Neked ajánljuk
               </h2>
             </div>
-            <p className="text-gray-600">
-              AI ajánlás a(z) <strong>{currentProduct.name}</strong> alapján
-            </p>
-          </div>
-          
-          <button
-            onClick={() => setUseAI(!useAI)}
-            className="hidden sm:flex items-center gap-2 px-4 py-2 bg-white rounded-xl text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors border border-gray-200"
-            title={useAI ? 'AI ajánlás' : 'Egyszerű ajánlás'}
-          >
-            {useAI ? (
-              <>
-                <Sparkles className="w-4 h-4 text-indigo-600" />
-                AI
-              </>
-            ) : (
-              <>Basic</>
+            {aiReason && (
+              <p className="text-sm sm:text-base text-gray-600 max-w-xl">
+                {aiReason}
+              </p>
             )}
-          </button>
+          </div>
         </div>
 
         {isLoading ? (
           <div className="flex items-center justify-center py-12">
             <div className="flex items-center gap-3 text-indigo-600">
               <Sparkles className="w-6 h-6 animate-pulse" />
-              <span className="text-lg font-medium">AI elemzi a termékeket...</span>
+              <span className="text-base sm:text-lg font-medium">Személyre szabott ajánlás készül...</span>
             </div>
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {similarProducts.map(product => (
-              <EnhancedProductCard
-                key={product.id}
-                product={product}
-                onToggleWishlist={onToggleWishlist}
-                isWishlisted={wishlist.includes(product.id)}
-                onQuickView={onQuickView}
-                showBadges={false}
-              />
+          <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-6">
+            {similarProducts.map((product, index) => (
+              <div key={product.id} className="relative group">
+                <EnhancedProductCard
+                  product={product}
+                  onToggleWishlist={onToggleWishlist}
+                  isWishlisted={wishlist.includes(product.id)}
+                  onQuickView={onQuickView}
+                  showBadges={false}
+                  index={index}
+                />
+                
+                {/* Feedback buttons */}
+                <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <button
+                    onClick={(e) => { e.stopPropagation(); handleLike(product.id); }}
+                    className={`p-1.5 rounded-full bg-white shadow-sm ${isProductLiked(product.id) ? 'text-green-600' : 'text-gray-400 hover:text-green-600'} transition-colors`}
+                    title="Tetszik"
+                  >
+                    <ThumbsUp className="w-4 h-4" />
+                  </button>
+                  <button
+                    onClick={(e) => { e.stopPropagation(); handleDislike(product.id); }}
+                    className="p-1.5 rounded-full bg-white shadow-sm text-gray-400 hover:text-red-600 transition-colors"
+                    title="Nem tetszik"
+                  >
+                    <ThumbsDown className="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
             ))}
           </div>
         )}
