@@ -14,6 +14,7 @@ import { AIShowcase, AIOnboarding } from './components/ai/AIShowcase';
 import AIChatAssistant from './components/ai/AIChatAssistant';
 import AIRoomDesigner from './components/ai/AIRoomDesigner';
 import AIStyleQuiz from './components/ai/AIStyleQuiz';
+import AIDebugPanel from './components/debug/AIDebugPanel';
 
 // Category Components
 import CategorySwipe from './components/category/CategorySwipe';
@@ -1278,6 +1279,7 @@ const App = () => {
   // AI Feature states
   const [showStyleQuiz, setShowStyleQuiz] = useState(false);
   const [showRoomDesigner, setShowRoomDesigner] = useState(false);
+  const [showAIDebug, setShowAIDebug] = useState(false);
   
   // Quick Peek & AR states
   const [quickPeekProduct, setQuickPeekProduct] = useState(null);
@@ -1856,6 +1858,20 @@ const App = () => {
           return Promise.resolve();
         }}
       />
+
+      {/* AI Debug Panel */}
+      {showAIDebug && (
+        <AIDebugPanel onClose={() => setShowAIDebug(false)} />
+      )}
+
+      {/* AI Debug Trigger - kis gomb a bal alsó sarokban */}
+      <button
+        onClick={() => setShowAIDebug(true)}
+        className="fixed bottom-[calc(1.5rem+44px)] md:bottom-6 left-4 z-40 w-10 h-10 bg-orange-500 text-white rounded-full shadow-lg flex items-center justify-center hover:bg-orange-600 transition-colors text-xs font-bold"
+        title="AI Debug Panel"
+      >
+        🔧
+      </button>
     </div>
     </ToastProvider>
   );
