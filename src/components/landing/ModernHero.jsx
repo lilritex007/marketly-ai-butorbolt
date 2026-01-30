@@ -65,39 +65,40 @@ export const ModernHero = ({ onExplore, onTryAI }) => {
         />
       </div>
 
-      <div className="relative z-10 w-full max-w-[2000px] mx-auto px-4 sm:px-6 lg:px-10 xl:px-16 py-12 sm:py-16 lg:py-24 xl:py-28">
+      {/* MOBILE-FIRST: Minimal padding, full-width feel */}
+      <div className="relative z-10 w-full max-w-[2000px] mx-auto px-3 sm:px-6 lg:px-10 xl:px-16 py-8 sm:py-12 lg:py-20 xl:py-28">
         <div className="text-center">
-          {/* Floating Badge */}
-          <div className="inline-flex items-center px-5 sm:px-7 py-3 sm:py-3.5 bg-white/80 backdrop-blur-sm rounded-full shadow-lg border border-indigo-100 mb-6 sm:mb-8 lg:mb-10 animate-float">
-            <Sparkles className="w-5 h-5 sm:w-6 sm:h-6 text-indigo-600 mr-2.5 animate-pulse" />
-            <span className="text-sm sm:text-base lg:text-lg font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
-              AI-Powered Furniture Shopping
+          {/* Floating Badge - compact on mobile */}
+          <div className="inline-flex items-center px-3 sm:px-5 py-2 sm:py-3 bg-white/80 backdrop-blur-sm rounded-full shadow-lg border border-indigo-100 mb-4 sm:mb-6 lg:mb-10 animate-float">
+            <Sparkles className="w-4 h-4 sm:w-5 sm:h-5 text-indigo-600 mr-2 animate-pulse" />
+            <span className="text-xs sm:text-sm lg:text-base font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
+              AI Bútorbolt
             </span>
-            <span className="ml-3 px-2.5 py-1 bg-green-100 text-green-700 text-xs sm:text-sm font-bold rounded-full">
+            <span className="ml-2 px-2 py-0.5 bg-green-100 text-green-700 text-[10px] sm:text-xs font-bold rounded-full">
               ÚJ
             </span>
           </div>
 
-          {/* Main Heading - LARGER on all screens */}
-          <h1 className="text-4xl sm:text-6xl md:text-7xl lg:text-8xl xl:text-9xl font-extrabold mb-6 sm:mb-8 lg:mb-10 leading-tight">
-            <span className="block text-gray-900 mb-2">Találd meg az</span>
+          {/* Main Heading - BIGGER on mobile too */}
+          <h1 className="text-[2.5rem] leading-[1.1] sm:text-6xl md:text-7xl lg:text-8xl xl:text-9xl font-extrabold mb-4 sm:mb-6 lg:mb-10">
+            <span className="block text-gray-900 mb-1">Találd meg az</span>
             <span className="block bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 bg-clip-text text-transparent animate-gradient">
               ideális bútort
             </span>
-            <span className="block text-gray-900 mt-2">AI segítséggel</span>
+            <span className="block text-gray-900 mt-1">AI segítséggel</span>
           </h1>
 
-          {/* Subheading - LARGER */}
-          <p className="text-lg sm:text-xl md:text-2xl lg:text-3xl text-gray-600 max-w-5xl mx-auto mb-10 sm:mb-14 lg:mb-16 leading-relaxed px-2">
+          {/* Subheading - readable on mobile */}
+          <p className="text-base sm:text-lg md:text-xl lg:text-2xl xl:text-3xl text-gray-600 max-w-5xl mx-auto mb-6 sm:mb-10 lg:mb-16 leading-relaxed px-1">
             Forradalmi AI technológia találkozik a bútorvásárlással. 
             <span className="font-semibold text-indigo-600"> Fotózz, tervezz, vásárolj</span> - minden egy helyen.
           </p>
 
-          {/* CTA Buttons - full width on mobile, LARGER */}
-          <div className="flex flex-col sm:flex-row gap-4 sm:gap-5 lg:gap-6 justify-center items-stretch sm:items-center mb-12 sm:mb-16 lg:mb-20">
+          {/* CTA Buttons - FULL WIDTH on mobile */}
+          <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 lg:gap-6 justify-center items-stretch sm:items-center mb-8 sm:mb-12 lg:mb-20 px-1">
             <button
               onClick={onTryAI}
-              className="group relative w-full sm:w-auto px-7 py-4 min-h-[52px] sm:px-10 sm:py-5 lg:px-12 lg:py-6 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-2xl font-bold text-lg sm:text-xl lg:text-2xl shadow-2xl hover:shadow-indigo-500/50 transition-all transform hover:-translate-y-1 hover:scale-105 overflow-hidden flex items-center justify-center"
+              className="group relative w-full sm:w-auto px-6 py-4 min-h-[56px] sm:px-8 sm:py-5 lg:px-12 lg:py-6 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-xl sm:rounded-2xl font-bold text-base sm:text-lg lg:text-2xl shadow-2xl hover:shadow-indigo-500/50 transition-all transform hover:-translate-y-1 hover:scale-105 overflow-hidden flex items-center justify-center"
             >
               <span className="relative z-10 flex items-center">
                 <Sparkles className="w-5 h-5 sm:w-6 sm:h-6 lg:w-7 lg:h-7 mr-2.5" />
@@ -109,36 +110,36 @@ export const ModernHero = ({ onExplore, onTryAI }) => {
 
             <button
               onClick={onExplore}
-              className="w-full sm:w-auto px-7 py-4 min-h-[52px] sm:px-10 sm:py-5 lg:px-12 lg:py-6 bg-white text-gray-900 rounded-2xl font-bold text-lg sm:text-xl lg:text-2xl shadow-lg hover:shadow-xl transition-all transform hover:-translate-y-1 border-2 border-gray-200 hover:border-indigo-300 flex items-center justify-center"
+              className="w-full sm:w-auto px-6 py-4 min-h-[56px] sm:px-8 sm:py-5 lg:px-12 lg:py-6 bg-white text-gray-900 rounded-xl sm:rounded-2xl font-bold text-base sm:text-lg lg:text-2xl shadow-lg hover:shadow-xl transition-all transform hover:-translate-y-1 border-2 border-gray-200 hover:border-indigo-300 flex items-center justify-center"
             >
-              Kollekció megtekintése
+              Kollekció
               <ChevronRight className="w-5 h-5 sm:w-6 sm:h-6 lg:w-7 lg:h-7 ml-2" />
             </button>
           </div>
 
-          {/* Stats - LARGER and full width */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6 lg:gap-8 max-w-6xl mx-auto">
+          {/* Stats - COMPACT on mobile, 2x2 grid */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-4 lg:gap-6 max-w-6xl mx-auto px-1">
             {[
               { icon: Package, value: '170K+', label: 'Termék' },
-              { icon: Users, value: '50K+', label: 'Elégedett vásárló' },
+              { icon: Users, value: '50K+', label: 'Vásárló' },
               { icon: Star, value: '4.9/5', label: 'Értékelés' },
-              { icon: Zap, value: '24/7', label: 'AI Support' }
+              { icon: Zap, value: '24/7', label: 'Support' }
             ].map((stat, idx) => (
               <div 
                 key={idx} 
-                className="bg-white/60 backdrop-blur-sm rounded-2xl lg:rounded-3xl p-5 sm:p-7 lg:p-8 border border-white/20 shadow-lg hover:shadow-xl transition-all transform hover:-translate-y-1"
+                className="bg-white/60 backdrop-blur-sm rounded-xl sm:rounded-2xl lg:rounded-3xl p-3 sm:p-5 lg:p-8 border border-white/20 shadow-lg hover:shadow-xl transition-all transform hover:-translate-y-1"
               >
-                <stat.icon className="w-7 h-7 sm:w-9 sm:h-9 lg:w-12 lg:h-12 text-indigo-600 mx-auto mb-2 lg:mb-3" />
-                <div className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-gray-900 mb-1">{stat.value}</div>
-                <div className="text-sm sm:text-base lg:text-lg text-gray-600 font-medium">{stat.label}</div>
+                <stat.icon className="w-6 h-6 sm:w-8 sm:h-8 lg:w-12 lg:h-12 text-indigo-600 mx-auto mb-1 sm:mb-2 lg:mb-3" />
+                <div className="text-xl sm:text-2xl lg:text-4xl font-extrabold text-gray-900 mb-0.5">{stat.value}</div>
+                <div className="text-xs sm:text-sm lg:text-lg text-gray-600 font-medium">{stat.label}</div>
               </div>
             ))}
           </div>
         </div>
       </div>
 
-      {/* Scroll Indicator */}
-      <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 animate-bounce">
+      {/* Scroll Indicator - hidden on small mobile */}
+      <div className="absolute bottom-6 sm:bottom-8 left-1/2 transform -translate-x-1/2 animate-bounce hidden sm:block">
         <div className="w-6 h-10 border-2 border-indigo-600 rounded-full flex justify-center p-1">
           <div className="w-1.5 h-3 bg-indigo-600 rounded-full animate-scroll" />
         </div>

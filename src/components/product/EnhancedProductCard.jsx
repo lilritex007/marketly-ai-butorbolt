@@ -76,7 +76,7 @@ export const EnhancedProductCard = ({
     <article 
       ref={cardRef}
       className={`
-        group relative bg-white rounded-xl sm:rounded-2xl lg:rounded-3xl overflow-hidden 
+        group relative bg-white rounded-lg sm:rounded-xl lg:rounded-2xl overflow-hidden 
         shadow-sm border border-gray-100 h-full flex flex-col
         hover-card tap-scale
         ${isVisible ? 'opacity-100' : 'opacity-0 translate-y-3'}
@@ -88,20 +88,20 @@ export const EnhancedProductCard = ({
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      {/* Smart Badges */}
-      <div className="absolute top-2 sm:top-3 lg:top-4 left-2 sm:left-3 lg:left-4 z-20">
+      {/* Smart Badges - COMPACT on mobile */}
+      <div className="absolute top-1 sm:top-2 lg:top-3 left-1 sm:left-2 lg:left-3 z-20">
         <SmartBadges product={product} maxBadges={2} />
       </div>
 
-      {/* Wishlist Button - larger on desktop */}
+      {/* Wishlist Button - COMPACT on mobile */}
       <button 
         onClick={(e) => { 
           e.stopPropagation(); 
           onToggleWishlist?.(product.id); 
         }} 
         className={`
-          absolute top-2 sm:top-3 lg:top-4 right-2 sm:right-3 lg:right-4 z-20
-          w-10 h-10 lg:w-12 lg:h-12 flex items-center justify-center 
+          absolute top-1 sm:top-2 lg:top-3 right-1 sm:right-2 lg:right-3 z-20
+          w-8 h-8 sm:w-9 sm:h-9 lg:w-11 lg:h-11 flex items-center justify-center 
           rounded-full shadow-md tap-scale
           ${isWishlisted 
             ? 'bg-red-500 text-white' 
@@ -111,10 +111,10 @@ export const EnhancedProductCard = ({
         style={{ transition: 'background-color 0.15s, color 0.15s' }}
         aria-label={isWishlisted ? 'Eltávolítás' : 'Kedvencekhez'}
       >
-        <Heart className={`w-5 h-5 lg:w-6 lg:h-6 ${isWishlisted ? 'fill-current' : ''}`} />
+        <Heart className={`w-4 h-4 sm:w-4.5 sm:h-4.5 lg:w-5 lg:h-5 ${isWishlisted ? 'fill-current' : ''}`} />
       </button>
 
-      {/* Image Section - Optimized Loading */}
+      {/* Image Section - TIGHTER padding on mobile */}
       <div 
         onClick={() => onQuickView?.(product)} 
         className="relative aspect-square overflow-hidden bg-gray-50 cursor-pointer"
@@ -124,12 +124,12 @@ export const EnhancedProductCard = ({
           <div className="absolute inset-0 bg-gray-100" />
         )}
         
-        {/* Actual image - GPU optimized */}
+        {/* Actual image - MINIMAL padding on mobile */}
         <img 
           src={imageError ? PLACEHOLDER_IMAGE : mainImage}
           alt={product.name} 
           className={`
-            w-full h-full object-contain p-3 sm:p-4 lg:p-6
+            w-full h-full object-contain p-1.5 sm:p-3 lg:p-5
             transition-opacity duration-300 ease-out
             ${imageLoaded ? 'opacity-100' : 'opacity-0'}
           `}
@@ -140,8 +140,8 @@ export const EnhancedProductCard = ({
           onError={() => { setImageError(true); setImageLoaded(true); }}
         />
         
-        {/* Stock badge */}
-        <div className="absolute bottom-2 sm:bottom-3 left-2 sm:left-3">
+        {/* Stock badge - smaller on mobile */}
+        <div className="absolute bottom-1 sm:bottom-2 left-1 sm:left-2">
           <StockBadge inStock={inStock} />
         </div>
         
@@ -163,46 +163,46 @@ export const EnhancedProductCard = ({
         </div>
       </div>
 
-      {/* Content Section - LARGER on desktop */}
-      <div className="p-3 sm:p-4 lg:p-6 xl:p-7 flex flex-col flex-1">
-        {/* Category */}
-        <span className="text-[11px] sm:text-xs lg:text-sm font-semibold text-indigo-600 uppercase tracking-wide mb-1 lg:mb-2">
+      {/* Content Section - COMPACT on mobile */}
+      <div className="p-2 sm:p-3 lg:p-5 xl:p-6 flex flex-col flex-1">
+        {/* Category - hidden on very small screens */}
+        <span className="hidden xs:block text-[10px] sm:text-xs lg:text-sm font-semibold text-indigo-600 uppercase tracking-wide mb-0.5 lg:mb-1.5 truncate">
           {product.category}
         </span>
         
-        {/* Product Name */}
+        {/* Product Name - 1 line on mobile, 2 lines on larger */}
         <h3 
           onClick={() => onQuickView?.(product)} 
-          className="text-sm sm:text-base lg:text-xl xl:text-2xl font-bold text-gray-900 line-clamp-2 leading-snug cursor-pointer hover:text-indigo-600 transition-colors mb-2 lg:mb-4 underline-slide" 
+          className="text-xs sm:text-sm lg:text-lg xl:text-xl font-bold text-gray-900 line-clamp-1 sm:line-clamp-2 leading-tight cursor-pointer hover:text-indigo-600 transition-colors mb-1.5 sm:mb-2 lg:mb-3" 
           title={product.name}
         >
           {product.name}
         </h3>
         
-        {/* Price Section */}
-        <div className="mt-auto pt-3 sm:pt-4 lg:pt-5 border-t border-gray-100">
-          <div className="flex justify-between items-end gap-3">
+        {/* Price Section - COMPACT */}
+        <div className="mt-auto pt-1.5 sm:pt-2 lg:pt-4 border-t border-gray-100">
+          <div className="flex justify-between items-end gap-1.5 sm:gap-2">
             <div className="min-w-0">
               {discount > 0 && (
-                <span className="text-xs sm:text-sm lg:text-base text-gray-400 line-through block mb-0.5">
+                <span className="text-[10px] sm:text-xs lg:text-sm text-gray-400 line-through block">
                   {formatPrice(product.price)}
                 </span>
               )}
-              <span className={`text-lg sm:text-xl lg:text-2xl xl:text-3xl font-extrabold ${discount > 0 ? 'text-red-600' : 'text-gray-900'}`}>
+              <span className={`text-sm sm:text-base lg:text-xl xl:text-2xl font-extrabold ${discount > 0 ? 'text-red-600' : 'text-gray-900'}`}>
                 {formatPrice(displayPrice)}
               </span>
             </div>
             
-            {/* Quick View Button - LARGER on desktop */}
+            {/* Quick View Button - SMALLER on mobile */}
             <button 
               onClick={(e) => { 
                 e.stopPropagation(); 
                 onQuickView?.(product); 
               }} 
-              className="shrink-0 w-10 h-10 sm:w-11 sm:h-11 lg:w-14 lg:h-14 flex items-center justify-center bg-gray-100 text-gray-700 rounded-full hover:bg-indigo-600 hover:text-white transition-all hover-lift tap-scale"
+              className="shrink-0 w-8 h-8 sm:w-9 sm:h-9 lg:w-12 lg:h-12 flex items-center justify-center bg-gray-100 text-gray-700 rounded-full hover:bg-indigo-600 hover:text-white transition-all hover-lift tap-scale"
               aria-label="Részletek"
             >
-              <Eye className="w-5 h-5 lg:w-6 lg:h-6" />
+              <Eye className="w-4 h-4 sm:w-4 sm:h-4 lg:w-5 lg:h-5" />
             </button>
           </div>
         </div>

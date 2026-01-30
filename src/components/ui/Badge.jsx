@@ -153,6 +153,7 @@ export const PriceDropBadge = ({ size = 'sm' }) => (
 );
 
 // Smart Badge - automatically determines which badge to show
+// Uses xs size on mobile for compact display
 export const SmartBadges = ({ product, maxBadges = 2 }) => {
   const badges = [];
   
@@ -169,7 +170,7 @@ export const SmartBadges = ({ product, maxBadges = 2 }) => {
     const percent = Math.round(((product.price - product.salePrice) / product.price) * 100);
     if (percent >= 10) {
       badges.push({ 
-        component: () => <DiscountBadge percent={percent} />, 
+        component: ({ size }) => <DiscountBadge percent={percent} size={size} />, 
         priority: 5 
       });
     }
@@ -203,9 +204,9 @@ export const SmartBadges = ({ product, maxBadges = 2 }) => {
   if (topBadges.length === 0) return null;
   
   return (
-    <div className="flex flex-col gap-1">
+    <div className="flex flex-col gap-0.5 sm:gap-1">
       {topBadges.map((badge, idx) => (
-        <badge.component key={idx} />
+        <badge.component key={idx} size="xs" />
       ))}
     </div>
   );
