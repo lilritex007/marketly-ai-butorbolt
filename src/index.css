@@ -23,6 +23,8 @@
   --radius-xl: 1rem;
   --radius-2xl: 1.25rem;
   --touch-target: 44px;
+  /* UNAS shop bottom navigation height on mobile */
+  --unas-bottom-nav: 40px;
 }
 
 /* ========================================
@@ -36,6 +38,15 @@
   color: #1f2937;
   /* Base font size scaling for larger text */
   font-size: 16px;
+  /* Bottom padding for UNAS mobile bottom nav (40px) */
+  padding-bottom: var(--unas-bottom-nav);
+}
+
+/* Remove bottom padding on larger screens (no bottom nav) */
+@media (min-width: 768px) {
+  #mkt-butorbolt-app {
+    padding-bottom: 0;
+  }
 }
 
 /* Larger fonts on tablets */

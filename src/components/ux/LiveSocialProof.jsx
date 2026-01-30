@@ -80,7 +80,7 @@ const LiveSocialProof = ({ currentProduct, recentPurchases = [] }) => {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="fixed bottom-40 left-6 z-40 bg-white rounded-full shadow-lg px-4 py-2 flex items-center gap-2"
+          className="fixed bottom-[calc(10rem+44px)] md:bottom-40 left-4 md:left-6 z-40 bg-white rounded-full shadow-lg px-3 md:px-4 py-1.5 md:py-2 flex items-center gap-2"
         >
           <div className="relative">
             <Eye className="w-5 h-5 text-indigo-600" />
@@ -102,8 +102,8 @@ const LiveSocialProof = ({ currentProduct, recentPurchases = [] }) => {
             exit={{ opacity: 0, y: 50, scale: 0.9 }}
             transition={{ type: 'spring', stiffness: 300, damping: 25 }}
             className={`
-              fixed bottom-6 left-6 z-50
-              max-w-sm rounded-xl shadow-2xl p-4
+              fixed bottom-[calc(1.5rem+44px)] md:bottom-6 left-2 md:left-6 z-50
+              max-w-[calc(100vw-1rem)] md:max-w-sm rounded-xl shadow-2xl p-3 md:p-4
               ${currentNotification.bg} border border-gray-200
               backdrop-blur-sm
             `}

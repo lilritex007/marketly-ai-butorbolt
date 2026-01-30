@@ -187,12 +187,12 @@ const Toast = ({ id, type = 'info', title, message, duration = 4000, onClose, ac
   );
 };
 
-// Toast Container
+// Toast Container - mobile aware of 40px UNAS bottom nav
 const ToastContainer = ({ toasts, removeToast }) => {
   if (!toasts || toasts.length === 0) return null;
 
   return (
-    <div className="fixed bottom-4 right-4 z-[100] flex flex-col gap-3 pointer-events-none">
+    <div className="fixed bottom-[calc(1rem+44px)] md:bottom-4 right-2 md:right-4 z-[100] flex flex-col gap-2 md:gap-3 pointer-events-none max-w-[calc(100vw-1rem)] md:max-w-none">
       {toasts.map(toast => (
         <div key={toast.id} className="pointer-events-auto">
           <Toast {...toast} onClose={removeToast} />

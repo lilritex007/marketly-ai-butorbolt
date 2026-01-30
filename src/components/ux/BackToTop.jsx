@@ -41,8 +41,8 @@ const BackToTop = () => {
     <button
       onClick={scrollToTop}
       className="
-        fixed bottom-24 right-6 z-40
-        w-12 h-12 rounded-full
+        fixed bottom-[calc(5rem+44px)] md:bottom-24 right-4 md:right-6 z-40
+        w-11 h-11 md:w-12 md:h-12 rounded-full
         bg-gradient-to-br from-indigo-500 to-purple-600
         text-white shadow-lg
         flex items-center justify-center
@@ -54,7 +54,7 @@ const BackToTop = () => {
       aria-label="Vissza a tetejére"
       title="Vissza a tetejére"
     >
-      <ArrowUp className="w-6 h-6" />
+      <ArrowUp className="w-5 h-5 md:w-6 md:h-6" />
       
       {/* Pulse animation ring */}
       <span className="absolute inset-0 rounded-full bg-indigo-500 opacity-0 animate-ping" />

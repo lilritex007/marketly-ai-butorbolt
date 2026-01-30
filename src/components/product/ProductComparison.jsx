@@ -19,12 +19,12 @@ export const ProductComparison = ({
 
   return (
     <>
-      {/* Floating Comparison Button */}
+      {/* Floating Comparison Button - mobile aware of 40px UNAS bottom nav */}
       <button
         onClick={() => setIsExpanded(true)}
-        className="fixed bottom-6 right-6 z-40 bg-indigo-600 text-white px-6 py-3 rounded-full shadow-2xl hover:bg-indigo-700 transition-all flex items-center gap-2 hover:scale-105 transform"
+        className="fixed bottom-[calc(1.5rem+44px)] md:bottom-6 left-4 md:left-auto md:right-6 z-40 bg-indigo-600 text-white px-4 md:px-6 py-2.5 md:py-3 rounded-full shadow-2xl hover:bg-indigo-700 transition-all flex items-center gap-2 hover:scale-105 transform text-sm md:text-base"
       >
-        <ArrowLeftRight className="w-5 h-5" />
+        <ArrowLeftRight className="w-4 h-4 md:w-5 md:h-5" />
         <span className="font-bold">Összehasonlítás ({comparisonList.length})</span>
       </button>
 

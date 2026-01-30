@@ -381,10 +381,11 @@ const Navbar = ({ activeTab, setActiveTab, wishlistCount, productCount = 0, onSc
         </div>
       </nav>
 
-      {/* FULL SCREEN Mobile menu */}
+      {/* FULL SCREEN Mobile menu - accounts for 40px UNAS bottom nav */}
       {mobileMenuOpen && (
         <div
           className="fixed inset-0 z-[200] lg:hidden"
+          style={{ bottom: '40px' }} /* UNAS bottom nav space */
           role="dialog"
           aria-label="Navigációs menü"
         >
@@ -393,47 +394,47 @@ const Navbar = ({ activeTab, setActiveTab, wishlistCount, productCount = 0, onSc
           
           {/* Decorative elements */}
           <div className="absolute inset-0 overflow-hidden pointer-events-none">
-            <div className="absolute top-20 left-10 w-64 h-64 bg-white/10 rounded-full blur-3xl" />
-            <div className="absolute bottom-40 right-10 w-80 h-80 bg-pink-400/20 rounded-full blur-3xl" />
+            <div className="absolute top-16 left-10 w-64 h-64 bg-white/10 rounded-full blur-3xl" />
+            <div className="absolute bottom-20 right-10 w-80 h-80 bg-pink-400/20 rounded-full blur-3xl" />
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-purple-400/10 rounded-full blur-3xl" />
           </div>
           
-          {/* Content */}
-          <div className="relative h-full flex flex-col text-white p-6 sm:p-8">
+          {/* Content - with safe area for bottom nav */}
+          <div className="relative h-full flex flex-col text-white p-5 sm:p-6">
             
-            {/* Header */}
-            <div className="flex justify-between items-center mb-10">
-              <div className="flex items-center gap-4">
-                <div className="w-14 h-14 bg-white/20 backdrop-blur-xl rounded-2xl flex items-center justify-center">
-                  <Home className="w-7 h-7" />
+            {/* Header - compact */}
+            <div className="flex justify-between items-center mb-6">
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 bg-white/20 backdrop-blur-xl rounded-xl flex items-center justify-center">
+                  <Home className="w-6 h-6" />
                 </div>
                 <div>
                   <div className="flex items-baseline">
-                    <span className="font-black text-3xl">Marketly</span>
-                    <span className="font-black text-3xl text-white/80">.AI</span>
+                    <span className="font-black text-2xl">Marketly</span>
+                    <span className="font-black text-2xl text-white/80">.AI</span>
                   </div>
-                  <p className="text-sm text-white/60 font-medium tracking-wider">BÚTORBOLT</p>
+                  <p className="text-xs text-white/60 font-medium tracking-wider">BÚTORBOLT</p>
                 </div>
               </div>
               <button
                 type="button"
-                className="p-4 min-w-[56px] min-h-[56px] flex items-center justify-center rounded-2xl bg-white/10 hover:bg-white/20 backdrop-blur-xl transition-colors"
+                className="p-3 min-w-[48px] min-h-[48px] flex items-center justify-center rounded-xl bg-white/10 hover:bg-white/20 backdrop-blur-xl transition-colors"
                 onClick={closeMobileMenu}
                 aria-label="Menü bezárása"
               >
-                <X className="w-8 h-8" />
+                <X className="w-7 h-7" />
               </button>
             </div>
 
-            {/* Navigation items */}
-            <nav className="flex-1 flex flex-col justify-center -mt-10">
-              <div className="space-y-4">
+            {/* Navigation items - optimized for space */}
+            <nav className="flex-1 flex flex-col justify-center">
+              <div className="space-y-3">
                 {navItems.map((item, index) => (
                   <button
                     key={item.id}
                     onClick={() => setTabAndClose(item.id)}
                     className={`
-                      w-full flex items-center gap-5 px-6 py-5 rounded-3xl text-left transition-all
+                      w-full flex items-center gap-4 px-5 py-4 rounded-2xl text-left transition-all
                       ${activeTab === item.id
                         ? 'bg-white text-gray-900 shadow-2xl scale-[1.02]'
                         : 'bg-white/10 hover:bg-white/20 backdrop-blur-xl'
@@ -442,21 +443,21 @@ const Navbar = ({ activeTab, setActiveTab, wishlistCount, productCount = 0, onSc
                     style={{ animationDelay: `${index * 100}ms` }}
                   >
                     <div className={`
-                      w-14 h-14 rounded-2xl flex items-center justify-center
+                      w-12 h-12 rounded-xl flex items-center justify-center shrink-0
                       ${activeTab === item.id 
                         ? 'bg-gradient-to-br from-indigo-500 to-purple-600 text-white' 
                         : 'bg-white/20'
                       }
                     `}>
-                      <item.icon className="w-7 h-7" />
+                      <item.icon className="w-6 h-6" />
                     </div>
-                    <div className="flex-1">
-                      <div className="flex items-center gap-3">
-                        <span className={`text-xl font-bold ${activeTab === item.id ? 'text-gray-900' : 'text-white'}`}>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2">
+                        <span className={`text-lg font-bold ${activeTab === item.id ? 'text-gray-900' : 'text-white'}`}>
                           {item.label}
                         </span>
                         {item.isAI && (
-                          <span className={`px-2.5 py-1 text-xs font-bold rounded-full ${
+                          <span className={`px-2 py-0.5 text-[10px] font-bold rounded-full ${
                             activeTab === item.id 
                               ? 'bg-gradient-to-r from-indigo-100 to-purple-100 text-indigo-600' 
                               : 'bg-white/20 text-white'
@@ -465,7 +466,7 @@ const Navbar = ({ activeTab, setActiveTab, wishlistCount, productCount = 0, onSc
                           </span>
                         )}
                         {item.badge && (
-                          <span className={`px-2.5 py-1 text-xs font-bold rounded-full ${
+                          <span className={`px-2 py-0.5 text-[10px] font-bold rounded-full ${
                             activeTab === item.id 
                               ? 'bg-green-100 text-green-700' 
                               : 'bg-white/20 text-white'
@@ -474,44 +475,44 @@ const Navbar = ({ activeTab, setActiveTab, wishlistCount, productCount = 0, onSc
                           </span>
                         )}
                       </div>
-                      <p className={`text-sm mt-0.5 ${activeTab === item.id ? 'text-gray-500' : 'text-white/60'}`}>
+                      <p className={`text-xs ${activeTab === item.id ? 'text-gray-500' : 'text-white/60'}`}>
                         {item.desc}
                       </p>
                     </div>
-                    <ChevronRight className={`w-6 h-6 ${activeTab === item.id ? 'text-indigo-600' : 'text-white/40'}`} />
+                    <ChevronRight className={`w-5 h-5 shrink-0 ${activeTab === item.id ? 'text-indigo-600' : 'text-white/40'}`} />
                   </button>
                 ))}
               </div>
             </nav>
 
-            {/* Bottom section */}
-            <div className="space-y-4">
-              {/* Stats row */}
-              <div className="grid grid-cols-3 gap-3">
-                <div className="bg-white/10 backdrop-blur-xl rounded-2xl p-4 text-center">
-                  <p className="text-2xl font-bold">{productCount > 0 ? `${(productCount/1000).toFixed(0)}K+` : '...'}</p>
-                  <p className="text-xs text-white/60 mt-1">Termék</p>
+            {/* Bottom section - compact */}
+            <div className="space-y-3 mt-4">
+              {/* Stats row - smaller */}
+              <div className="grid grid-cols-3 gap-2">
+                <div className="bg-white/10 backdrop-blur-xl rounded-xl p-3 text-center">
+                  <p className="text-xl font-bold">{productCount > 0 ? `${(productCount/1000).toFixed(0)}K+` : '...'}</p>
+                  <p className="text-[10px] text-white/60">Termék</p>
                 </div>
-                <div className="bg-white/10 backdrop-blur-xl rounded-2xl p-4 text-center">
-                  <p className="text-2xl font-bold">24/7</p>
-                  <p className="text-xs text-white/60 mt-1">AI Support</p>
+                <div className="bg-white/10 backdrop-blur-xl rounded-xl p-3 text-center">
+                  <p className="text-xl font-bold">24/7</p>
+                  <p className="text-[10px] text-white/60">AI Support</p>
                 </div>
-                <div className="bg-white/10 backdrop-blur-xl rounded-2xl p-4 text-center">
-                  <p className="text-2xl font-bold">4.9★</p>
-                  <p className="text-xs text-white/60 mt-1">Értékelés</p>
+                <div className="bg-white/10 backdrop-blur-xl rounded-xl p-3 text-center">
+                  <p className="text-xl font-bold">4.9★</p>
+                  <p className="text-[10px] text-white/60">Értékelés</p>
                 </div>
               </div>
 
-              {/* CTA Button */}
+              {/* CTA Button - compact */}
               <a 
                 href={WEBSHOP_DOMAIN} 
                 target="_blank" 
                 rel="noopener noreferrer" 
-                className="flex items-center justify-center gap-3 w-full px-6 py-5 rounded-2xl font-bold text-lg bg-white text-gray-900 hover:bg-gray-100 transition-all shadow-2xl"
+                className="flex items-center justify-center gap-2.5 w-full px-5 py-4 rounded-xl font-bold text-base bg-white text-gray-900 hover:bg-gray-100 transition-all shadow-2xl"
                 onClick={closeMobileMenu}
               >
                 Vissza a fő webshopba
-                <ArrowRight className="w-6 h-6" />
+                <ArrowRight className="w-5 h-5" />
               </a>
             </div>
           </div>
@@ -840,9 +841,9 @@ const ChatWidget = ({ products }) => {
   };
 
   return (
-    <div id="mkt-butorbolt-chat" className="fixed bottom-6 right-6 z-50 flex flex-col items-end">
+    <div id="mkt-butorbolt-chat" className="fixed bottom-[calc(1.5rem+44px)] md:bottom-6 right-4 md:right-6 z-50 flex flex-col items-end">
       {isOpen && (
-        <div className="bg-white rounded-2xl shadow-2xl mb-4 w-80 sm:w-96 overflow-hidden border border-gray-200 animate-fade-in-up">
+        <div className="bg-white rounded-2xl shadow-2xl mb-4 w-[calc(100vw-2rem)] sm:w-96 max-h-[calc(100vh-140px)] md:max-h-none overflow-hidden border border-gray-200 animate-fade-in-up">
           <div className="bg-gradient-to-r from-indigo-600 to-purple-600 p-4 flex justify-between items-center text-white">
             <span className="font-bold flex items-center"><MessageCircle className="w-5 h-5 mr-2" /> AI Asszisztens</span>
             <button onClick={() => setIsOpen(false)} className="text-white/80 hover:text-white"><X className="w-5 h-5" /></button>
