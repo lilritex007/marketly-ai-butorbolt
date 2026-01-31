@@ -65,17 +65,17 @@ export const SocialProof = () => {
           </p>
         </div>
 
-        {/* Trust Badges - COMPACT */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-2.5 sm:gap-3 lg:gap-4">
+        {/* Trust Badges */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 lg:gap-5">
           {trustBadges.map((badge, idx) => (
             <div
               key={idx}
-              className="group relative bg-gradient-to-br from-gray-50 to-white rounded-xl lg:rounded-2xl p-3 sm:p-4 lg:p-5 border border-gray-100 hover:border-indigo-200 hover:shadow-xl transition-all transform hover:-translate-y-1"
+              className="group relative bg-gradient-to-br from-gray-50 to-white rounded-xl lg:rounded-2xl p-4 sm:p-5 lg:p-6 border border-gray-100 hover:border-indigo-200 hover:shadow-xl transition-all transform hover:-translate-y-1"
             >
-              <div className={`w-10 h-10 sm:w-11 sm:h-11 lg:w-12 lg:h-12 bg-gradient-to-br ${colorClasses[badge.color]} rounded-lg lg:rounded-xl flex items-center justify-center mb-2 sm:mb-3 transform group-hover:rotate-6 transition-transform`}>
-                <badge.icon className="w-5 h-5 sm:w-5 sm:h-5 lg:w-6 lg:h-6 text-white" />
+              <div className={`w-11 h-11 sm:w-12 sm:h-12 lg:w-14 lg:h-14 bg-gradient-to-br ${colorClasses[badge.color]} rounded-xl flex items-center justify-center mb-3 sm:mb-4 transform group-hover:rotate-6 transition-transform`}>
+                <badge.icon className="w-5 h-5 sm:w-6 sm:h-6 lg:w-7 lg:h-7 text-white" />
               </div>
-              <h3 className="font-bold text-gray-900 text-xs sm:text-sm lg:text-base leading-tight">{badge.label}</h3>
+              <h3 className="font-bold text-gray-900 text-sm sm:text-base lg:text-lg leading-tight">{badge.label}</h3>
             </div>
           ))}
         </div>
@@ -222,15 +222,15 @@ export const LiveShowcase = ({ products = [], onProductClick }) => {
                   className="flex-shrink-0 w-[80%] sm:w-[45%] lg:w-[32%] cursor-pointer group"
                 >
                   <div className="relative bg-white rounded-xl lg:rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-all transform hover:-translate-y-1">
-                    {/* Tag - COMPACT */}
-                    <div className="absolute top-2 sm:top-2.5 left-2 sm:left-2.5 z-10">
-                      <span className="px-2 py-1 sm:px-2.5 sm:py-1 bg-gradient-to-r from-red-500 to-pink-500 text-white text-[10px] sm:text-xs font-bold rounded-full">
+                    {/* Tag */}
+                    <div className="absolute top-2.5 sm:top-3 left-2.5 sm:left-3 z-10">
+                      <span className="px-2.5 py-1 sm:px-3 sm:py-1.5 bg-gradient-to-r from-red-500 to-pink-500 text-white text-xs sm:text-sm font-bold rounded-full">
                         {product.tag || 'Népszerű'}
                       </span>
                     </div>
 
-                    {/* Image - COMPACT */}
-                    <div className="relative h-36 sm:h-40 lg:h-48 overflow-hidden bg-gray-100">
+                    {/* Image */}
+                    <div className="relative h-40 sm:h-48 lg:h-56 overflow-hidden bg-gray-100">
                       <img
                         src={product.image || product.images?.[0]}
                         alt={product.name}
@@ -240,17 +240,17 @@ export const LiveShowcase = ({ products = [], onProductClick }) => {
                       />
                     </div>
 
-                    {/* Content - COMPACT */}
-                    <div className="p-3 sm:p-3.5 lg:p-4">
-                      <h3 className="text-sm sm:text-base lg:text-lg font-bold text-gray-900 mb-1.5 truncate group-hover:text-indigo-600 transition-colors">
+                    {/* Content */}
+                    <div className="p-4 sm:p-5 lg:p-5">
+                      <h3 className="text-base sm:text-lg lg:text-lg font-bold text-gray-900 mb-2 truncate group-hover:text-indigo-600 transition-colors">
                         {product.name}
                       </h3>
                       <div className="flex items-center justify-between">
-                        <span className="text-base sm:text-lg lg:text-xl font-extrabold text-indigo-600">
+                        <span className="text-lg sm:text-xl lg:text-2xl font-extrabold text-indigo-600">
                           {new Intl.NumberFormat('hu-HU', { style: 'currency', currency: 'HUF', maximumFractionDigits: 0 }).format(product.price)}
                         </span>
-                        <button className="w-8 h-8 sm:w-9 sm:h-9 lg:w-10 lg:h-10 bg-indigo-600 text-white rounded-full flex items-center justify-center hover:bg-indigo-700 transition-all">
-                          <Eye className="w-4 h-4 sm:w-4 sm:h-4 lg:w-5 lg:h-5" />
+                        <button className="w-10 h-10 sm:w-10 sm:h-10 lg:w-11 lg:h-11 bg-indigo-600 text-white rounded-full flex items-center justify-center hover:bg-indigo-700 transition-all">
+                          <Eye className="w-5 h-5 lg:w-5 lg:h-5" />
                         </button>
                       </div>
                     </div>
@@ -309,10 +309,10 @@ export const InteractiveCTA = ({ onGetStarted }) => {
         <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center items-center">
           <button
             onClick={onGetStarted}
-            className="group w-full sm:w-auto px-5 py-3 sm:px-6 sm:py-3 lg:px-7 lg:py-3.5 bg-white text-indigo-600 rounded-xl font-bold text-sm sm:text-base lg:text-lg shadow-xl hover:shadow-white/50 transition-all transform hover:-translate-y-1 flex items-center justify-center"
+            className="group w-full sm:w-auto px-6 py-3 sm:px-7 sm:py-3.5 lg:px-8 lg:py-4 bg-white text-indigo-600 rounded-xl font-bold text-base sm:text-lg shadow-xl hover:shadow-white/50 transition-all transform hover:-translate-y-1 flex items-center justify-center"
           >
             Kezdjük el most
-            <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 ml-2 group-hover:translate-x-1 transition-transform" />
+            <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
           </button>
 
           <button 
@@ -321,25 +321,25 @@ export const InteractiveCTA = ({ onGetStarted }) => {
               if (aiSection) aiSection.scrollIntoView({ behavior: 'smooth' });
               else window.scrollTo({ top: 0, behavior: 'smooth' });
             }}
-            className="w-full sm:w-auto px-5 py-3 sm:px-6 sm:py-3 lg:px-7 lg:py-3.5 bg-white/10 backdrop-blur-sm text-white rounded-xl font-bold text-sm sm:text-base lg:text-lg border-2 border-white/30 hover:bg-white/20 transition-all"
+            className="w-full sm:w-auto px-6 py-3 sm:px-7 sm:py-3.5 lg:px-8 lg:py-4 bg-white/10 backdrop-blur-sm text-white rounded-xl font-bold text-base sm:text-lg border-2 border-white/30 hover:bg-white/20 transition-all"
           >
             Tudj meg többet
           </button>
         </div>
 
-        {/* Trust indicators - COMPACT */}
-        <div className="mt-6 sm:mt-8 lg:mt-10 flex flex-wrap justify-center gap-4 sm:gap-5 lg:gap-8 text-white/80">
-          <div className="flex items-center gap-1.5 sm:gap-2">
-            <Check className="w-4 h-4 sm:w-5 sm:h-5" />
-            <span className="text-xs sm:text-sm lg:text-base font-medium">Ingyenes kipróbálás</span>
+        {/* Trust indicators */}
+        <div className="mt-8 sm:mt-10 lg:mt-12 flex flex-wrap justify-center gap-5 sm:gap-6 lg:gap-8 text-white/80">
+          <div className="flex items-center gap-2">
+            <Check className="w-5 h-5 sm:w-5 sm:h-5" />
+            <span className="text-sm sm:text-base font-medium">Ingyenes kipróbálás</span>
           </div>
-          <div className="flex items-center gap-1.5 sm:gap-2">
-            <Check className="w-4 h-4 sm:w-5 sm:h-5" />
-            <span className="text-xs sm:text-sm lg:text-base font-medium">Nincs kártyaigény</span>
+          <div className="flex items-center gap-2">
+            <Check className="w-5 h-5 sm:w-5 sm:h-5" />
+            <span className="text-sm sm:text-base font-medium">Nincs kártyaigény</span>
           </div>
-          <div className="flex items-center gap-1.5 sm:gap-2">
-            <Check className="w-4 h-4 sm:w-5 sm:h-5" />
-            <span className="text-xs sm:text-sm lg:text-base font-medium">24/7 support</span>
+          <div className="flex items-center gap-2">
+            <Check className="w-5 h-5 sm:w-5 sm:h-5" />
+            <span className="text-sm sm:text-base font-medium">24/7 support</span>
           </div>
         </div>
       </div>

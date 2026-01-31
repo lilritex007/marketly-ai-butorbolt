@@ -88,20 +88,20 @@ export const EnhancedProductCard = ({
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      {/* Smart Badges - COMPACT */}
-      <div className="absolute top-2 sm:top-2.5 lg:top-3 left-2 sm:left-2.5 lg:left-3 z-20">
+      {/* Smart Badges */}
+      <div className="absolute top-2.5 sm:top-3 left-2.5 sm:left-3 z-20">
         <SmartBadges product={product} maxBadges={2} />
       </div>
 
-      {/* Wishlist Button - COMPACT touch target */}
+      {/* Wishlist Button */}
       <button 
         onClick={(e) => { 
           e.stopPropagation(); 
           onToggleWishlist?.(product.id); 
         }} 
         className={`
-          absolute top-2 sm:top-2.5 lg:top-3 right-2 sm:right-2.5 lg:right-3 z-20
-          w-8 h-8 sm:w-9 sm:h-9 lg:w-10 lg:h-10 flex items-center justify-center 
+          absolute top-2.5 sm:top-3 right-2.5 sm:right-3 z-20
+          w-9 h-9 sm:w-10 sm:h-10 lg:w-11 lg:h-11 flex items-center justify-center 
           rounded-full shadow-md tap-scale
           ${isWishlisted 
             ? 'bg-red-500 text-white' 
@@ -111,7 +111,7 @@ export const EnhancedProductCard = ({
         style={{ transition: 'background-color 0.15s, color 0.15s' }}
         aria-label={isWishlisted ? 'Eltávolítás' : 'Kedvencekhez'}
       >
-        <Heart className={`w-4 h-4 sm:w-4.5 sm:h-4.5 lg:w-5 lg:h-5 ${isWishlisted ? 'fill-current' : ''}`} />
+        <Heart className={`w-4.5 h-4.5 sm:w-5 sm:h-5 lg:w-5 lg:h-5 ${isWishlisted ? 'fill-current' : ''}`} />
       </button>
 
       {/* Image Section - FILL the space */}
@@ -124,12 +124,12 @@ export const EnhancedProductCard = ({
           <div className="absolute inset-0 bg-gray-100" />
         )}
         
-        {/* Actual image - COMPACT padding */}
+        {/* Actual image */}
         <img 
           src={imageError ? PLACEHOLDER_IMAGE : mainImage}
           alt={product.name} 
           className={`
-            w-full h-full object-contain p-2 sm:p-3 lg:p-4
+            w-full h-full object-contain p-3 sm:p-4 lg:p-5
             transition-opacity duration-300 ease-out
             ${imageLoaded ? 'opacity-100' : 'opacity-0'}
           `}
@@ -141,13 +141,13 @@ export const EnhancedProductCard = ({
         />
         
         {/* Stock badge */}
-        <div className="absolute bottom-1.5 sm:bottom-2 left-1.5 sm:left-2">
-          <StockBadge inStock={inStock} size="xs" />
+        <div className="absolute bottom-2 sm:bottom-2.5 left-2 sm:left-2.5">
+          <StockBadge inStock={inStock} size="sm" />
         </div>
         
-        {/* Desktop hover overlay - COMPACT */}
+        {/* Desktop hover overlay */}
         <div 
-          className="hidden md:flex absolute inset-0 bg-black/40 items-end justify-center pb-4 lg:pb-5 transition-opacity duration-200"
+          className="hidden md:flex absolute inset-0 bg-black/40 items-end justify-center pb-5 lg:pb-6 transition-opacity duration-200"
           style={{ opacity: isHovered ? 1 : 0, pointerEvents: isHovered ? 'auto' : 'none' }}
         >
           <button
@@ -155,32 +155,32 @@ export const EnhancedProductCard = ({
               e.stopPropagation();
               onQuickView?.(product);
             }}
-            className="bg-white text-gray-900 px-4 py-2 lg:px-5 lg:py-2.5 rounded-full text-sm lg:text-base font-bold shadow-lg flex items-center gap-1.5 lg:gap-2 hover:bg-gray-50 tap-scale"
+            className="bg-white text-gray-900 px-5 py-2.5 lg:px-6 lg:py-3 rounded-full text-sm lg:text-base font-bold shadow-lg flex items-center gap-2 hover:bg-gray-50 tap-scale"
           >
-            <Eye className="w-4 h-4 lg:w-4.5 lg:h-4.5" /> 
+            <Eye className="w-4 h-4 lg:w-5 lg:h-5" /> 
             Megnézem
           </button>
         </div>
       </div>
 
-      {/* Content Section - COMPACT typography */}
-      <div className="p-2.5 sm:p-3 lg:p-4 flex flex-col flex-1">
-        {/* Category - COMPACT */}
-        <span className="text-[10px] sm:text-xs lg:text-sm font-semibold text-indigo-600 uppercase tracking-wide mb-1 truncate">
+      {/* Content Section */}
+      <div className="p-3 sm:p-4 lg:p-5 flex flex-col flex-1">
+        {/* Category */}
+        <span className="text-[11px] sm:text-xs lg:text-sm font-semibold text-indigo-600 uppercase tracking-wide mb-1 lg:mb-1.5 truncate">
           {product.category}
         </span>
         
-        {/* Product Name - COMPACT */}
+        {/* Product Name */}
         <h3 
           onClick={() => onQuickView?.(product)} 
-          className="text-sm sm:text-base lg:text-lg font-bold text-gray-900 line-clamp-2 leading-tight cursor-pointer hover:text-indigo-600 transition-colors mb-1.5 lg:mb-2" 
+          className="text-sm sm:text-base lg:text-lg font-bold text-gray-900 line-clamp-2 leading-snug cursor-pointer hover:text-indigo-600 transition-colors mb-2" 
           title={product.name}
         >
           {product.name}
         </h3>
         
-        {/* Price Section - COMPACT */}
-        <div className="mt-auto pt-2 lg:pt-2.5 border-t border-gray-100">
+        {/* Price Section */}
+        <div className="mt-auto pt-2.5 lg:pt-3 border-t border-gray-100">
           <div className="flex justify-between items-center gap-2">
             <div className="min-w-0">
               {discount > 0 && (
@@ -188,21 +188,21 @@ export const EnhancedProductCard = ({
                   {formatPrice(product.price)}
                 </span>
               )}
-              <span className={`text-base sm:text-lg lg:text-xl font-black ${discount > 0 ? 'text-red-600' : 'text-gray-900'}`}>
+              <span className={`text-lg sm:text-xl lg:text-2xl font-black ${discount > 0 ? 'text-red-600' : 'text-gray-900'}`}>
                 {formatPrice(displayPrice)}
               </span>
             </div>
             
-            {/* Quick View Button - COMPACT */}
+            {/* Quick View Button */}
             <button 
               onClick={(e) => { 
                 e.stopPropagation(); 
                 onQuickView?.(product); 
               }} 
-              className="shrink-0 w-9 h-9 sm:w-10 sm:h-10 lg:w-11 lg:h-11 flex items-center justify-center bg-indigo-600 text-white rounded-lg lg:rounded-xl hover:bg-indigo-700 transition-all tap-scale"
+              className="shrink-0 w-10 h-10 sm:w-11 sm:h-11 lg:w-12 lg:h-12 flex items-center justify-center bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 transition-all tap-scale"
               aria-label="Részletek"
             >
-              <Eye className="w-4 h-4 sm:w-5 sm:h-5 lg:w-5 lg:h-5" />
+              <Eye className="w-5 h-5 lg:w-5 lg:h-5" />
             </button>
           </div>
         </div>

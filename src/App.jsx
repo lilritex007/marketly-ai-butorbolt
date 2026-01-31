@@ -917,34 +917,34 @@ const Hero = ({ onExplore }) => (
 );
 
 const Features = () => (
-    <div className="bg-white py-8 sm:py-10 lg:py-12 border-b border-gray-100">
-        <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-4 lg:gap-5">
+    <div className="bg-white py-10 sm:py-12 lg:py-14 border-b border-gray-100">
+        <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-10">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-5 lg:gap-6">
                 <div className="flex items-center p-4 sm:p-5 lg:p-6 bg-gray-50 rounded-xl lg:rounded-2xl">
-                    <div className="w-11 h-11 sm:w-12 sm:h-12 lg:w-14 lg:h-14 bg-blue-100 text-blue-600 rounded-lg lg:rounded-xl flex items-center justify-center mr-3 lg:mr-4 shrink-0">
-                        <Truck className="w-5 h-5 sm:w-6 sm:h-6 lg:w-7 lg:h-7" />
+                    <div className="w-12 h-12 sm:w-14 sm:h-14 lg:w-16 lg:h-16 bg-blue-100 text-blue-600 rounded-xl flex items-center justify-center mr-4 shrink-0">
+                        <Truck className="w-6 h-6 sm:w-7 sm:h-7 lg:w-8 lg:h-8" />
                     </div>
                     <div>
-                        <h3 className="font-bold text-gray-900 text-sm sm:text-base lg:text-lg">Ingyenes Szállítás</h3>
-                        <p className="text-xs sm:text-sm lg:text-base text-gray-500 mt-0.5">Minden 50.000 Ft feletti rendelésnél.</p>
+                        <h3 className="font-bold text-gray-900 text-base sm:text-lg lg:text-xl">Ingyenes Szállítás</h3>
+                        <p className="text-sm sm:text-base text-gray-500 mt-1">Minden 50.000 Ft feletti rendelésnél.</p>
                     </div>
                 </div>
                 <div className="flex items-center p-4 sm:p-5 lg:p-6 bg-gray-50 rounded-xl lg:rounded-2xl">
-                    <div className="w-11 h-11 sm:w-12 sm:h-12 lg:w-14 lg:h-14 bg-green-100 text-green-600 rounded-lg lg:rounded-xl flex items-center justify-center mr-3 lg:mr-4 shrink-0">
-                        <ShieldCheck className="w-5 h-5 sm:w-6 sm:h-6 lg:w-7 lg:h-7" />
+                    <div className="w-12 h-12 sm:w-14 sm:h-14 lg:w-16 lg:h-16 bg-green-100 text-green-600 rounded-xl flex items-center justify-center mr-4 shrink-0">
+                        <ShieldCheck className="w-6 h-6 sm:w-7 sm:h-7 lg:w-8 lg:h-8" />
                     </div>
                     <div>
-                        <h3 className="font-bold text-gray-900 text-sm sm:text-base lg:text-lg">Garancia</h3>
-                        <p className="text-xs sm:text-sm lg:text-base text-gray-500 mt-0.5">Minden bútorra teljes körű garancia.</p>
+                        <h3 className="font-bold text-gray-900 text-base sm:text-lg lg:text-xl">Garancia</h3>
+                        <p className="text-sm sm:text-base text-gray-500 mt-1">Minden bútorra teljes körű garancia.</p>
                     </div>
                 </div>
                 <div className="flex items-center p-4 sm:p-5 lg:p-6 bg-gray-50 rounded-xl lg:rounded-2xl">
-                    <div className="w-11 h-11 sm:w-12 sm:h-12 lg:w-14 lg:h-14 bg-purple-100 text-purple-600 rounded-lg lg:rounded-xl flex items-center justify-center mr-3 lg:mr-4 shrink-0">
-                        <Phone className="w-5 h-5 sm:w-6 sm:h-6 lg:w-7 lg:h-7" />
+                    <div className="w-12 h-12 sm:w-14 sm:h-14 lg:w-16 lg:h-16 bg-purple-100 text-purple-600 rounded-xl flex items-center justify-center mr-4 shrink-0">
+                        <Phone className="w-6 h-6 sm:w-7 sm:h-7 lg:w-8 lg:h-8" />
                     </div>
                     <div>
-                        <h3 className="font-bold text-gray-900 text-sm sm:text-base lg:text-lg">Ügyfélszolgálat</h3>
-                        <p className="text-xs sm:text-sm lg:text-base text-gray-500 mt-0.5">Szakértő segítség minden nap.</p>
+                        <h3 className="font-bold text-gray-900 text-base sm:text-lg lg:text-xl">Ügyfélszolgálat</h3>
+                        <p className="text-sm sm:text-base text-gray-500 mt-1">Szakértő segítség minden nap.</p>
                     </div>
                 </div>
             </div>
@@ -953,27 +953,27 @@ const Features = () => (
 );
 
 const Testimonials = () => (
-    <div className="bg-gray-50 py-8 sm:py-10 lg:py-12 mb-8 sm:mb-10 lg:mb-12">
-        <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 text-center">
-            <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900 mb-6 sm:mb-8 lg:mb-10">Mit mondanak rólunk?</h2>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-4 lg:gap-5">
+    <div className="bg-gray-50 py-10 sm:py-12 lg:py-14 mb-10 sm:mb-12 lg:mb-14">
+        <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-10 text-center">
+            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-8 sm:mb-10 lg:mb-12">Mit mondanak rólunk?</h2>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-5 lg:gap-6">
                 {[
                     { name: "Kovács Anna", text: "Az AI segítségével találtam meg a kanapét, ami pont illik a függönyhöz.", role: "Lakberendező" },
                     { name: "Nagy Péter", text: "Gyors szállítás, és a minőség is kiváló. A képkereső funkció nagyon hasznos.", role: "Vásárló" },
                     { name: "Szabó Éva", text: "Végre egy webshop, ahol nem kell órákig görgetni. Az asszisztens azonnal segített.", role: "Vásárló" }
                 ].map((t, i) => (
-                    <div key={i} className="bg-white p-4 sm:p-5 lg:p-6 rounded-xl lg:rounded-2xl shadow-sm hover:shadow-lg transition-shadow text-left">
-                        <div className="flex text-yellow-400 mb-3">
-                            {[...Array(5)].map((_, i) => <Star key={i} className="w-4 h-4 sm:w-4 sm:h-4 lg:w-5 lg:h-5 fill-current" />)}
+                    <div key={i} className="bg-white p-5 sm:p-6 lg:p-7 rounded-xl lg:rounded-2xl shadow-sm hover:shadow-lg transition-shadow text-left">
+                        <div className="flex text-yellow-400 mb-4">
+                            {[...Array(5)].map((_, i) => <Star key={i} className="w-5 h-5 sm:w-5 sm:h-5 lg:w-6 lg:h-6 fill-current" />)}
                         </div>
-                        <p className="text-gray-600 mb-4 italic text-sm sm:text-base lg:text-base leading-relaxed">"{t.text}"</p>
+                        <p className="text-gray-600 mb-5 italic text-base sm:text-base lg:text-lg leading-relaxed">"{t.text}"</p>
                         <div className="flex items-center">
-                            <div className="w-10 h-10 sm:w-11 sm:h-11 lg:w-12 lg:h-12 bg-indigo-100 rounded-full flex items-center justify-center font-bold text-indigo-600 text-base sm:text-lg mr-3">
+                            <div className="w-11 h-11 sm:w-12 sm:h-12 lg:w-14 lg:h-14 bg-indigo-100 rounded-full flex items-center justify-center font-bold text-indigo-600 text-lg sm:text-xl mr-4">
                                 {t.name.charAt(0)}
                             </div>
                             <div>
-                                <h4 className="font-bold text-gray-900 text-sm sm:text-base">{t.name}</h4>
-                                <p className="text-xs sm:text-sm text-gray-500">{t.role}</p>
+                                <h4 className="font-bold text-gray-900 text-base sm:text-lg">{t.name}</h4>
+                                <p className="text-sm sm:text-base text-gray-500">{t.role}</p>
                             </div>
                         </div>
                     </div>
