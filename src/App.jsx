@@ -571,24 +571,18 @@ const Navbar = ({ activeTab, setActiveTab, wishlistCount, productCount = 0, onSc
         </div>
       </div>
 
-      {/* 3. RETURNING USER GREETING - Elegant inline card */}
+      {/* 3. RETURNING USER GREETING - Elegant single-row inline card */}
       {isReturningUser && (
-        <div className="w-full max-w-[2000px] mx-auto px-4 sm:px-6 lg:px-10 pt-4 sm:pt-5">
-          <div className="max-w-sm">
-            <div className="bg-gradient-to-r from-emerald-50 to-green-50 border border-emerald-200/60 rounded-xl sm:rounded-2xl p-3 sm:p-4 flex items-center gap-3 sm:gap-4 shadow-sm">
-              <div className="w-10 h-10 sm:w-11 sm:h-11 bg-gradient-to-br from-emerald-400 to-green-500 rounded-xl flex items-center justify-center text-white text-base sm:text-lg shrink-0 shadow-md">
-                👋
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-sm sm:text-base font-bold text-gray-900">
-                  Üdv újra{userName ? `, ${userName}` : ''}!
-                </p>
-                <p className="text-xs sm:text-sm text-emerald-700/80">
-                  Örülünk, hogy visszatértél
-                </p>
-              </div>
-              <Sparkles className="w-5 h-5 text-emerald-500/60 shrink-0" />
+        <div className="w-full px-4 sm:px-6 lg:px-10 pt-4 sm:pt-5">
+          <div className="inline-flex items-center gap-3 bg-gradient-to-r from-emerald-50 to-green-50 border border-emerald-200/60 rounded-full py-2 px-4 shadow-sm">
+            <div className="w-8 h-8 bg-gradient-to-br from-emerald-400 to-green-500 rounded-full flex items-center justify-center text-white text-sm shrink-0">
+              👋
             </div>
+            <p className="text-sm font-bold text-gray-900 whitespace-nowrap">
+              Üdv újra{userName ? `, ${userName}` : ''}!
+            </p>
+            <span className="text-xs text-emerald-600 whitespace-nowrap">Örülünk, hogy visszatértél</span>
+            <Sparkles className="w-4 h-4 text-emerald-500/60 shrink-0" />
           </div>
         </div>
       )}
@@ -1649,9 +1643,7 @@ const App = () => {
 
   return (
     <ToastProvider>
-    <div id="mkt-butorbolt-app" className="min-h-screen bg-gradient-to-br from-gray-100 via-gray-50 to-gray-100 font-sans text-gray-900 p-2 sm:p-3 lg:p-4 xl:p-5">
-      {/* Inner container with elegant rounded corners */}
-      <div className="bg-white rounded-3xl sm:rounded-[2rem] lg:rounded-[2.5rem] overflow-hidden shadow-2xl shadow-gray-300/50 border border-gray-200/50">
+    <div id="mkt-butorbolt-app" className="min-h-screen bg-white font-sans text-gray-900 rounded-3xl sm:rounded-[2rem] lg:rounded-[2.5rem] overflow-hidden shadow-2xl shadow-gray-300/50 mx-auto w-full max-w-[2000px]">
       {/* Scroll Progress Bar */}
       <ScrollProgress />
       
@@ -2210,7 +2202,6 @@ const App = () => {
         recentlyAdded={recentlyAddedToCart}
         suggestedProducts={products.slice(0, 3)}
       />
-      </div>{/* End inner rounded container */}
     </div>
     </ToastProvider>
   );
