@@ -917,34 +917,34 @@ const Hero = ({ onExplore }) => (
 );
 
 const Features = () => (
-    <div className="bg-white py-10 sm:py-14 lg:py-16 xl:py-20 border-b border-gray-100">
-        <div className="max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-10 xl:px-16">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6 lg:gap-8 xl:gap-10">
-                <div className="flex items-center p-5 sm:p-6 lg:p-8 xl:p-10 bg-gray-50 rounded-2xl xl:rounded-3xl">
-                    <div className="w-14 h-14 sm:w-16 sm:h-16 lg:w-20 lg:h-20 xl:w-24 xl:h-24 bg-blue-100 text-blue-600 rounded-xl lg:rounded-2xl flex items-center justify-center mr-4 lg:mr-6 xl:mr-8 shrink-0">
-                        <Truck className="w-7 h-7 sm:w-8 sm:h-8 lg:w-10 lg:h-10 xl:w-12 xl:h-12" />
+    <div className="bg-white py-8 sm:py-10 lg:py-12 border-b border-gray-100">
+        <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-4 lg:gap-5">
+                <div className="flex items-center p-4 sm:p-5 lg:p-6 bg-gray-50 rounded-xl lg:rounded-2xl">
+                    <div className="w-11 h-11 sm:w-12 sm:h-12 lg:w-14 lg:h-14 bg-blue-100 text-blue-600 rounded-lg lg:rounded-xl flex items-center justify-center mr-3 lg:mr-4 shrink-0">
+                        <Truck className="w-5 h-5 sm:w-6 sm:h-6 lg:w-7 lg:h-7" />
                     </div>
                     <div>
-                        <h3 className="font-bold text-gray-900 text-lg sm:text-xl lg:text-2xl xl:text-3xl">Ingyenes Szállítás</h3>
-                        <p className="text-sm sm:text-base lg:text-lg xl:text-xl text-gray-500 mt-1 lg:mt-2">Minden 50.000 Ft feletti rendelésnél.</p>
+                        <h3 className="font-bold text-gray-900 text-sm sm:text-base lg:text-lg">Ingyenes Szállítás</h3>
+                        <p className="text-xs sm:text-sm lg:text-base text-gray-500 mt-0.5">Minden 50.000 Ft feletti rendelésnél.</p>
                     </div>
                 </div>
-                <div className="flex items-center p-5 sm:p-6 lg:p-8 xl:p-10 bg-gray-50 rounded-2xl xl:rounded-3xl">
-                    <div className="w-14 h-14 sm:w-16 sm:h-16 lg:w-20 lg:h-20 xl:w-24 xl:h-24 bg-green-100 text-green-600 rounded-xl lg:rounded-2xl flex items-center justify-center mr-4 lg:mr-6 xl:mr-8 shrink-0">
-                        <ShieldCheck className="w-7 h-7 sm:w-8 sm:h-8 lg:w-10 lg:h-10 xl:w-12 xl:h-12" />
+                <div className="flex items-center p-4 sm:p-5 lg:p-6 bg-gray-50 rounded-xl lg:rounded-2xl">
+                    <div className="w-11 h-11 sm:w-12 sm:h-12 lg:w-14 lg:h-14 bg-green-100 text-green-600 rounded-lg lg:rounded-xl flex items-center justify-center mr-3 lg:mr-4 shrink-0">
+                        <ShieldCheck className="w-5 h-5 sm:w-6 sm:h-6 lg:w-7 lg:h-7" />
                     </div>
                     <div>
-                        <h3 className="font-bold text-gray-900 text-lg sm:text-xl lg:text-2xl xl:text-3xl">Garancia</h3>
-                        <p className="text-sm sm:text-base lg:text-lg xl:text-xl text-gray-500 mt-1 lg:mt-2">Minden bútorra teljes körű garancia.</p>
+                        <h3 className="font-bold text-gray-900 text-sm sm:text-base lg:text-lg">Garancia</h3>
+                        <p className="text-xs sm:text-sm lg:text-base text-gray-500 mt-0.5">Minden bútorra teljes körű garancia.</p>
                     </div>
                 </div>
-                <div className="flex items-center p-5 sm:p-6 lg:p-8 xl:p-10 bg-gray-50 rounded-2xl xl:rounded-3xl">
-                    <div className="w-14 h-14 sm:w-16 sm:h-16 lg:w-20 lg:h-20 xl:w-24 xl:h-24 bg-purple-100 text-purple-600 rounded-xl lg:rounded-2xl flex items-center justify-center mr-4 lg:mr-6 xl:mr-8 shrink-0">
-                        <Phone className="w-7 h-7 sm:w-8 sm:h-8 lg:w-10 lg:h-10 xl:w-12 xl:h-12" />
+                <div className="flex items-center p-4 sm:p-5 lg:p-6 bg-gray-50 rounded-xl lg:rounded-2xl">
+                    <div className="w-11 h-11 sm:w-12 sm:h-12 lg:w-14 lg:h-14 bg-purple-100 text-purple-600 rounded-lg lg:rounded-xl flex items-center justify-center mr-3 lg:mr-4 shrink-0">
+                        <Phone className="w-5 h-5 sm:w-6 sm:h-6 lg:w-7 lg:h-7" />
                     </div>
                     <div>
-                        <h3 className="font-bold text-gray-900 text-lg sm:text-xl lg:text-2xl xl:text-3xl">Ügyfélszolgálat</h3>
-                        <p className="text-sm sm:text-base lg:text-lg xl:text-xl text-gray-500 mt-1 lg:mt-2">Szakértő segítség minden nap.</p>
+                        <h3 className="font-bold text-gray-900 text-sm sm:text-base lg:text-lg">Ügyfélszolgálat</h3>
+                        <p className="text-xs sm:text-sm lg:text-base text-gray-500 mt-0.5">Szakértő segítség minden nap.</p>
                     </div>
                 </div>
             </div>
@@ -953,27 +953,27 @@ const Features = () => (
 );
 
 const Testimonials = () => (
-    <div className="bg-gray-50 py-10 sm:py-14 lg:py-16 xl:py-20 mb-10 sm:mb-12 lg:mb-16">
-        <div className="max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-10 xl:px-16 text-center">
-            <h2 className="text-2xl sm:text-3xl lg:text-4xl xl:text-5xl 2xl:text-6xl font-bold text-gray-900 mb-8 sm:mb-10 lg:mb-14">Mit mondanak rólunk?</h2>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6 lg:gap-8 xl:gap-10">
+    <div className="bg-gray-50 py-8 sm:py-10 lg:py-12 mb-8 sm:mb-10 lg:mb-12">
+        <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900 mb-6 sm:mb-8 lg:mb-10">Mit mondanak rólunk?</h2>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-4 lg:gap-5">
                 {[
                     { name: "Kovács Anna", text: "Az AI segítségével találtam meg a kanapét, ami pont illik a függönyhöz.", role: "Lakberendező" },
                     { name: "Nagy Péter", text: "Gyors szállítás, és a minőség is kiváló. A képkereső funkció nagyon hasznos.", role: "Vásárló" },
                     { name: "Szabó Éva", text: "Végre egy webshop, ahol nem kell órákig görgetni. Az asszisztens azonnal segített.", role: "Vásárló" }
                 ].map((t, i) => (
-                    <div key={i} className="bg-white p-6 sm:p-8 lg:p-10 xl:p-12 rounded-2xl xl:rounded-3xl shadow-sm hover:shadow-lg transition-shadow text-left">
-                        <div className="flex text-yellow-400 mb-4 lg:mb-5">
-                            {[...Array(5)].map((_, i) => <Star key={i} className="w-5 h-5 sm:w-6 sm:h-6 lg:w-7 lg:h-7 xl:w-8 xl:h-8 fill-current" />)}
+                    <div key={i} className="bg-white p-4 sm:p-5 lg:p-6 rounded-xl lg:rounded-2xl shadow-sm hover:shadow-lg transition-shadow text-left">
+                        <div className="flex text-yellow-400 mb-3">
+                            {[...Array(5)].map((_, i) => <Star key={i} className="w-4 h-4 sm:w-4 sm:h-4 lg:w-5 lg:h-5 fill-current" />)}
                         </div>
-                        <p className="text-gray-600 mb-5 sm:mb-6 lg:mb-8 italic text-base sm:text-lg lg:text-xl xl:text-2xl leading-relaxed">"{t.text}"</p>
+                        <p className="text-gray-600 mb-4 italic text-sm sm:text-base lg:text-base leading-relaxed">"{t.text}"</p>
                         <div className="flex items-center">
-                            <div className="w-12 h-12 sm:w-14 sm:h-14 lg:w-16 lg:h-16 xl:w-20 xl:h-20 bg-indigo-100 rounded-full flex items-center justify-center font-bold text-indigo-600 text-lg sm:text-xl lg:text-2xl xl:text-3xl mr-4 lg:mr-5">
+                            <div className="w-10 h-10 sm:w-11 sm:h-11 lg:w-12 lg:h-12 bg-indigo-100 rounded-full flex items-center justify-center font-bold text-indigo-600 text-base sm:text-lg mr-3">
                                 {t.name.charAt(0)}
                             </div>
                             <div>
-                                <h4 className="font-bold text-gray-900 text-base sm:text-lg lg:text-xl xl:text-2xl">{t.name}</h4>
-                                <p className="text-sm sm:text-base lg:text-lg xl:text-xl text-gray-500">{t.role}</p>
+                                <h4 className="font-bold text-gray-900 text-sm sm:text-base">{t.name}</h4>
+                                <p className="text-xs sm:text-sm text-gray-500">{t.role}</p>
                             </div>
                         </div>
                     </div>

@@ -31,22 +31,22 @@ export const Badge = ({
   };
 
   const sizes = {
-    xs: 'text-[10px] sm:text-xs px-1.5 sm:px-2 py-0.5 sm:py-1',
-    sm: 'text-xs sm:text-sm px-2 sm:px-2.5 py-1 sm:py-1.5',
-    md: 'text-sm sm:text-base px-2.5 sm:px-3 py-1.5 sm:py-2',
-    lg: 'text-base sm:text-lg px-3 sm:px-4 py-2 sm:py-2.5'
+    xs: 'text-[10px] px-1.5 py-0.5',
+    sm: 'text-[11px] sm:text-xs px-2 py-0.5 sm:py-1',
+    md: 'text-xs sm:text-sm px-2.5 py-1',
+    lg: 'text-sm px-3 py-1.5'
   };
 
   const iconSizes = {
-    xs: 'w-3 h-3',
-    sm: 'w-3.5 h-3.5 sm:w-4 sm:h-4',
-    md: 'w-4 h-4 sm:w-5 sm:h-5',
-    lg: 'w-5 h-5 sm:w-6 sm:h-6'
+    xs: 'w-2.5 h-2.5',
+    sm: 'w-3 h-3',
+    md: 'w-3.5 h-3.5',
+    lg: 'w-4 h-4'
   };
 
   return (
     <span className={`
-      inline-flex items-center gap-1 sm:gap-1.5 font-semibold rounded-full
+      inline-flex items-center gap-1 font-semibold rounded-full
       ${variants[variant]} ${sizes[size]}
       ${pulse ? 'animate-pulse' : ''}
       ${className}

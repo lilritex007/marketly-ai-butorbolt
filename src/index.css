@@ -34,10 +34,10 @@
 #mkt-butorbolt-app {
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
   -webkit-font-smoothing: antialiased;
-  line-height: 1.6;
+  line-height: 1.5;
   color: #1f2937;
-  /* Base font size - OPTIMIZED for readability */
-  font-size: 17px;
+  /* Base font size - COMPACT and optimized */
+  font-size: 15px;
   /* Bottom padding for UNAS mobile bottom nav (40px) */
   padding-bottom: var(--unas-bottom-nav);
 }
@@ -49,23 +49,23 @@
   }
 }
 
-/* Larger fonts on tablets */
+/* Optimal on tablets */
 @media (min-width: 768px) {
   #mkt-butorbolt-app {
-    font-size: 18px;
+    font-size: 15px;
   }
 }
 
-/* Even larger on desktop */
+/* Desktop */
 @media (min-width: 1280px) {
   #mkt-butorbolt-app {
-    font-size: 19px;
+    font-size: 16px;
   }
 }
 
 @media (min-width: 1536px) {
   #mkt-butorbolt-app {
-    font-size: 20px;
+    font-size: 16px;
   }
 }
 
