@@ -68,8 +68,20 @@ import DeliveryEstimator from './components/product/DeliveryEstimator';
 import StockUrgency from './components/product/StockUrgency';
 import ProductShare from './components/product/ProductShare';
 import FloatingCartPreview from './components/cart/FloatingCartPreview';
+import FreeShippingProgress from './components/cart/FreeShippingProgress';
 import QuickActionsBar from './components/product/QuickActionsBar';
 import ProductTabs from './components/product/ProductTabs';
+import SmartBundle from './components/product/SmartBundle';
+import PriceHistory from './components/product/PriceHistory';
+import OneClickCheckout from './components/checkout/OneClickCheckout';
+import SmartSearchBar from './components/search/SmartSearchBar';
+import VirtualShowroom from './components/showroom/VirtualShowroom';
+import PhotoReviews from './components/reviews/PhotoReviews';
+import LoyaltyProgram from './components/loyalty/LoyaltyProgram';
+import ARMeasure from './components/ar/ARMeasure';
+import GiftRegistry from './components/wishlist/GiftRegistry';
+import StickyAddToCartMobile from './components/mobile/StickyAddToCartMobile';
+import TrustBadges from './components/trust/TrustBadges';
 
 // Hooks
 import { useLocalStorage } from './hooks/index';
@@ -1688,6 +1700,15 @@ const App = () => {
               }}
               variant="banner"
             />
+
+            {/* Free Shipping Progress - shows when cart has items */}
+            {cartItems.length > 0 && (
+              <FreeShippingProgress
+                currentTotal={cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0)}
+                threshold={30000}
+                variant="banner"
+              />
+            )}
             
             <ModernHero 
               onExplore={() => {
@@ -1799,6 +1820,20 @@ const App = () => {
                 wishlist={wishlist}
               />
             )}
+
+            {/* Virtual Showroom - Interactive room designer */}
+            <div className="w-full max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-10 py-8 sm:py-10 lg:py-12">
+              <VirtualShowroom
+                products={products}
+                onProductClick={handleProductView}
+                onAddToCart={(p) => handleAddToCart(p)}
+              />
+            </div>
+
+            {/* Photo Reviews Section */}
+            <div className="w-full max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+              <PhotoReviews productId="featured" />
+            </div>
             
             <FadeInOnScroll direction="up">
               <Features />
@@ -2202,6 +2237,21 @@ const App = () => {
         recentlyAdded={recentlyAddedToCart}
         suggestedProducts={products.slice(0, 3)}
       />
+
+      {/* Trust Badges Footer Section */}
+      <TrustBadges variant="footer" />
+
+      {/* Sticky Mobile Add to Cart - shows on product view */}
+      {selectedProduct && (
+        <StickyAddToCartMobile
+          product={selectedProduct}
+          onAddToCart={(product, qty) => handleAddToCart(product, qty)}
+          onToggleWishlist={() => toggleWishlist(selectedProduct.id)}
+          isInWishlist={wishlist.includes(selectedProduct?.id)}
+          isVisible={!quickViewProduct}
+          freeShippingThreshold={50000}
+        />
+      )}
     </div>
     </ToastProvider>
   );
