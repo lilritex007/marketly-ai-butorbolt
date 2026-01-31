@@ -61,6 +61,16 @@ import { FadeInOnScroll, Confetti, CountUp } from './components/ui/Animations';
 import SwipeableProductCard from './components/mobile/SwipeableProductCard';
 import BottomSheet, { FilterBottomSheet } from './components/mobile/BottomSheet';
 
+// New UX Components - Phase 2
+import WishlistDrawer from './components/wishlist/WishlistDrawer';
+import FlashSaleBanner from './components/marketing/FlashSaleBanner';
+import DeliveryEstimator from './components/product/DeliveryEstimator';
+import StockUrgency from './components/product/StockUrgency';
+import ProductShare from './components/product/ProductShare';
+import FloatingCartPreview from './components/cart/FloatingCartPreview';
+import QuickActionsBar from './components/product/QuickActionsBar';
+import ProductTabs from './components/product/ProductTabs';
+
 // Hooks
 import { useLocalStorage } from './hooks/index';
 // useInfiniteScroll removed - using manual "Load More" button instead
@@ -233,7 +243,7 @@ const POPULAR_CATEGORIES = [
   { id: 'asztalok', name: 'Asztalok', icon: Grid3X3, color: 'from-cyan-500 to-blue-600' },
 ];
 
-const Navbar = ({ activeTab, setActiveTab, wishlistCount, productCount = 0, onScrollToProducts, recentlyViewed = [], categories = [] }) => {
+const Navbar = ({ activeTab, setActiveTab, wishlistCount, productCount = 0, onScrollToProducts, recentlyViewed = [], categories = [], onOpenWishlist }) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [announcementIndex, setAnnouncementIndex] = useState(0);
@@ -535,6 +545,7 @@ const Navbar = ({ activeTab, setActiveTab, wishlistCount, productCount = 0, onSc
 
               {/* Wishlist */}
               <button 
+                onClick={onOpenWishlist}
                 className="relative p-2.5 sm:p-3 lg:p-3.5 xl:p-4 min-w-[44px] min-h-[44px] lg:min-w-[52px] lg:min-h-[52px] xl:min-w-[56px] xl:min-h-[56px] flex items-center justify-center text-gray-600 hover:text-red-500 rounded-xl xl:rounded-2xl hover:bg-red-50 transition-all group"
                 aria-label="Kívánságlista"
               >
@@ -1030,9 +1041,20 @@ const ProductModal = ({ product, isOpen, onClose, allProducts = [], onAddToCart 
                       <h2 className="text-2xl md:text-3xl font-extrabold text-gray-900 mb-2 leading-tight">{product.name}</h2>
                       <p className="text-2xl md:text-3xl font-bold text-indigo-600 mb-4">{formatPrice(product.price)}</p>
                       
-                      {/* Price Alert */}
-                      <div className="flex items-center gap-3 mb-6">
+                      {/* Price Alert & Share */}
+                      <div className="flex items-center gap-3 mb-4">
                         <PriceAlert product={product} />
+                        <ProductShare product={product} />
+                      </div>
+                      
+                      {/* Stock Urgency */}
+                      <div className="mb-4">
+                        <StockUrgency product={product} variant="compact" />
+                      </div>
+                      
+                      {/* Delivery Estimator */}
+                      <div className="mb-6">
+                        <DeliveryEstimator product={product} variant="compact" />
                       </div>
                       
                       <div className="mb-6">
@@ -1077,6 +1099,11 @@ const ProductModal = ({ product, isOpen, onClose, allProducts = [], onAddToCart 
                           />
                         </div>
                       )}
+
+                      {/* Product Tabs - Details, Specs, Reviews */}
+                      <div className="mb-6">
+                        <ProductTabs product={product} />
+                      </div>
 
                       <div className="sticky bottom-0 bg-white pt-4 border-t border-gray-100 mt-auto">
                           <a href={product.link} target="_blank" rel="noopener noreferrer" className="w-full bg-gray-900 text-white py-4 rounded-xl font-bold text-lg text-center hover:bg-gray-800 transition-all shadow-lg flex items-center justify-center hover:shadow-xl transform hover:-translate-y-1">
@@ -1306,6 +1333,18 @@ const App = () => {
   const [showFilterSheet, setShowFilterSheet] = useState(false);
   const [showExitIntent, setShowExitIntent] = useState(true); // Exit intent enabled
   
+  // Phase 2 UX states
+  const [showWishlistDrawer, setShowWishlistDrawer] = useState(false);
+  const [cartItems, setCartItems] = useState([]);
+  const [recentlyAddedToCart, setRecentlyAddedToCart] = useState(null);
+  
+  // Flash sale end time (set to 12 hours from now for demo)
+  const flashSaleEndTime = useMemo(() => {
+    const end = new Date();
+    end.setHours(end.getHours() + 12);
+    return end;
+  }, []);
+  
   // UNAS API states
   const [isLoadingUnas, setIsLoadingUnas] = useState(true);
   const [unasError, setUnasError] = useState(null);
@@ -1419,12 +1458,46 @@ const App = () => {
     // Trigger confetti
     setShowConfetti(true);
     
+    // Add to cart state
+    setCartItems(prev => {
+      const existing = prev.find(item => item.id === product.id);
+      if (existing) {
+        return prev.map(item => 
+          item.id === product.id 
+            ? { ...item, quantity: (item.quantity || 1) + quantity }
+            : item
+        );
+      }
+      return [...prev, { ...product, quantity }];
+    });
+    
+    // Set recently added for notification
+    setRecentlyAddedToCart(product);
+    setTimeout(() => setRecentlyAddedToCart(null), 3000);
+    
     // Show toast
     toast.success(`${product.name} hozzáadva a kosárhoz!`);
     
-    // In real app: Add to cart logic here
+    // In real app: Sync with backend
     console.log('Added to cart:', product.name, 'x', quantity);
   }, [toast]);
+  
+  // Handle remove from cart
+  const handleRemoveFromCart = useCallback((productId) => {
+    setCartItems(prev => prev.filter(item => item.id !== productId));
+    toast.info('Eltávolítva a kosárból');
+  }, [toast]);
+  
+  // Handle update cart quantity
+  const handleUpdateCartQuantity = useCallback((productId, quantity) => {
+    if (quantity <= 0) {
+      handleRemoveFromCart(productId);
+      return;
+    }
+    setCartItems(prev => prev.map(item => 
+      item.id === productId ? { ...item, quantity } : item
+    ));
+  }, [handleRemoveFromCart]);
   
   // Server-side search state
   const [serverSearchQuery, setServerSearchQuery] = useState('');
@@ -1574,6 +1647,7 @@ const App = () => {
         setActiveTab={setActiveTab} 
         wishlistCount={wishlist.length}
         productCount={products.length}
+        onOpenWishlist={() => setShowWishlistDrawer(true)}
       />
       
       {/* AI Onboarding */}
@@ -1598,6 +1672,18 @@ const App = () => {
       <main id="mkt-butorbolt-main">
         {activeTab === 'shop' && (
           <>
+            {/* Flash Sale Banner */}
+            <FlashSaleBanner
+              endTime={flashSaleEndTime}
+              title="🔥 Flash Sale!"
+              subtitle="Csak ma! Akár 50% kedvezmény kiválasztott bútorokra"
+              onViewSale={() => {
+                const productsSection = document.getElementById('products-section');
+                productsSection?.scrollIntoView({ behavior: 'smooth' });
+              }}
+              variant="banner"
+            />
+            
             <ModernHero 
               onExplore={() => {
                 const productsSection = document.getElementById('products-section');
@@ -2079,6 +2165,37 @@ const App = () => {
         }}
         onClearAll={() => setAdvancedFilters({})}
         onApply={() => setShowFilterSheet(false)}
+      />
+
+      {/* Wishlist Drawer */}
+      <WishlistDrawer
+        isOpen={showWishlistDrawer}
+        onClose={() => setShowWishlistDrawer(false)}
+        wishlistItems={products.filter(p => wishlist.includes(p.id))}
+        onRemove={(id) => toggleWishlist(id)}
+        onAddToCart={handleAddToCart}
+        onProductClick={(product) => {
+          setShowWishlistDrawer(false);
+          handleProductView(product);
+        }}
+        onClearAll={() => {
+          wishlist.forEach(id => toggleWishlist(id));
+        }}
+      />
+
+      {/* Floating Cart Preview */}
+      <FloatingCartPreview
+        cartItems={cartItems}
+        onRemove={handleRemoveFromCart}
+        onUpdateQuantity={handleUpdateCartQuantity}
+        onCheckout={() => {
+          window.open(`${WEBSHOP_DOMAIN}/checkout`, '_blank');
+        }}
+        onViewCart={() => {
+          window.open(`${WEBSHOP_DOMAIN}/cart`, '_blank');
+        }}
+        recentlyAdded={recentlyAddedToCart}
+        suggestedProducts={products.slice(0, 3)}
       />
     </div>
     </ToastProvider>
