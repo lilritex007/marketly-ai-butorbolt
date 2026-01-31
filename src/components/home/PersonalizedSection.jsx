@@ -67,7 +67,7 @@ const PersonalizedSection = ({
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
           <div>
             <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 flex items-center gap-2">
-              <Sparkles className="w-7 h-7 text-indigo-600" />
+              <Sparkles className="w-7 h-7 text-primary-500" />
               Személyre szabva neked
             </h2>
             {styleDNA?.styleDNA && (
@@ -110,17 +110,17 @@ const PersonalizedSection = ({
                 className={`
                   flex items-center gap-2 px-4 py-2.5 rounded-full whitespace-nowrap transition-all
                   ${isActive 
-                    ? 'bg-indigo-600 text-white shadow-lg' 
+                    ? 'bg-primary-500 text-white shadow-lg' 
                     : 'bg-white text-gray-700 hover:bg-gray-100 shadow'
                   }
                 `}
               >
-                <Icon className={`w-4 h-4 ${isActive ? 'text-white' : 'text-indigo-600'}`} />
+                <Icon className={`w-4 h-4 ${isActive ? 'text-white' : 'text-primary-500'}`} />
                 <span className="font-medium text-sm">{tab.label}</span>
                 {count > 0 && (
                   <span className={`
                     text-xs px-1.5 py-0.5 rounded-full
-                    ${isActive ? 'bg-white/20 text-white' : 'bg-indigo-100 text-indigo-700'}
+                    ${isActive ? 'bg-white/20 text-white' : 'bg-primary-100 text-primary-600'}
                   `}>
                     {count}
                   </span>
@@ -165,7 +165,7 @@ const PersonalizedSection = ({
                       {/* Badges */}
                       <div className="absolute top-2 left-2 flex flex-col gap-1">
                         {activeTab === 'foryou' && index < 3 && (
-                          <span className="px-2 py-1 bg-gradient-to-r from-indigo-500 to-purple-600 text-white text-[10px] font-bold rounded-full flex items-center gap-1">
+                          <span className="px-2 py-1 bg-gradient-to-r from-primary-500 to-secondary-700 text-white text-[10px] font-bold rounded-full flex items-center gap-1">
                             <Star className="w-3 h-3" fill="currentColor" />
                             Top {index + 1}
                           </span>
@@ -209,7 +209,7 @@ const PersonalizedSection = ({
                         {product.name}
                       </p>
                       <div className="flex items-center justify-between">
-                        <span className="text-lg font-bold text-indigo-600">
+                        <span className="text-lg font-bold text-primary-500">
                           {formatPrice(price)}
                         </span>
                         {viewedAt && activeTab === 'recent' && (

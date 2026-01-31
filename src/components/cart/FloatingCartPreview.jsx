@@ -64,7 +64,7 @@ const FloatingCartPreview = ({
         {/* Cart button */}
         <button
           onClick={() => setIsExpanded(!isExpanded)}
-          className="relative bg-gradient-to-r from-indigo-600 to-purple-600 text-white p-4 rounded-2xl shadow-2xl hover:shadow-indigo-500/50 hover:scale-105 transition-all"
+          className="relative bg-gradient-to-r from-primary-500 to-secondary-700 text-white p-4 rounded-2xl shadow-2xl hover:shadow-primary-500/50 hover:scale-105 transition-all"
         >
           <ShoppingCart className="w-6 h-6" />
           {totalItems > 0 && (
@@ -79,7 +79,7 @@ const FloatingCartPreview = ({
       {isExpanded && (
         <div className="fixed bottom-40 right-4 z-50 w-80 max-h-[60vh] bg-white rounded-2xl shadow-2xl border border-gray-100 overflow-hidden animate-scale-in">
           {/* Header */}
-          <div className="bg-gradient-to-r from-indigo-600 to-purple-600 p-4 text-white">
+          <div className="bg-gradient-to-r from-primary-500 to-secondary-700 p-4 text-white">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2.5">
                 <ShoppingCart className="w-6 h-6" />
@@ -107,7 +107,7 @@ const FloatingCartPreview = ({
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-base font-medium text-gray-900 line-clamp-1">{item.name}</p>
-                  <p className="text-lg font-bold text-indigo-600">
+                  <p className="text-lg font-bold text-primary-500">
                     {formatPrice(item.salePrice || item.price)}
                   </p>
                 </div>
@@ -179,7 +179,7 @@ const FloatingCartPreview = ({
               </button>
               <button
                 onClick={onCheckout}
-                className="px-4 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-bold rounded-xl hover:shadow-lg transition-all flex items-center justify-center gap-2 text-base"
+                className="px-4 py-3 bg-gradient-to-r from-primary-500 to-secondary-700 text-white font-bold rounded-xl hover:shadow-lg transition-all flex items-center justify-center gap-2 text-base"
               >
                 Pénztár <ArrowRight className="w-5 h-5" />
               </button>

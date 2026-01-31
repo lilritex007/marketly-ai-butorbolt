@@ -82,7 +82,7 @@ const StickyAddToCart = ({
           <div className="flex-1 min-w-0 sm:hidden">
             <p className="text-base font-medium text-gray-900 truncate">{product.name}</p>
             <div className="flex items-center gap-2">
-              <span className="text-xl font-bold text-indigo-600">{formatPrice(price)} Ft</span>
+              <span className="text-xl font-bold text-primary-500">{formatPrice(price)} Ft</span>
               {hasDiscount && (
                 <span className="text-sm line-through text-gray-400">{formatPrice(originalPrice)}</span>
               )}
@@ -99,7 +99,7 @@ const StickyAddToCart = ({
             <div>
               <p className="font-medium text-gray-900 text-base lg:text-lg line-clamp-1">{product.name}</p>
               <div className="flex items-center gap-2">
-                <span className="text-xl lg:text-2xl font-bold text-indigo-600">{formatPrice(price)} Ft</span>
+                <span className="text-xl lg:text-2xl font-bold text-primary-500">{formatPrice(price)} Ft</span>
                 {hasDiscount && (
                   <>
                     <span className="text-base line-through text-gray-400">{formatPrice(originalPrice)}</span>
@@ -170,7 +170,7 @@ const StickyAddToCart = ({
                 ${addedToCart 
                   ? 'bg-green-500 text-white' 
                   : isInStock 
-                    ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white hover:shadow-lg hover:scale-[1.02]'
+                    ? 'bg-gradient-to-r from-primary-500 to-secondary-700 text-white hover:shadow-lg hover:scale-[1.02]'
                     : 'bg-gray-300 text-gray-500 cursor-not-allowed'
                 }
               `}
@@ -199,7 +199,7 @@ const StickyAddToCart = ({
       {/* Scroll to top button */}
       <button
         onClick={scrollToTop}
-        className="absolute -top-12 right-4 p-2 bg-white rounded-full shadow-lg border border-gray-200 text-gray-600 hover:text-indigo-600 hover:border-indigo-300 transition-all"
+        className="absolute -top-12 right-4 p-2 bg-white rounded-full shadow-lg border border-gray-200 text-gray-600 hover:text-primary-500 hover:border-primary-300 transition-all"
       >
         <ChevronUp className="w-5 h-5" />
       </button>

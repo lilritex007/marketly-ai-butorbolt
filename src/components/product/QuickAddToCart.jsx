@@ -51,7 +51,7 @@ const QuickAddToCart = ({ product, onAdd, className = '' }) => {
         transform hover:scale-105 active:scale-95
         ${showSuccess 
           ? 'bg-green-500 text-white' 
-          : 'bg-indigo-600 text-white hover:bg-indigo-700'
+          : 'bg-primary-500 text-white hover:bg-primary-600'
         }
         disabled:opacity-80
         ${className}

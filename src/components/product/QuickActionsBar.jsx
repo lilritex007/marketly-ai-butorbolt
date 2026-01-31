@@ -58,7 +58,7 @@ const QuickActionsBar = ({
       id: 'dimensions',
       icon: Ruler,
       label: 'Méretek',
-      color: 'text-gray-600 hover:text-purple-500 hover:bg-purple-50',
+      color: 'text-gray-600 hover:text-secondary-600 hover:bg-secondary-50',
       onClick: () => onDimensionView?.(product)
     }
   ];

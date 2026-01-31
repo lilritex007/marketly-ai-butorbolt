@@ -52,12 +52,12 @@ const TOAST_TYPES = {
   },
   cart: {
     icon: ShoppingCart,
-    bg: 'bg-indigo-50 border-indigo-200',
-    iconBg: 'bg-indigo-100',
-    iconColor: 'text-indigo-600',
-    title: 'text-indigo-900',
-    message: 'text-indigo-700',
-    progress: 'bg-indigo-500'
+    bg: 'bg-primary-50 border-primary-200',
+    iconBg: 'bg-primary-100',
+    iconColor: 'text-primary-500',
+    title: 'text-primary-700',
+    message: 'text-primary-600',
+    progress: 'bg-primary-500'
   },
   wishlist: {
     icon: Heart,
@@ -70,12 +70,12 @@ const TOAST_TYPES = {
   },
   ai: {
     icon: Sparkles,
-    bg: 'bg-purple-50 border-purple-200',
-    iconBg: 'bg-purple-100',
-    iconColor: 'text-purple-600',
-    title: 'text-purple-900',
-    message: 'text-purple-700',
-    progress: 'bg-purple-500'
+    bg: 'bg-secondary-50 border-secondary-200',
+    iconBg: 'bg-secondary-100',
+    iconColor: 'text-secondary-700',
+    title: 'text-secondary-800',
+    message: 'text-secondary-700',
+    progress: 'bg-secondary-600'
   },
   notification: {
     icon: Bell,

@@ -77,7 +77,7 @@ const AIStyleQuiz = ({ products, onRecommendations, onClose }) => {
         { id: 'earth', label: 'Földszínek (Barna, Zöld)', icon: Leaf, color: 'text-amber-700 bg-amber-50', keywords: ['barna', 'zöld', 'fa', 'dió', 'tölgy'] },
         { id: 'bold', label: 'Merész (Kék, Piros)', icon: Zap, color: 'text-red-600 bg-red-50', keywords: ['kék', 'piros', 'sárga', 'élénk', 'színes'] },
         { id: 'dark', label: 'Sötét (Fekete, Antracit)', icon: Circle, color: 'text-gray-800 bg-gray-200', keywords: ['fekete', 'antracit', 'sötét', 'grafit', 'éjfekete'] },
-        { id: 'pastel', label: 'Pasztell (Rózsaszín, Menta)', icon: Sparkles, color: 'text-purple-400 bg-purple-50', keywords: ['rózsaszín', 'menta', 'pasztell', 'halvány', 'lágy'] },
+        { id: 'pastel', label: 'Pasztell (Rózsaszín, Menta)', icon: Sparkles, color: 'text-secondary-500 bg-secondary-50', keywords: ['rózsaszín', 'menta', 'pasztell', 'halvány', 'lágy'] },
       ]
     },
     {
@@ -88,7 +88,7 @@ const AIStyleQuiz = ({ products, onRecommendations, onClose }) => {
         { id: 'budget', label: 'Megfizethető (< 100k Ft)', icon: DollarSign, color: 'text-green-600 bg-green-50' },
         { id: 'mid', label: 'Közép (100-300k Ft)', icon: Gem, color: 'text-blue-600 bg-blue-50' },
         { id: 'premium', label: 'Prémium (> 300k Ft)', icon: Crown, color: 'text-amber-600 bg-amber-50' },
-        { id: 'flexible', label: 'Rugalmas', icon: Target, color: 'text-indigo-600 bg-indigo-50' },
+        { id: 'flexible', label: 'Rugalmas', icon: Target, color: 'text-primary-500 bg-primary-50' },
       ]
     },
     {
@@ -96,7 +96,7 @@ const AIStyleQuiz = ({ products, onRecommendations, onClose }) => {
       question: 'Mi a legfontosabb számodra?',
       icon: Target,
       options: [
-        { id: 'comfort', label: 'Kényelem', icon: Sofa, color: 'text-indigo-600 bg-indigo-50', keywords: ['kényelmes', 'puha', 'tágas'] },
+        { id: 'comfort', label: 'Kényelem', icon: Sofa, color: 'text-primary-500 bg-primary-50', keywords: ['kényelmes', 'puha', 'tágas'] },
         { id: 'design', label: 'Design', icon: Paintbrush, color: 'text-pink-600 bg-pink-50', keywords: ['design', 'stílusos', 'elegáns', 'divatos'] },
         { id: 'durability', label: 'Tartósság', icon: Shield, color: 'text-gray-600 bg-gray-100', keywords: ['tartós', 'strapabíró', 'erős', 'masszív'] },
         { id: 'versatility', label: 'Sokoldalúság', icon: RefreshCw, color: 'text-blue-600 bg-blue-50', keywords: ['praktikus', 'átalakítható', 'multifunkciós'] },
@@ -108,8 +108,8 @@ const AIStyleQuiz = ({ products, onRecommendations, onClose }) => {
       question: 'Melyik helyiségbe keresel bútort?',
       icon: Home,
       options: [
-        { id: 'living', label: 'Nappali', icon: Tv, color: 'text-indigo-600 bg-indigo-50', keywords: ['kanapé', 'fotel', 'dohányzó', 'tv', 'nappali', 'ülőgarnitúra', 'sarok'] },
-        { id: 'bedroom', label: 'Hálószoba', icon: BedDouble, color: 'text-purple-600 bg-purple-50', keywords: ['ágy', 'matrac', 'éjjeli', 'hálószoba', 'gardrób', 'komód', 'franciaágy'] },
+        { id: 'living', label: 'Nappali', icon: Tv, color: 'text-primary-500 bg-primary-50', keywords: ['kanapé', 'fotel', 'dohányzó', 'tv', 'nappali', 'ülőgarnitúra', 'sarok'] },
+        { id: 'bedroom', label: 'Hálószoba', icon: BedDouble, color: 'text-secondary-700 bg-secondary-50', keywords: ['ágy', 'matrac', 'éjjeli', 'hálószoba', 'gardrób', 'komód', 'franciaágy'] },
         { id: 'dining', label: 'Étkező', icon: UtensilsCrossed, color: 'text-amber-600 bg-amber-50', keywords: ['étkező', 'asztal', 'szék', 'tálaló', 'étkezőasztal', 'étkezőszék'] },
         { id: 'office', label: 'Dolgozószoba', icon: Briefcase, color: 'text-gray-600 bg-gray-100', keywords: ['íróasztal', 'iroda', 'forgószék', 'polc', 'könyvespolc'] },
         { id: 'all', label: 'Teljes lakás', icon: Home, color: 'text-emerald-600 bg-emerald-50', keywords: [] },
@@ -375,7 +375,7 @@ Legyél barátságos, használj tegezést. Magyarul válaszolj!`;
         onClick={e => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="bg-gradient-to-r from-indigo-600 to-purple-600 p-5 relative">
+        <div className="bg-gradient-to-r from-primary-500 to-secondary-700 p-5 relative">
           <button
             onClick={onClose}
             className="absolute top-3 right-3 w-8 h-8 flex items-center justify-center text-white/80 hover:text-white hover:bg-white/10 rounded-full transition-colors"
@@ -416,7 +416,7 @@ Legyél barátságos, használj tegezést. Magyarul válaszolj!`;
         <div className="p-5">
           {isAnalyzing ? (
             <div className="py-12 text-center">
-              <Loader2 className="w-12 h-12 text-indigo-600 animate-spin mx-auto mb-4" />
+              <Loader2 className="w-12 h-12 text-primary-500 animate-spin mx-auto mb-4" />
               <h3 className="text-lg font-bold text-gray-900 mb-2">AI elemzés folyamatban...</h3>
               <p className="text-gray-500 text-sm">
                 {productStats?.total.toLocaleString()} termékből keressük a neked valókat
@@ -425,7 +425,7 @@ Legyél barátságos, használj tegezést. Magyarul válaszolj!`;
           ) : styleDNA ? (
             <div className="space-y-5">
               {/* Result */}
-              <div className="bg-gradient-to-br from-indigo-50 to-purple-50 rounded-xl p-5 border border-indigo-100">
+              <div className="bg-gradient-to-br from-primary-50 to-secondary-50 rounded-xl p-5 border border-primary-100">
                 <div className="flex items-center gap-2 mb-3">
                   <CheckCircle className="w-5 h-5 text-green-500" />
                   <h3 className="text-lg font-bold text-gray-900">A Te Style DNA-d</h3>
@@ -442,7 +442,7 @@ Legyél barátságos, használj tegezést. Magyarul válaszolj!`;
                   </h4>
                   <div className="grid grid-cols-3 gap-2">
                     {recommendations.slice(0, 6).map((product) => (
-                      <div key={product.id} className="bg-gray-50 rounded-lg p-2 text-center hover:bg-indigo-50 transition-colors cursor-pointer">
+                      <div key={product.id} className="bg-gray-50 rounded-lg p-2 text-center hover:bg-primary-50 transition-colors cursor-pointer">
                         <img
                           src={product.images?.[0] || product.image || '/placeholder.png'}
                           alt={product.name}
@@ -450,7 +450,7 @@ Legyél barátságos, használj tegezést. Magyarul válaszolj!`;
                           onError={(e) => { e.target.src = 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100"><rect fill="%23f3f4f6" width="100" height="100"/><text x="50%" y="50%" text-anchor="middle" dy=".3em" fill="%239ca3af" font-size="12">Kép</text></svg>'; }}
                         />
                         <p className="text-[10px] text-gray-600 truncate">{product.name}</p>
-                        <p className="text-xs font-bold text-indigo-600">{formatPrice(product.salePrice || product.price)}</p>
+                        <p className="text-xs font-bold text-primary-500">{formatPrice(product.salePrice || product.price)}</p>
                       </div>
                     ))}
                   </div>
@@ -464,7 +464,7 @@ Legyél barátságos, használj tegezést. Magyarul válaszolj!`;
 
               <button
                 onClick={onClose}
-                className="w-full bg-gradient-to-r from-indigo-600 to-purple-600 text-white py-3.5 rounded-xl font-bold hover:opacity-90 transition-opacity flex items-center justify-center gap-2"
+                className="w-full bg-gradient-to-r from-primary-500 to-secondary-700 text-white py-3.5 rounded-xl font-bold hover:opacity-90 transition-opacity flex items-center justify-center gap-2"
               >
                 <ShoppingBag className="w-5 h-5" />
                 Termékek megtekintése
@@ -474,8 +474,8 @@ Legyél barátságos, használj tegezést. Magyarul válaszolj!`;
             <div>
               {/* Question */}
               <div className="flex items-center gap-3 mb-5">
-                <div className="w-10 h-10 bg-indigo-100 rounded-xl flex items-center justify-center shrink-0">
-                  <QuestionIcon className="w-5 h-5 text-indigo-600" />
+                <div className="w-10 h-10 bg-primary-100 rounded-xl flex items-center justify-center shrink-0">
+                  <QuestionIcon className="w-5 h-5 text-primary-500" />
                 </div>
                 <h3 className="text-lg font-bold text-gray-900">{currentQuestion.question}</h3>
               </div>
@@ -494,8 +494,8 @@ Legyél barátságos, használj tegezést. Magyarul válaszolj!`;
                         w-full p-3.5 rounded-xl border-2 text-left transition-all
                         flex items-center gap-3
                         ${isSelected 
-                          ? 'border-indigo-500 bg-indigo-50' 
-                          : 'border-gray-200 hover:border-indigo-300 hover:bg-gray-50'
+                          ? 'border-primary-500 bg-primary-50' 
+                          : 'border-gray-200 hover:border-primary-300 hover:bg-gray-50'
                         }
                       `}
                     >
@@ -503,7 +503,7 @@ Legyél barátságos, használj tegezést. Magyarul válaszolj!`;
                         <OptionIcon className="w-5 h-5" />
                       </div>
                       <span className="text-sm font-medium text-gray-800 flex-1">{option.label}</span>
-                      {isSelected && <ArrowRight className="w-5 h-5 text-indigo-600" />}
+                      {isSelected && <ArrowRight className="w-5 h-5 text-primary-500" />}
                     </button>
                   );
                 })}

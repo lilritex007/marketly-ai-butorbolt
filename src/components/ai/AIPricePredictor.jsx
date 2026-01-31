@@ -126,7 +126,7 @@ Adj reális elemzést a bútoráruház kontextusában.
     const badges = {
       buy_now: { text: '✓ Jó ár', color: 'bg-green-100 text-green-800' },
       wait: { text: '⏳ Érdemes várni', color: 'bg-yellow-100 text-yellow-800' },
-      good_deal: { text: 'Kiváló ajánlat', color: 'bg-indigo-100 text-indigo-800' }
+      good_deal: { text: 'Kiváló ajánlat', color: 'bg-primary-100 text-primary-700' }
     };
     
     const badge = badges[prediction.recommendation] || badges.buy_now;
@@ -139,10 +139,10 @@ Adj reális elemzést a bútoráruház kontextusában.
   };
 
   return (
-    <div className="bg-gradient-to-br from-indigo-50 to-purple-50 rounded-xl p-4 border border-indigo-100">
+    <div className="bg-gradient-to-br from-primary-50 to-secondary-50 rounded-xl p-4 border border-primary-100">
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2">
-          <Sparkles className="w-5 h-5 text-indigo-600" />
+          <Sparkles className="w-5 h-5 text-primary-500" />
           <h3 className="font-bold text-gray-900">AI Ár Előrejelzés</h3>
         </div>
         
@@ -151,8 +151,8 @@ Adj reális elemzést a bútoráruház kontextusában.
           className={`
             p-2 rounded-lg transition-colors
             ${alertEnabled 
-              ? 'bg-indigo-600 text-white' 
-              : 'bg-white text-gray-600 hover:bg-indigo-50'
+              ? 'bg-primary-500 text-white' 
+              : 'bg-white text-gray-600 hover:bg-primary-50'
             }
           `}
           title={alertEnabled ? 'Értesítés kikapcsolva' : 'Értesítés bekapcsolva'}
@@ -164,7 +164,7 @@ Adj reális elemzést a bútoráruház kontextusában.
       {!prediction && !isAnalyzing && (
         <button
           onClick={analyzePriceTrend}
-          className="w-full bg-white hover:bg-indigo-50 text-indigo-600 font-medium py-3 rounded-lg transition-colors border-2 border-indigo-200 hover:border-indigo-300"
+          className="w-full bg-white hover:bg-primary-50 text-primary-500 font-medium py-3 rounded-lg transition-colors border-2 border-primary-200 hover:border-primary-300"
         >
           Ár trend elemzése
         </button>
@@ -173,7 +173,7 @@ Adj reális elemzést a bútoráruház kontextusában.
       {isAnalyzing && (
         <div className="flex items-center justify-center py-8">
           <div className="flex flex-col items-center gap-2">
-            <div className="w-8 h-8 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin" />
+            <div className="w-8 h-8 border-4 border-primary-500 border-t-transparent rounded-full animate-spin" />
             <span className="text-sm text-gray-600">AI elemzés folyamatban...</span>
           </div>
         </div>
@@ -200,7 +200,7 @@ Adj reális elemzést a bútoráruház kontextusában.
               </div>
               
               <div className="flex items-baseline gap-2 mb-2">
-                <span className="text-2xl font-bold text-indigo-600">
+                <span className="text-2xl font-bold text-primary-500">
                   {prediction.trendPercent > 0 ? '+' : ''}{prediction.trendPercent}%
                 </span>
                 <span className="text-sm text-gray-600">várható változás</span>
@@ -220,7 +220,7 @@ Adj reális elemzést a bútoráruház kontextusában.
 
             {/* Alert Info */}
             {alertEnabled && (
-              <div className="bg-indigo-100 text-indigo-800 rounded-lg p-3 text-sm flex items-start gap-2">
+              <div className="bg-primary-100 text-primary-700 rounded-lg p-3 text-sm flex items-start gap-2">
                 <Bell className="w-4 h-4 mt-0.5 flex-shrink-0" />
                 <span>
                   Értesítést kapsz, ha az ár <strong>10%-kal csökken</strong> vagy várható akció van.
@@ -231,7 +231,7 @@ Adj reális elemzést a bútoráruház kontextusában.
             {/* Refresh Button */}
             <button
               onClick={analyzePriceTrend}
-              className="w-full text-sm text-indigo-600 hover:text-indigo-700 font-medium py-2"
+              className="w-full text-sm text-primary-500 hover:text-primary-600 font-medium py-2"
             >
               Frissítés
             </button>

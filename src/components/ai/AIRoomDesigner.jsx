@@ -294,7 +294,7 @@ TIPP: [1 mondat személyre szabott tanács magyarul, tegezve]`;
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="flex items-center justify-between p-5 border-b border-gray-100 bg-gradient-to-r from-purple-500 to-pink-600">
+        <div className="flex items-center justify-between p-5 border-b border-gray-100 bg-gradient-to-r from-secondary-500 to-pink-600">
           <div className="flex items-center gap-3">
             <div className="p-2.5 bg-white/20 rounded-xl">
               <Camera className="w-6 h-6 text-white" />
@@ -319,14 +319,14 @@ TIPP: [1 mondat személyre szabott tanács magyarul, tegezve]`;
           {!imagePreview && (
             <div
               onClick={() => fileInputRef.current?.click()}
-              className="border-2 border-dashed border-gray-300 rounded-xl p-10 text-center cursor-pointer hover:border-purple-500 hover:bg-purple-50/30 transition-all"
+              className="border-2 border-dashed border-gray-300 rounded-xl p-10 text-center cursor-pointer hover:border-secondary-500 hover:bg-secondary-50/30 transition-all"
             >
               <Upload className="w-14 h-14 text-gray-400 mx-auto mb-4" />
               <h3 className="text-lg font-semibold text-gray-700 mb-2">
                 Kattints vagy húzd ide a fotót
               </h3>
               <p className="text-sm text-gray-500">JPG, PNG vagy WEBP (max 4MB)</p>
-              <p className="text-xs text-purple-600 mt-2">
+              <p className="text-xs text-secondary-700 mt-2">
                 Az AI elemzi a szobát és {productStats?.total.toLocaleString() || ''} termékből ajánl
               </p>
               <input
@@ -360,7 +360,7 @@ TIPP: [1 mondat személyre szabott tanács magyarul, tegezve]`;
               {!analysis && !isAnalyzing && !analysisError && (
                 <button
                   onClick={analyzeRoom}
-                  className="w-full py-4 rounded-xl bg-gradient-to-r from-purple-500 to-pink-600 text-white font-semibold text-lg shadow-lg hover:shadow-xl transition-all hover:scale-[1.02] flex items-center justify-center gap-3"
+                  className="w-full py-4 rounded-xl bg-gradient-to-r from-secondary-500 to-pink-600 text-white font-semibold text-lg shadow-lg hover:shadow-xl transition-all hover:scale-[1.02] flex items-center justify-center gap-3"
                 >
                   <Sparkles className="w-6 h-6" />
                   AI Elemzés Indítása
@@ -370,7 +370,7 @@ TIPP: [1 mondat személyre szabott tanács magyarul, tegezve]`;
               {/* Loading */}
               {isAnalyzing && (
                 <div className="text-center py-8">
-                  <Loader2 className="w-12 h-12 text-purple-500 animate-spin mx-auto mb-4" />
+                  <Loader2 className="w-12 h-12 text-secondary-500 animate-spin mx-auto mb-4" />
                   <p className="text-gray-600 font-medium">Az AI elemzi a szobádat...</p>
                   <p className="text-gray-400 text-sm mt-1">
                     {productStats?.total.toLocaleString()} termékből keressük a tökéleteset
@@ -397,7 +397,7 @@ TIPP: [1 mondat személyre szabott tanács magyarul, tegezve]`;
               {analysis && (
                 <div className="space-y-5">
                   {/* AI Analysis */}
-                  <div className="bg-gradient-to-br from-purple-50 to-pink-50 rounded-xl p-5 border border-purple-100">
+                  <div className="bg-gradient-to-br from-secondary-50 to-pink-50 rounded-xl p-5 border border-secondary-100">
                     <div className="flex items-center gap-2 mb-3">
                       <CheckCircle className="w-5 h-5 text-green-500" />
                       <h3 className="text-lg font-bold text-gray-800">AI Elemzés</h3>
@@ -423,7 +423,7 @@ TIPP: [1 mondat személyre szabott tanács magyarul, tegezve]`;
                   {aiKeywords.length > 0 && (
                     <div className="flex flex-wrap gap-2">
                       {aiKeywords.slice(0, 8).map((kw, i) => (
-                        <span key={i} className="px-2.5 py-1 bg-purple-100 text-purple-700 text-xs rounded-full">
+                        <span key={i} className="px-2.5 py-1 bg-secondary-100 text-secondary-700 text-xs rounded-full">
                           {kw}
                         </span>
                       ))}
@@ -442,7 +442,7 @@ TIPP: [1 mondat személyre szabott tanács magyarul, tegezve]`;
                           <button
                             key={product.id}
                             onClick={() => handleProductClick(product)}
-                            className="bg-white rounded-lg overflow-hidden border border-gray-200 hover:shadow-md hover:border-purple-300 transition-all text-left"
+                            className="bg-white rounded-lg overflow-hidden border border-gray-200 hover:shadow-md hover:border-secondary-400 transition-all text-left"
                           >
                             <img
                               src={product.images?.[0] || product.image || product.mainImage}
@@ -454,7 +454,7 @@ TIPP: [1 mondat személyre szabott tanács magyarul, tegezve]`;
                               <h4 className="font-medium text-sm text-gray-800 line-clamp-1 mb-1">
                                 {product.name}
                               </h4>
-                              <p className="text-base font-bold text-purple-600">
+                              <p className="text-base font-bold text-secondary-700">
                                 {formatPrice(product.salePrice || product.price)}
                               </p>
                             </div>
@@ -480,7 +480,7 @@ TIPP: [1 mondat személyre szabott tanács magyarul, tegezve]`;
                     </button>
                     <button
                       onClick={handleClose}
-                      className="py-3 rounded-xl bg-gradient-to-r from-purple-500 to-pink-600 text-white font-semibold hover:opacity-90 transition-opacity flex items-center justify-center gap-2"
+                      className="py-3 rounded-xl bg-gradient-to-r from-secondary-500 to-pink-600 text-white font-semibold hover:opacity-90 transition-opacity flex items-center justify-center gap-2"
                     >
                       <ShoppingBag className="w-5 h-5" />
                       Megnézem

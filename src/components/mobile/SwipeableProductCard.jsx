@@ -105,7 +105,7 @@ const SwipeableProductCard = ({
       <div 
         className={`
           absolute inset-0 flex items-center justify-end px-6 transition-opacity duration-200
-          ${swipeDirection === 'left' ? 'bg-gradient-to-l from-blue-500 to-indigo-500 opacity-100' : 'opacity-0'}
+          ${swipeDirection === 'left' ? 'bg-gradient-to-l from-blue-500 to-primary-500 opacity-100' : 'opacity-0'}
         `}
       >
         <div className="flex items-center gap-2 text-white">
@@ -190,10 +190,10 @@ const DefaultProductCard = ({ product, onQuickView, onAddToCart, isWishlisted, i
       <div>
         <p className="font-medium text-gray-900 line-clamp-2 mb-1 text-sm">{product.name}</p>
         <div className="flex items-center justify-between">
-          <span className="text-lg font-bold text-indigo-600">{formatPrice(price)}</span>
+          <span className="text-lg font-bold text-primary-500">{formatPrice(price)}</span>
           <button
             onClick={() => onAddToCart?.(product)}
-            className="p-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
+            className="p-2 bg-primary-500 text-white rounded-lg hover:bg-primary-600 transition-colors"
           >
             <ShoppingCart className="w-4 h-4" />
           </button>

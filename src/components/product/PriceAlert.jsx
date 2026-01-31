@@ -177,7 +177,7 @@ const PriceAlertModal = ({
                 />
                 <div className="flex-1 min-w-0">
                   <p className="font-medium text-gray-900 text-sm line-clamp-2">{product.name}</p>
-                  <p className="text-lg font-bold text-indigo-600">{formatPrice(currentPrice)} Ft</p>
+                  <p className="text-lg font-bold text-primary-500">{formatPrice(currentPrice)} Ft</p>
                 </div>
               </div>
 

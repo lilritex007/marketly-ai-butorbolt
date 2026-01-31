@@ -85,8 +85,8 @@ export const EmptyState = ({
               onClick={action.onClick}
               className={`
                 ${s.button} min-h-[44px]
-                bg-indigo-600 text-white font-semibold rounded-xl
-                hover:bg-indigo-700 transition-colors
+                bg-primary-500 text-white font-semibold rounded-xl
+                hover:bg-primary-600 transition-colors
                 flex items-center justify-center gap-2
               `}
             >

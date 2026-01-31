@@ -105,7 +105,7 @@ const StockUrgency = ({
 
         {/* Viewing count */}
         <div className="flex items-center gap-2 text-sm text-gray-600">
-          <Eye className="w-4 h-4 text-indigo-500" />
+          <Eye className="w-4 h-4 text-primary-500" />
           <span>{viewingCount} ember nézi most</span>
         </div>
       </div>
@@ -165,23 +165,23 @@ const StockUrgency = ({
       {!isOutOfStock && (
         <div className="grid grid-cols-2 gap-3">
           {/* Currently viewing */}
-          <div className="flex items-center gap-2 p-3 bg-indigo-50 rounded-xl">
+          <div className="flex items-center gap-2 p-3 bg-primary-50 rounded-xl">
             <div className="relative">
-              <Eye className="w-5 h-5 text-indigo-600" />
+              <Eye className="w-5 h-5 text-primary-500" />
               <span className="absolute -top-1 -right-1 w-2 h-2 bg-green-500 rounded-full animate-pulse" />
             </div>
             <div>
-              <p className="text-lg font-bold text-indigo-700">{viewingCount}</p>
-              <p className="text-[10px] text-indigo-600">nézi most</p>
+              <p className="text-lg font-bold text-primary-600">{viewingCount}</p>
+              <p className="text-[10px] text-primary-500">nézi most</p>
             </div>
           </div>
 
           {/* Recent purchases */}
-          <div className="flex items-center gap-2 p-3 bg-purple-50 rounded-xl">
-            <ShoppingCart className="w-5 h-5 text-purple-600" />
+          <div className="flex items-center gap-2 p-3 bg-secondary-50 rounded-xl">
+            <ShoppingCart className="w-5 h-5 text-secondary-700" />
             <div>
-              <p className="text-lg font-bold text-purple-700">{recentPurchases}</p>
-              <p className="text-[10px] text-purple-600">vette meg ma</p>
+              <p className="text-lg font-bold text-secondary-700">{recentPurchases}</p>
+              <p className="text-[10px] text-secondary-700">vette meg ma</p>
             </div>
           </div>
         </div>

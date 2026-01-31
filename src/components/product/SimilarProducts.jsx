@@ -121,12 +121,12 @@ Csak az indoklást írd meg, ne a termékneveket!`;
   }
 
   return (
-    <div className="bg-gradient-to-br from-purple-50 to-indigo-50 py-8 sm:py-12 px-4 sm:px-6 lg:px-8 my-8 sm:my-16 rounded-2xl sm:rounded-3xl">
+    <div className="bg-gradient-to-br from-secondary-50 to-primary-50 py-8 sm:py-12 px-4 sm:px-6 lg:px-8 my-8 sm:my-16 rounded-2xl sm:rounded-3xl">
       <div className="max-w-7xl mx-auto">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6 sm:mb-8">
           <div>
             <div className="flex items-center gap-2 mb-2">
-              <Sparkles className="w-5 h-5 sm:w-6 sm:h-6 text-indigo-600" />
+              <Sparkles className="w-5 h-5 sm:w-6 sm:h-6 text-primary-500" />
               <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900">
                 Neked ajánljuk
               </h2>
@@ -141,7 +141,7 @@ Csak az indoklást írd meg, ne a termékneveket!`;
 
         {isLoading ? (
           <div className="flex items-center justify-center py-12">
-            <div className="flex items-center gap-3 text-indigo-600">
+            <div className="flex items-center gap-3 text-primary-500">
               <Sparkles className="w-6 h-6 animate-pulse" />
               <span className="text-base sm:text-lg font-medium">Személyre szabott ajánlás készül...</span>
             </div>

@@ -117,7 +117,7 @@ const ExitIntentPopup = ({ discountPercent = 10, onClose }) => {
         </button>
 
         {/* Decorative top section */}
-        <div className="bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-500 p-8 text-center relative overflow-hidden">
+        <div className="bg-gradient-to-br from-primary-500 via-secondary-700 to-pink-500 p-8 text-center relative overflow-hidden">
           {/* Animated background shapes */}
           <div className="absolute inset-0 overflow-hidden">
             <div className="absolute -top-10 -left-10 w-40 h-40 bg-white/10 rounded-full animate-blob" />
@@ -170,14 +170,14 @@ const ExitIntentPopup = ({ discountPercent = 10, onClose }) => {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="pelda@email.com"
-                    className="w-full pl-12 pr-4 py-4 border-2 border-gray-200 rounded-xl focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 outline-none transition-all text-lg"
+                    className="w-full pl-12 pr-4 py-4 border-2 border-gray-200 rounded-xl focus:border-primary-500 focus:ring-2 focus:ring-primary-200 outline-none transition-all text-lg"
                     required
                   />
                 </div>
 
                 <button
                   type="submit"
-                  className="w-full py-4 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-bold text-lg rounded-xl hover:shadow-lg hover:scale-[1.02] transition-all flex items-center justify-center gap-2"
+                  className="w-full py-4 bg-gradient-to-r from-primary-500 to-secondary-700 text-white font-bold text-lg rounded-xl hover:shadow-lg hover:scale-[1.02] transition-all flex items-center justify-center gap-2"
                 >
                   <Sparkles className="w-5 h-5" />
                   Kedvezmény aktiválása

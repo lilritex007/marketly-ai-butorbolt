@@ -225,7 +225,7 @@ const ImageGallery = ({ images = [], productName = 'Termék' }) => {
               className={`
                 flex-shrink-0 w-16 h-16 sm:w-20 sm:h-20 rounded-xl overflow-hidden border-2 transition-all
                 ${idx === currentIndex 
-                  ? 'border-indigo-500 ring-2 ring-indigo-200' 
+                  ? 'border-primary-500 ring-2 ring-primary-200' 
                   : 'border-gray-200 hover:border-gray-300 opacity-70 hover:opacity-100'
                 }
               `}
@@ -250,7 +250,7 @@ const ImageGallery = ({ images = [], productName = 'Termék' }) => {
               onClick={() => setCurrentIndex(idx)}
               className={`
                 w-2 h-2 rounded-full transition-all
-                ${idx === currentIndex ? 'bg-indigo-600 w-6' : 'bg-gray-300'}
+                ${idx === currentIndex ? 'bg-primary-500 w-6' : 'bg-gray-300'}
               `}
             />
           ))}

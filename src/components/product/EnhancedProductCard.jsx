@@ -166,14 +166,14 @@ export const EnhancedProductCard = ({
       {/* Content Section - UNIFIED TYPOGRAPHY */}
       <div className="p-4 sm:p-5 lg:p-6 flex flex-col flex-1">
         {/* Category - small readable (14px) */}
-        <span className="text-sm font-semibold text-indigo-600 uppercase tracking-wide mb-1.5 truncate">
+        <span className="text-sm font-semibold text-primary-600 uppercase tracking-wide mb-1.5 truncate">
           {product.category}
         </span>
         
         {/* Product Name - body to large (16-20px) */}
         <h3 
           onClick={() => onQuickView?.(product)} 
-          className="text-base sm:text-lg lg:text-xl font-bold text-gray-900 line-clamp-2 leading-snug cursor-pointer hover:text-indigo-600 transition-colors mb-3" 
+          className="text-base sm:text-lg lg:text-xl font-bold text-gray-900 line-clamp-2 leading-snug cursor-pointer hover:text-primary-600 transition-colors mb-3" 
           title={product.name}
         >
           {product.name}
@@ -199,7 +199,7 @@ export const EnhancedProductCard = ({
                 e.stopPropagation(); 
                 onQuickView?.(product); 
               }} 
-              className="shrink-0 w-11 h-11 sm:w-12 sm:h-12 lg:w-14 lg:h-14 flex items-center justify-center bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 transition-all tap-scale"
+              className="shrink-0 w-11 h-11 sm:w-12 sm:h-12 lg:w-14 lg:h-14 flex items-center justify-center bg-primary-500 text-white rounded-xl hover:bg-primary-600 transition-all tap-scale"
               aria-label="Részletek"
             >
               <Eye className="w-5 h-5 sm:w-6 sm:h-6" />

@@ -42,7 +42,7 @@ export const SocialProof = () => {
   const colorClasses = {
     blue: 'from-blue-500 to-blue-600',
     green: 'from-green-500 to-green-600',
-    purple: 'from-purple-500 to-purple-600',
+    purple: 'from-secondary-500 to-secondary-700',
     orange: 'from-orange-500 to-orange-600'
   };
 
@@ -51,13 +51,13 @@ export const SocialProof = () => {
       <div className="w-full max-w-[2000px] mx-auto px-4 sm:px-6 lg:px-10 xl:px-16">
         {/* Happy Customers Counter */}
         <div className="text-center mb-10 sm:mb-12 lg:mb-16 xl:mb-20">
-          <div className="inline-flex items-center gap-2 mb-4 sm:mb-5 lg:mb-6 px-4 py-2 sm:px-5 sm:py-2.5 lg:px-6 lg:py-3 bg-indigo-50 rounded-full">
-            <Users className="w-5 h-5 sm:w-6 sm:h-6 lg:w-7 lg:h-7 text-indigo-600" />
-            <span className="text-sm sm:text-base lg:text-lg xl:text-xl font-bold text-indigo-600 uppercase tracking-wide">
+          <div className="inline-flex items-center gap-2 mb-4 sm:mb-5 lg:mb-6 px-4 py-2 sm:px-5 sm:py-2.5 lg:px-6 lg:py-3 bg-primary-50 rounded-full">
+            <Users className="w-5 h-5 sm:w-6 sm:h-6 lg:w-7 lg:h-7 text-primary-500" />
+            <span className="text-sm sm:text-base lg:text-lg xl:text-xl font-bold text-primary-500 uppercase tracking-wide">
               Elégedett Vásárlóink
             </span>
           </div>
-          <div className="text-5xl sm:text-6xl lg:text-7xl xl:text-8xl font-extrabold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent mb-3 sm:mb-4 lg:mb-5">
+          <div className="text-5xl sm:text-6xl lg:text-7xl xl:text-8xl font-extrabold bg-gradient-to-r from-primary-500 to-secondary-700 bg-clip-text text-transparent mb-3 sm:mb-4 lg:mb-5">
             {count.toLocaleString('hu-HU')}+
           </div>
           <p className="text-base sm:text-lg lg:text-2xl xl:text-3xl text-gray-600">
@@ -70,7 +70,7 @@ export const SocialProof = () => {
           {trustBadges.map((badge, idx) => (
             <div
               key={idx}
-              className="group relative bg-gradient-to-br from-gray-50 to-white rounded-xl lg:rounded-2xl p-4 sm:p-5 lg:p-6 border border-gray-100 hover:border-indigo-200 hover:shadow-xl transition-all transform hover:-translate-y-1"
+              className="group relative bg-gradient-to-br from-gray-50 to-white rounded-xl lg:rounded-2xl p-4 sm:p-5 lg:p-6 border border-gray-100 hover:border-primary-200 hover:shadow-xl transition-all transform hover:-translate-y-1"
             >
               <div className={`w-11 h-11 sm:w-12 sm:h-12 lg:w-14 lg:h-14 bg-gradient-to-br ${colorClasses[badge.color]} rounded-xl flex items-center justify-center mb-3 sm:mb-4 transform group-hover:rotate-6 transition-transform`}>
                 <badge.icon className="w-5 h-5 sm:w-6 sm:h-6 lg:w-7 lg:h-7 text-white" />
@@ -180,7 +180,7 @@ export const LiveShowcase = ({ products = [], onProductClick }) => {
             <span className="text-sm sm:text-base lg:text-lg xl:text-xl font-bold text-green-600">Most népszerű</span>
           </div>
           <h2 className="text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-extrabold text-gray-900">
-            Vásárlóink <span className="bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">kedvencei</span>
+            Vásárlóink <span className="bg-gradient-to-r from-primary-500 to-secondary-700 bg-clip-text text-transparent">kedvencei</span>
           </h2>
         </div>
 
@@ -192,13 +192,13 @@ export const LiveShowcase = ({ products = [], onProductClick }) => {
           {/* Navigation Arrows - Desktop */}
           <button 
             onClick={goPrev}
-            className="hidden md:flex absolute left-0 top-1/2 -translate-y-1/2 -translate-x-2 lg:-translate-x-4 z-20 w-10 h-10 lg:w-12 lg:h-12 xl:w-14 xl:h-14 bg-white shadow-lg rounded-full items-center justify-center text-gray-600 hover:text-indigo-600 hover:shadow-xl transition-all"
+            className="hidden md:flex absolute left-0 top-1/2 -translate-y-1/2 -translate-x-2 lg:-translate-x-4 z-20 w-10 h-10 lg:w-12 lg:h-12 xl:w-14 xl:h-14 bg-white shadow-lg rounded-full items-center justify-center text-gray-600 hover:text-primary-500 hover:shadow-xl transition-all"
           >
             <ArrowRight className="w-5 h-5 lg:w-6 lg:h-6 rotate-180" />
           </button>
           <button 
             onClick={goNext}
-            className="hidden md:flex absolute right-0 top-1/2 -translate-y-1/2 translate-x-2 lg:translate-x-4 z-20 w-10 h-10 lg:w-12 lg:h-12 xl:w-14 xl:h-14 bg-white shadow-lg rounded-full items-center justify-center text-gray-600 hover:text-indigo-600 hover:shadow-xl transition-all"
+            className="hidden md:flex absolute right-0 top-1/2 -translate-y-1/2 translate-x-2 lg:translate-x-4 z-20 w-10 h-10 lg:w-12 lg:h-12 xl:w-14 xl:h-14 bg-white shadow-lg rounded-full items-center justify-center text-gray-600 hover:text-primary-500 hover:shadow-xl transition-all"
           >
             <ArrowRight className="w-5 h-5 lg:w-6 lg:h-6" />
           </button>
@@ -242,14 +242,14 @@ export const LiveShowcase = ({ products = [], onProductClick }) => {
 
                     {/* Content - UNIFIED TYPOGRAPHY */}
                     <div className="p-4 sm:p-5 lg:p-6">
-                      <h3 className="text-base sm:text-lg lg:text-xl font-bold text-gray-900 mb-2 truncate group-hover:text-indigo-600 transition-colors">
+                      <h3 className="text-base sm:text-lg lg:text-xl font-bold text-gray-900 mb-2 truncate group-hover:text-primary-500 transition-colors">
                         {product.name}
                       </h3>
                       <div className="flex items-center justify-between">
-                        <span className="text-xl sm:text-2xl lg:text-2xl font-extrabold text-indigo-600">
+                        <span className="text-xl sm:text-2xl lg:text-2xl font-extrabold text-primary-500">
                           {new Intl.NumberFormat('hu-HU', { style: 'currency', currency: 'HUF', maximumFractionDigits: 0 }).format(product.price)}
                         </span>
-                        <button className="w-11 h-11 sm:w-12 sm:h-12 lg:w-12 lg:h-12 bg-indigo-600 text-white rounded-full flex items-center justify-center hover:bg-indigo-700 transition-all">
+                        <button className="w-11 h-11 sm:w-12 sm:h-12 lg:w-12 lg:h-12 bg-primary-500 text-white rounded-full flex items-center justify-center hover:bg-primary-600 transition-all">
                           <Eye className="w-5 h-5 lg:w-6 lg:h-6" />
                         </button>
                       </div>
@@ -267,7 +267,7 @@ export const LiveShowcase = ({ products = [], onProductClick }) => {
                 key={idx}
                 onClick={() => setCurrentIndex(idx)}
                 className={`h-2 rounded-full transition-all ${
-                  currentIndex === idx ? 'w-6 sm:w-8 lg:w-10 bg-indigo-600' : 'w-2 bg-gray-300 hover:bg-gray-400'
+                  currentIndex === idx ? 'w-6 sm:w-8 lg:w-10 bg-primary-500' : 'w-2 bg-gray-300 hover:bg-gray-400'
                 }`}
               />
             ))}
@@ -283,7 +283,7 @@ export const LiveShowcase = ({ products = [], onProductClick }) => {
  */
 export const InteractiveCTA = ({ onGetStarted }) => {
   return (
-    <div className="py-10 sm:py-12 lg:py-16 xl:py-20 bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-600 relative overflow-hidden">
+    <div className="py-10 sm:py-12 lg:py-16 xl:py-20 bg-gradient-to-br from-primary-500 via-secondary-700 to-pink-600 relative overflow-hidden">
       {/* Animated Background */}
       <div className="absolute inset-0 opacity-20">
         <div className="absolute top-0 left-0 w-48 sm:w-72 lg:w-96 h-48 sm:h-72 lg:h-96 bg-white rounded-full filter blur-3xl animate-blob" />
@@ -309,7 +309,7 @@ export const InteractiveCTA = ({ onGetStarted }) => {
         <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center items-center">
           <button
             onClick={onGetStarted}
-            className="group w-full sm:w-auto px-6 py-3 sm:px-7 sm:py-3.5 lg:px-8 lg:py-4 bg-white text-indigo-600 rounded-xl font-bold text-base sm:text-lg shadow-xl hover:shadow-white/50 transition-all transform hover:-translate-y-1 flex items-center justify-center"
+            className="group w-full sm:w-auto px-6 py-3 sm:px-7 sm:py-3.5 lg:px-8 lg:py-4 bg-white text-primary-500 rounded-xl font-bold text-base sm:text-lg shadow-xl hover:shadow-white/50 transition-all transform hover:-translate-y-1 flex items-center justify-center"
           >
             Kezdjük el most
             <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />

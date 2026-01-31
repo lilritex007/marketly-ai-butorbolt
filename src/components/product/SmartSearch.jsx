@@ -255,7 +255,7 @@ TIPP: [a tipped ide]`;
           }}
           onFocus={() => setIsOpen(true)}
           onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
-          className="w-full h-12 sm:h-12 lg:h-14 xl:h-16 2xl:h-[72px] pl-11 sm:pl-12 lg:pl-14 xl:pl-16 pr-11 sm:pr-12 lg:pr-14 xl:pr-16 text-base sm:text-base lg:text-lg xl:text-xl 2xl:text-2xl border-2 border-gray-200 rounded-xl lg:rounded-2xl bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 outline-none transition-all placeholder:text-gray-400 font-medium"
+          className="w-full h-12 sm:h-12 lg:h-14 xl:h-16 2xl:h-[72px] pl-11 sm:pl-12 lg:pl-14 xl:pl-16 pr-11 sm:pr-12 lg:pr-14 xl:pr-16 text-base sm:text-base lg:text-lg xl:text-xl 2xl:text-2xl border-2 border-gray-200 rounded-xl lg:rounded-2xl bg-white focus:border-primary-500 focus:ring-2 focus:ring-primary-100 outline-none transition-all placeholder:text-gray-400 font-medium"
         />
         {query && (
           <button
@@ -274,7 +274,7 @@ TIPP: [a tipped ide]`;
           
           {/* AI Insight */}
           {aiInsight && (
-            <div className="p-3 sm:p-4 bg-gradient-to-r from-indigo-50 to-purple-50 border-b border-indigo-100">
+            <div className="p-3 sm:p-4 bg-gradient-to-r from-primary-50 to-secondary-50 border-b border-primary-100">
               <div className="flex items-start gap-2">
                 <Lightbulb className="w-4 h-4 text-amber-500 shrink-0 mt-0.5" />
                 <p className="text-sm text-gray-700">{aiInsight}</p>
@@ -291,7 +291,7 @@ TIPP: [a tipped ide]`;
                 </span>
                 <button
                   onClick={() => { setRecentSearches([]); localStorage.removeItem('recent_searches'); }}
-                  className="text-xs sm:text-sm text-indigo-600 hover:text-indigo-700 font-medium"
+                  className="text-xs sm:text-sm text-primary-500 hover:text-primary-600 font-medium"
                 >
                   Törlés
                 </button>
@@ -313,7 +313,7 @@ TIPP: [a tipped ide]`;
 
           {/* AI Loading */}
           {isAISearching && (
-            <div className="p-4 flex items-center justify-center gap-2 text-indigo-600 border-b border-gray-100">
+            <div className="p-4 flex items-center justify-center gap-2 text-primary-500 border-b border-gray-100">
               <Loader2 className="w-4 h-4 animate-spin" />
               <span className="text-sm">AI elemzi a keresést...</span>
             </div>
@@ -330,7 +330,7 @@ TIPP: [a tipped ide]`;
                   <button
                     key={product.id}
                     onClick={() => handleSelectProduct(product)}
-                    className="w-full text-left px-2 sm:px-3 py-2.5 min-h-[44px] hover:bg-indigo-50 rounded-xl transition-colors flex items-center gap-3 group"
+                    className="w-full text-left px-2 sm:px-3 py-2.5 min-h-[44px] hover:bg-primary-50 rounded-xl transition-colors flex items-center gap-3 group"
                   >
                     <img
                       src={product.images?.[0] || product.image || PLACEHOLDER_IMAGE}
@@ -339,7 +339,7 @@ TIPP: [a tipped ide]`;
                       onError={(e) => { e.target.src = PLACEHOLDER_IMAGE; }}
                     />
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm sm:text-[15px] font-medium text-gray-900 truncate group-hover:text-indigo-600 transition-colors">
+                      <p className="text-sm sm:text-[15px] font-medium text-gray-900 truncate group-hover:text-primary-500 transition-colors">
                         {product.name}
                       </p>
                       <p className="text-xs sm:text-sm text-gray-400 truncate">{product.category}</p>
@@ -355,8 +355,8 @@ TIPP: [a tipped ide]`;
 
           {/* AI Extended Suggestions */}
           {aiSuggestions.length > 0 && (
-            <div className="p-3 sm:p-4 bg-gradient-to-b from-purple-50/50 to-white border-t border-purple-100">
-              <div className="text-xs sm:text-sm font-semibold text-purple-600 mb-2 px-1 flex items-center gap-1.5">
+            <div className="p-3 sm:p-4 bg-gradient-to-b from-secondary-50/50 to-white border-t border-secondary-100">
+              <div className="text-xs sm:text-sm font-semibold text-secondary-700 mb-2 px-1 flex items-center gap-1.5">
                 <Sparkles className="w-3.5 h-3.5" /> AI javaslatok
               </div>
               <div className="space-y-1">
@@ -364,7 +364,7 @@ TIPP: [a tipped ide]`;
                   <button
                     key={product.id}
                     onClick={() => handleSelectProduct(product)}
-                    className="w-full text-left px-2 sm:px-3 py-2.5 min-h-[44px] hover:bg-purple-50 rounded-xl transition-colors flex items-center gap-3 group"
+                    className="w-full text-left px-2 sm:px-3 py-2.5 min-h-[44px] hover:bg-secondary-50 rounded-xl transition-colors flex items-center gap-3 group"
                   >
                     <img
                       src={product.images?.[0] || product.image || PLACEHOLDER_IMAGE}
@@ -373,7 +373,7 @@ TIPP: [a tipped ide]`;
                       onError={(e) => { e.target.src = PLACEHOLDER_IMAGE; }}
                     />
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm sm:text-[15px] font-medium text-gray-900 truncate group-hover:text-purple-600 transition-colors">
+                      <p className="text-sm sm:text-[15px] font-medium text-gray-900 truncate group-hover:text-secondary-700 transition-colors">
                         {product.name}
                       </p>
                       <p className="text-xs sm:text-sm text-gray-400 truncate">{product.category}</p>
@@ -392,7 +392,7 @@ TIPP: [a tipped ide]`;
             <div className="p-3 border-t border-gray-100">
               <button
                 onClick={handleShowAIResults}
-                className="w-full py-3 bg-gradient-to-r from-indigo-500 to-purple-600 text-white font-medium rounded-xl hover:opacity-90 transition-opacity flex items-center justify-center gap-2"
+                className="w-full py-3 bg-gradient-to-r from-primary-500 to-secondary-700 text-white font-medium rounded-xl hover:opacity-90 transition-opacity flex items-center justify-center gap-2"
               >
                 <Sparkles className="w-4 h-4" />
                 Összes találat megtekintése ({suggestions.length + aiSuggestions.length})

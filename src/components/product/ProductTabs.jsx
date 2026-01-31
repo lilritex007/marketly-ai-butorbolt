@@ -53,7 +53,7 @@ const ProductTabs = ({ product }) => {
             className={`
               flex items-center gap-2.5 px-5 sm:px-6 py-4 font-medium text-base whitespace-nowrap border-b-2 transition-all
               ${activeTab === tab.id 
-                ? 'border-indigo-600 text-indigo-600 bg-indigo-50/50' 
+                ? 'border-primary-500 text-primary-500 bg-primary-50/50' 
                 : 'border-transparent text-gray-500 hover:text-gray-700 hover:bg-gray-50'
               }
             `}
@@ -62,7 +62,7 @@ const ProductTabs = ({ product }) => {
             <span>{tab.label}</span>
             {tab.badge && (
               <span className={`px-2 py-0.5 text-sm rounded-full ${
-                activeTab === tab.id ? 'bg-indigo-100 text-indigo-700' : 'bg-gray-100 text-gray-600'
+                activeTab === tab.id ? 'bg-primary-100 text-primary-600' : 'bg-gray-100 text-gray-600'
               }`}>
                 {tab.badge}
               </span>
@@ -151,7 +151,7 @@ const ProductTabs = ({ product }) => {
                 <div key={review.id} className="border-b border-gray-100 pb-5 last:border-0">
                   <div className="flex items-center justify-between mb-3">
                     <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 bg-indigo-100 rounded-full flex items-center justify-center text-indigo-600 font-bold text-base">
+                      <div className="w-10 h-10 bg-primary-100 rounded-full flex items-center justify-center text-primary-500 font-bold text-base">
                         {review.author.charAt(0)}
                       </div>
                       <div>
@@ -179,7 +179,7 @@ const ProductTabs = ({ product }) => {
             </div>
 
             {/* Write review button */}
-            <button className="w-full mt-5 py-3.5 border-2 border-dashed border-gray-200 text-gray-500 font-medium text-base rounded-xl hover:border-indigo-300 hover:text-indigo-600 transition-colors">
+            <button className="w-full mt-5 py-3.5 border-2 border-dashed border-gray-200 text-gray-500 font-medium text-base rounded-xl hover:border-primary-300 hover:text-primary-500 transition-colors">
               + Vélemény írása
             </button>
           </div>
@@ -213,7 +213,7 @@ const ProductTabs = ({ product }) => {
             ))}
 
             {/* Ask question */}
-            <button className="w-full mt-3 py-3.5 border-2 border-dashed border-gray-200 text-gray-500 font-medium text-base rounded-xl hover:border-indigo-300 hover:text-indigo-600 transition-colors flex items-center justify-center gap-2">
+            <button className="w-full mt-3 py-3.5 border-2 border-dashed border-gray-200 text-gray-500 font-medium text-base rounded-xl hover:border-primary-300 hover:text-primary-500 transition-colors flex items-center justify-center gap-2">
               <MessageCircle className="w-5 h-5" />
               Kérdés feltevése
             </button>

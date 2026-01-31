@@ -101,7 +101,7 @@ const AIDebugPanel = ({ onClose }) => {
         onClick={e => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="bg-gradient-to-r from-indigo-600 to-purple-600 p-5 text-white">
+        <div className="bg-gradient-to-r from-primary-500 to-secondary-700 p-5 text-white">
           <div className="flex items-center justify-between">
             <div>
               <h2 className="text-xl font-bold flex items-center gap-2">
@@ -164,7 +164,7 @@ const AIDebugPanel = ({ onClose }) => {
           <button
             onClick={runFullTest}
             disabled={testStatus === 'testing'}
-            className="w-full py-4 rounded-xl bg-gradient-to-r from-indigo-500 to-purple-600 text-white font-bold text-lg shadow-lg hover:shadow-xl transition-all disabled:opacity-50 flex items-center justify-center gap-3"
+            className="w-full py-4 rounded-xl bg-gradient-to-r from-primary-500 to-secondary-700 text-white font-bold text-lg shadow-lg hover:shadow-xl transition-all disabled:opacity-50 flex items-center justify-center gap-3"
           >
             {testStatus === 'testing' ? (
               <>
@@ -257,9 +257,9 @@ const AIDebugPanel = ({ onClose }) => {
           </div>
 
           {/* Instructions */}
-          <div className="bg-indigo-50 rounded-xl p-4 text-sm">
-            <h4 className="font-bold text-indigo-800 mb-2">📋 Checklist</h4>
-            <ol className="list-decimal list-inside space-y-1.5 text-indigo-700">
+          <div className="bg-primary-50 rounded-xl p-4 text-sm">
+            <h4 className="font-bold text-primary-700 mb-2">📋 Checklist</h4>
+            <ol className="list-decimal list-inside space-y-1.5 text-primary-600">
               <li>Railway-en van <strong>GEMINI_API_KEY</strong> változó?</li>
               <li>Az API kulcs <strong>aktív</strong> a Google AI Studio-ban?</li>
               <li>A Railway deploy <strong>sikeresen lefutott</strong>?</li>

@@ -314,11 +314,11 @@ FELADATOD:
           className="
             fixed bottom-[calc(1.5rem+44px)] md:bottom-6 right-4 md:right-6 z-50
             w-14 h-14 md:w-16 md:h-16 rounded-full
-            bg-gradient-to-br from-indigo-500 to-purple-600
+            bg-gradient-to-br from-primary-500 to-secondary-700
             text-white shadow-2xl
             flex items-center justify-center
             transition-all duration-300
-            hover:shadow-indigo-500/50 hover:scale-110
+            hover:shadow-primary-500/50 hover:scale-110
           "
           aria-label="AI Chat megnyitása"
         >
@@ -338,7 +338,7 @@ FELADATOD:
           flex flex-col overflow-hidden border border-gray-200
         ">
           {/* Header */}
-          <div className="bg-gradient-to-r from-indigo-500 to-purple-600 p-4 flex items-center justify-between">
+          <div className="bg-gradient-to-r from-primary-500 to-secondary-700 p-4 flex items-center justify-between">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center">
                 <Sparkles className="w-6 h-6 text-white" />
@@ -368,10 +368,10 @@ FELADATOD:
                   <div className={`
                     w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0
                     ${message.role === 'user' 
-                      ? 'bg-indigo-500' 
+                      ? 'bg-primary-500' 
                       : message.isError 
                         ? 'bg-orange-500'
-                        : 'bg-gradient-to-br from-indigo-500 to-purple-600'
+                        : 'bg-gradient-to-br from-primary-500 to-secondary-700'
                     }
                   `}>
                     {message.role === 'user' ? (
@@ -387,7 +387,7 @@ FELADATOD:
                     <div className={`
                       rounded-2xl p-3
                       ${message.role === 'user'
-                        ? 'bg-indigo-500 text-white rounded-tr-sm'
+                        ? 'bg-primary-500 text-white rounded-tr-sm'
                         : 'bg-white text-gray-800 rounded-tl-sm shadow-sm'
                       }
                     `}>
@@ -438,7 +438,7 @@ FELADATOD:
                         <button
                           key={product.id}
                           onClick={() => handleProductClick(product, message.products)}
-                          className="bg-white rounded-xl p-2 shadow-sm border border-gray-100 hover:shadow-md hover:border-indigo-300 transition-all text-left group"
+                          className="bg-white rounded-xl p-2 shadow-sm border border-gray-100 hover:shadow-md hover:border-primary-300 transition-all text-left group"
                         >
                           <div className="aspect-square bg-gray-50 rounded-lg mb-2 overflow-hidden">
                             <img
@@ -449,14 +449,14 @@ FELADATOD:
                             />
                           </div>
                           <p className="text-xs font-medium text-gray-800 line-clamp-2 leading-tight">{product.name}</p>
-                          <p className="text-sm font-bold text-indigo-600 mt-1">{formatPrice(product.salePrice || product.price)}</p>
+                          <p className="text-sm font-bold text-primary-500 mt-1">{formatPrice(product.salePrice || product.price)}</p>
                         </button>
                       ))}
                     </div>
                     {message.products.length > 4 && (
                       <button
                         onClick={() => handleProductClick(message.products[0], message.products)}
-                        className="w-full mt-2 py-2 text-xs text-indigo-600 hover:text-indigo-800 font-medium"
+                        className="w-full mt-2 py-2 text-xs text-primary-500 hover:text-primary-700 font-medium"
                       >
                         + {message.products.length - 4} további termék megtekintése
                       </button>
@@ -468,12 +468,12 @@ FELADATOD:
 
             {isLoading && (
               <div className="flex gap-3">
-                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center">
+                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-primary-500 to-secondary-700 flex items-center justify-center">
                   <Bot className="w-5 h-5 text-white" />
                 </div>
                 <div className="bg-white rounded-2xl rounded-tl-sm p-3 shadow-sm">
                   <div className="flex items-center gap-2">
-                    <Loader2 className="w-5 h-5 text-indigo-500 animate-spin" />
+                    <Loader2 className="w-5 h-5 text-primary-500 animate-spin" />
                     <span className="text-sm text-gray-500">Keresem a legjobb ajánlatokat...</span>
                   </div>
                 </div>
@@ -498,7 +498,7 @@ FELADATOD:
                       setInputValue(suggestion);
                       inputRef.current?.focus();
                     }}
-                    className="px-3 py-1.5 text-xs bg-indigo-50 text-indigo-700 rounded-full hover:bg-indigo-100 transition-colors truncate max-w-[180px]"
+                    className="px-3 py-1.5 text-xs bg-primary-50 text-primary-600 rounded-full hover:bg-primary-100 transition-colors truncate max-w-[180px]"
                   >
                     {suggestion}
                   </button>
@@ -520,7 +520,7 @@ FELADATOD:
                 className="
                   flex-1 px-4 py-3 rounded-full
                   bg-gray-100 text-gray-800
-                  focus:outline-none focus:ring-2 focus:ring-indigo-500
+                  focus:outline-none focus:ring-2 focus:ring-primary-500
                   text-sm
                 "
                 disabled={isLoading}
@@ -530,7 +530,7 @@ FELADATOD:
                 disabled={!inputValue.trim() || isLoading}
                 className="
                   w-12 h-12 rounded-full
-                  bg-gradient-to-br from-indigo-500 to-purple-600
+                  bg-gradient-to-br from-primary-500 to-secondary-700
                   text-white
                   flex items-center justify-center
                   transition-all

@@ -235,8 +235,8 @@ const ANNOUNCEMENT_MESSAGES = [
 
 // Popular categories for mega menu and mobile
 const POPULAR_CATEGORIES = [
-  { id: 'kanapek', name: 'Kanapék', icon: Sofa, color: 'from-blue-500 to-indigo-600' },
-  { id: 'agyak', name: 'Ágyak', icon: BedDouble, color: 'from-purple-500 to-pink-600' },
+  { id: 'kanapek', name: 'Kanapék', icon: Sofa, color: 'from-blue-500 to-primary-500' },
+  { id: 'agyak', name: 'Ágyak', icon: BedDouble, color: 'from-secondary-600 to-secondary-600' },
   { id: 'fotelek', name: 'Fotelek', icon: Armchair, color: 'from-orange-500 to-red-600' },
   { id: 'lampak', name: 'Lámpák', icon: Lamp, color: 'from-yellow-500 to-orange-600' },
   { id: 'szekrenyek', name: 'Szekrények', icon: Grid3X3, color: 'from-green-500 to-teal-600' },
@@ -348,7 +348,7 @@ const Navbar = ({ activeTab, setActiveTab, wishlistCount, productCount = 0, onSc
   return (
     <>
       {/* Animated Announcement Bar - UNIFIED sizing */}
-      <div className="bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 text-white py-2.5 sm:py-3 lg:py-4 px-3 sm:px-4 lg:px-6 text-center relative overflow-hidden">
+      <div className="bg-gradient-to-r from-primary-500 via-secondary-700 to-secondary-600 text-white py-2.5 sm:py-3 lg:py-4 px-3 sm:px-4 lg:px-6 text-center relative overflow-hidden">
         <div className="absolute inset-0 opacity-20" style={{backgroundImage: 'radial-gradient(circle, rgba(255,255,255,0.3) 1px, transparent 1px)', backgroundSize: '16px 16px'}} />
         
         {/* Animated message */}
@@ -412,10 +412,10 @@ const Navbar = ({ activeTab, setActiveTab, wishlistCount, productCount = 0, onSc
             {/* Logo - UNIFIED scaling */}
             <div className="flex items-center cursor-pointer group" onClick={() => setActiveTab('shop')}>
               <div className={`
-                relative bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 rounded-xl sm:rounded-2xl 
+                relative bg-gradient-to-br from-primary-500 via-secondary-600 to-secondary-500 rounded-xl sm:rounded-2xl 
                 flex items-center justify-center text-white mr-3 sm:mr-4 lg:mr-5
                 transform group-hover:scale-105 group-hover:rotate-3 transition-all duration-300 
-                shadow-lg shadow-indigo-300/50 group-hover:shadow-xl
+                shadow-lg shadow-primary-300/50 group-hover:shadow-xl
                 ${isScrolled ? 'w-11 h-11 sm:w-12 sm:h-12 lg:w-14 lg:h-14 xl:w-16 xl:h-16' : 'w-12 h-12 sm:w-14 sm:h-14 lg:w-16 lg:h-16 xl:w-20 xl:h-20'}
               `}>
                 <Home className={`${isScrolled ? 'w-5 h-5 sm:w-6 sm:h-6 lg:w-7 lg:h-7 xl:w-8 xl:h-8' : 'w-6 h-6 sm:w-7 sm:h-7 lg:w-8 lg:h-8 xl:w-10 xl:h-10'}`} />
@@ -428,7 +428,7 @@ const Navbar = ({ activeTab, setActiveTab, wishlistCount, productCount = 0, onSc
                   <span className={`font-black text-gray-900 tracking-tight transition-all ${isScrolled ? 'text-xl sm:text-2xl lg:text-3xl xl:text-4xl' : 'text-2xl sm:text-3xl lg:text-4xl xl:text-5xl'}`}>
                     Marketly
                   </span>
-                  <span className={`font-black bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent transition-all ${isScrolled ? 'text-xl sm:text-2xl lg:text-3xl xl:text-4xl' : 'text-2xl sm:text-3xl lg:text-4xl xl:text-5xl'}`}>
+                  <span className={`font-black bg-gradient-to-r from-primary-500 to-secondary-700 bg-clip-text text-transparent transition-all ${isScrolled ? 'text-xl sm:text-2xl lg:text-3xl xl:text-4xl' : 'text-2xl sm:text-3xl lg:text-4xl xl:text-5xl'}`}>
                     .AI
                   </span>
                 </div>
@@ -478,7 +478,7 @@ const Navbar = ({ activeTab, setActiveTab, wishlistCount, productCount = 0, onSc
                           setActiveTab('shop');
                           setShowMegaMenu(false);
                         }}
-                        className="w-full flex items-center justify-center gap-2 xl:gap-3 py-3 xl:py-4 text-base xl:text-lg 2xl:text-xl text-indigo-600 hover:bg-indigo-50 rounded-xl xl:rounded-2xl font-bold transition-all"
+                        className="w-full flex items-center justify-center gap-2 xl:gap-3 py-3 xl:py-4 text-base xl:text-lg 2xl:text-xl text-primary-500 hover:bg-primary-50 rounded-xl xl:rounded-2xl font-bold transition-all"
                       >
                         Összes kategória megtekintése
                         <ArrowRight className="w-4 h-4 xl:w-5 xl:h-5" />
@@ -496,7 +496,7 @@ const Navbar = ({ activeTab, setActiveTab, wishlistCount, productCount = 0, onSc
                     relative flex items-center gap-2 xl:gap-3 px-4 xl:px-6 2xl:px-7 py-2.5 xl:py-3.5 2xl:py-4 rounded-xl xl:rounded-2xl
                     font-bold text-base xl:text-lg 2xl:text-xl transition-all duration-200
                     ${activeTab === item.id
-                      ? 'bg-gradient-to-r from-indigo-500 to-purple-600 text-white shadow-lg shadow-indigo-300/50'
+                      ? 'bg-gradient-to-r from-primary-500 to-secondary-700 text-white shadow-lg shadow-primary-300/50'
                       : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
                     }
                   `}
@@ -504,7 +504,7 @@ const Navbar = ({ activeTab, setActiveTab, wishlistCount, productCount = 0, onSc
                   <item.icon className="w-5 h-5 xl:w-6 xl:h-6" />
                   <span>{item.label}</span>
                   {item.isAI && activeTab !== item.id && (
-                    <span className="px-2 py-0.5 xl:px-2.5 xl:py-1 text-[10px] xl:text-xs font-bold bg-gradient-to-r from-indigo-100 to-purple-100 text-indigo-600 rounded-full">
+                    <span className="px-2 py-0.5 xl:px-2.5 xl:py-1 text-[10px] xl:text-xs font-bold bg-gradient-to-r from-primary-100 to-secondary-100 text-primary-500 rounded-full">
                       AI
                     </span>
                   )}
@@ -560,7 +560,7 @@ const Navbar = ({ activeTab, setActiveTab, wishlistCount, productCount = 0, onSc
               {/* Mobile menu button */}
               <button
                 type="button"
-                className="lg:hidden p-2.5 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-xl bg-gradient-to-r from-indigo-500 to-purple-600 text-white shadow-lg hover:shadow-xl transition-all"
+                className="lg:hidden p-2.5 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-xl bg-gradient-to-r from-primary-500 to-secondary-700 text-white shadow-lg hover:shadow-xl transition-all"
                 onClick={openMobileMenu}
                 aria-label="Menü megnyitása"
               >
@@ -594,7 +594,7 @@ const Navbar = ({ activeTab, setActiveTab, wishlistCount, productCount = 0, onSc
           onTouchEnd={handleTouchEnd}
         >
           {/* Gradient background */}
-          <div className="absolute inset-0 bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-600" />
+          <div className="absolute inset-0 bg-gradient-to-br from-primary-500 via-secondary-700 to-secondary-600" />
           
           {/* Animated floating shapes */}
           <div className="absolute inset-0 overflow-hidden pointer-events-none">
@@ -693,7 +693,7 @@ const Navbar = ({ activeTab, setActiveTab, wishlistCount, productCount = 0, onSc
                   <div className={`
                     w-12 h-12 sm:w-14 sm:h-14 rounded-xl flex items-center justify-center shrink-0
                     ${activeTab === item.id 
-                      ? 'bg-gradient-to-br from-indigo-500 to-purple-600 text-white' 
+                      ? 'bg-gradient-to-br from-primary-500 to-secondary-700 text-white' 
                       : 'bg-white/20'
                     }
                   `}>
@@ -707,7 +707,7 @@ const Navbar = ({ activeTab, setActiveTab, wishlistCount, productCount = 0, onSc
                       {item.isAI && (
                         <span className={`px-2 py-0.5 text-xs font-bold rounded-full ${
                           activeTab === item.id 
-                            ? 'bg-indigo-100 text-indigo-600' 
+                            ? 'bg-primary-100 text-primary-500' 
                             : 'bg-white/20 text-white'
                         }`}>
                           AI
@@ -718,7 +718,7 @@ const Navbar = ({ activeTab, setActiveTab, wishlistCount, productCount = 0, onSc
                       {item.desc}
                     </p>
                   </div>
-                  <ChevronRight className={`w-5 h-5 sm:w-6 sm:h-6 shrink-0 ${activeTab === item.id ? 'text-indigo-600' : 'text-white/40'}`} />
+                  <ChevronRight className={`w-5 h-5 sm:w-6 sm:h-6 shrink-0 ${activeTab === item.id ? 'text-primary-500' : 'text-white/40'}`} />
                 </button>
               ))}
             </div>
@@ -759,7 +759,7 @@ const Navbar = ({ activeTab, setActiveTab, wishlistCount, productCount = 0, onSc
                   {isDarkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
                   <span className="font-semibold">{isDarkMode ? 'Világos mód' : 'Sötét mód'}</span>
                 </div>
-                <div className={`w-10 h-6 rounded-full transition-colors ${isDarkMode ? 'bg-indigo-400' : 'bg-white/30'}`}>
+                <div className={`w-10 h-6 rounded-full transition-colors ${isDarkMode ? 'bg-primary-400' : 'bg-white/30'}`}>
                   <div className={`w-5 h-5 bg-white rounded-full mt-0.5 transition-transform ${isDarkMode ? 'translate-x-4.5 ml-0.5' : 'translate-x-0.5'}`} />
                 </div>
               </button>
@@ -842,7 +842,7 @@ const FileLoaderBar = ({ onFileLoad, onUnasRefresh, isLoadingUnas, lastUpdated, 
     };
     
     return (
-        <div id="mkt-butorbolt-loader" className="bg-indigo-600 text-white py-3 px-4 shadow-md">
+        <div id="mkt-butorbolt-loader" className="bg-primary-500 text-white py-3 px-4 shadow-md">
             <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3">
                 <div className="flex items-center">
                     <Database className="w-5 h-5 mr-2" />
@@ -864,14 +864,14 @@ const FileLoaderBar = ({ onFileLoad, onUnasRefresh, isLoadingUnas, lastUpdated, 
                     }} />
                     <button 
                         onClick={() => fileInputRef.current?.click()} 
-                        className="bg-white text-indigo-600 px-3 py-1.5 rounded-lg text-sm font-bold hover:bg-indigo-50 transition-colors flex items-center shadow-sm"
+                        className="bg-white text-primary-500 px-3 py-1.5 rounded-lg text-sm font-bold hover:bg-primary-50 transition-colors flex items-center shadow-sm"
                     >
                         <Upload className="w-4 h-4 mr-1.5" /> CSV
                     </button>
                     <button 
                         onClick={onUnasRefresh}
                         disabled={isLoadingUnas}
-                        className="bg-white text-indigo-600 px-3 py-1.5 rounded-lg text-sm font-bold hover:bg-indigo-50 transition-colors flex items-center shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="bg-white text-primary-500 px-3 py-1.5 rounded-lg text-sm font-bold hover:bg-primary-50 transition-colors flex items-center shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                         <RefreshCw className={`w-4 h-4 mr-1.5 ${isLoadingUnas ? 'animate-spin' : ''}`} /> 
                         {isLoadingUnas ? 'Frissítés...' : 'UNAS Frissítés'}
@@ -884,16 +884,16 @@ const FileLoaderBar = ({ onFileLoad, onUnasRefresh, isLoadingUnas, lastUpdated, 
 
 const Hero = ({ onExplore }) => (
     <div className="relative bg-gray-50 overflow-hidden mb-12">
-        <div className="absolute inset-0 bg-gradient-to-br from-indigo-50 to-white z-0"></div>
+        <div className="absolute inset-0 bg-gradient-to-br from-primary-50 to-white z-0"></div>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
             <div className="py-20 lg:py-28 flex flex-col lg:flex-row items-center justify-between">
                 <div className="lg:w-1/2 mb-12 lg:mb-0">
-                    <div className="inline-flex items-center px-4 py-2 bg-white rounded-full shadow-sm text-indigo-600 text-sm font-bold mb-6 border border-indigo-50">
+                    <div className="inline-flex items-center px-4 py-2 bg-white rounded-full shadow-sm text-primary-500 text-sm font-bold mb-6 border border-primary-50">
                         <Star className="w-4 h-4 mr-2 fill-current" /> Prémium Minőség 2025
                     </div>
                     <h1 className="text-5xl lg:text-7xl font-extrabold text-gray-900 leading-tight mb-6 tracking-tight">
                         Otthonod, <br/>
-                        <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-purple-600">a te stílusod.</span>
+                        <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary-500 to-secondary-700">a te stílusod.</span>
                     </h1>
                     <p className="text-xl text-gray-500 mb-10 max-w-lg leading-relaxed">
                         Találd meg a tökéletes bútort az AI segítségével. Tölts fel egy fotót álmaid szobájáról, és mi megmutatjuk hozzá a termékeket.
@@ -939,7 +939,7 @@ const Features = () => (
                     </div>
                 </div>
                 <div className="flex items-center p-4 sm:p-5 lg:p-6 bg-gray-50 rounded-xl lg:rounded-2xl">
-                    <div className="w-12 h-12 sm:w-14 sm:h-14 lg:w-16 lg:h-16 bg-purple-100 text-purple-600 rounded-xl flex items-center justify-center mr-4 shrink-0">
+                    <div className="w-12 h-12 sm:w-14 sm:h-14 lg:w-16 lg:h-16 bg-secondary-100 text-secondary-700 rounded-xl flex items-center justify-center mr-4 shrink-0">
                         <Phone className="w-6 h-6 sm:w-7 sm:h-7 lg:w-8 lg:h-8" />
                     </div>
                     <div>
@@ -968,7 +968,7 @@ const Testimonials = () => (
                         </div>
                         <p className="text-gray-600 mb-5 italic text-base sm:text-base lg:text-lg leading-relaxed">"{t.text}"</p>
                         <div className="flex items-center">
-                            <div className="w-11 h-11 sm:w-12 sm:h-12 lg:w-14 lg:h-14 bg-indigo-100 rounded-full flex items-center justify-center font-bold text-indigo-600 text-lg sm:text-xl mr-4">
+                            <div className="w-11 h-11 sm:w-12 sm:h-12 lg:w-14 lg:h-14 bg-primary-100 rounded-full flex items-center justify-center font-bold text-primary-500 text-lg sm:text-xl mr-4">
                                 {t.name.charAt(0)}
                             </div>
                             <div>
@@ -1032,14 +1032,14 @@ const ProductModal = ({ product, isOpen, onClose, allProducts = [], onAddToCart 
                   {/* Right: Product Info */}
                   <div className="md:w-1/2 p-6 md:p-8 overflow-y-auto">
                       <div className="flex items-center gap-2 mb-3">
-                          <span className="bg-indigo-50 text-indigo-700 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide">{product.category}</span>
+                          <span className="bg-primary-50 text-primary-600 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide">{product.category}</span>
                           {product.inStock ?? product.in_stock ? 
                               <span className="text-green-600 text-xs font-bold flex items-center bg-green-50 px-2 py-1 rounded-full"><Check className="w-3 h-3 mr-1" /> Raktáron</span> : 
                               <span className="text-red-500 text-xs font-bold bg-red-50 px-2 py-1 rounded-full">Készlethiány</span>
                           }
                       </div>
                       <h2 className="text-2xl md:text-3xl font-extrabold text-gray-900 mb-2 leading-tight">{product.name}</h2>
-                      <p className="text-2xl md:text-3xl font-bold text-indigo-600 mb-4">{formatPrice(product.price)}</p>
+                      <p className="text-2xl md:text-3xl font-bold text-primary-500 mb-4">{formatPrice(product.price)}</p>
                       
                       {/* Price Alert & Share */}
                       <div className="flex items-center gap-3 mb-4">
@@ -1059,7 +1059,7 @@ const ProductModal = ({ product, isOpen, onClose, allProducts = [], onAddToCart 
                       
                       <div className="mb-6">
                           {!aiTip && !loadingTip && (
-                              <button onClick={generateStyleTip} className="w-full bg-gradient-to-r from-purple-50 to-indigo-50 hover:from-purple-100 hover:to-indigo-100 text-indigo-700 p-4 rounded-xl border border-indigo-100 flex items-center justify-center transition-all group">
+                              <button onClick={generateStyleTip} className="w-full bg-gradient-to-r from-secondary-50 to-primary-50 hover:from-secondary-100 hover:to-primary-100 text-primary-600 p-4 rounded-xl border border-primary-100 flex items-center justify-center transition-all group">
                                   <Sparkles className="w-5 h-5 mr-2 group-hover:scale-110 transition-transform" />
                                   Kérj AI Lakberendező tippet!
                               </button>
@@ -1070,8 +1070,8 @@ const ProductModal = ({ product, isOpen, onClose, allProducts = [], onAddToCart 
                               </div>
                           )}
                           {aiTip && (
-                              <div className="bg-gradient-to-br from-indigo-50 to-white p-5 rounded-xl border border-indigo-100 shadow-sm animate-fade-in">
-                                  <div className="flex items-center mb-2 text-indigo-700 font-bold"><Lightbulb className="w-5 h-5 mr-2" /> AI Tipp:</div>
+                              <div className="bg-gradient-to-br from-primary-50 to-white p-5 rounded-xl border border-primary-100 shadow-sm animate-fade-in">
+                                  <div className="flex items-center mb-2 text-primary-600 font-bold"><Lightbulb className="w-5 h-5 mr-2" /> AI Tipp:</div>
                                   <div className="text-sm text-gray-700 leading-relaxed whitespace-pre-line">{aiTip}</div>
                               </div>
                           )}
@@ -1163,24 +1163,24 @@ const ChatWidget = ({ products }) => {
     <div id="mkt-butorbolt-chat" className="fixed bottom-[calc(1.5rem+44px)] md:bottom-6 right-4 md:right-6 z-50 flex flex-col items-end">
       {isOpen && (
         <div className="bg-white rounded-2xl shadow-2xl mb-4 w-[calc(100vw-2rem)] sm:w-96 max-h-[calc(100vh-140px)] md:max-h-none overflow-hidden border border-gray-200 animate-fade-in-up">
-          <div className="bg-gradient-to-r from-indigo-600 to-purple-600 p-4 flex justify-between items-center text-white">
+          <div className="bg-gradient-to-r from-primary-500 to-secondary-700 p-4 flex justify-between items-center text-white">
             <span className="font-bold flex items-center"><MessageCircle className="w-5 h-5 mr-2" /> AI Asszisztens</span>
             <button onClick={() => setIsOpen(false)} className="text-white/80 hover:text-white"><X className="w-5 h-5" /></button>
           </div>
           <div className="h-80 overflow-y-auto p-4 bg-gray-50 space-y-3">
             {messages.map((msg, idx) => (
-              <div key={idx} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}><div className={`max-w-[85%] p-3 rounded-2xl text-sm ${msg.role === 'user' ? 'bg-indigo-600 text-white' : 'bg-white border text-gray-800'}`}>{msg.text}</div></div>
+              <div key={idx} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}><div className={`max-w-[85%] p-3 rounded-2xl text-sm ${msg.role === 'user' ? 'bg-primary-500 text-white' : 'bg-white border text-gray-800'}`}>{msg.text}</div></div>
             ))}
             {isLoading && <div className="text-xs text-gray-400 p-2">Gépelés...</div>}
             <div ref={messagesEndRef} />
           </div>
           <div className="p-3 bg-white border-t border-gray-100 flex items-center gap-2">
-            <input type="text" value={input} onChange={(e) => setInput(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && handleSend()} placeholder="Írj üzenetet..." className="flex-1 p-2 bg-gray-50 border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" />
-            <button onClick={handleSend} disabled={isLoading} className="bg-indigo-600 text-white p-2 rounded-xl"><Send className="w-4 h-4" /></button>
+            <input type="text" value={input} onChange={(e) => setInput(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && handleSend()} placeholder="Írj üzenetet..." className="flex-1 p-2 bg-gray-50 border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary-500" />
+            <button onClick={handleSend} disabled={isLoading} className="bg-primary-500 text-white p-2 rounded-xl"><Send className="w-4 h-4" /></button>
           </div>
         </div>
       )}
-      <button onClick={() => setIsOpen(!isOpen)} className="bg-indigo-600 text-white p-4 rounded-full shadow-lg hover:scale-110 transition-transform">{isOpen ? <X className="w-6 h-6" /> : <MessageCircle className="w-6 h-6" />}</button>
+      <button onClick={() => setIsOpen(!isOpen)} className="bg-primary-500 text-white p-4 rounded-full shadow-lg hover:scale-110 transition-transform">{isOpen ? <X className="w-6 h-6" /> : <MessageCircle className="w-6 h-6" />}</button>
     </div>
   );
 };
@@ -1226,14 +1226,14 @@ const VisualSearch = ({ products }) => {
       <div className="bg-white rounded-xl shadow-lg p-8 mb-8 border-2 border-dashed border-gray-300 flex flex-col items-center justify-center text-center">
         {!selectedImage ? (
           <>
-            <div className="bg-indigo-50 p-4 rounded-full mb-4"><Camera className="w-8 h-8 text-indigo-600" /></div>
-            <label className="cursor-pointer bg-indigo-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-indigo-700 transition-colors">Fénykép feltöltése<input type="file" className="hidden" accept="image/*" onChange={handleImageUpload} /></label>
+            <div className="bg-primary-50 p-4 rounded-full mb-4"><Camera className="w-8 h-8 text-primary-500" /></div>
+            <label className="cursor-pointer bg-primary-500 text-white px-6 py-3 rounded-lg font-medium hover:bg-primary-600 transition-colors">Fénykép feltöltése<input type="file" className="hidden" accept="image/*" onChange={handleImageUpload} /></label>
           </>
         ) : (
           <div className="relative w-full max-w-md mx-auto">
             <img src={selectedImage} alt="Uploaded" className="rounded-lg shadow-md max-h-64 mx-auto" />
             <button onClick={() => { setSelectedImage(null); setSearchResults([]); }} className="absolute -top-2 -right-2 bg-red-500 text-white p-1 rounded-full shadow-md hover:bg-red-600"><X className="w-4 h-4" /></button>
-            {isAnalyzing && <div className="absolute inset-0 bg-white bg-opacity-80 flex items-center justify-center rounded-lg"><span className="text-indigo-800 font-bold animate-pulse">Elemzés...</span></div>}
+            {isAnalyzing && <div className="absolute inset-0 bg-white bg-opacity-80 flex items-center justify-center rounded-lg"><span className="text-primary-700 font-bold animate-pulse">Elemzés...</span></div>}
           </div>
         )}
       </div>
@@ -1268,13 +1268,13 @@ const RoomPlanner = ({ products }) => {
           <div className="p-4 border-b bg-gray-50"><h3 className="font-bold">Bútorok</h3></div>
           <div className="flex-1 overflow-y-auto p-2 space-y-2">
               {products.slice(0, 50).map(p => (
-                  <div key={p.id} onClick={() => addItem(p)} className="flex items-center gap-3 p-2 hover:bg-indigo-50 rounded cursor-pointer"><img src={p.images[0]} className="w-12 h-12 object-contain" /><p className="text-xs font-bold truncate w-24">{p.name}</p></div>
+                  <div key={p.id} onClick={() => addItem(p)} className="flex items-center gap-3 p-2 hover:bg-primary-50 rounded cursor-pointer"><img src={p.images[0]} className="w-12 h-12 object-contain" /><p className="text-xs font-bold truncate w-24">{p.name}</p></div>
               ))}
           </div>
       </div>
       <div className="lg:w-3/4 bg-gray-100 rounded-2xl border-2 border-dashed relative overflow-hidden flex items-center justify-center">
           {!background ? (
-              <label className="bg-indigo-600 text-white px-6 py-3 rounded-xl cursor-pointer">Szobafotó feltöltése<input type="file" className="hidden" accept="image/*" onChange={handleBackgroundUpload} /></label>
+              <label className="bg-primary-500 text-white px-6 py-3 rounded-xl cursor-pointer">Szobafotó feltöltése<input type="file" className="hidden" accept="image/*" onChange={handleBackgroundUpload} /></label>
           ) : (
               <div className="relative w-full h-full">
                   <img src={background} className="w-full h-full object-cover" />
@@ -1705,9 +1705,9 @@ const App = () => {
             {/* AI Super Features Row */}
             <div className="w-full max-w-[2000px] mx-auto px-4 sm:px-6 lg:px-10 xl:px-16 py-6 sm:py-8 lg:py-12">
               <div className="text-center mb-6 lg:mb-8">
-                <div className="inline-flex items-center gap-2.5 px-5 py-2.5 bg-indigo-100 rounded-full mb-5">
-                  <Bot className="w-5 h-5 lg:w-6 lg:h-6 text-indigo-600" />
-                  <span className="text-base lg:text-lg font-bold text-indigo-600">AI Powered</span>
+                <div className="inline-flex items-center gap-2.5 px-5 py-2.5 bg-primary-100 rounded-full mb-5">
+                  <Bot className="w-5 h-5 lg:w-6 lg:h-6 text-primary-500" />
+                  <span className="text-base lg:text-lg font-bold text-primary-500">AI Powered</span>
                 </div>
                 <h2 className="text-2xl sm:text-3xl lg:text-4xl xl:text-5xl font-bold text-gray-900 mb-4">
                   AI Szuper Funkciók
@@ -1721,16 +1721,16 @@ const App = () => {
                   onClick={() => setShowStyleQuiz(true)}
                   className="
                     group p-5 sm:p-8 rounded-2xl
-                    bg-gradient-to-br from-indigo-50 to-purple-50
-                    hover:from-indigo-100 hover:to-purple-100
-                    border-2 border-transparent hover:border-indigo-300
+                    bg-gradient-to-br from-primary-50 to-secondary-50
+                    hover:from-primary-100 hover:to-secondary-100
+                    border-2 border-transparent hover:border-primary-300
                     transition-all duration-300
                     hover:shadow-xl hover:scale-[1.02]
                     text-left
                   "
                 >
                   <div className="flex items-start gap-3 sm:gap-4">
-                    <div className="p-2.5 sm:p-3 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl text-white group-hover:scale-110 transition-transform shrink-0">
+                    <div className="p-2.5 sm:p-3 bg-gradient-to-br from-primary-500 to-secondary-700 rounded-xl text-white group-hover:scale-110 transition-transform shrink-0">
                       <Sparkles className="w-6 h-6 sm:w-8 sm:h-8" />
                     </div>
                     <div className="flex-1 min-w-0">
@@ -1740,7 +1740,7 @@ const App = () => {
                       <p className="text-gray-600 text-sm mb-2 sm:mb-3">
                         5 kérdés, és megismered a Style DNA-d! Személyre szabott ajánlatok.
                       </p>
-                      <span className="text-indigo-600 font-semibold text-sm flex items-center gap-2">
+                      <span className="text-primary-500 font-semibold text-sm flex items-center gap-2">
                         Kipróbálom <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                       </span>
                     </div>
@@ -1751,16 +1751,16 @@ const App = () => {
                   onClick={() => setShowRoomDesigner(true)}
                   className="
                     group p-5 sm:p-8 rounded-2xl
-                    bg-gradient-to-br from-purple-50 to-pink-50
-                    hover:from-purple-100 hover:to-pink-100
-                    border-2 border-transparent hover:border-purple-300
+                    bg-gradient-to-br from-secondary-50 to-pink-50
+                    hover:from-secondary-100 hover:to-pink-100
+                    border-2 border-transparent hover:border-secondary-400
                     transition-all duration-300
                     hover:shadow-xl hover:scale-[1.02]
                     text-left
                   "
                 >
                   <div className="flex items-start gap-3 sm:gap-4">
-                    <div className="p-2.5 sm:p-3 bg-gradient-to-br from-purple-500 to-pink-600 rounded-xl text-white group-hover:scale-110 transition-transform shrink-0">
+                    <div className="p-2.5 sm:p-3 bg-gradient-to-br from-secondary-600 to-secondary-600 rounded-xl text-white group-hover:scale-110 transition-transform shrink-0">
                       <Camera className="w-6 h-6 sm:w-8 sm:h-8" />
                     </div>
                     <div className="flex-1 min-w-0">
@@ -1770,7 +1770,7 @@ const App = () => {
                       <p className="text-gray-600 text-sm mb-2 sm:mb-3">
                         Töltsd fel a szobád fotóját, és az AI megtervezi neked!
                       </p>
-                      <span className="text-purple-600 font-semibold text-sm flex items-center gap-2">
+                      <span className="text-secondary-700 font-semibold text-sm flex items-center gap-2">
                         Kipróbálom <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                       </span>
                     </div>
@@ -1824,7 +1824,7 @@ const App = () => {
                       <h2 className="text-xl sm:text-2xl lg:text-3xl xl:text-4xl 2xl:text-5xl font-bold text-gray-900">Termékek</h2>
                       {!isLoadingUnas && (
                         <span className="text-sm sm:text-base lg:text-lg xl:text-xl 2xl:text-2xl text-gray-500">
-                          <span className="font-semibold text-indigo-600">{products.length.toLocaleString('hu-HU')}</span> db
+                          <span className="font-semibold text-primary-500">{products.length.toLocaleString('hu-HU')}</span> db
                         </span>
                       )}
                     </div>
@@ -1856,7 +1856,7 @@ const App = () => {
                       </button>
                       <select 
                         onChange={(e) => setSortOption(e.target.value)} 
-                        className="hidden sm:block px-4 lg:px-5 xl:px-6 py-3 lg:py-3.5 xl:py-4 min-h-[48px] lg:min-h-[52px] xl:min-h-[56px] text-sm sm:text-base lg:text-lg xl:text-xl border-2 border-gray-200 rounded-xl lg:rounded-2xl bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 outline-none transition-all cursor-pointer font-medium"
+                        className="hidden sm:block px-4 lg:px-5 xl:px-6 py-3 lg:py-3.5 xl:py-4 min-h-[48px] lg:min-h-[52px] xl:min-h-[56px] text-sm sm:text-base lg:text-lg xl:text-xl border-2 border-gray-200 rounded-xl lg:rounded-2xl bg-white focus:border-primary-500 focus:ring-2 focus:ring-primary-100 outline-none transition-all cursor-pointer font-medium"
                         aria-label="Rendezés"
                       >
                         <option value="default">Rendezés</option>
@@ -1884,7 +1884,7 @@ const App = () => {
                 {isLoadingUnas && (
                   <div className="space-y-6">
                     <div className="flex items-center justify-center gap-3">
-                      <div className="w-6 h-6 border-3 border-indigo-600 border-t-transparent rounded-full animate-spin" />
+                      <div className="w-6 h-6 border-3 border-primary-500 border-t-transparent rounded-full animate-spin" />
                       <p className="text-sm text-gray-500 font-medium">Termékek betöltése...</p>
                     </div>
                     <div className="product-grid">
@@ -1904,7 +1904,7 @@ const App = () => {
                     <button
                       type="button"
                       onClick={() => loadUnasData(false)}
-                      className="px-6 py-3 min-h-[44px] bg-indigo-600 text-white rounded-xl font-bold hover:bg-indigo-700 transition-colors"
+                      className="px-6 py-3 min-h-[44px] bg-primary-500 text-white rounded-xl font-bold hover:bg-primary-600 transition-colors"
                     >
                       Újrapróbálás
                     </button>
@@ -1930,7 +1930,7 @@ const App = () => {
 
                 {/* AI Recommendations Banner */}
                 {aiRecommendedProducts.length > 0 && (
-                  <div className="mb-6 p-4 sm:p-5 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 rounded-2xl shadow-lg">
+                  <div className="mb-6 p-4 sm:p-5 bg-gradient-to-r from-primary-500 via-secondary-600 to-secondary-500 rounded-2xl shadow-lg">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-3">
                         <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-white/20 flex items-center justify-center">
@@ -1974,8 +1974,8 @@ const App = () => {
                     {hasMoreToShow ? (
                       <button
                         onClick={handleLoadMore}
-                        className="px-6 sm:px-8 lg:px-10 py-3.5 sm:py-4 lg:py-5 min-h-[48px] lg:min-h-[56px] bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-semibold rounded-xl lg:rounded-2xl
-                                   hover:from-indigo-700 hover:to-purple-700 transition-all duration-200
+                        className="px-6 sm:px-8 lg:px-10 py-3.5 sm:py-4 lg:py-5 min-h-[48px] lg:min-h-[56px] bg-gradient-to-r from-primary-500 to-secondary-700 text-white font-semibold rounded-xl lg:rounded-2xl
+                                   hover:from-primary-600 hover:to-secondary-700 transition-all duration-200
                                    shadow-lg hover:shadow-xl active:scale-[0.98]
                                    flex items-center gap-3 sm:gap-4 text-base sm:text-lg lg:text-xl"
                       >

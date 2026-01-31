@@ -83,7 +83,7 @@ const LiveSocialProof = ({ currentProduct, recentPurchases = [] }) => {
           className="fixed bottom-[calc(10rem+44px)] md:bottom-40 left-4 md:left-6 z-40 bg-white rounded-full shadow-lg px-3 md:px-4 py-1.5 md:py-2 flex items-center gap-2"
         >
           <div className="relative">
-            <Eye className="w-5 h-5 text-indigo-600" />
+            <Eye className="w-5 h-5 text-primary-500" />
             <span className="absolute -top-1 -right-1 w-2 h-2 bg-green-500 rounded-full animate-pulse" />
           </div>
           <div>
@@ -134,7 +134,7 @@ const LiveSocialProof = ({ currentProduct, recentPurchases = [] }) => {
               initial={{ width: '100%' }}
               animate={{ width: '0%' }}
               transition={{ duration: 5, ease: 'linear' }}
-              className="absolute bottom-0 left-0 h-1 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-bl-xl"
+              className="absolute bottom-0 left-0 h-1 bg-gradient-to-r from-primary-500 to-secondary-600 rounded-bl-xl"
             />
           </motion.div>
         )}

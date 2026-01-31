@@ -28,7 +28,7 @@ export const BannerStrip = () => {
   if (dismissed) return null;
 
   return (
-    <div className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white py-2.5 px-4">
+    <div className="bg-gradient-to-r from-primary-500 to-secondary-700 text-white py-2.5 px-4">
       <div className="container-app flex items-center justify-between gap-4">
         <div className="flex items-center gap-2 min-w-0">
           <Truck className="w-5 h-5 flex-shrink-0 hidden sm:block" />

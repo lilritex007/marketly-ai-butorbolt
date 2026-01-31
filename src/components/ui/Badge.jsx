@@ -20,13 +20,13 @@ export const Badge = ({
 }) => {
   const variants = {
     default: 'bg-gray-100 text-gray-700',
-    primary: 'bg-indigo-100 text-indigo-700',
+    primary: 'bg-primary-100 text-primary-700',
     success: 'bg-emerald-100 text-emerald-700',
     warning: 'bg-amber-100 text-amber-700',
     danger: 'bg-red-100 text-red-700',
-    purple: 'bg-purple-100 text-purple-700',
+    purple: 'bg-secondary-100 text-secondary-700',
     pink: 'bg-pink-100 text-pink-700',
-    gradient: 'bg-gradient-to-r from-indigo-500 to-purple-500 text-white',
+    gradient: 'bg-gradient-to-r from-primary-500 to-secondary-600 text-white',
     outline: 'bg-transparent border-2 border-current'
   };
 

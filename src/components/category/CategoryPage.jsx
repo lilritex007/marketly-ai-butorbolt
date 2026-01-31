@@ -40,18 +40,18 @@ const getCategoryImage = (name) => {
  */
 const getCategoryTheme = (categoryName) => {
   const themes = {
-    'Kanapé': { gradient: 'from-blue-600/90 to-indigo-800/90', accent: 'indigo' },
-    'Fotel': { gradient: 'from-indigo-600/90 to-purple-800/90', accent: 'purple' },
-    'Nappali': { gradient: 'from-violet-600/90 to-purple-800/90', accent: 'violet' },
-    'Ágy': { gradient: 'from-purple-600/90 to-pink-800/90', accent: 'purple' },
-    'Hálószoba': { gradient: 'from-purple-600/90 to-pink-800/90', accent: 'pink' },
+    'Kanapé': { gradient: 'from-blue-600/90 to-primary-700/90', accent: 'indigo' },
+    'Fotel': { gradient: 'from-primary-500/90 to-secondary-800/90', accent: 'purple' },
+    'Nappali': { gradient: 'from-secondary-700/90 to-secondary-800/90', accent: 'violet' },
+    'Ágy': { gradient: 'from-secondary-700/90 to-pink-800/90', accent: 'purple' },
+    'Hálószoba': { gradient: 'from-secondary-700/90 to-pink-800/90', accent: 'pink' },
     'Asztal': { gradient: 'from-amber-600/90 to-orange-800/90', accent: 'amber' },
     'Szék': { gradient: 'from-yellow-600/90 to-amber-800/90', accent: 'yellow' },
     'Iroda': { gradient: 'from-slate-600/90 to-gray-800/90', accent: 'slate' },
     'Szekrény': { gradient: 'from-teal-600/90 to-cyan-800/90', accent: 'teal' },
     'Lámpa': { gradient: 'from-yellow-500/90 to-orange-700/90', accent: 'yellow' },
     'Kert': { gradient: 'from-green-600/90 to-emerald-800/90', accent: 'green' },
-    default: { gradient: 'from-indigo-600/90 to-purple-800/90', accent: 'indigo' }
+    default: { gradient: 'from-primary-500/90 to-secondary-800/90', accent: 'indigo' }
   };
   
   for (const [key, theme] of Object.entries(themes)) {
@@ -170,7 +170,7 @@ const SidebarFilters = ({
               type="checkbox"
               checked={(filters[type] || []).includes(item)}
               onChange={() => toggleFilter(type, item)}
-              className="w-4 h-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
+              className="w-4 h-4 rounded border-gray-300 text-primary-500 focus:ring-primary-500"
             />
             <span className="text-sm text-gray-600 group-hover:text-gray-900">{item}</span>
           </label>
@@ -201,7 +201,7 @@ const SidebarFilters = ({
             max={filterOptions.priceMax}
             value={priceRange[1]}
             onChange={(e) => onPriceRangeChange([priceRange[0], parseInt(e.target.value)])}
-            className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-indigo-600"
+            className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-primary-500"
           />
           <div className="flex justify-between text-sm text-gray-500">
             <span>{priceRange[0].toLocaleString('hu-HU')} Ft</span>
@@ -225,7 +225,7 @@ const SidebarFilters = ({
             type="checkbox"
             checked={filters.inStockOnly}
             onChange={() => onFilterChange({ ...filters, inStockOnly: !filters.inStockOnly })}
-            className="w-4 h-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
+            className="w-4 h-4 rounded border-gray-300 text-primary-500 focus:ring-primary-500"
           />
           <span className="text-sm text-gray-700">Csak készleten</span>
         </label>
@@ -234,7 +234,7 @@ const SidebarFilters = ({
       {/* Clear Filters */}
       <button
         onClick={() => onFilterChange({})}
-        className="w-full py-2 text-sm text-indigo-600 hover:text-indigo-700 font-medium"
+        className="w-full py-2 text-sm text-primary-500 hover:text-primary-600 font-medium"
       >
         Szűrők törlése
       </button>
@@ -293,7 +293,7 @@ const RelatedCategories = ({ currentCategory, allCategories, onCategoryChange })
             <button
               key={cat.name}
               onClick={() => onCategoryChange(cat.name)}
-              className="flex items-center gap-2 px-3 py-2 bg-white rounded-xl border border-gray-200 hover:border-indigo-300 hover:bg-indigo-50 transition-colors tap-scale"
+              className="flex items-center gap-2 px-3 py-2 bg-white rounded-xl border border-gray-200 hover:border-primary-300 hover:bg-primary-50 transition-colors tap-scale"
             >
               <Icon className="w-4 h-4 text-gray-500" />
               <span className="text-sm font-medium text-gray-700">{cat.name}</span>
@@ -334,7 +334,7 @@ const PriceStats = ({ products }) => {
         { label: 'Legolcsóbb', value: formatPrice(stats.min), color: 'text-green-600' },
         { label: 'Átlagár', value: formatPrice(stats.avg), color: 'text-gray-900' },
         { label: 'Legdrágább', value: formatPrice(stats.max), color: 'text-gray-900' },
-        { label: 'Készleten', value: `${stats.inStock} db`, color: 'text-indigo-600' }
+        { label: 'Készleten', value: `${stats.inStock} db`, color: 'text-primary-500' }
       ].map((stat, i) => (
         <div key={i} className="bg-white rounded-xl p-3 sm:p-4 border border-gray-100">
           <p className="text-xs text-gray-500 mb-1">{stat.label}</p>
@@ -397,9 +397,9 @@ const CompactProductCard = ({ product, onQuickView, onToggleWishlist, isWishlist
         onClick={() => onQuickView(product)}
       />
       <div className="flex-1 min-w-0">
-        <p className="text-xs text-indigo-600 font-medium mb-1">{product.category}</p>
+        <p className="text-xs text-primary-500 font-medium mb-1">{product.category}</p>
         <h4 
-          className="text-sm font-semibold text-gray-900 line-clamp-2 cursor-pointer hover:text-indigo-600"
+          className="text-sm font-semibold text-gray-900 line-clamp-2 cursor-pointer hover:text-primary-500"
           onClick={() => onQuickView(product)}
         >
           {product.name}
@@ -418,7 +418,7 @@ const CompactProductCard = ({ product, onQuickView, onToggleWishlist, isWishlist
           <div className="flex gap-1">
             <button
               onClick={() => onCompare?.(product)}
-              className={`p-1.5 rounded-lg transition-colors ${isComparing ? 'bg-indigo-100 text-indigo-600' : 'hover:bg-gray-100 text-gray-400'}`}
+              className={`p-1.5 rounded-lg transition-colors ${isComparing ? 'bg-primary-100 text-primary-500' : 'hover:bg-gray-100 text-gray-400'}`}
             >
               <GitCompare className="w-4 h-4" />
             </button>
@@ -439,7 +439,7 @@ const CompactProductCard = ({ product, onQuickView, onToggleWishlist, isWishlist
  * AI Recommendations Banner
  */
 const AIBanner = ({ category, onAskAI }) => (
-  <div className="bg-gradient-to-r from-indigo-500 to-purple-600 rounded-2xl p-4 sm:p-6 text-white mb-6 animate-fade-in">
+  <div className="bg-gradient-to-r from-primary-500 to-secondary-700 rounded-2xl p-4 sm:p-6 text-white mb-6 animate-fade-in">
     <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
       <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center shrink-0">
         <Sparkles className="w-6 h-6" />
@@ -450,7 +450,7 @@ const AIBanner = ({ category, onAskAI }) => (
       </div>
       <button
         onClick={onAskAI}
-        className="w-full sm:w-auto px-5 py-2.5 bg-white text-indigo-600 rounded-xl font-semibold hover:bg-indigo-50 transition-colors tap-scale"
+        className="w-full sm:w-auto px-5 py-2.5 bg-white text-primary-500 rounded-xl font-semibold hover:bg-primary-50 transition-colors tap-scale"
       >
         AI Tanácsadó
       </button>
@@ -481,7 +481,7 @@ const ViewControls = ({
         <span className="font-semibold text-gray-900">{productCount}</span> termék
       </p>
       {compareCount > 0 && (
-        <span className="px-2 py-1 bg-indigo-100 text-indigo-700 text-xs font-medium rounded-full">
+        <span className="px-2 py-1 bg-primary-100 text-primary-600 text-xs font-medium rounded-full">
           {compareCount} összehasonlításra
         </span>
       )}
@@ -491,7 +491,7 @@ const ViewControls = ({
       <select
         value={sortOption}
         onChange={(e) => onSortChange(e.target.value)}
-        className="px-3 py-2 text-sm border border-gray-200 rounded-lg bg-white focus:border-indigo-500 outline-none"
+        className="px-3 py-2 text-sm border border-gray-200 rounded-lg bg-white focus:border-primary-500 outline-none"
       >
         <option value="default">Relevancia</option>
         <option value="price-asc">Ár ↑</option>
@@ -508,7 +508,7 @@ const ViewControls = ({
           <button
             key={mode}
             onClick={() => onViewModeChange(mode)}
-            className={`p-2 ${viewMode === mode ? 'bg-indigo-600 text-white' : 'bg-white text-gray-600 hover:bg-gray-50'}`}
+            className={`p-2 ${viewMode === mode ? 'bg-primary-500 text-white' : 'bg-white text-gray-600 hover:bg-gray-50'}`}
           >
             <Icon className="w-5 h-5" />
           </button>
@@ -695,7 +695,7 @@ const CategoryPage = ({
             {/* Infinite scroll trigger */}
             {hasMoreToShow && (
               <div ref={loadMoreRef} className="flex justify-center py-8">
-                <div className="w-8 h-8 border-3 border-indigo-600 border-t-transparent rounded-full animate-spin" />
+                <div className="w-8 h-8 border-3 border-primary-500 border-t-transparent rounded-full animate-spin" />
               </div>
             )}
             

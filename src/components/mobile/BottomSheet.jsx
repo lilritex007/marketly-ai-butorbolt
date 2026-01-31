@@ -171,7 +171,7 @@ export const FilterBottomSheet = ({
             </span>
             <button
               onClick={onClearAll}
-              className="text-sm text-indigo-600 font-medium"
+              className="text-sm text-primary-500 font-medium"
             >
               Összes törlése
             </button>
@@ -191,7 +191,7 @@ export const FilterBottomSheet = ({
         {/* Apply button */}
         <button
           onClick={onApply}
-          className="w-full py-4 bg-indigo-600 text-white font-bold rounded-xl hover:bg-indigo-700 transition-colors"
+          className="w-full py-4 bg-primary-500 text-white font-bold rounded-xl hover:bg-primary-600 transition-colors"
         >
           Szűrők alkalmazása
         </button>
@@ -226,7 +226,7 @@ const FilterSection = ({ filter, value, onChange }) => {
                     : (value || []).filter(v => v !== option.value);
                   onChange(newValue);
                 }}
-                className="w-5 h-5 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
+                className="w-5 h-5 rounded border-gray-300 text-primary-500 focus:ring-primary-500"
               />
               <span className="text-gray-700">{option.label}</span>
               {option.count && (
@@ -245,7 +245,7 @@ const FilterSection = ({ filter, value, onChange }) => {
                     value={value?.min || ''}
                     onChange={(e) => onChange({ ...value, min: e.target.value })}
                     placeholder={filter.min?.toString()}
-                    className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:border-indigo-500 focus:ring-1 focus:ring-indigo-200 outline-none"
+                    className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:border-primary-500 focus:ring-1 focus:ring-primary-200 outline-none"
                   />
                 </div>
                 <div className="flex-1">
@@ -255,7 +255,7 @@ const FilterSection = ({ filter, value, onChange }) => {
                     value={value?.max || ''}
                     onChange={(e) => onChange({ ...value, max: e.target.value })}
                     placeholder={filter.max?.toString()}
-                    className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:border-indigo-500 focus:ring-1 focus:ring-indigo-200 outline-none"
+                    className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:border-primary-500 focus:ring-1 focus:ring-primary-200 outline-none"
                   />
                 </div>
               </div>

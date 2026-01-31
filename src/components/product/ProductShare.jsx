@@ -56,7 +56,7 @@ const ProductShare = ({
     {
       name: 'Messenger',
       icon: MessageCircle,
-      color: 'bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600',
+      color: 'bg-gradient-to-r from-blue-500 to-secondary-600 hover:from-blue-600 hover:to-secondary-700',
       url: `fb-messenger://share/?link=${encodeURIComponent(shareUrl)}`
     },
     {
@@ -171,7 +171,7 @@ const ShareModal = ({ product, shareLinks, shareUrl, copied, onCopy, onClose }) 
             />
             <div className="flex-1 min-w-0">
               <p className="font-medium text-gray-900 text-sm line-clamp-2">{product.name}</p>
-              <p className="text-indigo-600 font-bold">
+              <p className="text-primary-500 font-bold">
                 {(product.salePrice || product.price || 0).toLocaleString('hu-HU')} Ft
               </p>
             </div>
@@ -206,7 +206,7 @@ const ShareModal = ({ product, shareLinks, shareUrl, copied, onCopy, onClose }) 
               className={`px-4 py-3 font-bold rounded-xl transition-all flex items-center gap-2 ${
                 copied 
                   ? 'bg-green-500 text-white' 
-                  : 'bg-indigo-600 text-white hover:bg-indigo-700'
+                  : 'bg-primary-500 text-white hover:bg-primary-600'
               }`}
             >
               {copied ? (

@@ -130,7 +130,7 @@ const SmartNewsletterPopup = ({ onSubscribe }) => {
           >
             <div className="bg-white rounded-2xl shadow-2xl overflow-hidden">
               {/* Header */}
-              <div className="relative bg-gradient-to-br from-indigo-600 to-purple-600 p-8 text-white">
+              <div className="relative bg-gradient-to-br from-primary-500 to-secondary-700 p-8 text-white">
                 <button
                   onClick={handleClose}
                   className="absolute top-4 right-4 p-2 hover:bg-white/20 rounded-lg transition-colors"
@@ -162,15 +162,15 @@ const SmartNewsletterPopup = ({ onSubscribe }) => {
                     {/* Benefits */}
                     <div className="space-y-2 mb-4">
                       <div className="flex items-center gap-2 text-sm text-gray-700">
-                        <Sparkles className="w-4 h-4 text-indigo-600" />
+                        <Sparkles className="w-4 h-4 text-primary-500" />
                         <span>Exkluzív ajánlatok</span>
                       </div>
                       <div className="flex items-center gap-2 text-sm text-gray-700">
-                        <Sparkles className="w-4 h-4 text-indigo-600" />
+                        <Sparkles className="w-4 h-4 text-primary-500" />
                         <span>Korai hozzáférés új termékekhez</span>
                       </div>
                       <div className="flex items-center gap-2 text-sm text-gray-700">
-                        <Sparkles className="w-4 h-4 text-indigo-600" />
+                        <Sparkles className="w-4 h-4 text-primary-500" />
                         <span>Lakberendezési tippek</span>
                       </div>
                     </div>
@@ -184,7 +184,7 @@ const SmartNewsletterPopup = ({ onSubscribe }) => {
                           value={email}
                           onChange={(e) => setEmail(e.target.value)}
                           placeholder="Add meg az email címed"
-                          className="w-full pl-10 pr-4 py-3 border-2 border-gray-200 rounded-lg focus:border-indigo-600 focus:ring-2 focus:ring-indigo-600/20 outline-none transition-all"
+                          className="w-full pl-10 pr-4 py-3 border-2 border-gray-200 rounded-lg focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 outline-none transition-all"
                           required
                         />
                       </div>
@@ -196,7 +196,7 @@ const SmartNewsletterPopup = ({ onSubscribe }) => {
                     {/* Submit Button */}
                     <button
                       type="submit"
-                      className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 rounded-lg transition-colors shadow-lg hover:shadow-xl"
+                      className="w-full bg-primary-500 hover:bg-primary-600 text-white font-bold py-3 rounded-lg transition-colors shadow-lg hover:shadow-xl"
                     >
                       Feliratkozom!
                     </button>

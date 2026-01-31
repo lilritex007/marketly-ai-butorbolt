@@ -121,7 +121,7 @@ const ARProductPreview = ({ product, onClose }) => {
           className="bg-white rounded-2xl shadow-2xl max-w-md w-full overflow-hidden"
         >
           {/* Header */}
-          <div className="bg-gradient-to-r from-indigo-600 to-purple-600 p-6 text-white relative">
+          <div className="bg-gradient-to-r from-primary-500 to-secondary-700 p-6 text-white relative">
             <button
               onClick={onClose}
               className="absolute top-4 right-4 p-2 hover:bg-white/20 rounded-lg transition-colors"
@@ -140,7 +140,7 @@ const ARProductPreview = ({ product, onClose }) => {
           <div className="p-6">
             {isLoading && (
               <div className="text-center py-8">
-                <div className="w-12 h-12 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+                <div className="w-12 h-12 border-4 border-primary-500 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
                 <p className="text-gray-600">AR képességek ellenőrzése...</p>
               </div>
             )}
@@ -161,9 +161,9 @@ const ARProductPreview = ({ product, onClose }) => {
 
             {!isLoading && isARAvailable && (
               <div className="space-y-4">
-                <div className="bg-gradient-to-br from-indigo-50 to-purple-50 rounded-xl p-6 text-center">
+                <div className="bg-gradient-to-br from-primary-50 to-secondary-50 rounded-xl p-6 text-center">
                   <div className="w-20 h-20 bg-white rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg">
-                    <Eye className="w-10 h-10 text-indigo-600" />
+                    <Eye className="w-10 h-10 text-primary-500" />
                   </div>
                   <h3 className="font-bold text-gray-900 mb-2">Nézd meg otthonodban!</h3>
                   <p className="text-sm text-gray-600">
@@ -173,7 +173,7 @@ const ARProductPreview = ({ product, onClose }) => {
 
                 <button
                   onClick={handleARLaunch}
-                  className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-4 rounded-xl transition-colors shadow-lg flex items-center justify-center gap-2"
+                  className="w-full bg-primary-500 hover:bg-primary-600 text-white font-bold py-4 rounded-xl transition-colors shadow-lg flex items-center justify-center gap-2"
                 >
                   <Smartphone className="w-5 h-5" />
                   AR Indítása
@@ -181,15 +181,15 @@ const ARProductPreview = ({ product, onClose }) => {
 
                 <div className="space-y-2">
                   <div className="flex items-center gap-2 text-sm text-gray-600">
-                    <span className="w-6 h-6 bg-indigo-100 rounded-full flex items-center justify-center text-indigo-600 font-bold text-xs">1</span>
+                    <span className="w-6 h-6 bg-primary-100 rounded-full flex items-center justify-center text-primary-500 font-bold text-xs">1</span>
                     <span>Engedélyezd a kamera hozzáférést</span>
                   </div>
                   <div className="flex items-center gap-2 text-sm text-gray-600">
-                    <span className="w-6 h-6 bg-indigo-100 rounded-full flex items-center justify-center text-indigo-600 font-bold text-xs">2</span>
+                    <span className="w-6 h-6 bg-primary-100 rounded-full flex items-center justify-center text-primary-500 font-bold text-xs">2</span>
                     <span>Célozd meg a padlót a telefonoddal</span>
                   </div>
                   <div className="flex items-center gap-2 text-sm text-gray-600">
-                    <span className="w-6 h-6 bg-indigo-100 rounded-full flex items-center justify-center text-indigo-600 font-bold text-xs">3</span>
+                    <span className="w-6 h-6 bg-primary-100 rounded-full flex items-center justify-center text-primary-500 font-bold text-xs">3</span>
                     <span>Helyezd el és forgasd a terméket</span>
                   </div>
                 </div>
@@ -209,7 +209,7 @@ const ARProductPreview = ({ product, onClose }) => {
                 </div>
                 <button
                   onClick={openInARViewer}
-                  className="text-indigo-600 hover:text-indigo-700 font-medium text-sm"
+                  className="text-primary-500 hover:text-primary-600 font-medium text-sm"
                 >
                   Megnyitás web AR nézetben →
                 </button>

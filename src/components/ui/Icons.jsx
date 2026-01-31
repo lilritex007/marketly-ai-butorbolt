@@ -150,7 +150,7 @@ export const StyleIcons = {
   neutral: () => <div className="w-4 h-4 rounded-full bg-gradient-to-br from-gray-200 to-gray-400" />,
   earth: () => <div className="w-4 h-4 rounded-full bg-gradient-to-br from-amber-600 to-green-700" />,
   bold: () => <div className="w-4 h-4 rounded-full bg-gradient-to-br from-blue-500 to-red-500" />,
-  pastel: () => <div className="w-4 h-4 rounded-full bg-gradient-to-br from-pink-300 to-purple-300" />,
+  pastel: () => <div className="w-4 h-4 rounded-full bg-gradient-to-br from-pink-300 to-secondary-400" />,
   
   // Budget
   budget: DollarSign,
@@ -198,7 +198,7 @@ export const AnimatedIcon = ({ icon: Icon, className = "", pulse = false, bounce
  */
 export const GradientIcon = ({ 
   icon: Icon, 
-  gradient = "from-indigo-500 to-purple-600",
+  gradient = "from-primary-500 to-secondary-700",
   size = "md",
   className = ""
 }) => {

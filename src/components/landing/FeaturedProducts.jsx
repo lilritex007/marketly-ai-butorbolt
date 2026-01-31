@@ -22,7 +22,7 @@ export const FeaturedProducts = ({ products = [], onProductClick, onToggleWishli
       <div className="container-app">
         <div className="flex items-center justify-between mb-8">
           <div className="flex items-center gap-2">
-            <Sparkles className="w-6 h-6 text-indigo-600" />
+            <Sparkles className="w-6 h-6 text-primary-500" />
             <h2 className="text-2xl md:text-3xl font-bold text-gray-900">
               Kiemelt ajánlatok
             </h2>

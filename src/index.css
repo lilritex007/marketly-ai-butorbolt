@@ -11,6 +11,18 @@
 /* CSS Custom Properties (global, doesn't affect layout) */
 :root {
   /* ========================================
+     BRAND COLORS
+     Primary: Orange #ff8a00
+     Secondary: Teal #006b6f
+     ======================================== */
+  --color-primary: #ff8a00;
+  --color-primary-light: #ffad4d;
+  --color-primary-dark: #ea7600;
+  --color-secondary: #006b6f;
+  --color-secondary-light: #0d9488;
+  --color-secondary-dark: #005a5d;
+  
+  /* ========================================
      UNIFIED TYPOGRAPHY SCALE
      Minimum: 12px (tiny) - Maximum: varies by context
      ======================================== */
@@ -208,7 +220,7 @@
 }
 
 #mkt-butorbolt-app ::selection {
-  background-color: #6366f1;
+  background-color: #ff8a00;
   color: white;
 }
 
@@ -687,7 +699,7 @@
 
 /* Focus styles - scoped */
 #mkt-butorbolt-app *:focus-visible {
-  outline: 2px solid #6366f1;
+  outline: 2px solid #ff8a00;
   outline-offset: 2px;
 }
 
@@ -700,7 +712,7 @@
 
 /* Gradient text */
 .gradient-text {
-  background: linear-gradient(135deg, #6366f1, #8b5cf6, #ec4899);
+  background: linear-gradient(135deg, #ff8a00, #ffad4d, #006b6f);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;

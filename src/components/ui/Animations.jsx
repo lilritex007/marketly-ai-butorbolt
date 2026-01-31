@@ -100,7 +100,7 @@ export const Confetti = ({ isActive, duration = 2000, onComplete }) => {
       x: Math.random() * 100,
       y: -10,
       size: Math.random() * 8 + 4,
-      color: ['#6366f1', '#8b5cf6', '#ec4899', '#f59e0b', '#10b981', '#3b82f6'][Math.floor(Math.random() * 6)],
+      color: ['#6366f1', '#a855f7', '#ec4899', '#f59e0b', '#10b981', '#3b82f6'][Math.floor(Math.random() * 6)],
       speedX: (Math.random() - 0.5) * 3,
       speedY: Math.random() * 3 + 2,
       rotation: Math.random() * 360,
@@ -276,7 +276,7 @@ export const CountUp = ({ end, duration = 2000, prefix = '', suffix = '', classN
 /**
  * ProgressBar - Animated progress bar
  */
-export const ProgressBar = ({ progress, className = '', color = 'indigo' }) => {
+export const ProgressBar = ({ progress, className = '', color = 'primary' }) => {
   const [width, setWidth] = useState(0);
 
   useEffect(() => {
@@ -287,7 +287,7 @@ export const ProgressBar = ({ progress, className = '', color = 'indigo' }) => {
   return (
     <div className={`h-2 bg-gray-200 rounded-full overflow-hidden ${className}`}>
       <div 
-        className={`h-full bg-gradient-to-r from-${color}-500 to-${color}-600 rounded-full transition-all duration-1000 ease-out`}
+        className={`h-full bg-gradient-to-r from-${color}-500 to-${color}-500 rounded-full transition-all duration-1000 ease-out`}
         style={{ width: `${width}%` }}
       />
     </div>

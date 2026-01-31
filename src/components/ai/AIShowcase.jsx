@@ -22,14 +22,14 @@ export const AIShowcase = () => {
       title: 'AI Asszisztens',
       description: 'Beszélgess szakértőnkkel, kérdezz, tanácsot kérj.',
       icon: MessageCircle,
-      gradient: 'from-blue-500 to-indigo-600',
+      gradient: 'from-blue-500 to-primary-500',
       feature: 'Chat'
     },
     {
       title: 'Képkereső',
       description: 'Fotózd le a bútort, mi megtaláljuk a hasonlót.',
       icon: Camera,
-      gradient: 'from-purple-500 to-pink-600',
+      gradient: 'from-secondary-600 to-pink-600',
       feature: 'Visual Search'
     },
     {
@@ -42,12 +42,12 @@ export const AIShowcase = () => {
   ];
 
   return (
-    <div className="relative bg-gradient-to-br from-purple-600 via-indigo-600 to-blue-600 text-white py-6 sm:py-8 lg:py-12 xl:py-14 mb-4 sm:mb-6 lg:mb-8 overflow-hidden">
+    <div className="relative bg-gradient-to-br from-secondary-700 via-primary-500 to-blue-600 text-white py-6 sm:py-8 lg:py-12 xl:py-14 mb-4 sm:mb-6 lg:mb-8 overflow-hidden">
       {/* Animated background */}
       <div className="absolute inset-0 opacity-20">
         <div className="absolute top-0 left-0 w-48 sm:w-72 lg:w-96 h-48 sm:h-72 lg:h-96 bg-white rounded-full mix-blend-multiply filter blur-3xl animate-blob"></div>
-        <div className="absolute top-0 right-0 w-48 sm:w-72 lg:w-96 h-48 sm:h-72 lg:h-96 bg-purple-300 rounded-full mix-blend-multiply filter blur-3xl animate-blob animation-delay-2000"></div>
-        <div className="absolute bottom-0 left-1/2 w-48 sm:w-72 lg:w-96 h-48 sm:h-72 lg:h-96 bg-indigo-300 rounded-full mix-blend-multiply filter blur-3xl animate-blob animation-delay-4000"></div>
+        <div className="absolute top-0 right-0 w-48 sm:w-72 lg:w-96 h-48 sm:h-72 lg:h-96 bg-secondary-400 rounded-full mix-blend-multiply filter blur-3xl animate-blob animation-delay-2000"></div>
+        <div className="absolute bottom-0 left-1/2 w-48 sm:w-72 lg:w-96 h-48 sm:h-72 lg:h-96 bg-primary-300 rounded-full mix-blend-multiply filter blur-3xl animate-blob animation-delay-4000"></div>
       </div>
 
       <button 
@@ -152,8 +152,8 @@ export const AIOnboarding = ({ isOpen, onClose, targetFeature }) => {
       <div className="bg-white rounded-2xl lg:rounded-3xl p-6 sm:p-8 lg:p-10 max-w-md lg:max-w-lg xl:max-w-xl w-full shadow-2xl animate-scale-in" onClick={e => e.stopPropagation()}>
         <div className="flex items-center justify-between mb-4 lg:mb-6">
           <div className="flex items-center gap-3 lg:gap-4">
-            <div className="w-10 h-10 lg:w-12 lg:h-12 xl:w-14 xl:h-14 bg-indigo-100 rounded-xl lg:rounded-2xl flex items-center justify-center">
-              <Sparkles className="w-5 h-5 lg:w-6 lg:h-6 xl:w-7 xl:h-7 text-indigo-600 animate-pulse" />
+            <div className="w-10 h-10 lg:w-12 lg:h-12 xl:w-14 xl:h-14 bg-primary-100 rounded-xl lg:rounded-2xl flex items-center justify-center">
+              <Sparkles className="w-5 h-5 lg:w-6 lg:h-6 xl:w-7 xl:h-7 text-primary-500 animate-pulse" />
             </div>
             <h3 className="text-lg sm:text-xl lg:text-2xl xl:text-3xl font-bold text-gray-900">{content.title}</h3>
           </div>
@@ -162,18 +162,18 @@ export const AIOnboarding = ({ isOpen, onClose, targetFeature }) => {
           </button>
         </div>
         <p className="text-gray-600 mb-4 lg:mb-6 text-sm sm:text-base lg:text-lg xl:text-xl">{content.description}</p>
-        <div className="bg-indigo-50 border border-indigo-100 rounded-xl lg:rounded-2xl p-3 sm:p-4 lg:p-5 mb-6 lg:mb-8 flex items-start gap-3 lg:gap-4">
-          <div className="w-8 h-8 lg:w-10 lg:h-10 bg-indigo-100 rounded-lg lg:rounded-xl flex items-center justify-center shrink-0">
-            <Lightbulb className="w-4 h-4 lg:w-5 lg:h-5 text-indigo-600" />
+        <div className="bg-primary-50 border border-primary-100 rounded-xl lg:rounded-2xl p-3 sm:p-4 lg:p-5 mb-6 lg:mb-8 flex items-start gap-3 lg:gap-4">
+          <div className="w-8 h-8 lg:w-10 lg:h-10 bg-primary-100 rounded-lg lg:rounded-xl flex items-center justify-center shrink-0">
+            <Lightbulb className="w-4 h-4 lg:w-5 lg:h-5 text-primary-500" />
           </div>
           <div>
-            <p className="text-xs lg:text-sm font-semibold text-indigo-600 mb-1">Tipp</p>
-            <p className="text-sm lg:text-base xl:text-lg text-indigo-700">{content.tip}</p>
+            <p className="text-xs lg:text-sm font-semibold text-primary-500 mb-1">Tipp</p>
+            <p className="text-sm lg:text-base xl:text-lg text-primary-600">{content.tip}</p>
           </div>
         </div>
         <button 
           onClick={onClose}
-          className="w-full bg-indigo-600 text-white py-3 lg:py-4 xl:py-5 rounded-xl lg:rounded-2xl font-bold text-base lg:text-lg xl:text-xl hover:bg-indigo-700 transition-colors min-h-[44px] lg:min-h-[52px] xl:min-h-[60px]"
+          className="w-full bg-primary-500 text-white py-3 lg:py-4 xl:py-5 rounded-xl lg:rounded-2xl font-bold text-base lg:text-lg xl:text-xl hover:bg-primary-600 transition-colors min-h-[44px] lg:min-h-[52px] xl:min-h-[60px]"
         >
           Értem, kezdjük!
         </button>

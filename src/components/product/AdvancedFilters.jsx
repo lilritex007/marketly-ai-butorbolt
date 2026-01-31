@@ -126,7 +126,7 @@ export const AdvancedFilters = ({
     <>
       <div className="p-4 border-b border-gray-200 flex justify-between items-center shrink-0">
         <h3 className="font-bold text-lg flex items-center gap-2">
-          <Filter className="w-5 h-5 text-indigo-600" />
+          <Filter className="w-5 h-5 text-primary-500" />
           Szűrők
         </h3>
         <button
@@ -191,7 +191,7 @@ export const AdvancedFilters = ({
                   type="checkbox"
                   checked={filters.inStockOnly}
                   onChange={(e) => setFilters(prev => ({ ...prev, inStockOnly: e.target.checked }))}
-                  className="w-4 h-4 text-indigo-600 rounded"
+                  className="w-4 h-4 text-primary-500 rounded"
                 />
                 <span className="text-sm text-gray-700">Csak raktáron lévő termékek</span>
               </label>
@@ -211,7 +211,7 @@ export const AdvancedFilters = ({
                         type="checkbox"
                         checked={filters.categories.includes(cat)}
                         onChange={() => toggleCategory(cat)}
-                        className="w-4 h-4 text-indigo-600 rounded"
+                        className="w-4 h-4 text-primary-500 rounded"
                       />
                       <span className="text-sm text-gray-700">{cat}</span>
                     </label>
@@ -234,7 +234,7 @@ export const AdvancedFilters = ({
           <button
             type="button"
             onClick={restorePreviousFilters}
-            className="flex-1 min-w-[80px] px-4 py-3 min-h-[44px] border border-indigo-300 rounded-xl text-sm font-medium text-indigo-700 hover:bg-indigo-50 transition-colors"
+            className="flex-1 min-w-[80px] px-4 py-3 min-h-[44px] border border-primary-300 rounded-xl text-sm font-medium text-primary-600 hover:bg-primary-50 transition-colors"
           >
             Visszaállítás
           </button>
@@ -242,7 +242,7 @@ export const AdvancedFilters = ({
         <button
           type="button"
           onClick={() => setIsOpen(false)}
-          className="flex-1 min-w-[80px] px-4 py-3 min-h-[44px] bg-indigo-600 text-white rounded-xl text-sm font-bold hover:bg-indigo-700 transition-colors"
+          className="flex-1 min-w-[80px] px-4 py-3 min-h-[44px] bg-primary-500 text-white rounded-xl text-sm font-bold hover:bg-primary-600 transition-colors"
         >
           Alkalmaz
         </button>
@@ -256,13 +256,13 @@ export const AdvancedFilters = ({
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className="relative px-4 py-2 min-h-[44px] border-2 border-gray-200 rounded-xl hover:border-indigo-500 transition-all flex items-center gap-2 font-medium"
+        className="relative px-4 py-2 min-h-[44px] border-2 border-gray-200 rounded-xl hover:border-primary-500 transition-all flex items-center gap-2 font-medium"
         aria-label="Szűrők megnyitása"
       >
         <Filter className="w-4 h-4" />
         <span>Szűrők</span>
         {activeFilterCount > 0 && (
-          <span className="absolute -top-2 -right-2 bg-indigo-600 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
+          <span className="absolute -top-2 -right-2 bg-primary-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
             {activeFilterCount}
           </span>
         )}

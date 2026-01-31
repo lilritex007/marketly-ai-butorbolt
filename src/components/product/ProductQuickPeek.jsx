@@ -67,9 +67,9 @@ const ProductQuickPeek = ({ product, isOpen, onClose, onAddToCart }) => {
             >
             <div className="bg-white rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh] min-h-0">
               {/* Header */}
-              <div className="flex items-center justify-between p-4 border-b border-gray-200 bg-gradient-to-r from-indigo-50 to-purple-50">
+              <div className="flex items-center justify-between p-4 border-b border-gray-200 bg-gradient-to-r from-primary-50 to-secondary-50">
                 <div className="flex items-center gap-2">
-                  <Sparkles className="w-5 h-5 text-indigo-600" />
+                  <Sparkles className="w-5 h-5 text-primary-500" />
                   <h3 className="text-lg font-bold text-gray-900">Gyors előnézet</h3>
                 </div>
                 <button
@@ -101,12 +101,12 @@ const ProductQuickPeek = ({ product, isOpen, onClose, onAddToCart }) => {
                       
                       {!imageLoaded && (
                         <div className="absolute inset-0 flex items-center justify-center">
-                          <div className="w-12 h-12 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin" />
+                          <div className="w-12 h-12 border-4 border-primary-500 border-t-transparent rounded-full animate-spin" />
                         </div>
                       )}
 
                       {/* Quick View Badge */}
-                      <div className="absolute top-3 left-3 bg-white/90 backdrop-blur-sm px-3 py-1 rounded-full text-xs font-medium text-indigo-600">
+                      <div className="absolute top-3 left-3 bg-white/90 backdrop-blur-sm px-3 py-1 rounded-full text-xs font-medium text-primary-500">
                         Gyors előnézet
                       </div>
                     </div>
@@ -120,7 +120,7 @@ const ProductQuickPeek = ({ product, isOpen, onClose, onAddToCart }) => {
                             onClick={() => setActiveImage(idx)}
                             className={`
                               flex-shrink-0 w-16 h-16 rounded-lg overflow-hidden border-2 transition-all
-                              ${activeImage === idx ? 'border-indigo-600 scale-110' : 'border-gray-200 hover:border-indigo-300'}
+                              ${activeImage === idx ? 'border-primary-500 scale-110' : 'border-gray-200 hover:border-primary-300'}
                             `}
                           >
                             <img src={img} alt={`${product.name} ${idx + 1}`} className="w-full h-full object-cover" />
@@ -133,7 +133,7 @@ const ProductQuickPeek = ({ product, isOpen, onClose, onAddToCart }) => {
                   {/* Right: Info */}
                   <div className="flex flex-col gap-4">
                     {/* Category */}
-                    <div className="inline-flex items-center gap-2 text-sm text-indigo-600 font-medium">
+                    <div className="inline-flex items-center gap-2 text-sm text-primary-500 font-medium">
                       <span>{product.category}</span>
                     </div>
 
@@ -144,7 +144,7 @@ const ProductQuickPeek = ({ product, isOpen, onClose, onAddToCart }) => {
 
                     {/* Price */}
                     <div className="flex items-baseline gap-2">
-                      <span className="text-3xl font-bold text-indigo-600">
+                      <span className="text-3xl font-bold text-primary-500">
                         {formatPrice(product.price)}
                       </span>
                       {product.originalPrice && product.originalPrice > product.price && (
@@ -198,7 +198,7 @@ const ProductQuickPeek = ({ product, isOpen, onClose, onAddToCart }) => {
                           e.stopPropagation();
                           // Share logic
                         }}
-                        className="p-3 border-2 border-gray-200 rounded-lg hover:border-indigo-500 hover:text-indigo-500 transition-colors"
+                        className="p-3 border-2 border-gray-200 rounded-lg hover:border-primary-500 hover:text-primary-500 transition-colors"
                       >
                         <Share2 className="w-5 h-5" />
                       </button>
@@ -209,7 +209,7 @@ const ProductQuickPeek = ({ product, isOpen, onClose, onAddToCart }) => {
                       href={product.link}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="flex items-center justify-center gap-2 text-sm text-indigo-600 hover:text-indigo-700 font-medium py-2"
+                      className="flex items-center justify-center gap-2 text-sm text-primary-500 hover:text-primary-600 font-medium py-2"
                     >
                       <span>Teljes leírás megtekintése</span>
                       <ExternalLink className="w-4 h-4" />

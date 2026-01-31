@@ -143,7 +143,7 @@ const WishlistDrawer = ({
                     {/* Info - UNIFIED TYPOGRAPHY */}
                     <div className="flex-1 min-w-0">
                       <p 
-                        className="font-medium text-gray-900 text-sm sm:text-base line-clamp-2 cursor-pointer hover:text-indigo-600 transition-colors"
+                        className="font-medium text-gray-900 text-sm sm:text-base line-clamp-2 cursor-pointer hover:text-primary-500 transition-colors"
                         onClick={() => {
                           onProductClick?.(item);
                           handleClose();
@@ -151,7 +151,7 @@ const WishlistDrawer = ({
                       >
                         {item.name}
                       </p>
-                      <p className="text-lg sm:text-xl font-bold text-indigo-600 mt-1">
+                      <p className="text-lg sm:text-xl font-bold text-primary-500 mt-1">
                         {formatPrice(item.salePrice || item.price)}
                       </p>
                       
@@ -159,7 +159,7 @@ const WishlistDrawer = ({
                       <div className="flex items-center gap-2 mt-2">
                         <button
                           onClick={() => onAddToCart?.(item)}
-                          className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 bg-indigo-600 text-white text-sm font-bold rounded-lg hover:bg-indigo-700 transition-colors"
+                          className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 bg-primary-500 text-white text-sm font-bold rounded-lg hover:bg-primary-600 transition-colors"
                         >
                           <ShoppingCart className="w-4 h-4" />
                           Kosárba
@@ -202,7 +202,7 @@ const WishlistDrawer = ({
                 onClick={() => {
                   wishlistItems.forEach(item => onAddToCart?.(item));
                 }}
-                className="flex-1 flex items-center justify-center gap-2 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-bold text-sm sm:text-base rounded-xl hover:shadow-lg transition-all"
+                className="flex-1 flex items-center justify-center gap-2 py-3 bg-gradient-to-r from-primary-500 to-secondary-700 text-white font-bold text-sm sm:text-base rounded-xl hover:shadow-lg transition-all"
               >
                 <ShoppingCart className="w-5 h-5" />
                 Mind a kosárba
