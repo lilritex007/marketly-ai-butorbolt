@@ -46,9 +46,20 @@ import AIPricePredictor from './components/ai/AIPricePredictor';
 
 // Marketing Components
 import SmartNewsletterPopup from './components/marketing/SmartNewsletterPopup';
+import ExitIntentPopup from './components/marketing/ExitIntentPopup';
 
 // AR Components
 import ARProductPreview from './components/ar/ARProductPreview';
+
+// New UX Components
+import CompleteTheLook from './components/product/CompleteTheLook';
+import PersonalizedSection from './components/home/PersonalizedSection';
+import ImageGallery from './components/product/ImageGallery';
+import StickyAddToCart from './components/product/StickyAddToCart';
+import PriceAlert from './components/product/PriceAlert';
+import { FadeInOnScroll, Confetti, CountUp } from './components/ui/Animations';
+import SwipeableProductCard from './components/mobile/SwipeableProductCard';
+import BottomSheet, { FilterBottomSheet } from './components/mobile/BottomSheet';
 
 // Hooks
 import { useLocalStorage } from './hooks/index';
@@ -961,14 +972,12 @@ const Testimonials = () => (
     </div>
 );
 
-const ProductModal = ({ product, isOpen, onClose }) => {
-    const [activeImg, setActiveImg] = useState(0);
+const ProductModal = ({ product, isOpen, onClose, allProducts = [], onAddToCart }) => {
     const [aiTip, setAiTip] = useState(null);
     const [loadingTip, setLoadingTip] = useState(false);
     
     useEffect(() => {
         setAiTip(null);
-        setActiveImg(0);
     }, [product]);
 
     if (!isOpen || !product) return null;
@@ -997,81 +1006,84 @@ const ProductModal = ({ product, isOpen, onClose }) => {
 
     return (
         <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-fade-in" onClick={onClose}>
-            <div className="bg-white rounded-3xl w-full max-w-5xl max-h-[90vh] overflow-hidden shadow-2xl flex flex-col md:flex-row relative" onClick={e => e.stopPropagation()}>
+            <div className="bg-white rounded-3xl w-full max-w-6xl max-h-[90vh] overflow-hidden shadow-2xl flex flex-col relative" onClick={e => e.stopPropagation()}>
                 <button onClick={onClose} className="absolute top-4 right-4 z-10 bg-white/80 p-2 rounded-full hover:bg-gray-100 transition-colors"><X className="w-6 h-6 text-gray-600" /></button>
                 
-                <div className="md:w-1/2 bg-gray-50 p-6 flex flex-col justify-center">
-                    <div className="flex-1 relative rounded-2xl overflow-hidden mb-4 bg-white shadow-inner aspect-square">
-                        <img 
-                            src={product.images && product.images[activeImg]} 
-                            alt={product.name} 
-                            className="absolute inset-0 w-full h-full object-contain p-4"
-                            onError={(e) => {e.target.src = PLACEHOLDER_IMAGE}}
-                        />
-                    </div>
-                    {product.images && product.images.length > 1 && (
-                        <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
-                            {product.images.map((img, idx) => (
-                                <button 
-                                    key={idx} 
-                                    onClick={() => setActiveImg(idx)}
-                                    className={`w-16 h-16 rounded-lg overflow-hidden border-2 flex-shrink-0 transition-all ${activeImg === idx ? 'border-indigo-600 scale-105' : 'border-transparent opacity-70 hover:opacity-100'}`}
-                                >
-                                    <img src={img} className="w-full h-full object-cover" alt="" onError={(e) => {e.target.style.display='none'}} />
-                                </button>
-                            ))}
+                <div className="flex flex-col md:flex-row overflow-y-auto">
+                  {/* Left: Image Gallery */}
+                  <div className="md:w-1/2 bg-gray-50 p-6">
+                      <ImageGallery 
+                        images={product.images || []} 
+                        productName={product.name}
+                      />
+                  </div>
+
+                  {/* Right: Product Info */}
+                  <div className="md:w-1/2 p-6 md:p-8 overflow-y-auto">
+                      <div className="flex items-center gap-2 mb-3">
+                          <span className="bg-indigo-50 text-indigo-700 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide">{product.category}</span>
+                          {product.inStock ?? product.in_stock ? 
+                              <span className="text-green-600 text-xs font-bold flex items-center bg-green-50 px-2 py-1 rounded-full"><Check className="w-3 h-3 mr-1" /> Raktáron</span> : 
+                              <span className="text-red-500 text-xs font-bold bg-red-50 px-2 py-1 rounded-full">Készlethiány</span>
+                          }
+                      </div>
+                      <h2 className="text-2xl md:text-3xl font-extrabold text-gray-900 mb-2 leading-tight">{product.name}</h2>
+                      <p className="text-2xl md:text-3xl font-bold text-indigo-600 mb-4">{formatPrice(product.price)}</p>
+                      
+                      {/* Price Alert */}
+                      <div className="flex items-center gap-3 mb-6">
+                        <PriceAlert product={product} />
+                      </div>
+                      
+                      <div className="mb-6">
+                          {!aiTip && !loadingTip && (
+                              <button onClick={generateStyleTip} className="w-full bg-gradient-to-r from-purple-50 to-indigo-50 hover:from-purple-100 hover:to-indigo-100 text-indigo-700 p-4 rounded-xl border border-indigo-100 flex items-center justify-center transition-all group">
+                                  <Sparkles className="w-5 h-5 mr-2 group-hover:scale-110 transition-transform" />
+                                  Kérj AI Lakberendező tippet!
+                              </button>
+                          )}
+                          {loadingTip && (
+                              <div className="bg-gray-50 p-4 rounded-xl border border-gray-100 flex items-center justify-center text-gray-500 animate-pulse">
+                                  <RefreshCw className="w-5 h-5 mr-2 animate-spin" /> A tervező gondolkodik...
+                              </div>
+                          )}
+                          {aiTip && (
+                              <div className="bg-gradient-to-br from-indigo-50 to-white p-5 rounded-xl border border-indigo-100 shadow-sm animate-fade-in">
+                                  <div className="flex items-center mb-2 text-indigo-700 font-bold"><Lightbulb className="w-5 h-5 mr-2" /> AI Tipp:</div>
+                                  <div className="text-sm text-gray-700 leading-relaxed whitespace-pre-line">{aiTip}</div>
+                              </div>
+                          )}
+                      </div>
+
+                      <div className="prose prose-sm text-gray-600 mb-6 border-t border-gray-100 pt-4">
+                          <h4 className="font-bold text-gray-900 mb-2">Leírás</h4>
+                          <p className="text-sm">{product.description || "Nincs leírás."}</p>
+                          {product.params && (
+                              <div className="mt-4 grid grid-cols-2 gap-2 text-xs">
+                                  {product.params.split(',').slice(0, 6).map((param, i) => (
+                                      <div key={i} className="bg-gray-50 p-2 rounded text-gray-700">{param.trim()}</div>
+                                  ))}
+                              </div>
+                          )}
+                      </div>
+
+                      {/* Complete The Look - AI Bundle */}
+                      {allProducts.length > 0 && (
+                        <div className="mb-6">
+                          <CompleteTheLook
+                            currentProduct={product}
+                            allProducts={allProducts}
+                            onAddToCart={onAddToCart}
+                          />
                         </div>
-                    )}
-                </div>
+                      )}
 
-                <div className="md:w-1/2 p-8 overflow-y-auto custom-scrollbar">
-                    <div className="flex items-center gap-2 mb-3">
-                        <span className="bg-indigo-50 text-indigo-700 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide">{product.category}</span>
-                        {product.inStock ?? product.in_stock ? 
-                            <span className="text-green-600 text-xs font-bold flex items-center bg-green-50 px-2 py-1 rounded-full"><Check className="w-3 h-3 mr-1" /> Raktáron</span> : 
-                            <span className="text-red-500 text-xs font-bold bg-red-50 px-2 py-1 rounded-full">Készlethiány</span>
-                        }
-                    </div>
-                    <h2 className="text-3xl font-extrabold text-gray-900 mb-2 leading-tight">{product.name}</h2>
-                    <p className="text-3xl font-bold text-indigo-600 mb-6">{formatPrice(product.price)}</p>
-                    
-                    <div className="mb-6">
-                        {!aiTip && !loadingTip && (
-                            <button onClick={generateStyleTip} className="w-full bg-gradient-to-r from-purple-50 to-indigo-50 hover:from-purple-100 hover:to-indigo-100 text-indigo-700 p-4 rounded-xl border border-indigo-100 flex items-center justify-center transition-all group">
-                                <Sparkles className="w-5 h-5 mr-2 group-hover:scale-110 transition-transform" />
-                                Kérj AI Lakberendező tippet!
-                            </button>
-                        )}
-                        {loadingTip && (
-                            <div className="bg-gray-50 p-4 rounded-xl border border-gray-100 flex items-center justify-center text-gray-500 animate-pulse">
-                                <RefreshCw className="w-5 h-5 mr-2 animate-spin" /> A tervező gondolkodik...
-                            </div>
-                        )}
-                        {aiTip && (
-                            <div className="bg-gradient-to-br from-indigo-50 to-white p-5 rounded-xl border border-indigo-100 shadow-sm animate-fade-in">
-                                <div className="flex items-center mb-2 text-indigo-700 font-bold"><Lightbulb className="w-5 h-5 mr-2" /> AI Tipp:</div>
-                                <div className="text-sm text-gray-700 leading-relaxed whitespace-pre-line">{aiTip}</div>
-                            </div>
-                        )}
-                    </div>
-
-                    <div className="prose prose-sm text-gray-600 mb-8 border-t border-gray-100 pt-4">
-                        <h4 className="font-bold text-gray-900 mb-2">Leírás</h4>
-                        <p>{product.description || "Nincs leírás."}</p>
-                        {product.params && (
-                            <div className="mt-4 grid grid-cols-2 gap-2 text-xs">
-                                {product.params.split(',').slice(0, 6).map((param, i) => (
-                                    <div key={i} className="bg-gray-50 p-2 rounded text-gray-700">{param.trim()}</div>
-                                ))}
-                            </div>
-                        )}
-                    </div>
-
-                    <div className="sticky bottom-0 bg-white pt-4 border-t border-gray-100 mt-auto">
-                        <a href={product.link} target="_blank" rel="noopener noreferrer" className="w-full bg-gray-900 text-white py-4 rounded-xl font-bold text-lg text-center hover:bg-gray-800 transition-all shadow-lg flex items-center justify-center hover:shadow-xl transform hover:-translate-y-1">
-                            Megveszem a webshopban <ArrowRight className="ml-2 w-5 h-5" />
-                        </a>
-                    </div>
+                      <div className="sticky bottom-0 bg-white pt-4 border-t border-gray-100 mt-auto">
+                          <a href={product.link} target="_blank" rel="noopener noreferrer" className="w-full bg-gray-900 text-white py-4 rounded-xl font-bold text-lg text-center hover:bg-gray-800 transition-all shadow-lg flex items-center justify-center hover:shadow-xl transform hover:-translate-y-1">
+                              Megveszem a webshopban <ArrowRight className="ml-2 w-5 h-5" />
+                          </a>
+                      </div>
+                  </div>
                 </div>
             </div>
         </div>
@@ -1289,6 +1301,11 @@ const App = () => {
   const [showARPreview, setShowARPreview] = useState(false);
   const [arProduct, setArProduct] = useState(null);
   
+  // New UX states
+  const [showConfetti, setShowConfetti] = useState(false);
+  const [showFilterSheet, setShowFilterSheet] = useState(false);
+  const [showExitIntent, setShowExitIntent] = useState(true); // Exit intent enabled
+  
   // UNAS API states
   const [isLoadingUnas, setIsLoadingUnas] = useState(true);
   const [unasError, setUnasError] = useState(null);
@@ -1396,6 +1413,18 @@ const App = () => {
       toast.error(result.message);
     }
   };
+  
+  // Handle add to cart with confetti celebration
+  const handleAddToCart = useCallback((product, quantity = 1) => {
+    // Trigger confetti
+    setShowConfetti(true);
+    
+    // Show toast
+    toast.success(`${product.name} hozzáadva a kosárhoz!`);
+    
+    // In real app: Add to cart logic here
+    console.log('Added to cart:', product.name, 'x', quantity);
+  }, [toast]);
   
   // Server-side search state
   const [serverSearchQuery, setServerSearchQuery] = useState('');
@@ -1669,7 +1698,20 @@ const App = () => {
               products={products.slice(0, 6)} 
               onProductClick={handleProductView}
             />
-            <Features />
+            
+            {/* Personalized Section - For You + Recently Viewed + Trending */}
+            {products.length > 0 && (
+              <PersonalizedSection
+                products={products}
+                onProductClick={handleProductView}
+                onToggleWishlist={toggleWishlist}
+                wishlist={wishlist}
+              />
+            )}
+            
+            <FadeInOnScroll direction="up">
+              <Features />
+            </FadeInOnScroll>
             
             {/* Category Page View - shown when specific category selected */}
             {categoryFilter && categoryFilter !== "Összes" && !isLoadingUnas ? (
@@ -1710,11 +1752,22 @@ const App = () => {
                           onSelectProduct={handleProductView}
                         />
                       </div>
-                      <AdvancedFilters
-                        products={products}
-                        onFilterChange={setAdvancedFilters}
-                        initialFilters={advancedFilters}
-                      />
+                      {/* Desktop filters */}
+                      <div className="hidden sm:block">
+                        <AdvancedFilters
+                          products={products}
+                          onFilterChange={setAdvancedFilters}
+                          initialFilters={advancedFilters}
+                        />
+                      </div>
+                      {/* Mobile filter button */}
+                      <button
+                        onClick={() => setShowFilterSheet(true)}
+                        className="sm:hidden p-3 min-h-[48px] min-w-[48px] border-2 border-gray-200 rounded-xl bg-white hover:bg-gray-50 transition-colors flex items-center justify-center"
+                        aria-label="Szűrők"
+                      >
+                        <Filter className="w-5 h-5 text-gray-700" />
+                      </button>
                       <select 
                         onChange={(e) => setSortOption(e.target.value)} 
                         className="hidden sm:block px-4 lg:px-5 xl:px-6 py-3 lg:py-3.5 xl:py-4 min-h-[48px] lg:min-h-[52px] xl:min-h-[56px] text-sm sm:text-base lg:text-lg xl:text-xl border-2 border-gray-200 rounded-xl lg:rounded-2xl bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 outline-none transition-all cursor-pointer font-medium"
@@ -1865,7 +1918,9 @@ const App = () => {
               onQuickView={handleProductView}
             />
             
-            <Testimonials />
+            <FadeInOnScroll direction="up" delay={100}>
+              <Testimonials />
+            </FadeInOnScroll>
             
             {/* Final CTA */}
             <InteractiveCTA 
@@ -1881,7 +1936,13 @@ const App = () => {
         {activeTab === 'room-planner' && <RoomPlanner products={products} />}
       </main>
 
-      <ProductModal product={selectedProduct} isOpen={!!selectedProduct} onClose={() => setSelectedProduct(null)} />
+      <ProductModal 
+        product={selectedProduct} 
+        isOpen={!!selectedProduct} 
+        onClose={() => setSelectedProduct(null)}
+        allProducts={products}
+        onAddToCart={handleAddToCart}
+      />
       
       {/* Similar Products AI Recommendation */}
       {selectedProduct && (
@@ -1966,6 +2027,59 @@ const App = () => {
       >
         🔧
       </button>
+
+      {/* Confetti Celebration */}
+      <Confetti 
+        isActive={showConfetti} 
+        onComplete={() => setShowConfetti(false)} 
+      />
+
+      {/* Sticky Add to Cart (shows for selected product) */}
+      {selectedProduct && (
+        <StickyAddToCart
+          product={selectedProduct}
+          onAddToCart={handleAddToCart}
+          onToggleWishlist={toggleWishlist}
+          isWishlisted={wishlist.includes(selectedProduct.id)}
+        />
+      )}
+
+      {/* Exit Intent Popup */}
+      {showExitIntent && (
+        <ExitIntentPopup 
+          discountPercent={10}
+          onClose={() => setShowExitIntent(false)}
+        />
+      )}
+
+      {/* Mobile Filter Bottom Sheet */}
+      <FilterBottomSheet
+        isOpen={showFilterSheet}
+        onClose={() => setShowFilterSheet(false)}
+        filters={[
+          {
+            id: 'price',
+            label: 'Ár',
+            type: 'range',
+            min: 0,
+            max: 1000000
+          },
+          {
+            id: 'inStock',
+            label: 'Raktáron',
+            type: 'checkbox',
+            options: [
+              { value: 'yes', label: 'Csak raktáron lévő', count: products.filter(p => p.inStock).length }
+            ]
+          }
+        ]}
+        activeFilters={advancedFilters}
+        onFilterChange={(filterId, value) => {
+          setAdvancedFilters(prev => ({ ...prev, [filterId]: value }));
+        }}
+        onClearAll={() => setAdvancedFilters({})}
+        onApply={() => setShowFilterSheet(false)}
+      />
     </div>
     </ToastProvider>
   );
