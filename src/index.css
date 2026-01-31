@@ -115,7 +115,7 @@
   #mkt-butorbolt-app .sm\:text-6xl { font-size: 60px !important; }
 }
 
-/* Responsive text size overrides - md: breakpoint (768px) */
+/* Responsive text size overrides - md: breakpoint (768px) - TABLET: max 36px */
 @media (min-width: 768px) {
   #mkt-butorbolt-app .md\:text-xs { font-size: 12px !important; }
   #mkt-butorbolt-app .md\:text-sm { font-size: 14px !important; }
@@ -123,13 +123,23 @@
   #mkt-butorbolt-app .md\:text-lg { font-size: 18px !important; }
   #mkt-butorbolt-app .md\:text-xl { font-size: 20px !important; }
   #mkt-butorbolt-app .md\:text-2xl { font-size: 24px !important; }
-  #mkt-butorbolt-app .md\:text-3xl { font-size: 30px !important; }
-  #mkt-butorbolt-app .md\:text-4xl { font-size: 36px !important; }
-  #mkt-butorbolt-app .md\:text-5xl { font-size: 48px !important; }
-  #mkt-butorbolt-app .md\:text-6xl { font-size: 60px !important; }
+  #mkt-butorbolt-app .md\:text-3xl { font-size: 28px !important; }
+  #mkt-butorbolt-app .md\:text-4xl { font-size: 32px !important; }
+  #mkt-butorbolt-app .md\:text-5xl { font-size: 36px !important; }
+  #mkt-butorbolt-app .md\:text-6xl { font-size: 36px !important; }
+  #mkt-butorbolt-app .md\:text-7xl { font-size: 36px !important; }
+  #mkt-butorbolt-app .md\:text-8xl { font-size: 36px !important; }
+  #mkt-butorbolt-app .md\:text-9xl { font-size: 36px !important; }
+  
+  /* Global cap on large text from tablet */
+  #mkt-butorbolt-app .text-5xl { font-size: 36px !important; }
+  #mkt-butorbolt-app .text-6xl { font-size: 36px !important; }
+  #mkt-butorbolt-app .text-7xl { font-size: 36px !important; }
+  #mkt-butorbolt-app .text-8xl { font-size: 36px !important; }
+  #mkt-butorbolt-app .text-9xl { font-size: 36px !important; }
 }
 
-/* Responsive text size overrides - lg: breakpoint (1024px) - DESKTOP optimized */
+/* Responsive text size overrides - lg: breakpoint (1024px) - DESKTOP: max 36px */
 @media (min-width: 1024px) {
   #mkt-butorbolt-app .lg\:text-xs { font-size: 12px !important; }
   #mkt-butorbolt-app .lg\:text-sm { font-size: 14px !important; }
@@ -137,21 +147,24 @@
   #mkt-butorbolt-app .lg\:text-lg { font-size: 16px !important; }
   #mkt-butorbolt-app .lg\:text-xl { font-size: 18px !important; }
   #mkt-butorbolt-app .lg\:text-2xl { font-size: 20px !important; }
-  #mkt-butorbolt-app .lg\:text-3xl { font-size: 30px !important; }
-  #mkt-butorbolt-app .lg\:text-4xl { font-size: 36px !important; }
-  #mkt-butorbolt-app .lg\:text-5xl { font-size: 48px !important; }
-  #mkt-butorbolt-app .lg\:text-6xl { font-size: 60px !important; }
-  #mkt-butorbolt-app .lg\:text-7xl { font-size: 48px !important; }
+  #mkt-butorbolt-app .lg\:text-3xl { font-size: 26px !important; }
+  #mkt-butorbolt-app .lg\:text-4xl { font-size: 32px !important; }
+  #mkt-butorbolt-app .lg\:text-5xl { font-size: 36px !important; }
+  #mkt-butorbolt-app .lg\:text-6xl { font-size: 36px !important; }
+  #mkt-butorbolt-app .lg\:text-7xl { font-size: 36px !important; }
+  #mkt-butorbolt-app .lg\:text-8xl { font-size: 36px !important; }
+  #mkt-butorbolt-app .lg\:text-9xl { font-size: 36px !important; }
   
   /* Desktop base sizes */
   #mkt-butorbolt-app .text-base { font-size: 14px !important; }
   #mkt-butorbolt-app .text-lg { font-size: 16px !important; }
   #mkt-butorbolt-app .text-xl { font-size: 18px !important; }
   #mkt-butorbolt-app .text-2xl { font-size: 20px !important; }
-  #mkt-butorbolt-app .text-7xl { font-size: 48px !important; }
+  #mkt-butorbolt-app .text-3xl { font-size: 26px !important; }
+  #mkt-butorbolt-app .text-4xl { font-size: 32px !important; }
 }
 
-/* Desktop - xl: breakpoint (1280px) */
+/* Desktop - xl: breakpoint (1280px) - max 36px */
 @media (min-width: 1280px) {
   #mkt-butorbolt-app {
     font-size: 15px !important;
@@ -162,15 +175,16 @@
   #mkt-butorbolt-app .xl\:text-lg { font-size: 16px !important; }
   #mkt-butorbolt-app .xl\:text-xl { font-size: 18px !important; }
   #mkt-butorbolt-app .xl\:text-2xl { font-size: 20px !important; }
-  #mkt-butorbolt-app .xl\:text-3xl { font-size: 30px !important; }
-  #mkt-butorbolt-app .xl\:text-4xl { font-size: 36px !important; }
-  #mkt-butorbolt-app .xl\:text-5xl { font-size: 48px !important; }
-  #mkt-butorbolt-app .xl\:text-6xl { font-size: 60px !important; }
-  #mkt-butorbolt-app .xl\:text-7xl { font-size: 48px !important; }
-  #mkt-butorbolt-app .xl\:text-8xl { font-size: 96px !important; }
+  #mkt-butorbolt-app .xl\:text-3xl { font-size: 26px !important; }
+  #mkt-butorbolt-app .xl\:text-4xl { font-size: 32px !important; }
+  #mkt-butorbolt-app .xl\:text-5xl { font-size: 36px !important; }
+  #mkt-butorbolt-app .xl\:text-6xl { font-size: 36px !important; }
+  #mkt-butorbolt-app .xl\:text-7xl { font-size: 36px !important; }
+  #mkt-butorbolt-app .xl\:text-8xl { font-size: 36px !important; }
+  #mkt-butorbolt-app .xl\:text-9xl { font-size: 36px !important; }
 }
 
-/* 2xl: breakpoint (1536px) */
+/* 2xl: breakpoint (1536px) - max 36px */
 @media (min-width: 1536px) {
   #mkt-butorbolt-app {
     font-size: 15px !important;
@@ -179,13 +193,13 @@
   #mkt-butorbolt-app .\32xl\:text-lg { font-size: 17px !important; }
   #mkt-butorbolt-app .\32xl\:text-xl { font-size: 18px !important; }
   #mkt-butorbolt-app .\32xl\:text-2xl { font-size: 20px !important; }
-  #mkt-butorbolt-app .\32xl\:text-3xl { font-size: 32px !important; }
-  #mkt-butorbolt-app .\32xl\:text-4xl { font-size: 40px !important; }
-  #mkt-butorbolt-app .\32xl\:text-5xl { font-size: 52px !important; }
-  #mkt-butorbolt-app .\32xl\:text-6xl { font-size: 64px !important; }
-  #mkt-butorbolt-app .\32xl\:text-7xl { font-size: 48px !important; }
-  #mkt-butorbolt-app .\32xl\:text-8xl { font-size: 104px !important; }
-  #mkt-butorbolt-app .\32xl\:text-9xl { font-size: 140px !important; }
+  #mkt-butorbolt-app .\32xl\:text-3xl { font-size: 26px !important; }
+  #mkt-butorbolt-app .\32xl\:text-4xl { font-size: 32px !important; }
+  #mkt-butorbolt-app .\32xl\:text-5xl { font-size: 36px !important; }
+  #mkt-butorbolt-app .\32xl\:text-6xl { font-size: 36px !important; }
+  #mkt-butorbolt-app .\32xl\:text-7xl { font-size: 36px !important; }
+  #mkt-butorbolt-app .\32xl\:text-8xl { font-size: 36px !important; }
+  #mkt-butorbolt-app .\32xl\:text-9xl { font-size: 36px !important; }
 }
 
 #mkt-butorbolt-app ::selection {
