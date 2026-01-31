@@ -42,11 +42,11 @@ const FloatingCartPreview = ({
     <>
       {/* Floating cart button */}
       <div className="fixed bottom-24 right-4 z-50 flex flex-col items-end gap-3">
-        {/* Added notification */}
+        {/* Added notification - UNIFIED TYPOGRAPHY */}
         {showAddedNotification && recentlyAdded && (
           <div className="bg-green-500 text-white px-4 py-3 rounded-xl shadow-lg animate-bounce-in max-w-xs">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-white/20 rounded-lg overflow-hidden shrink-0">
+              <div className="w-12 h-12 bg-white/20 rounded-lg overflow-hidden shrink-0">
                 <img 
                   src={recentlyAdded.images?.[0] || recentlyAdded.image} 
                   alt="" 
@@ -54,8 +54,8 @@ const FloatingCartPreview = ({
                 />
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-bold">Kosárba téve!</p>
-                <p className="text-xs text-white/80 truncate">{recentlyAdded.name}</p>
+                <p className="text-base font-bold">Kosárba téve!</p>
+                <p className="text-sm text-white/80 truncate">{recentlyAdded.name}</p>
               </div>
             </div>
           </div>
@@ -68,7 +68,7 @@ const FloatingCartPreview = ({
         >
           <ShoppingCart className="w-6 h-6" />
           {totalItems > 0 && (
-            <span className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 text-white text-xs font-bold rounded-full flex items-center justify-center shadow-lg animate-scale-in">
+            <span className="absolute -top-2 -right-2 w-7 h-7 bg-red-500 text-white text-sm font-bold rounded-full flex items-center justify-center shadow-lg animate-scale-in">
               {totalItems}
             </span>
           )}
@@ -81,24 +81,24 @@ const FloatingCartPreview = ({
           {/* Header */}
           <div className="bg-gradient-to-r from-indigo-600 to-purple-600 p-4 text-white">
             <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <ShoppingCart className="w-5 h-5" />
-                <span className="font-bold">Kosár ({totalItems})</span>
+              <div className="flex items-center gap-2.5">
+                <ShoppingCart className="w-6 h-6" />
+                <span className="font-bold text-lg">Kosár ({totalItems})</span>
               </div>
               <button
                 onClick={() => setIsExpanded(false)}
-                className="p-1 hover:bg-white/20 rounded-full transition-colors"
+                className="p-1.5 hover:bg-white/20 rounded-full transition-colors"
               >
-                <X className="w-5 h-5" />
+                <X className="w-6 h-6" />
               </button>
             </div>
           </div>
 
-          {/* Items */}
-          <div className="max-h-60 overflow-y-auto p-3 space-y-2">
+          {/* Items - UNIFIED TYPOGRAPHY */}
+          <div className="max-h-64 overflow-y-auto p-4 space-y-3">
             {cartItems.map((item) => (
-              <div key={item.id} className="flex items-center gap-3 p-2 bg-gray-50 rounded-xl">
-                <div className="w-14 h-14 bg-white rounded-lg overflow-hidden shrink-0">
+              <div key={item.id} className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl">
+                <div className="w-16 h-16 bg-white rounded-lg overflow-hidden shrink-0">
                   <img 
                     src={item.images?.[0] || item.image} 
                     alt={item.name}
@@ -106,8 +106,8 @@ const FloatingCartPreview = ({
                   />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-gray-900 line-clamp-1">{item.name}</p>
-                  <p className="text-sm font-bold text-indigo-600">
+                  <p className="text-base font-medium text-gray-900 line-clamp-1">{item.name}</p>
+                  <p className="text-lg font-bold text-indigo-600">
                     {formatPrice(item.salePrice || item.price)}
                   </p>
                 </div>
@@ -115,73 +115,73 @@ const FloatingCartPreview = ({
                   {/* Quantity controls */}
                   <button
                     onClick={() => onUpdateQuantity?.(item.id, Math.max(0, (item.quantity || 1) - 1))}
-                    className="p-1 text-gray-400 hover:text-gray-600 hover:bg-gray-200 rounded transition-colors"
+                    className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-200 rounded transition-colors"
                   >
-                    <Minus className="w-3 h-3" />
+                    <Minus className="w-4 h-4" />
                   </button>
-                  <span className="w-6 text-center text-sm font-medium">{item.quantity || 1}</span>
+                  <span className="w-8 text-center text-base font-semibold">{item.quantity || 1}</span>
                   <button
                     onClick={() => onUpdateQuantity?.(item.id, (item.quantity || 1) + 1)}
-                    className="p-1 text-gray-400 hover:text-gray-600 hover:bg-gray-200 rounded transition-colors"
+                    className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-200 rounded transition-colors"
                   >
-                    <Plus className="w-3 h-3" />
+                    <Plus className="w-4 h-4" />
                   </button>
                 </div>
                 <button
                   onClick={() => onRemove?.(item.id)}
-                  className="p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded transition-colors"
+                  className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded transition-colors"
                 >
-                  <Trash2 className="w-4 h-4" />
+                  <Trash2 className="w-5 h-5" />
                 </button>
               </div>
             ))}
           </div>
 
-          {/* Upsell suggestion */}
+          {/* Upsell suggestion - UNIFIED TYPOGRAPHY */}
           {suggestedProducts.length > 0 && (
-            <div className="p-3 border-t border-gray-100 bg-gradient-to-r from-amber-50 to-orange-50">
-              <div className="flex items-center gap-2 text-amber-700 text-xs font-medium mb-2">
-                <Sparkles className="w-3.5 h-3.5" />
+            <div className="p-4 border-t border-gray-100 bg-gradient-to-r from-amber-50 to-orange-50">
+              <div className="flex items-center gap-2 text-amber-700 text-base font-semibold mb-3">
+                <Sparkles className="w-5 h-5" />
                 Ajánljuk mellé:
               </div>
-              <div className="flex gap-2 overflow-x-auto pb-1">
+              <div className="flex gap-3 overflow-x-auto pb-1">
                 {suggestedProducts.slice(0, 3).map((product) => (
                   <div 
                     key={product.id}
-                    className="shrink-0 w-16 text-center cursor-pointer hover:opacity-80 transition-opacity"
+                    className="shrink-0 w-20 text-center cursor-pointer hover:opacity-80 transition-opacity"
                   >
-                    <div className="w-16 h-16 bg-white rounded-lg overflow-hidden mb-1 shadow-sm">
+                    <div className="w-18 h-18 bg-white rounded-lg overflow-hidden mb-1.5 shadow-sm">
                       <img 
                         src={product.images?.[0] || product.image}
                         alt={product.name}
                         className="w-full h-full object-contain"
                       />
                     </div>
-                    <p className="text-[10px] text-gray-600 line-clamp-1">{product.name}</p>
+                    <p className="text-sm text-gray-600 line-clamp-1">{product.name}</p>
                   </div>
                 ))}
               </div>
             </div>
           )}
 
-          {/* Footer */}
+          {/* Footer - UNIFIED TYPOGRAPHY */}
           <div className="p-4 border-t border-gray-100 bg-white">
-            <div className="flex items-center justify-between mb-3">
-              <span className="text-gray-600">Összesen:</span>
-              <span className="text-xl font-bold text-gray-900">{formatPrice(totalPrice)}</span>
+            <div className="flex items-center justify-between mb-4">
+              <span className="text-base text-gray-600">Összesen:</span>
+              <span className="text-2xl font-bold text-gray-900">{formatPrice(totalPrice)}</span>
             </div>
-            <div className="grid grid-cols-2 gap-2">
+            <div className="grid grid-cols-2 gap-3">
               <button
                 onClick={onViewCart}
-                className="px-4 py-2.5 border-2 border-gray-200 text-gray-700 font-bold rounded-xl hover:bg-gray-50 transition-colors text-sm"
+                className="px-4 py-3 border-2 border-gray-200 text-gray-700 font-bold rounded-xl hover:bg-gray-50 transition-colors text-base"
               >
                 Kosár
               </button>
               <button
                 onClick={onCheckout}
-                className="px-4 py-2.5 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-bold rounded-xl hover:shadow-lg transition-all flex items-center justify-center gap-1 text-sm"
+                className="px-4 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-bold rounded-xl hover:shadow-lg transition-all flex items-center justify-center gap-2 text-base"
               >
-                Pénztár <ArrowRight className="w-4 h-4" />
+                Pénztár <ArrowRight className="w-5 h-5" />
               </button>
             </div>
           </div>

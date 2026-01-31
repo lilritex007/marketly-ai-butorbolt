@@ -10,6 +10,24 @@
 
 /* CSS Custom Properties (global, doesn't affect layout) */
 :root {
+  /* ========================================
+     UNIFIED TYPOGRAPHY SCALE
+     Minimum: 12px (tiny) - Maximum: varies by context
+     ======================================== */
+  
+  /* Base text sizes */
+  --text-tiny: 0.75rem;      /* 12px - badges, labels */
+  --text-small: 0.875rem;    /* 14px - secondary text */
+  --text-body: 1rem;         /* 16px - body text */
+  --text-medium: 1.125rem;   /* 18px - emphasis */
+  --text-large: 1.25rem;     /* 20px - sub-headings, prices */
+  --text-xl: 1.5rem;         /* 24px - section titles */
+  --text-2xl: 1.875rem;      /* 30px - major headings */
+  --text-3xl: 2.25rem;       /* 36px - hero sub-titles */
+  --text-4xl: 3rem;          /* 48px - hero titles */
+  --text-display: 3.75rem;   /* 60px - display text */
+  
+  /* Spacing */
   --space-xs: 0.25rem;
   --space-sm: 0.5rem;
   --space-md: 0.75rem;
@@ -17,12 +35,17 @@
   --space-xl: 1.5rem;
   --space-2xl: 2rem;
   --space-3xl: 3rem;
+  
+  /* Radius */
   --radius-sm: 0.375rem;
   --radius-md: 0.5rem;
   --radius-lg: 0.75rem;
   --radius-xl: 1rem;
   --radius-2xl: 1.25rem;
+  
+  /* Touch target */
   --touch-target: 44px;
+  
   /* UNAS shop bottom navigation height on mobile */
   --unas-bottom-nav: 40px;
 }

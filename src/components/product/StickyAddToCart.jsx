@@ -77,33 +77,33 @@ const StickyAddToCart = ({
           </div>
         )}
 
-        <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between gap-4">
-          {/* Product info - mobile */}
+        <div className="max-w-7xl mx-auto px-4 py-3.5 flex items-center justify-between gap-4">
+          {/* Product info - mobile - UNIFIED TYPOGRAPHY */}
           <div className="flex-1 min-w-0 sm:hidden">
-            <p className="text-sm font-medium text-gray-900 truncate">{product.name}</p>
+            <p className="text-base font-medium text-gray-900 truncate">{product.name}</p>
             <div className="flex items-center gap-2">
-              <span className="text-lg font-bold text-indigo-600">{formatPrice(price)} Ft</span>
+              <span className="text-xl font-bold text-indigo-600">{formatPrice(price)} Ft</span>
               {hasDiscount && (
                 <span className="text-sm line-through text-gray-400">{formatPrice(originalPrice)}</span>
               )}
             </div>
           </div>
 
-          {/* Product info - desktop */}
+          {/* Product info - desktop - UNIFIED TYPOGRAPHY */}
           <div className="hidden sm:flex items-center gap-4 flex-1">
             <img 
               src={product.images?.[0] || product.image} 
               alt={product.name}
-              className="w-14 h-14 object-contain bg-gray-50 rounded-lg"
+              className="w-16 h-16 object-contain bg-gray-50 rounded-lg"
             />
             <div>
-              <p className="font-medium text-gray-900 line-clamp-1">{product.name}</p>
+              <p className="font-medium text-gray-900 text-base lg:text-lg line-clamp-1">{product.name}</p>
               <div className="flex items-center gap-2">
-                <span className="text-xl font-bold text-indigo-600">{formatPrice(price)} Ft</span>
+                <span className="text-xl lg:text-2xl font-bold text-indigo-600">{formatPrice(price)} Ft</span>
                 {hasDiscount && (
                   <>
-                    <span className="text-sm line-through text-gray-400">{formatPrice(originalPrice)}</span>
-                    <span className="px-1.5 py-0.5 bg-red-100 text-red-600 text-xs font-bold rounded">
+                    <span className="text-base line-through text-gray-400">{formatPrice(originalPrice)}</span>
+                    <span className="px-2 py-0.5 bg-red-100 text-red-600 text-sm font-bold rounded">
                       -{discountPercent}%
                     </span>
                   </>
@@ -112,36 +112,36 @@ const StickyAddToCart = ({
             </div>
           </div>
 
-          {/* Trust badges - desktop only */}
-          <div className="hidden lg:flex items-center gap-4 text-gray-500 text-xs">
-            <div className="flex items-center gap-1.5">
-              <Truck className="w-4 h-4 text-green-600" />
+          {/* Trust badges - desktop only - UNIFIED TYPOGRAPHY */}
+          <div className="hidden lg:flex items-center gap-5 text-gray-500 text-sm">
+            <div className="flex items-center gap-2">
+              <Truck className="w-5 h-5 text-green-600" />
               <span>Ingyenes szállítás</span>
             </div>
-            <div className="flex items-center gap-1.5">
-              <Shield className="w-4 h-4 text-blue-600" />
+            <div className="flex items-center gap-2">
+              <Shield className="w-5 h-5 text-blue-600" />
               <span>2 év garancia</span>
             </div>
-            <div className="flex items-center gap-1.5">
-              <Clock className="w-4 h-4 text-amber-600" />
+            <div className="flex items-center gap-2">
+              <Clock className="w-5 h-5 text-amber-600" />
               <span>24h kiszállítás</span>
             </div>
           </div>
 
-          {/* Actions */}
-          <div className="flex items-center gap-2">
+          {/* Actions - UNIFIED TYPOGRAPHY */}
+          <div className="flex items-center gap-3">
             {/* Quantity selector - desktop only */}
-            <div className="hidden sm:flex items-center border border-gray-200 rounded-lg">
+            <div className="hidden sm:flex items-center border border-gray-200 rounded-xl">
               <button 
                 onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                className="px-3 py-2 text-gray-600 hover:bg-gray-100 transition-colors"
+                className="px-4 py-2.5 text-gray-600 hover:bg-gray-100 transition-colors text-lg"
               >
                 -
               </button>
-              <span className="px-3 py-2 font-medium min-w-[40px] text-center">{quantity}</span>
+              <span className="px-4 py-2.5 font-medium min-w-[48px] text-center text-base">{quantity}</span>
               <button 
                 onClick={() => setQuantity(quantity + 1)}
-                className="px-3 py-2 text-gray-600 hover:bg-gray-100 transition-colors"
+                className="px-4 py-2.5 text-gray-600 hover:bg-gray-100 transition-colors text-lg"
               >
                 +
               </button>
@@ -151,14 +151,14 @@ const StickyAddToCart = ({
             <button
               onClick={() => onToggleWishlist?.(product.id)}
               className={`
-                p-3 rounded-xl transition-all
+                p-3.5 rounded-xl transition-all
                 ${isWishlisted 
                   ? 'bg-red-100 text-red-500' 
                   : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                 }
               `}
             >
-              <Heart className="w-5 h-5" fill={isWishlisted ? 'currentColor' : 'none'} />
+              <Heart className="w-6 h-6" fill={isWishlisted ? 'currentColor' : 'none'} />
             </button>
 
             {/* Add to cart */}
@@ -166,7 +166,7 @@ const StickyAddToCart = ({
               onClick={handleAddToCart}
               disabled={!isInStock || addedToCart}
               className={`
-                flex items-center gap-2 px-5 sm:px-6 py-3 rounded-xl font-bold transition-all
+                flex items-center gap-2 px-6 sm:px-7 py-3.5 rounded-xl font-bold text-base transition-all
                 ${addedToCart 
                   ? 'bg-green-500 text-white' 
                   : isInStock 

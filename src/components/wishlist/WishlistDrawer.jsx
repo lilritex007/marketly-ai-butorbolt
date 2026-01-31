@@ -76,7 +76,7 @@ const WishlistDrawer = ({
           ${isClosing ? 'translate-x-full' : 'translate-x-0'}
         `}
       >
-        {/* Header */}
+        {/* Header - UNIFIED TYPOGRAPHY */}
         <div className="bg-gradient-to-r from-pink-500 to-red-500 p-5 text-white">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
@@ -84,8 +84,8 @@ const WishlistDrawer = ({
                 <Heart className="w-6 h-6" fill="white" />
               </div>
               <div>
-                <h2 className="text-xl font-bold">Kívánságlista</h2>
-                <p className="text-white/80 text-sm">{wishlistItems.length} termék</p>
+                <h2 className="text-xl sm:text-2xl font-bold">Kívánságlista</h2>
+                <p className="text-white/80 text-sm sm:text-base">{wishlistItems.length} termék</p>
               </div>
             </div>
             <button
@@ -100,16 +100,16 @@ const WishlistDrawer = ({
         {/* Content */}
         <div className="flex flex-col h-[calc(100%-180px)] overflow-hidden">
           {wishlistItems.length === 0 ? (
-            /* Empty state */
+            /* Empty state - UNIFIED TYPOGRAPHY */
             <div className="flex-1 flex flex-col items-center justify-center p-8 text-center">
               <div className="w-24 h-24 bg-pink-50 rounded-full flex items-center justify-center mb-4">
                 <Heart className="w-12 h-12 text-pink-300" />
               </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-2">Üres a kívánságlista</h3>
-              <p className="text-gray-500 mb-6">Adj hozzá termékeket a szív ikonra kattintva!</p>
+              <h3 className="text-xl sm:text-2xl font-bold text-gray-900 mb-2">Üres a kívánságlista</h3>
+              <p className="text-base text-gray-500 mb-6">Adj hozzá termékeket a szív ikonra kattintva!</p>
               <button
                 onClick={handleClose}
-                className="px-6 py-3 bg-gradient-to-r from-pink-500 to-red-500 text-white font-bold rounded-xl hover:shadow-lg transition-all"
+                className="px-6 py-3 bg-gradient-to-r from-pink-500 to-red-500 text-white font-bold text-base rounded-xl hover:shadow-lg transition-all"
               >
                 Böngészés
               </button>
@@ -140,10 +140,10 @@ const WishlistDrawer = ({
                       />
                     </div>
 
-                    {/* Info */}
+                    {/* Info - UNIFIED TYPOGRAPHY */}
                     <div className="flex-1 min-w-0">
                       <p 
-                        className="font-medium text-gray-900 text-sm line-clamp-2 cursor-pointer hover:text-indigo-600 transition-colors"
+                        className="font-medium text-gray-900 text-sm sm:text-base line-clamp-2 cursor-pointer hover:text-indigo-600 transition-colors"
                         onClick={() => {
                           onProductClick?.(item);
                           handleClose();
@@ -151,7 +151,7 @@ const WishlistDrawer = ({
                       >
                         {item.name}
                       </p>
-                      <p className="text-lg font-bold text-indigo-600 mt-1">
+                      <p className="text-lg sm:text-xl font-bold text-indigo-600 mt-1">
                         {formatPrice(item.salePrice || item.price)}
                       </p>
                       
@@ -159,17 +159,17 @@ const WishlistDrawer = ({
                       <div className="flex items-center gap-2 mt-2">
                         <button
                           onClick={() => onAddToCart?.(item)}
-                          className="flex-1 flex items-center justify-center gap-1.5 px-3 py-1.5 bg-indigo-600 text-white text-xs font-bold rounded-lg hover:bg-indigo-700 transition-colors"
+                          className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 bg-indigo-600 text-white text-sm font-bold rounded-lg hover:bg-indigo-700 transition-colors"
                         >
-                          <ShoppingCart className="w-3.5 h-3.5" />
+                          <ShoppingCart className="w-4 h-4" />
                           Kosárba
                         </button>
                         <button
                           onClick={() => onRemove?.(item.id)}
-                          className="p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                          className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
                           title="Eltávolítás"
                         >
-                          <Trash2 className="w-4 h-4" />
+                          <Trash2 className="w-5 h-5" />
                         </button>
                       </div>
                     </div>
@@ -180,12 +180,12 @@ const WishlistDrawer = ({
           )}
         </div>
 
-        {/* Footer */}
+        {/* Footer - UNIFIED TYPOGRAPHY */}
         {wishlistItems.length > 0 && (
           <div className="absolute bottom-0 left-0 right-0 bg-white border-t border-gray-100 p-4 space-y-3">
             {/* Total */}
             <div className="flex items-center justify-between">
-              <span className="text-gray-600">Összérték:</span>
+              <span className="text-base text-gray-600">Összérték:</span>
               <span className="text-2xl font-bold text-gray-900">{formatPrice(totalValue)}</span>
             </div>
 
@@ -193,7 +193,7 @@ const WishlistDrawer = ({
             <div className="flex gap-2">
               <button
                 onClick={handleShare}
-                className="flex-1 flex items-center justify-center gap-2 py-3 border-2 border-gray-200 text-gray-700 font-bold rounded-xl hover:bg-gray-50 transition-colors"
+                className="flex-1 flex items-center justify-center gap-2 py-3 border-2 border-gray-200 text-gray-700 font-bold text-sm sm:text-base rounded-xl hover:bg-gray-50 transition-colors"
               >
                 <Share2 className="w-5 h-5" />
                 Megosztás
@@ -202,7 +202,7 @@ const WishlistDrawer = ({
                 onClick={() => {
                   wishlistItems.forEach(item => onAddToCart?.(item));
                 }}
-                className="flex-1 flex items-center justify-center gap-2 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-bold rounded-xl hover:shadow-lg transition-all"
+                className="flex-1 flex items-center justify-center gap-2 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-bold text-sm sm:text-base rounded-xl hover:shadow-lg transition-all"
               >
                 <ShoppingCart className="w-5 h-5" />
                 Mind a kosárba
@@ -212,7 +212,7 @@ const WishlistDrawer = ({
             {/* Clear all */}
             <button
               onClick={onClearAll}
-              className="w-full text-center text-sm text-gray-400 hover:text-red-500 transition-colors py-2"
+              className="w-full text-center text-sm sm:text-base text-gray-400 hover:text-red-500 transition-colors py-2"
             >
               Lista törlése
             </button>

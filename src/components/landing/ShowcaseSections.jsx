@@ -240,17 +240,17 @@ export const LiveShowcase = ({ products = [], onProductClick }) => {
                       />
                     </div>
 
-                    {/* Content */}
-                    <div className="p-4 sm:p-5 lg:p-5">
-                      <h3 className="text-base sm:text-lg lg:text-lg font-bold text-gray-900 mb-2 truncate group-hover:text-indigo-600 transition-colors">
+                    {/* Content - UNIFIED TYPOGRAPHY */}
+                    <div className="p-4 sm:p-5 lg:p-6">
+                      <h3 className="text-base sm:text-lg lg:text-xl font-bold text-gray-900 mb-2 truncate group-hover:text-indigo-600 transition-colors">
                         {product.name}
                       </h3>
                       <div className="flex items-center justify-between">
-                        <span className="text-lg sm:text-xl lg:text-2xl font-extrabold text-indigo-600">
+                        <span className="text-xl sm:text-2xl lg:text-2xl font-extrabold text-indigo-600">
                           {new Intl.NumberFormat('hu-HU', { style: 'currency', currency: 'HUF', maximumFractionDigits: 0 }).format(product.price)}
                         </span>
-                        <button className="w-10 h-10 sm:w-10 sm:h-10 lg:w-11 lg:h-11 bg-indigo-600 text-white rounded-full flex items-center justify-center hover:bg-indigo-700 transition-all">
-                          <Eye className="w-5 h-5 lg:w-5 lg:h-5" />
+                        <button className="w-11 h-11 sm:w-12 sm:h-12 lg:w-12 lg:h-12 bg-indigo-600 text-white rounded-full flex items-center justify-center hover:bg-indigo-700 transition-all">
+                          <Eye className="w-5 h-5 lg:w-6 lg:h-6" />
                         </button>
                       </div>
                     </div>
