@@ -66,21 +66,21 @@ export const ModernHero = ({ onExplore, onTryAI }) => {
       </div>
 
       {/* FULLSCREEN: Edge-to-edge, LARGE elements for enjoyable browsing */}
-      <div className="relative z-10 w-full max-w-[2000px] mx-auto px-4 sm:px-6 lg:px-10 xl:px-16 py-8 sm:py-12 lg:py-16 xl:py-20">
+      <div className="relative z-10 w-full max-w-[2000px] mx-auto px-4 sm:px-6 lg:px-10 xl:px-16 py-10 sm:py-14 lg:py-20 xl:py-24">
         <div className="text-center">
           {/* Floating Badge - VISIBLE and prominent */}
-          <div className="inline-flex items-center px-4 sm:px-6 py-2.5 sm:py-3 bg-white/80 backdrop-blur-sm rounded-full shadow-lg border border-indigo-100 mb-6 sm:mb-8 lg:mb-10 animate-float">
-            <Sparkles className="w-5 h-5 sm:w-6 sm:h-6 text-indigo-600 mr-2.5 animate-pulse" />
-            <span className="text-sm sm:text-base lg:text-lg font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
+          <div className="inline-flex items-center px-5 sm:px-6 lg:px-8 py-2.5 sm:py-3 lg:py-4 bg-white/80 backdrop-blur-sm rounded-full shadow-lg border border-indigo-100 mb-6 sm:mb-8 lg:mb-10 animate-float">
+            <Sparkles className="w-5 h-5 sm:w-6 sm:h-6 lg:w-7 lg:h-7 text-indigo-600 mr-2.5 animate-pulse" />
+            <span className="text-sm sm:text-base lg:text-xl xl:text-2xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
               AI-Powered Furniture Shopping
             </span>
-            <span className="ml-2.5 px-2.5 py-1 bg-green-100 text-green-700 text-xs sm:text-sm font-bold rounded-full">
+            <span className="ml-2.5 px-3 py-1 sm:py-1.5 bg-green-100 text-green-700 text-xs sm:text-sm lg:text-base font-bold rounded-full">
               ÚJ
             </span>
           </div>
 
           {/* Main Heading - LARGE and impactful */}
-          <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-extrabold mb-6 sm:mb-8 lg:mb-10 leading-[1.1]">
+          <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl 2xl:text-9xl font-extrabold mb-6 sm:mb-8 lg:mb-12 leading-[1.1]">
             <span className="block text-gray-900 mb-2">Találd meg az</span>
             <span className="block bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 bg-clip-text text-transparent animate-gradient">
               ideális bútort
@@ -89,36 +89,36 @@ export const ModernHero = ({ onExplore, onTryAI }) => {
           </h1>
 
           {/* Subheading - READABLE */}
-          <p className="text-lg sm:text-xl md:text-2xl lg:text-3xl text-gray-600 max-w-5xl mx-auto mb-8 sm:mb-12 lg:mb-16 leading-relaxed px-2">
+          <p className="text-lg sm:text-xl md:text-2xl lg:text-3xl xl:text-4xl text-gray-600 max-w-6xl mx-auto mb-10 sm:mb-12 lg:mb-16 leading-relaxed px-2">
             Forradalmi AI technológia találkozik a bútorvásárlással. 
             <span className="font-semibold text-indigo-600"> Fotózz, tervezz, vásárolj</span> - minden egy helyen.
           </p>
 
           {/* CTA Buttons - BALANCED and readable */}
-          <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 lg:gap-5 justify-center items-stretch sm:items-center mb-10 sm:mb-14 lg:mb-20 px-3">
+          <div className="flex flex-col sm:flex-row gap-4 sm:gap-5 lg:gap-6 justify-center items-stretch sm:items-center mb-12 sm:mb-16 lg:mb-20 px-3">
             <button
               onClick={onTryAI}
-              className="group relative w-full sm:w-auto px-6 py-3.5 sm:px-8 sm:py-4 lg:px-12 lg:py-5 xl:px-14 xl:py-5 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-xl lg:rounded-2xl font-bold text-base sm:text-lg lg:text-xl xl:text-2xl shadow-xl hover:shadow-indigo-500/50 transition-all transform hover:-translate-y-1 overflow-hidden flex items-center justify-center"
+              className="group relative w-full sm:w-auto px-7 py-4 sm:px-10 sm:py-5 lg:px-14 lg:py-6 xl:px-16 xl:py-6 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-xl lg:rounded-2xl font-bold text-lg sm:text-xl lg:text-2xl xl:text-3xl shadow-xl hover:shadow-indigo-500/50 transition-all transform hover:-translate-y-1 overflow-hidden flex items-center justify-center"
             >
               <span className="relative z-10 flex items-center">
-                <Sparkles className="w-5 h-5 sm:w-6 sm:h-6 lg:w-6 lg:h-6 xl:w-7 xl:h-7 mr-2.5" />
+                <Sparkles className="w-6 h-6 sm:w-7 sm:h-7 lg:w-8 lg:h-8 xl:w-9 xl:h-9 mr-3" />
                 Próbáld ki az AI-t
-                <ArrowRight className="w-5 h-5 sm:w-6 sm:h-6 lg:w-6 lg:h-6 xl:w-7 xl:h-7 ml-2.5 group-hover:translate-x-1 transition-transform" />
+                <ArrowRight className="w-6 h-6 sm:w-7 sm:h-7 lg:w-8 lg:h-8 xl:w-9 xl:h-9 ml-3 group-hover:translate-x-1 transition-transform" />
               </span>
               <div className="absolute inset-0 bg-gradient-to-r from-purple-600 to-pink-600 opacity-0 group-hover:opacity-100 transition-opacity" />
             </button>
 
             <button
               onClick={onExplore}
-              className="w-full sm:w-auto px-6 py-3.5 sm:px-8 sm:py-4 lg:px-12 lg:py-5 xl:px-14 xl:py-5 bg-white text-gray-900 rounded-xl lg:rounded-2xl font-bold text-base sm:text-lg lg:text-xl xl:text-2xl shadow-lg hover:shadow-xl transition-all transform hover:-translate-y-1 border-2 border-gray-200 hover:border-indigo-300 flex items-center justify-center"
+              className="w-full sm:w-auto px-7 py-4 sm:px-10 sm:py-5 lg:px-14 lg:py-6 xl:px-16 xl:py-6 bg-white text-gray-900 rounded-xl lg:rounded-2xl font-bold text-lg sm:text-xl lg:text-2xl xl:text-3xl shadow-lg hover:shadow-xl transition-all transform hover:-translate-y-1 border-2 border-gray-200 hover:border-indigo-300 flex items-center justify-center"
             >
               Kollekció megtekintése
-              <ChevronRight className="w-5 h-5 sm:w-5 sm:h-5 lg:w-6 lg:h-6 xl:w-7 xl:h-7 ml-2" />
+              <ChevronRight className="w-6 h-6 sm:w-6 sm:h-6 lg:w-7 lg:h-7 xl:w-8 xl:h-8 ml-2" />
             </button>
           </div>
 
           {/* Stats - PROMINENT on all screens */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 lg:gap-6 max-w-6xl mx-auto px-2">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-5 lg:gap-8 max-w-7xl mx-auto px-2">
             {[
               { icon: Package, value: '170K+', label: 'Termék' },
               { icon: Users, value: '50K+', label: 'Elégedett vásárló' },
@@ -127,11 +127,11 @@ export const ModernHero = ({ onExplore, onTryAI }) => {
             ].map((stat, idx) => (
               <div 
                 key={idx} 
-                className="bg-white/60 backdrop-blur-sm rounded-2xl lg:rounded-3xl p-4 sm:p-6 lg:p-8 border border-white/20 shadow-lg hover:shadow-xl transition-all transform hover:-translate-y-1"
+                className="bg-white/60 backdrop-blur-sm rounded-2xl lg:rounded-3xl p-5 sm:p-6 lg:p-8 xl:p-10 border border-white/20 shadow-lg hover:shadow-xl transition-all transform hover:-translate-y-1"
               >
-                <stat.icon className="w-8 h-8 sm:w-10 sm:h-10 lg:w-12 lg:h-12 text-indigo-600 mx-auto mb-2 sm:mb-3 lg:mb-4" />
-                <div className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-gray-900 mb-1">{stat.value}</div>
-                <div className="text-sm sm:text-base lg:text-lg text-gray-600 font-medium">{stat.label}</div>
+                <stat.icon className="w-9 h-9 sm:w-11 sm:h-11 lg:w-14 lg:h-14 xl:w-16 xl:h-16 text-indigo-600 mx-auto mb-3 sm:mb-4 lg:mb-5" />
+                <div className="text-2xl sm:text-3xl lg:text-4xl xl:text-5xl font-extrabold text-gray-900 mb-1 lg:mb-2">{stat.value}</div>
+                <div className="text-sm sm:text-base lg:text-lg xl:text-xl text-gray-600 font-medium">{stat.label}</div>
               </div>
             ))}
           </div>
@@ -201,14 +201,14 @@ export const AIFeaturesShowcase = ({ onFeatureClick }) => {
   }, []);
 
   return (
-    <div className="py-8 sm:py-10 lg:py-14 xl:py-16 bg-gradient-to-b from-white to-gray-50">
+    <div className="py-10 sm:py-12 lg:py-16 xl:py-20 bg-gradient-to-b from-white to-gray-50">
       <div className="w-full max-w-[2000px] mx-auto px-4 sm:px-6 lg:px-10 xl:px-16">
-        <div className="text-center mb-6 sm:mb-8 lg:mb-12">
-          <div className="inline-flex items-center px-5 py-2.5 lg:px-6 lg:py-3 bg-indigo-100 rounded-full mb-5 lg:mb-6">
-            <Sparkles className="w-5 h-5 lg:w-6 lg:h-6 text-indigo-600 mr-2" />
-            <span className="text-base lg:text-lg xl:text-xl font-bold text-indigo-600">AI Powered Features</span>
+        <div className="text-center mb-8 sm:mb-10 lg:mb-14">
+          <div className="inline-flex items-center px-5 py-2.5 sm:px-6 sm:py-3 lg:px-8 lg:py-4 bg-indigo-100 rounded-full mb-5 lg:mb-6">
+            <Sparkles className="w-5 h-5 sm:w-6 sm:h-6 lg:w-7 lg:h-7 text-indigo-600 mr-2.5" />
+            <span className="text-base sm:text-lg lg:text-xl xl:text-2xl font-bold text-indigo-600">AI Powered Features</span>
           </div>
-          <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-extrabold text-gray-900 mb-5 lg:mb-6">
+          <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-extrabold text-gray-900 mb-5 lg:mb-8">
             Mesterséges intelligencia a <span className="bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">szolgálatodban</span>
           </h2>
           <p className="text-lg sm:text-xl lg:text-2xl xl:text-3xl text-gray-600 max-w-5xl mx-auto leading-relaxed">
@@ -216,7 +216,7 @@ export const AIFeaturesShowcase = ({ onFeatureClick }) => {
           </p>
         </div>
 
-        <div className="grid md:grid-cols-3 gap-6 lg:gap-8 xl:gap-10">
+        <div className="grid md:grid-cols-3 gap-5 sm:gap-6 lg:gap-8 xl:gap-10">
           {features.map((feature, idx) => (
             <div
               key={idx}
@@ -230,34 +230,34 @@ export const AIFeaturesShowcase = ({ onFeatureClick }) => {
             >
               <div className={`absolute inset-0 bg-gradient-to-br ${feature.color} rounded-3xl blur-xl opacity-50 group-hover:opacity-75 transition-opacity`} />
               
-              <div className="relative bg-white rounded-3xl p-7 sm:p-8 lg:p-10 xl:p-12 shadow-xl border border-gray-100 hover:shadow-2xl transition-all">
+              <div className="relative bg-white rounded-2xl sm:rounded-3xl p-6 sm:p-8 lg:p-10 xl:p-12 shadow-xl border border-gray-100 hover:shadow-2xl transition-all">
                 {/* Icon */}
-                <div className={`w-16 h-16 sm:w-18 sm:h-18 lg:w-20 lg:h-20 xl:w-24 xl:h-24 bg-gradient-to-br ${feature.color} rounded-2xl xl:rounded-3xl flex items-center justify-center mb-6 lg:mb-8 transform group-hover:rotate-6 transition-transform`}>
-                  <feature.icon className="w-8 h-8 sm:w-9 sm:h-9 lg:w-10 lg:h-10 xl:w-12 xl:h-12 text-white" />
+                <div className={`w-16 h-16 sm:w-20 sm:h-20 lg:w-24 lg:h-24 xl:w-28 xl:h-28 bg-gradient-to-br ${feature.color} rounded-2xl xl:rounded-3xl flex items-center justify-center mb-5 sm:mb-6 lg:mb-8 transform group-hover:rotate-6 transition-transform`}>
+                  <feature.icon className="w-8 h-8 sm:w-10 sm:h-10 lg:w-12 lg:h-12 xl:w-14 xl:h-14 text-white" />
                 </div>
 
                 {/* Title */}
-                <h3 className="text-xl sm:text-2xl lg:text-3xl xl:text-4xl font-bold text-gray-900 mb-3 lg:mb-4">{feature.title}</h3>
+                <h3 className="text-xl sm:text-2xl lg:text-3xl xl:text-4xl font-bold text-gray-900 mb-3 lg:mb-5">{feature.title}</h3>
 
                 {/* Description */}
-                <p className="text-base sm:text-lg lg:text-xl xl:text-2xl text-gray-600 mb-6 lg:mb-8 leading-relaxed">{feature.description}</p>
+                <p className="text-base sm:text-lg lg:text-xl xl:text-2xl text-gray-600 mb-5 sm:mb-6 lg:mb-8 leading-relaxed">{feature.description}</p>
 
                 {/* Demo Flow */}
-                <div className="bg-gray-50 rounded-xl lg:rounded-2xl p-4 lg:p-5 xl:p-6 mb-5 lg:mb-6">
+                <div className="bg-gray-50 rounded-xl lg:rounded-2xl p-4 sm:p-5 lg:p-6 xl:p-7 mb-5 lg:mb-6">
                   <DemoFlow steps={feature.demoSteps} />
                 </div>
 
                 {/* Stats */}
                 <div className="flex items-center justify-between">
-                  <span className="text-base lg:text-lg xl:text-xl font-bold text-indigo-600">{feature.stats}</span>
-                  <ArrowRight className={`w-5 h-5 lg:w-6 lg:h-6 xl:w-7 xl:h-7 text-gray-400 group-hover:text-indigo-600 group-hover:translate-x-1 transition-all`} />
+                  <span className="text-base sm:text-lg lg:text-xl xl:text-2xl font-bold text-indigo-600">{feature.stats}</span>
+                  <ArrowRight className={`w-5 h-5 sm:w-6 sm:h-6 lg:w-7 lg:h-7 xl:w-8 xl:h-8 text-gray-400 group-hover:text-indigo-600 group-hover:translate-x-1 transition-all`} />
                 </div>
 
                 {/* Active Indicator */}
                 {activeFeature === idx && (
                   <div className="absolute -top-2 -right-2 lg:-top-3 lg:-right-3 xl:-top-4 xl:-right-4">
-                    <div className="w-7 h-7 lg:w-8 lg:h-8 xl:w-10 xl:h-10 bg-green-500 rounded-full border-4 border-white animate-pulse flex items-center justify-center">
-                      <Check className="w-3.5 h-3.5 lg:w-4 lg:h-4 xl:w-5 xl:h-5 text-white" />
+                    <div className="w-8 h-8 lg:w-10 lg:h-10 xl:w-12 xl:h-12 bg-green-500 rounded-full border-4 border-white animate-pulse flex items-center justify-center">
+                      <Check className="w-4 h-4 lg:w-5 lg:h-5 xl:w-6 xl:h-6 text-white" />
                     </div>
                   </div>
                 )}
@@ -267,13 +267,13 @@ export const AIFeaturesShowcase = ({ onFeatureClick }) => {
         </div>
 
         {/* Progress Indicators */}
-        <div className="flex justify-center gap-2 mt-12">
+        <div className="flex justify-center gap-2.5 mt-10 lg:mt-14">
           {features.map((_, idx) => (
             <button
               key={idx}
               onClick={() => setActiveFeature(idx)}
-              className={`h-2 rounded-full transition-all ${
-                activeFeature === idx ? 'w-12 bg-indigo-600' : 'w-2 bg-gray-300'
+              className={`h-2.5 sm:h-3 rounded-full transition-all ${
+                activeFeature === idx ? 'w-12 sm:w-14 bg-indigo-600' : 'w-2.5 sm:w-3 bg-gray-300'
               }`}
             />
           ))}

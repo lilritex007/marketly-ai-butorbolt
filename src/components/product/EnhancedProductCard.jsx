@@ -163,46 +163,46 @@ export const EnhancedProductCard = ({
         </div>
       </div>
 
-      {/* Content Section - UNIFIED typography scale */}
-      <div className="p-3 sm:p-4 lg:p-5 xl:p-6 flex flex-col flex-1">
+      {/* Content Section - OPTIMIZED typography scale */}
+      <div className="p-3 sm:p-4 lg:p-6 xl:p-7 flex flex-col flex-1">
         {/* Category - visible */}
-        <span className="text-xs sm:text-xs lg:text-sm xl:text-base font-bold text-indigo-600 uppercase tracking-wide mb-1 lg:mb-2 truncate">
+        <span className="text-xs sm:text-sm lg:text-base xl:text-lg font-bold text-indigo-600 uppercase tracking-wide mb-1.5 lg:mb-2 truncate">
           {product.category}
         </span>
         
-        {/* Product Name - UNIFIED scale */}
+        {/* Product Name - OPTIMIZED scale */}
         <h3 
           onClick={() => onQuickView?.(product)} 
-          className="text-base sm:text-lg lg:text-xl xl:text-2xl font-bold text-gray-900 line-clamp-2 leading-tight cursor-pointer hover:text-indigo-600 transition-colors mb-2 lg:mb-3" 
+          className="text-base sm:text-lg lg:text-xl xl:text-2xl 2xl:text-3xl font-bold text-gray-900 line-clamp-2 leading-snug cursor-pointer hover:text-indigo-600 transition-colors mb-2 lg:mb-3" 
           title={product.name}
         >
           {product.name}
         </h3>
         
-        {/* Price Section - UNIFIED scale */}
-        <div className="mt-auto pt-2 lg:pt-3 border-t border-gray-100">
+        {/* Price Section - OPTIMIZED scale */}
+        <div className="mt-auto pt-3 lg:pt-4 border-t border-gray-100">
           <div className="flex justify-between items-center gap-2 lg:gap-3">
             <div className="min-w-0">
               {discount > 0 && (
-                <span className="text-sm sm:text-sm lg:text-base text-gray-400 line-through block">
+                <span className="text-sm sm:text-base lg:text-lg text-gray-400 line-through block">
                   {formatPrice(product.price)}
                 </span>
               )}
-              <span className={`text-lg sm:text-xl lg:text-2xl xl:text-3xl font-black ${discount > 0 ? 'text-red-600' : 'text-gray-900'}`}>
+              <span className={`text-xl sm:text-2xl lg:text-3xl xl:text-4xl font-black ${discount > 0 ? 'text-red-600' : 'text-gray-900'}`}>
                 {formatPrice(displayPrice)}
               </span>
             </div>
             
-            {/* Quick View Button - UNIFIED */}
+            {/* Quick View Button - OPTIMIZED */}
             <button 
               onClick={(e) => { 
                 e.stopPropagation(); 
                 onQuickView?.(product); 
               }} 
-              className="shrink-0 w-10 h-10 lg:w-12 lg:h-12 xl:w-14 xl:h-14 flex items-center justify-center bg-indigo-600 text-white rounded-xl lg:rounded-2xl hover:bg-indigo-700 transition-all tap-scale"
+              className="shrink-0 w-11 h-11 sm:w-12 sm:h-12 lg:w-14 lg:h-14 xl:w-16 xl:h-16 flex items-center justify-center bg-indigo-600 text-white rounded-xl lg:rounded-2xl hover:bg-indigo-700 transition-all tap-scale"
               aria-label="Részletek"
             >
-              <Eye className="w-5 h-5 lg:w-6 lg:h-6 xl:w-7 xl:h-7" />
+              <Eye className="w-5 h-5 sm:w-6 sm:h-6 lg:w-7 lg:h-7 xl:w-8 xl:h-8" />
             </button>
           </div>
         </div>

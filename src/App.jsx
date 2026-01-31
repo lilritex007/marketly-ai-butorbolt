@@ -604,34 +604,34 @@ const Navbar = ({ activeTab, setActiveTab, wishlistCount, productCount = 0, onSc
           </div>
           
           {/* Content */}
-          <div className="relative h-full flex flex-col text-white p-4 sm:p-5 overflow-y-auto">
+          <div className="relative h-full flex flex-col text-white p-4 sm:p-6 overflow-y-auto">
             
             {/* Header */}
-            <div className="flex justify-between items-center mb-4">
-              <div className="flex items-center gap-3">
-                <div className="w-11 h-11 bg-white/20 backdrop-blur-xl rounded-xl flex items-center justify-center">
-                  <Home className="w-5 h-5" />
+            <div className="flex justify-between items-center mb-5">
+              <div className="flex items-center gap-3 sm:gap-4">
+                <div className="w-12 h-12 sm:w-14 sm:h-14 bg-white/20 backdrop-blur-xl rounded-xl flex items-center justify-center">
+                  <Home className="w-6 h-6 sm:w-7 sm:h-7" />
                 </div>
                 <div>
                   <div className="flex items-baseline">
-                    <span className="font-black text-xl">Marketly</span>
-                    <span className="font-black text-xl text-white/80">.AI</span>
+                    <span className="font-black text-2xl sm:text-3xl">Marketly</span>
+                    <span className="font-black text-2xl sm:text-3xl text-white/80">.AI</span>
                   </div>
-                  <p className="text-[10px] text-white/60 font-medium tracking-wider">BÚTORBOLT</p>
+                  <p className="text-xs sm:text-sm text-white/60 font-medium tracking-wider">BÚTORBOLT</p>
                 </div>
               </div>
               <button
                 type="button"
-                className="p-2.5 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-xl bg-white/10 hover:bg-white/20 backdrop-blur-xl transition-colors"
+                className="p-3 min-w-[48px] min-h-[48px] flex items-center justify-center rounded-xl bg-white/10 hover:bg-white/20 backdrop-blur-xl transition-colors"
                 onClick={closeMobileMenu}
                 aria-label="Menü bezárása"
               >
-                <X className="w-6 h-6" />
+                <X className="w-7 h-7" />
               </button>
             </div>
 
             {/* Quick Actions Row */}
-            <div className="flex gap-3 mb-5">
+            <div className="flex gap-3 sm:gap-4 mb-6">
               <button 
                 onClick={() => {
                   closeMobileMenu();
@@ -639,16 +639,16 @@ const Navbar = ({ activeTab, setActiveTab, wishlistCount, productCount = 0, onSc
                     document.getElementById('products-section')?.scrollIntoView({ behavior: 'smooth' });
                   }, 350);
                 }}
-                className="flex-1 flex items-center justify-center gap-2 py-3.5 bg-white/15 backdrop-blur-xl rounded-xl font-bold text-base"
+                className="flex-1 flex items-center justify-center gap-2.5 py-4 bg-white/15 backdrop-blur-xl rounded-xl font-bold text-base sm:text-lg"
               >
-                <Search className="w-5 h-5" />
+                <Search className="w-5 h-5 sm:w-6 sm:h-6" />
                 <span>Keresés</span>
               </button>
-              <button className="flex-1 flex items-center justify-center gap-2 py-3.5 bg-white/15 backdrop-blur-xl rounded-xl font-bold text-base relative">
-                <Heart className={`w-5 h-5 ${wishlistCount > 0 ? 'fill-white' : ''}`} />
+              <button className="flex-1 flex items-center justify-center gap-2.5 py-4 bg-white/15 backdrop-blur-xl rounded-xl font-bold text-base sm:text-lg relative">
+                <Heart className={`w-5 h-5 sm:w-6 sm:h-6 ${wishlistCount > 0 ? 'fill-white' : ''}`} />
                 <span>Kedvencek</span>
                 {wishlistCount > 0 && (
-                  <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 rounded-full text-xs flex items-center justify-center font-bold">
+                  <span className="absolute -top-1 -right-1 w-6 h-6 bg-red-500 rounded-full text-sm flex items-center justify-center font-bold">
                     {wishlistCount}
                   </span>
                 )}
@@ -656,33 +656,33 @@ const Navbar = ({ activeTab, setActiveTab, wishlistCount, productCount = 0, onSc
             </div>
 
             {/* Popular Categories Grid */}
-            <div className="mb-5">
-              <p className="text-sm text-white/70 font-bold uppercase tracking-wider mb-3">Népszerű kategóriák</p>
-              <div className="grid grid-cols-3 gap-2">
+            <div className="mb-6">
+              <p className="text-sm sm:text-base text-white/70 font-bold uppercase tracking-wider mb-3 sm:mb-4">Népszerű kategóriák</p>
+              <div className="grid grid-cols-3 gap-2.5 sm:gap-3">
                 {POPULAR_CATEGORIES.slice(0, 6).map((cat) => (
                   <button
                     key={cat.id}
                     onClick={() => setTabAndClose('shop')}
-                    className="flex flex-col items-center gap-2 py-3 bg-white/10 backdrop-blur-xl rounded-xl hover:bg-white/20 transition-all"
+                    className="flex flex-col items-center gap-2 sm:gap-2.5 py-3.5 sm:py-4 bg-white/10 backdrop-blur-xl rounded-xl hover:bg-white/20 transition-all"
                   >
-                    <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${cat.color} flex items-center justify-center`}>
-                      <cat.icon className="w-5 h-5" />
+                    <div className={`w-11 h-11 sm:w-12 sm:h-12 rounded-xl bg-gradient-to-br ${cat.color} flex items-center justify-center`}>
+                      <cat.icon className="w-5 h-5 sm:w-6 sm:h-6" />
                     </div>
-                    <span className="text-xs font-bold">{cat.name}</span>
+                    <span className="text-xs sm:text-sm font-bold">{cat.name}</span>
                   </button>
                 ))}
               </div>
             </div>
 
             {/* Main Navigation */}
-            <div className="space-y-2.5 mb-5">
-              <p className="text-sm text-white/70 font-bold uppercase tracking-wider mb-3">Navigáció</p>
+            <div className="space-y-3 mb-6">
+              <p className="text-sm sm:text-base text-white/70 font-bold uppercase tracking-wider mb-3 sm:mb-4">Navigáció</p>
               {navItems.map((item, index) => (
                 <button
                   key={item.id}
                   onClick={() => setTabAndClose(item.id)}
                   className={`
-                    w-full flex items-center gap-4 px-4 py-3.5 rounded-xl text-left transition-all
+                    w-full flex items-center gap-4 px-4 sm:px-5 py-4 sm:py-5 rounded-xl text-left transition-all
                     ${activeTab === item.id
                       ? 'bg-white text-gray-900 shadow-2xl'
                       : 'bg-white/10 hover:bg-white/20 backdrop-blur-xl'
@@ -691,21 +691,21 @@ const Navbar = ({ activeTab, setActiveTab, wishlistCount, productCount = 0, onSc
                   style={{ animationDelay: `${index * 50}ms` }}
                 >
                   <div className={`
-                    w-11 h-11 rounded-xl flex items-center justify-center shrink-0
+                    w-12 h-12 sm:w-14 sm:h-14 rounded-xl flex items-center justify-center shrink-0
                     ${activeTab === item.id 
                       ? 'bg-gradient-to-br from-indigo-500 to-purple-600 text-white' 
                       : 'bg-white/20'
                     }
                   `}>
-                    <item.icon className="w-5 h-5" />
+                    <item.icon className="w-6 h-6 sm:w-7 sm:h-7" />
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2">
-                      <span className={`text-lg font-bold ${activeTab === item.id ? 'text-gray-900' : 'text-white'}`}>
+                      <span className={`text-lg sm:text-xl font-bold ${activeTab === item.id ? 'text-gray-900' : 'text-white'}`}>
                         {item.label}
                       </span>
                       {item.isAI && (
-                        <span className={`px-2 py-0.5 text-[10px] font-bold rounded-full ${
+                        <span className={`px-2 py-0.5 text-xs font-bold rounded-full ${
                           activeTab === item.id 
                             ? 'bg-indigo-100 text-indigo-600' 
                             : 'bg-white/20 text-white'
@@ -714,11 +714,11 @@ const Navbar = ({ activeTab, setActiveTab, wishlistCount, productCount = 0, onSc
                         </span>
                       )}
                     </div>
-                    <p className={`text-sm ${activeTab === item.id ? 'text-gray-500' : 'text-white/60'}`}>
+                    <p className={`text-sm sm:text-base ${activeTab === item.id ? 'text-gray-500' : 'text-white/60'}`}>
                       {item.desc}
                     </p>
                   </div>
-                  <ChevronRight className={`w-5 h-5 shrink-0 ${activeTab === item.id ? 'text-indigo-600' : 'text-white/40'}`} />
+                  <ChevronRight className={`w-5 h-5 sm:w-6 sm:h-6 shrink-0 ${activeTab === item.id ? 'text-indigo-600' : 'text-white/40'}`} />
                 </button>
               ))}
             </div>
@@ -917,34 +917,34 @@ const Hero = ({ onExplore }) => (
 );
 
 const Features = () => (
-    <div className="bg-white py-16 lg:py-20 xl:py-24 border-b border-gray-100">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8 xl:gap-10">
-                <div className="flex items-center p-6 lg:p-8 xl:p-10 bg-gray-50 rounded-2xl xl:rounded-3xl">
-                    <div className="w-14 h-14 lg:w-16 lg:h-16 xl:w-20 xl:h-20 bg-blue-100 text-blue-600 rounded-xl lg:rounded-2xl flex items-center justify-center mr-4 lg:mr-5 xl:mr-6 shrink-0">
-                        <Truck className="w-7 h-7 lg:w-8 lg:h-8 xl:w-10 xl:h-10" />
+    <div className="bg-white py-10 sm:py-14 lg:py-16 xl:py-20 border-b border-gray-100">
+        <div className="max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-10 xl:px-16">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6 lg:gap-8 xl:gap-10">
+                <div className="flex items-center p-5 sm:p-6 lg:p-8 xl:p-10 bg-gray-50 rounded-2xl xl:rounded-3xl">
+                    <div className="w-14 h-14 sm:w-16 sm:h-16 lg:w-20 lg:h-20 xl:w-24 xl:h-24 bg-blue-100 text-blue-600 rounded-xl lg:rounded-2xl flex items-center justify-center mr-4 lg:mr-6 xl:mr-8 shrink-0">
+                        <Truck className="w-7 h-7 sm:w-8 sm:h-8 lg:w-10 lg:h-10 xl:w-12 xl:h-12" />
                     </div>
                     <div>
-                        <h3 className="font-bold text-gray-900 text-lg lg:text-xl xl:text-2xl">Ingyenes Szállítás</h3>
-                        <p className="text-sm lg:text-base xl:text-lg text-gray-500 mt-1">Minden 50.000 Ft feletti rendelésnél.</p>
+                        <h3 className="font-bold text-gray-900 text-lg sm:text-xl lg:text-2xl xl:text-3xl">Ingyenes Szállítás</h3>
+                        <p className="text-sm sm:text-base lg:text-lg xl:text-xl text-gray-500 mt-1 lg:mt-2">Minden 50.000 Ft feletti rendelésnél.</p>
                     </div>
                 </div>
-                <div className="flex items-center p-6 lg:p-8 xl:p-10 bg-gray-50 rounded-2xl xl:rounded-3xl">
-                    <div className="w-14 h-14 lg:w-16 lg:h-16 xl:w-20 xl:h-20 bg-green-100 text-green-600 rounded-xl lg:rounded-2xl flex items-center justify-center mr-4 lg:mr-5 xl:mr-6 shrink-0">
-                        <ShieldCheck className="w-7 h-7 lg:w-8 lg:h-8 xl:w-10 xl:h-10" />
+                <div className="flex items-center p-5 sm:p-6 lg:p-8 xl:p-10 bg-gray-50 rounded-2xl xl:rounded-3xl">
+                    <div className="w-14 h-14 sm:w-16 sm:h-16 lg:w-20 lg:h-20 xl:w-24 xl:h-24 bg-green-100 text-green-600 rounded-xl lg:rounded-2xl flex items-center justify-center mr-4 lg:mr-6 xl:mr-8 shrink-0">
+                        <ShieldCheck className="w-7 h-7 sm:w-8 sm:h-8 lg:w-10 lg:h-10 xl:w-12 xl:h-12" />
                     </div>
                     <div>
-                        <h3 className="font-bold text-gray-900 text-lg lg:text-xl xl:text-2xl">Garancia</h3>
-                        <p className="text-sm lg:text-base xl:text-lg text-gray-500 mt-1">Minden bútorra teljes körű garancia.</p>
+                        <h3 className="font-bold text-gray-900 text-lg sm:text-xl lg:text-2xl xl:text-3xl">Garancia</h3>
+                        <p className="text-sm sm:text-base lg:text-lg xl:text-xl text-gray-500 mt-1 lg:mt-2">Minden bútorra teljes körű garancia.</p>
                     </div>
                 </div>
-                <div className="flex items-center p-6 lg:p-8 xl:p-10 bg-gray-50 rounded-2xl xl:rounded-3xl">
-                    <div className="w-14 h-14 lg:w-16 lg:h-16 xl:w-20 xl:h-20 bg-purple-100 text-purple-600 rounded-xl lg:rounded-2xl flex items-center justify-center mr-4 lg:mr-5 xl:mr-6 shrink-0">
-                        <Phone className="w-7 h-7 lg:w-8 lg:h-8 xl:w-10 xl:h-10" />
+                <div className="flex items-center p-5 sm:p-6 lg:p-8 xl:p-10 bg-gray-50 rounded-2xl xl:rounded-3xl">
+                    <div className="w-14 h-14 sm:w-16 sm:h-16 lg:w-20 lg:h-20 xl:w-24 xl:h-24 bg-purple-100 text-purple-600 rounded-xl lg:rounded-2xl flex items-center justify-center mr-4 lg:mr-6 xl:mr-8 shrink-0">
+                        <Phone className="w-7 h-7 sm:w-8 sm:h-8 lg:w-10 lg:h-10 xl:w-12 xl:h-12" />
                     </div>
                     <div>
-                        <h3 className="font-bold text-gray-900 text-lg lg:text-xl xl:text-2xl">Ügyfélszolgálat</h3>
-                        <p className="text-sm lg:text-base xl:text-lg text-gray-500 mt-1">Szakértő segítség minden nap.</p>
+                        <h3 className="font-bold text-gray-900 text-lg sm:text-xl lg:text-2xl xl:text-3xl">Ügyfélszolgálat</h3>
+                        <p className="text-sm sm:text-base lg:text-lg xl:text-xl text-gray-500 mt-1 lg:mt-2">Szakértő segítség minden nap.</p>
                     </div>
                 </div>
             </div>
@@ -953,27 +953,27 @@ const Features = () => (
 );
 
 const Testimonials = () => (
-    <div className="bg-gray-50 py-16 lg:py-20 xl:py-24 mb-16">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-            <h2 className="text-3xl lg:text-4xl xl:text-5xl font-bold text-gray-900 mb-12 lg:mb-16">Mit mondanak rólunk?</h2>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8 xl:gap-10">
+    <div className="bg-gray-50 py-10 sm:py-14 lg:py-16 xl:py-20 mb-10 sm:mb-12 lg:mb-16">
+        <div className="max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-10 xl:px-16 text-center">
+            <h2 className="text-2xl sm:text-3xl lg:text-4xl xl:text-5xl 2xl:text-6xl font-bold text-gray-900 mb-8 sm:mb-10 lg:mb-14">Mit mondanak rólunk?</h2>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6 lg:gap-8 xl:gap-10">
                 {[
                     { name: "Kovács Anna", text: "Az AI segítségével találtam meg a kanapét, ami pont illik a függönyhöz.", role: "Lakberendező" },
                     { name: "Nagy Péter", text: "Gyors szállítás, és a minőség is kiváló. A képkereső funkció nagyon hasznos.", role: "Vásárló" },
                     { name: "Szabó Éva", text: "Végre egy webshop, ahol nem kell órákig görgetni. Az asszisztens azonnal segített.", role: "Vásárló" }
                 ].map((t, i) => (
-                    <div key={i} className="bg-white p-8 lg:p-10 xl:p-12 rounded-2xl xl:rounded-3xl shadow-sm hover:shadow-lg transition-shadow text-left">
+                    <div key={i} className="bg-white p-6 sm:p-8 lg:p-10 xl:p-12 rounded-2xl xl:rounded-3xl shadow-sm hover:shadow-lg transition-shadow text-left">
                         <div className="flex text-yellow-400 mb-4 lg:mb-5">
-                            {[...Array(5)].map((_, i) => <Star key={i} className="w-5 h-5 lg:w-6 lg:h-6 fill-current" />)}
+                            {[...Array(5)].map((_, i) => <Star key={i} className="w-5 h-5 sm:w-6 sm:h-6 lg:w-7 lg:h-7 xl:w-8 xl:h-8 fill-current" />)}
                         </div>
-                        <p className="text-gray-600 mb-6 lg:mb-8 italic text-base lg:text-lg xl:text-xl leading-relaxed">"{t.text}"</p>
+                        <p className="text-gray-600 mb-5 sm:mb-6 lg:mb-8 italic text-base sm:text-lg lg:text-xl xl:text-2xl leading-relaxed">"{t.text}"</p>
                         <div className="flex items-center">
-                            <div className="w-12 h-12 lg:w-14 lg:h-14 xl:w-16 xl:h-16 bg-indigo-100 rounded-full flex items-center justify-center font-bold text-indigo-600 text-lg lg:text-xl xl:text-2xl mr-4">
+                            <div className="w-12 h-12 sm:w-14 sm:h-14 lg:w-16 lg:h-16 xl:w-20 xl:h-20 bg-indigo-100 rounded-full flex items-center justify-center font-bold text-indigo-600 text-lg sm:text-xl lg:text-2xl xl:text-3xl mr-4 lg:mr-5">
                                 {t.name.charAt(0)}
                             </div>
                             <div>
-                                <h4 className="font-bold text-gray-900 text-base lg:text-lg xl:text-xl">{t.name}</h4>
-                                <p className="text-sm lg:text-base text-gray-500">{t.role}</p>
+                                <h4 className="font-bold text-gray-900 text-base sm:text-lg lg:text-xl xl:text-2xl">{t.name}</h4>
+                                <p className="text-sm sm:text-base lg:text-lg xl:text-xl text-gray-500">{t.role}</p>
                             </div>
                         </div>
                     </div>
