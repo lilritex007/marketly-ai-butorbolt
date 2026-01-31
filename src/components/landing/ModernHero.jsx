@@ -1,10 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { 
   Sparkles, Camera, Move3d, MessageCircle, ArrowRight, Check, 
-  TrendingUp, Users, ShoppingBag, Star, Zap, Eye, Heart,
-  Package, Shield, Clock, Award, ChevronRight, Play, Target, Gift, Bot
+  Users, Star, Zap, Package, ChevronRight, Bot
 } from 'lucide-react';
-import { DemoFlow } from '../ui/Icons';
 
 /**
  * Modern Hero Section with 3D effect and animations
@@ -149,131 +147,162 @@ export const ModernHero = ({ onExplore, onTryAI }) => {
 };
 
 /**
- * AI Features Interactive Showcase
+ * AI Features - Ultra-compact, professional showcase
+ * Smart hover effects and elegant design
  */
 export const AIFeaturesShowcase = ({ onFeatureClick }) => {
   const [activeFeature, setActiveFeature] = useState(0);
+  const [isHovering, setIsHovering] = useState(false);
 
   const features = [
     {
       icon: Camera,
-      title: 'AI Képfelismerés',
-      description: 'Fotózd le a bútort és azonnal találd meg a hasonló termékeket',
+      title: 'Képfelismerés',
+      shortDesc: 'Fotózz és keress',
       color: 'from-blue-500 to-primary-500',
-      demoSteps: [
-        { icon: Camera, color: 'text-blue-600', bg: 'bg-blue-100' },
-        { icon: Bot, color: 'text-primary-500', bg: 'bg-primary-100' },
-        { icon: Sparkles, color: 'text-secondary-700', bg: 'bg-secondary-100' }
-      ],
-      stats: '99% pontosság'
+      bgColor: 'bg-blue-50',
+      stat: '99%',
+      statLabel: 'pontosság'
     },
     {
       icon: MessageCircle,
-      title: 'Intelligens Asszisztens',
-      description: 'Beszélgess szakértőnkkel és kérj személyre szabott ajánlatokat',
-      color: 'from-secondary-500 to-pink-600',
-      demoSteps: [
-        { icon: MessageCircle, color: 'text-secondary-700', bg: 'bg-secondary-100' },
-        { icon: Target, color: 'text-pink-600', bg: 'bg-pink-100' },
-        { icon: Gift, color: 'text-rose-600', bg: 'bg-rose-100' }
-      ],
-      stats: '24/7 elérhető'
+      title: 'AI Chat',
+      shortDesc: 'Személyes tanácsadó',
+      color: 'from-secondary-600 to-secondary-700',
+      bgColor: 'bg-secondary-50',
+      stat: '24/7',
+      statLabel: 'elérhető'
     },
     {
       icon: Move3d,
-      title: 'Virtuális Tervező',
-      description: 'Helyezd el a bútorokat otthonodban virtuálisan, látogatás élőben',
-      color: 'from-green-500 to-emerald-600',
-      demoSteps: [
-        { icon: Camera, color: 'text-green-600', bg: 'bg-green-100' },
-        { icon: Move3d, color: 'text-emerald-600', bg: 'bg-emerald-100' },
-        { icon: Eye, color: 'text-teal-600', bg: 'bg-teal-100' }
-      ],
-      stats: 'AR támogatás'
+      title: 'Szobatervező',
+      shortDesc: 'Virtuális elhelyezés',
+      color: 'from-emerald-500 to-green-600',
+      bgColor: 'bg-emerald-50',
+      stat: 'AR',
+      statLabel: 'támogatás'
     }
   ];
 
   useEffect(() => {
+    if (isHovering) return;
     const interval = setInterval(() => {
       setActiveFeature((prev) => (prev + 1) % features.length);
-    }, 5000);
+    }, 4000);
     return () => clearInterval(interval);
-  }, []);
+  }, [isHovering]);
 
   return (
-    <div className="py-10 sm:py-12 lg:py-14 bg-gradient-to-b from-white to-gray-50">
-      <div className="w-full max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-10">
-        <div className="text-center mb-8 sm:mb-10 lg:mb-12">
-          <div className="inline-flex items-center px-4 py-2 sm:px-5 sm:py-2.5 bg-primary-100 rounded-full mb-5 lg:mb-6">
-            <Sparkles className="w-5 h-5 sm:w-5 sm:h-5 text-primary-500 mr-2" />
-            <span className="text-base sm:text-lg font-bold text-primary-500">AI Powered Features</span>
+    <div className="py-6 sm:py-8 lg:py-10 bg-gradient-to-b from-gray-50/50 to-white">
+      <div className="w-full max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Compact Header */}
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-5 sm:mb-6">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 sm:w-11 sm:h-11 bg-gradient-to-br from-primary-500 to-secondary-700 rounded-xl flex items-center justify-center shadow-lg">
+              <Sparkles className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
+            </div>
+            <div>
+              <h2 className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-900">
+                AI a <span className="bg-gradient-to-r from-primary-500 to-secondary-700 bg-clip-text text-transparent">szolgálatodban</span>
+              </h2>
+              <p className="text-xs sm:text-sm text-gray-500">Okos funkciók a tökéletes választáshoz</p>
+            </div>
           </div>
-          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-gray-900 mb-4 lg:mb-5">
-            Mesterséges intelligencia a <span className="bg-gradient-to-r from-primary-500 to-secondary-700 bg-clip-text text-transparent">szolgálatodban</span>
-          </h2>
-          <p className="text-base sm:text-lg lg:text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
-            Használd ki a legmodernebb AI technológiát a tökéletes bútor megtalálásához
-          </p>
+          
+          {/* Progress dots - desktop only */}
+          <div className="hidden sm:flex items-center gap-1.5">
+            {features.map((_, idx) => (
+              <button
+                key={idx}
+                onClick={() => setActiveFeature(idx)}
+                className={`h-1.5 rounded-full transition-all duration-300 ${
+                  activeFeature === idx ? 'w-6 bg-primary-500' : 'w-1.5 bg-gray-300 hover:bg-gray-400'
+                }`}
+              />
+            ))}
+          </div>
         </div>
 
-        <div className="grid md:grid-cols-3 gap-4 sm:gap-5 lg:gap-6">
+        {/* Feature Cards - Horizontal scroll on mobile, grid on desktop */}
+        <div 
+          className="flex gap-3 sm:grid sm:grid-cols-3 sm:gap-4 overflow-x-auto pb-2 sm:pb-0 -mx-4 px-4 sm:mx-0 sm:px-0 snap-x snap-mandatory sm:snap-none scrollbar-hide"
+          onMouseEnter={() => setIsHovering(true)}
+          onMouseLeave={() => setIsHovering(false)}
+        >
           {features.map((feature, idx) => (
-            <div
+            <button
               key={idx}
               onClick={() => {
                 setActiveFeature(idx);
                 onFeatureClick?.(feature);
               }}
-              className={`relative group cursor-pointer transition-all duration-500 ${
-                activeFeature === idx ? 'scale-[1.02]' : 'scale-100 opacity-75 hover:opacity-100'
-              }`}
+              className={`
+                relative flex-shrink-0 w-[280px] sm:w-auto snap-center
+                group p-4 sm:p-5 rounded-xl sm:rounded-2xl text-left
+                transition-all duration-300 border-2
+                ${activeFeature === idx 
+                  ? `${feature.bgColor} border-transparent shadow-lg` 
+                  : 'bg-white border-gray-100 hover:border-gray-200 hover:shadow-md'
+                }
+              `}
             >
-              <div className={`absolute inset-0 bg-gradient-to-br ${feature.color} rounded-2xl blur-xl opacity-50 group-hover:opacity-75 transition-opacity`} />
-              
-              <div className="relative bg-white rounded-xl lg:rounded-2xl p-5 sm:p-6 lg:p-7 shadow-xl border border-gray-100 hover:shadow-2xl transition-all">
-                {/* Icon */}
-                <div className={`w-14 h-14 sm:w-16 sm:h-16 lg:w-18 lg:h-18 bg-gradient-to-br ${feature.color} rounded-xl lg:rounded-2xl flex items-center justify-center mb-5 transform group-hover:rotate-6 transition-transform`}>
-                  <feature.icon className="w-7 h-7 sm:w-8 sm:h-8 lg:w-9 lg:h-9 text-white" />
-                </div>
-
-                {/* Title */}
-                <h3 className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-900 mb-3">{feature.title}</h3>
-
-                {/* Description */}
-                <p className="text-base sm:text-base lg:text-lg text-gray-600 mb-5 leading-relaxed">{feature.description}</p>
-
-                {/* Demo Flow */}
-                <div className="bg-gray-50 rounded-xl p-4 sm:p-5 mb-5">
-                  <DemoFlow steps={feature.demoSteps} />
-                </div>
-
-                {/* Stats */}
-                <div className="flex items-center justify-between">
-                  <span className="text-base sm:text-lg font-bold text-primary-500">{feature.stats}</span>
-                  <ArrowRight className={`w-5 h-5 sm:w-5 sm:h-5 text-gray-400 group-hover:text-primary-500 group-hover:translate-x-1 transition-all`} />
-                </div>
-
-                {/* Active Indicator */}
-                {activeFeature === idx && (
-                  <div className="absolute -top-2 -right-2">
-                    <div className="w-7 h-7 lg:w-8 lg:h-8 bg-green-500 rounded-full border-2 border-white animate-pulse flex items-center justify-center">
-                      <Check className="w-4 h-4 lg:w-4 lg:h-4 text-white" />
-                    </div>
+              {/* Top Row: Icon + Title + Stat */}
+              <div className="flex items-start justify-between gap-3 mb-3">
+                <div className="flex items-center gap-3">
+                  <div className={`
+                    w-10 h-10 sm:w-11 sm:h-11 rounded-xl flex items-center justify-center shrink-0
+                    transition-all duration-300
+                    ${activeFeature === idx 
+                      ? `bg-gradient-to-br ${feature.color} shadow-md` 
+                      : 'bg-gray-100 group-hover:bg-gray-200'
+                    }
+                  `}>
+                    <feature.icon className={`w-5 h-5 sm:w-6 sm:h-6 transition-colors ${
+                      activeFeature === idx ? 'text-white' : 'text-gray-600'
+                    }`} />
                   </div>
-                )}
+                  <div>
+                    <h3 className="font-bold text-gray-900 text-sm sm:text-base">{feature.title}</h3>
+                    <p className="text-xs text-gray-500">{feature.shortDesc}</p>
+                  </div>
+                </div>
+                
+                {/* Stat Badge */}
+                <div className={`
+                  text-right shrink-0 px-2 py-1 rounded-lg
+                  ${activeFeature === idx ? 'bg-white/80' : 'bg-gray-50'}
+                `}>
+                  <div className="text-sm sm:text-base font-bold text-gray-900">{feature.stat}</div>
+                  <div className="text-[10px] text-gray-500">{feature.statLabel}</div>
+                </div>
               </div>
-            </div>
+
+              {/* Bottom: CTA hint */}
+              <div className={`
+                flex items-center gap-1.5 text-xs font-medium transition-all
+                ${activeFeature === idx ? 'text-primary-600' : 'text-gray-400 group-hover:text-gray-600'}
+              `}>
+                <span>Kipróbálom</span>
+                <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
+              </div>
+
+              {/* Active indicator line */}
+              <div className={`
+                absolute bottom-0 left-4 right-4 h-0.5 rounded-full transition-all duration-300
+                ${activeFeature === idx ? `bg-gradient-to-r ${feature.color}` : 'bg-transparent'}
+              `} />
+            </button>
           ))}
         </div>
 
-        {/* Progress Indicators */}
-        <div className="flex justify-center gap-2.5 mt-10 lg:mt-12">
+        {/* Mobile progress dots */}
+        <div className="flex sm:hidden justify-center gap-1.5 mt-3">
           {features.map((_, idx) => (
             <button
               key={idx}
               onClick={() => setActiveFeature(idx)}
-              className={`h-2.5 rounded-full transition-all ${
-                activeFeature === idx ? 'w-10 sm:w-12 bg-primary-500' : 'w-2.5 bg-gray-300'
+              className={`h-1.5 rounded-full transition-all duration-300 ${
+                activeFeature === idx ? 'w-5 bg-primary-500' : 'w-1.5 bg-gray-300'
               }`}
             />
           ))}
