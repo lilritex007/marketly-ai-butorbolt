@@ -347,55 +347,7 @@ const Navbar = ({ activeTab, setActiveTab, wishlistCount, productCount = 0, onSc
 
   return (
     <>
-      {/* Animated Announcement Bar - UNIFIED sizing */}
-      <div className="bg-gradient-to-r from-primary-500 via-secondary-700 to-secondary-600 text-white py-2.5 sm:py-3 lg:py-4 px-3 sm:px-4 lg:px-6 text-center relative overflow-hidden">
-        <div className="absolute inset-0 opacity-20" style={{backgroundImage: 'radial-gradient(circle, rgba(255,255,255,0.3) 1px, transparent 1px)', backgroundSize: '16px 16px'}} />
-        
-        {/* Animated message */}
-        <div className="relative flex items-center justify-center gap-2 sm:gap-3 lg:gap-4">
-          <div 
-            key={announcementIndex}
-            className="flex items-center gap-2 sm:gap-3 lg:gap-4 animate-fade-in"
-          >
-            <currentAnnouncement.icon className="w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6 shrink-0" />
-            <span className="text-sm sm:text-base lg:text-lg xl:text-xl font-medium">
-              {currentAnnouncement.text.split(currentAnnouncement.highlight).map((part, i, arr) => (
-                <React.Fragment key={i}>
-                  {part}
-                  {i < arr.length - 1 && (
-                    <span className="font-bold bg-white/20 px-1.5 py-0.5 lg:px-2 lg:py-1 rounded mx-1 text-sm sm:text-base lg:text-lg xl:text-xl">
-                      {currentAnnouncement.highlight}
-                    </span>
-                  )}
-                </React.Fragment>
-              ))}
-            </span>
-          </div>
-          
-          {/* Progress dots */}
-          <div className="hidden sm:flex items-center gap-1 lg:gap-1.5 ml-4 lg:ml-6">
-            {ANNOUNCEMENT_MESSAGES.map((_, i) => (
-              <div 
-                key={i} 
-                className={`w-1.5 h-1.5 lg:w-2 lg:h-2 rounded-full transition-all duration-300 ${
-                  i === announcementIndex ? 'bg-white w-4 lg:w-6' : 'bg-white/40'
-                }`}
-              />
-            ))}
-          </div>
-        </div>
-      </div>
-
-      {/* Returning User Greeting */}
-      {isReturningUser && (
-        <div className="bg-gradient-to-r from-green-50 to-emerald-50 border-b border-green-100 py-2 px-3 text-center">
-          <span className="text-sm sm:text-base text-green-800 font-medium">
-            👋 Üdv újra{userName ? `, ${userName}` : ''}! Örülünk, hogy visszatértél!
-          </span>
-        </div>
-      )}
-
-      {/* Main navbar - UNIFIED sizing */}
+      {/* 1. MAIN NAVBAR - Logo at the very top */}
       <nav 
         id="mkt-butorbolt-navbar" 
         className={`
@@ -581,6 +533,65 @@ const Navbar = ({ activeTab, setActiveTab, wishlistCount, productCount = 0, onSc
           </div>
         </div>
       </nav>
+
+      {/* 2. ANNOUNCEMENT BAR - Below navbar */}
+      <div className="bg-gradient-to-r from-primary-500 via-secondary-700 to-secondary-600 text-white py-2 sm:py-2.5 lg:py-3 px-3 sm:px-4 lg:px-6 text-center relative overflow-hidden">
+        <div className="absolute inset-0 opacity-20" style={{backgroundImage: 'radial-gradient(circle, rgba(255,255,255,0.3) 1px, transparent 1px)', backgroundSize: '16px 16px'}} />
+        
+        <div className="relative flex items-center justify-center gap-2 sm:gap-3">
+          <div 
+            key={announcementIndex}
+            className="flex items-center gap-2 sm:gap-3 animate-fade-in"
+          >
+            <currentAnnouncement.icon className="w-4 h-4 sm:w-5 sm:h-5 shrink-0" />
+            <span className="text-sm sm:text-base lg:text-lg font-medium">
+              {currentAnnouncement.text.split(currentAnnouncement.highlight).map((part, i, arr) => (
+                <React.Fragment key={i}>
+                  {part}
+                  {i < arr.length - 1 && (
+                    <span className="font-bold bg-white/20 px-1.5 py-0.5 rounded mx-1">
+                      {currentAnnouncement.highlight}
+                    </span>
+                  )}
+                </React.Fragment>
+              ))}
+            </span>
+          </div>
+          
+          <div className="hidden sm:flex items-center gap-1 ml-3">
+            {ANNOUNCEMENT_MESSAGES.map((_, i) => (
+              <div 
+                key={i} 
+                className={`w-1.5 h-1.5 rounded-full transition-all duration-300 ${
+                  i === announcementIndex ? 'bg-white w-4' : 'bg-white/40'
+                }`}
+              />
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* 3. RETURNING USER GREETING - Elegant inline card */}
+      {isReturningUser && (
+        <div className="w-full max-w-[2000px] mx-auto px-4 sm:px-6 lg:px-10 pt-4 sm:pt-5">
+          <div className="max-w-sm">
+            <div className="bg-gradient-to-r from-emerald-50 to-green-50 border border-emerald-200/60 rounded-xl sm:rounded-2xl p-3 sm:p-4 flex items-center gap-3 sm:gap-4 shadow-sm">
+              <div className="w-10 h-10 sm:w-11 sm:h-11 bg-gradient-to-br from-emerald-400 to-green-500 rounded-xl flex items-center justify-center text-white text-base sm:text-lg shrink-0 shadow-md">
+                👋
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm sm:text-base font-bold text-gray-900">
+                  Üdv újra{userName ? `, ${userName}` : ''}!
+                </p>
+                <p className="text-xs sm:text-sm text-emerald-700/80">
+                  Örülünk, hogy visszatértél
+                </p>
+              </div>
+              <Sparkles className="w-5 h-5 text-emerald-500/60 shrink-0" />
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* ENHANCED Mobile Menu - Slide-in with swipe gesture */}
       {mobileMenuOpen && (
@@ -1638,7 +1649,9 @@ const App = () => {
 
   return (
     <ToastProvider>
-    <div id="mkt-butorbolt-app" className="min-h-screen bg-white font-sans text-gray-900">
+    <div id="mkt-butorbolt-app" className="min-h-screen bg-gradient-to-br from-gray-100 via-gray-50 to-gray-100 font-sans text-gray-900 p-2 sm:p-3 lg:p-4 xl:p-5">
+      {/* Inner container with elegant rounded corners */}
+      <div className="bg-white rounded-3xl sm:rounded-[2rem] lg:rounded-[2.5rem] overflow-hidden shadow-2xl shadow-gray-300/50 border border-gray-200/50">
       {/* Scroll Progress Bar */}
       <ScrollProgress />
       
@@ -2197,6 +2210,7 @@ const App = () => {
         recentlyAdded={recentlyAddedToCart}
         suggestedProducts={products.slice(0, 3)}
       />
+      </div>{/* End inner rounded container */}
     </div>
     </ToastProvider>
   );
