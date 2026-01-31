@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { Zap, Clock, ArrowRight, X, Flame, Percent } from 'lucide-react';
+import { Zap, Clock, ArrowRight, X, Flame } from 'lucide-react';
 
 /**
- * FlashSaleBanner - Ultra-compact, elegant countdown banner
- * Professional UX with smooth animations
+ * FlashSaleBanner - Impactful, urgent sale banner
+ * Clear message: SALE + TIME + ACTION
  */
 const FlashSaleBanner = ({ 
   endTime,
@@ -49,74 +49,133 @@ const FlashSaleBanner = ({
 
   const pad = (n) => String(n).padStart(2, '0');
 
-  // Compact time display
-  const TimeUnit = ({ value, label }) => (
-    <div className="flex items-center">
-      <span className="bg-white/20 backdrop-blur-sm text-white font-bold tabular-nums px-1.5 py-0.5 rounded text-sm sm:text-base lg:text-lg">
-        {pad(value)}
-      </span>
-      <span className="text-white/60 text-[10px] ml-0.5 hidden sm:inline">{label}</span>
-    </div>
-  );
-
   return (
-    <div className="relative bg-gradient-to-r from-red-500 via-orange-500 to-amber-500 overflow-hidden">
-      {/* Subtle animated background */}
-      <div className="absolute inset-0 opacity-30">
-        <div className="absolute inset-0" style={{
-          backgroundImage: 'repeating-linear-gradient(90deg, transparent, transparent 10px, rgba(255,255,255,0.05) 10px, rgba(255,255,255,0.05) 20px)'
-        }} />
+    <div className="relative bg-gradient-to-r from-red-600 via-orange-500 to-amber-500 overflow-hidden">
+      {/* Animated shine effect */}
+      <div className="absolute inset-0 overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -skew-x-12 animate-[shimmer_3s_infinite]" 
+          style={{ animation: 'shimmer 3s infinite', transform: 'translateX(-100%)' }} />
       </div>
 
-      {/* Content - Ultra compact single line */}
-      <div className="relative flex items-center justify-between gap-2 sm:gap-4 px-3 sm:px-4 lg:px-6 py-2 sm:py-2.5">
-        {/* Left: Icon + Title */}
-        <div className="flex items-center gap-2 min-w-0">
-          <div className="w-7 h-7 sm:w-8 sm:h-8 bg-white/20 backdrop-blur-sm rounded-lg flex items-center justify-center shrink-0">
-            <Zap className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
+      {/* Mobile Layout - Stacked, centered */}
+      <div className="sm:hidden relative px-3 py-3">
+        {/* Top row: Icon + Title + Dismiss */}
+        <div className="flex items-center justify-between mb-2">
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 bg-white/20 backdrop-blur-sm rounded-lg flex items-center justify-center">
+              <Flame className="w-5 h-5 text-white animate-pulse" />
+            </div>
+            <div>
+              <div className="flex items-center gap-1.5">
+                <span className="font-black text-white text-base">{title}</span>
+                <span className="px-1.5 py-0.5 bg-yellow-400 text-yellow-900 text-[10px] font-black rounded animate-pulse">
+                  -50%
+                </span>
+              </div>
+            </div>
           </div>
-          <div className="min-w-0">
-            <div className="flex items-center gap-1.5">
-              <span className="font-bold text-white text-sm sm:text-base truncate">{title}</span>
-              <span className="hidden sm:inline-flex items-center px-1.5 py-0.5 bg-white/20 rounded text-[10px] font-bold text-white uppercase tracking-wider animate-pulse">
-                Live
+          <button
+            onClick={handleDismiss}
+            className="p-1.5 text-white/60 hover:text-white rounded-full hover:bg-white/10"
+          >
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+
+        {/* Center: Countdown - Big and clear */}
+        <div className="flex items-center justify-center gap-1 mb-2.5">
+          <Clock className="w-4 h-4 text-white/80" />
+          <span className="text-white/80 text-xs font-medium mr-1">Vége:</span>
+          {[
+            { value: timeLeft.hours, label: 'ó' },
+            { value: timeLeft.minutes, label: 'p' },
+            { value: timeLeft.seconds, label: 'mp' }
+          ].map((unit, idx) => (
+            <React.Fragment key={idx}>
+              <div className="bg-black/30 backdrop-blur-sm rounded px-2 py-1">
+                <span className="text-white font-black text-lg tabular-nums">{pad(unit.value)}</span>
+                <span className="text-white/70 text-[10px] ml-0.5">{unit.label}</span>
+              </div>
+              {idx < 2 && <span className="text-white/40 font-bold">:</span>}
+            </React.Fragment>
+          ))}
+        </div>
+
+        {/* CTA Button - Full width */}
+        <button
+          onClick={onViewSale}
+          className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-white text-red-600 font-bold text-sm rounded-lg shadow-lg active:scale-[0.98] transition-transform"
+        >
+          <Zap className="w-4 h-4" />
+          Megnézem az akciókat
+          <ArrowRight className="w-4 h-4" />
+        </button>
+      </div>
+
+      {/* Desktop Layout - Single row, all visible */}
+      <div className="hidden sm:flex relative items-center justify-between gap-4 lg:gap-6 px-4 lg:px-8 py-2.5 lg:py-3 max-w-[1800px] mx-auto">
+        {/* Left: Icon + Title + Badge */}
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 lg:w-11 lg:h-11 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center">
+            <Flame className="w-6 h-6 lg:w-7 lg:h-7 text-white animate-pulse" />
+          </div>
+          <div>
+            <div className="flex items-center gap-2">
+              <span className="font-black text-white text-lg lg:text-xl">{title}</span>
+              <span className="px-2 py-0.5 bg-yellow-400 text-yellow-900 text-xs font-black rounded-md">
+                AKÁR -50%
               </span>
             </div>
-            <p className="text-white/80 text-[10px] sm:text-xs truncate hidden sm:block">{subtitle}</p>
+            <p className="text-white/80 text-xs lg:text-sm">{subtitle}</p>
           </div>
         </div>
 
         {/* Center: Countdown */}
-        <div className="flex items-center gap-1 shrink-0">
-          <Clock className="w-3.5 h-3.5 text-white/70 hidden sm:block" />
-          <div className="flex items-center gap-0.5 sm:gap-1">
-            <TimeUnit value={timeLeft.hours} label="ó" />
-            <span className="text-white/50 font-bold">:</span>
-            <TimeUnit value={timeLeft.minutes} label="p" />
-            <span className="text-white/50 font-bold">:</span>
-            <TimeUnit value={timeLeft.seconds} label="mp" />
+        <div className="flex items-center gap-2">
+          <Clock className="w-5 h-5 text-white/80" />
+          <span className="text-white/90 text-sm font-medium">Lejár:</span>
+          <div className="flex items-center gap-1">
+            {[
+              { value: timeLeft.hours, label: 'óra' },
+              { value: timeLeft.minutes, label: 'perc' },
+              { value: timeLeft.seconds, label: 'mp' }
+            ].map((unit, idx) => (
+              <React.Fragment key={idx}>
+                <div className="bg-black/30 backdrop-blur-sm rounded-lg px-2.5 lg:px-3 py-1.5">
+                  <span className="text-white font-black text-xl lg:text-2xl tabular-nums">{pad(unit.value)}</span>
+                  <span className="text-white/70 text-[10px] lg:text-xs ml-1">{unit.label}</span>
+                </div>
+                {idx < 2 && <span className="text-white/40 font-bold text-xl mx-0.5">:</span>}
+              </React.Fragment>
+            ))}
           </div>
         </div>
 
-        {/* Right: CTA */}
-        <button
-          onClick={onViewSale}
-          className="flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-4 py-1.5 sm:py-2 bg-white text-red-600 font-bold text-xs sm:text-sm rounded-lg hover:bg-red-50 transition-all shadow-md hover:shadow-lg shrink-0"
-        >
-          <Percent className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-          <span className="hidden sm:inline">Akciók</span>
-          <ArrowRight className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-        </button>
-
-        {/* Dismiss */}
-        <button
-          onClick={handleDismiss}
-          className="p-1 text-white/50 hover:text-white hover:bg-white/10 rounded transition-colors shrink-0"
-          aria-label="Bezárás"
-        >
-          <X className="w-4 h-4" />
-        </button>
+        {/* Right: CTA + Dismiss */}
+        <div className="flex items-center gap-3">
+          <button
+            onClick={onViewSale}
+            className="flex items-center gap-2 px-5 lg:px-6 py-2.5 bg-white text-red-600 font-bold text-sm lg:text-base rounded-xl shadow-lg hover:shadow-xl hover:scale-[1.02] transition-all"
+          >
+            <Zap className="w-4 h-4 lg:w-5 lg:h-5" />
+            Megnézem
+            <ArrowRight className="w-4 h-4 lg:w-5 lg:h-5" />
+          </button>
+          <button
+            onClick={handleDismiss}
+            className="p-2 text-white/60 hover:text-white rounded-full hover:bg-white/10 transition-colors"
+          >
+            <X className="w-5 h-5" />
+          </button>
+        </div>
       </div>
+
+      <style>{`
+        @keyframes shimmer {
+          0% { transform: translateX(-100%) skewX(-12deg); }
+          100% { transform: translateX(200%) skewX(-12deg); }
+        }
+      `}</style>
     </div>
   );
 };

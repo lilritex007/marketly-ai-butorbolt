@@ -573,15 +573,15 @@ const Navbar = ({ activeTab, setActiveTab, wishlistCount, productCount = 0, onSc
 
       {/* 3. RETURNING USER GREETING - Elegant single-row inline card */}
       {isReturningUser && (
-        <div className="w-full px-4 sm:px-6 lg:px-10 pt-4 sm:pt-5">
-          <div className="inline-flex items-center gap-3 bg-gradient-to-r from-emerald-50 to-green-50 border border-emerald-200/60 rounded-full py-2 px-4 shadow-sm">
-            <div className="w-8 h-8 bg-gradient-to-br from-emerald-400 to-green-500 rounded-full flex items-center justify-center text-white text-sm shrink-0">
+        <div className="w-full flex justify-center px-4 sm:px-6 lg:px-10 pt-4 sm:pt-5">
+          <div className="inline-flex items-center justify-center gap-2 sm:gap-3 bg-gradient-to-r from-emerald-50 to-green-50 border border-emerald-200/60 rounded-full py-2 px-4 sm:px-6 lg:px-8 shadow-sm w-auto lg:min-w-[400px]">
+            <div className="w-7 h-7 sm:w-8 sm:h-8 bg-gradient-to-br from-emerald-400 to-green-500 rounded-full flex items-center justify-center text-white text-sm shrink-0">
               👋
             </div>
             <p className="text-sm font-bold text-gray-900 whitespace-nowrap">
               Üdv újra{userName ? `, ${userName}` : ''}!
             </p>
-            <span className="text-xs text-emerald-600 whitespace-nowrap">Örülünk, hogy visszatértél</span>
+            <span className="text-xs text-emerald-600 whitespace-nowrap hidden sm:inline">Örülünk, hogy visszatértél</span>
             <Sparkles className="w-4 h-4 text-emerald-500/60 shrink-0" />
           </div>
         </div>
