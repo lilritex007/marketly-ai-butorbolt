@@ -265,7 +265,7 @@ const PhotoReviews = ({ productId, reviews = [] }) => {
       {/* Photo Lightbox */}
       {selectedPhoto && (
         <div 
-          className="fixed inset-0 lg:top-[60px] bg-black/90 z-50 flex items-center justify-center p-4"
+          className="fixed inset-0 lg:top-[60px] bg-black/90 z-[9999] flex items-center justify-center p-4"
           onClick={() => setSelectedPhoto(null)}
         >
           <button 

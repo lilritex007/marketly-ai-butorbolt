@@ -226,7 +226,7 @@ const GiftRegistry = ({
 
       {/* Share Modal */}
       {showShareModal && (
-        <div className="fixed inset-0 lg:top-[60px] bg-black/50 z-50 flex items-center justify-center p-4" onClick={() => setShowShareModal(false)}>
+        <div className="fixed inset-0 lg:top-[60px] bg-black/50 z-[9999] flex items-center justify-center p-4" onClick={() => setShowShareModal(false)}>
           <div className="bg-white rounded-2xl max-w-sm w-full p-5" onClick={e => e.stopPropagation()}>
             <div className="flex items-center justify-between mb-4">
               <h4 className="font-bold text-gray-900">Megosztás</h4>

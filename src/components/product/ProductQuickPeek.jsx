@@ -52,11 +52,11 @@ const ProductQuickPeek = ({ product, isOpen, onClose, onAddToCart }) => {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={onClose}
-            className="fixed inset-0 lg:top-[60px] bg-black/50 backdrop-blur-sm z-50"
+            className="fixed inset-0 lg:top-[60px] bg-black/50 backdrop-blur-sm z-[9999]"
           />
 
           {/* Wrapper: always center modal on screen (safe area for mobile) */}
-          <div className="fixed inset-0 lg:top-[60px] flex items-center justify-center p-4 z-50 pointer-events-none overflow-y-auto">
+          <div className="fixed inset-0 lg:top-[60px] flex items-center justify-center p-4 z-[9999] pointer-events-none overflow-y-auto">
             {/* Modal: centered, scrolls on small screens */}
             <motion.div
               initial={{ opacity: 0, scale: 0.9, y: 20 }}

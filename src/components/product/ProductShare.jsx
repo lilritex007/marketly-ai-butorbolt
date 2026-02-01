@@ -141,7 +141,7 @@ const ProductShare = ({
 const ShareModal = ({ product, shareLinks, shareUrl, copied, onCopy, onClose }) => {
   return (
     <div 
-      className="fixed inset-0 lg:top-[60px] z-[100] flex items-end sm:items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
+      className="fixed inset-0 lg:top-[60px] z-[9999] flex items-end sm:items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
       onClick={onClose}
     >
       <div 

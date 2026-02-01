@@ -110,7 +110,7 @@ const ARProductPreview = ({ product, onClose }) => {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
-        className="fixed inset-0 lg:top-[60px] bg-black/80 backdrop-blur-sm z-[60] flex items-center justify-center p-4"
+        className="fixed inset-0 lg:top-[60px] bg-black/80 backdrop-blur-sm z-[9999] flex items-center justify-center p-4"
         onClick={onClose}
       >
         <motion.div
