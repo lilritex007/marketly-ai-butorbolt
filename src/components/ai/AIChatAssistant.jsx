@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect, useMemo, useCallback } from 'react';
-import { MessageCircle, X, Send, Loader2, Sparkles, User, Bot, AlertCircle, ThumbsUp, ThumbsDown, Search, Package, Tag, TrendingUp, Filter } from 'lucide-react';
+import { MessageCircle, X, Send, Loader2, Sparkles, User, Bot, AlertCircle, ThumbsUp, ThumbsDown, Search, Package, Tag, TrendingUp, Filter, Zap, Star, ShoppingBag } from 'lucide-react';
 import { generateText } from '../../services/geminiService';
+import { smartSearch, parseSearchIntent, getProactiveSuggestions } from '../../services/aiSearchService';
 import { 
   getPersonalizedContext, 
   trackAIFeedback, 
@@ -8,15 +9,18 @@ import {
   trackSearch,
   saveChatContext,
   getChatContext,
-  getSearchHistory
+  getSearchHistory,
+  getTopCategories,
+  getStyleDNA
 } from '../../services/userPreferencesService';
 
 /**
- * AIChatAssistant - Super Smart AI Chat with Full Product Knowledge
+ * AIChatAssistant - Világszínvonalú AI Chat asszisztens
+ * - Szuperokos keresés a központi aiSearchService-ből
+ * - Természetes nyelvű megértés
  * - Teljes termékkatalógus ismerete
- * - Okos keresés szinonimákkal és ár szűréssel
- * - Kategória és stílus alapú ajánlások
  * - Személyre szabott válaszok
+ * - Proaktív ajánlások
  */
 const AIChatAssistant = ({ products, onShowProducts }) => {
   const [isOpen, setIsOpen] = useState(false);
@@ -27,57 +31,7 @@ const AIChatAssistant = ({ products, onShowProducts }) => {
   const inputRef = useRef(null);
   const messageIdRef = useRef(0);
 
-  // Szinonimák és kapcsolódó kifejezések
-  const synonymMap = useMemo(() => ({
-    // Bútor típusok
-    'kanapé': ['ülőgarnitúra', 'szófa', 'couch', 'sofa', 'heverő', 'pamlag'],
-    'ülőgarnitúra': ['kanapé', 'szófa', 'nappali bútor'],
-    'ágy': ['franciaágy', 'hálószoba', 'fekvőhely', 'ágyneműtartós'],
-    'asztal': ['étkezőasztal', 'dohányzóasztal', 'íróasztal'],
-    'szék': ['étkező szék', 'forgószék', 'irodai szék'],
-    'szekrény': ['gardrób', 'ruhásszekrény', 'gardróbszekrény', 'komód'],
-    'komód': ['fiókos szekrény', 'tároló'],
-    'polc': ['könyvespolc', 'falipolc', 'állópolc'],
-    
-    // Stílusok
-    'modern': ['kortárs', 'minimalista', 'letisztult'],
-    'skandináv': ['nordic', 'északi', 'scandi'],
-    'rusztikus': ['vidéki', 'country', 'vintage'],
-    'klasszikus': ['elegáns', 'tradicionális', 'időtlen'],
-    'indusztriális': ['industrial', 'loft', 'ipari'],
-    
-    // Szobák
-    'nappali': ['living room', 'társalgó'],
-    'hálószoba': ['bedroom', 'alvó'],
-    'étkező': ['dining', 'ebédlő'],
-    'dolgozószoba': ['iroda', 'home office', 'munkaszoba'],
-    'előszoba': ['hall', 'közlekedő'],
-    'fürdőszoba': ['bathroom', 'mosdó'],
-    
-    // Anyagok
-    'fa': ['tömörfa', 'fenyő', 'tölgy', 'bükk'],
-    'bőr': ['valódi bőr', 'műbőr', 'textilbőr'],
-    'szövet': ['textil', 'kárpit'],
-  }), []);
-
-  // Ár szűrő kulcsszavak
-  const priceKeywords = useMemo(() => ({
-    'olcsó': { max: 50000 },
-    'kedvező': { max: 80000 },
-    'megfizethető': { max: 100000 },
-    'akciós': { max: 100000 },
-    'budget': { max: 80000 },
-    '50 ezer alatt': { max: 50000 },
-    '100 ezer alatt': { max: 100000 },
-    '150 ezer alatt': { max: 150000 },
-    '200 ezer alatt': { max: 200000 },
-    '300 ezer alatt': { max: 300000 },
-    'prémium': { min: 200000 },
-    'luxus': { min: 300000 },
-    'minőségi': { min: 150000 },
-  }), []);
-
-  // Teljes katalógus elemzés
+  // Teljes katalógus elemzés - részletes statisztikák
   const catalogStats = useMemo(() => {
     if (!products || products.length === 0) return null;
 
@@ -86,7 +40,9 @@ const AIChatAssistant = ({ products, onShowProducts }) => {
     const priceRanges = { under50k: 0, under100k: 0, under200k: 0, over200k: 0 };
     let minPrice = Infinity;
     let maxPrice = 0;
-    const brands = {};
+    let onSaleCount = 0;
+    const colors = new Set();
+    const styles = new Set();
 
     products.forEach(p => {
       // Kategória feldolgozás
@@ -115,6 +71,18 @@ const AIChatAssistant = ({ products, onShowProducts }) => {
         else if (price < 200000) priceRanges.under200k++;
         else priceRanges.over200k++;
       }
+      
+      // Akciók számolása
+      if (p.originalPrice && p.originalPrice > price) onSaleCount++;
+      
+      // Stílusok és színek kinyerése a névből
+      const name = (p.name || '').toLowerCase();
+      ['modern', 'skandináv', 'rusztikus', 'klasszikus', 'minimalista', 'vintage'].forEach(s => {
+        if (name.includes(s)) styles.add(s);
+      });
+      ['fehér', 'fekete', 'szürke', 'barna', 'bézs', 'kék', 'zöld'].forEach(c => {
+        if (name.includes(c)) colors.add(c);
+      });
     });
 
     // Top kategóriák
@@ -132,89 +100,20 @@ const AIChatAssistant = ({ products, onShowProducts }) => {
       total: products.length,
       categories: topCategories,
       priceRange: { min: minPrice, max: maxPrice },
-      priceDistribution: priceRanges
+      priceDistribution: priceRanges,
+      onSaleCount,
+      availableStyles: Array.from(styles),
+      availableColors: Array.from(colors)
     };
   }, [products]);
 
-  // Okos termék keresés
-  const smartSearch = useCallback((query, options = {}) => {
-    if (!products || products.length === 0) return [];
+  // Okos keresés a központi aiSearchService-ből
+  const performSmartSearch = useCallback((query, options = {}) => {
+    if (!products || products.length === 0) return { results: [], intent: null };
     
-    const { maxResults = 12, priceMin, priceMax } = options;
-    const lowerQuery = query.toLowerCase();
-    
-    // Szinonimák kibontása
-    const expandedTerms = new Set();
-    const words = lowerQuery.split(/\s+/).filter(w => w.length > 1);
-    
-    words.forEach(word => {
-      expandedTerms.add(word);
-      Object.entries(synonymMap).forEach(([key, synonyms]) => {
-        if (key.includes(word) || synonyms.some(s => s.includes(word))) {
-          expandedTerms.add(key);
-          synonyms.forEach(s => expandedTerms.add(s));
-        }
-      });
-    });
-
-    // Ár szűrő felismerés
-    let detectedPriceMax = priceMax;
-    let detectedPriceMin = priceMin;
-    Object.entries(priceKeywords).forEach(([keyword, range]) => {
-      if (lowerQuery.includes(keyword)) {
-        if (range.max) detectedPriceMax = detectedPriceMax ? Math.min(detectedPriceMax, range.max) : range.max;
-        if (range.min) detectedPriceMin = detectedPriceMin ? Math.max(detectedPriceMin, range.min) : range.min;
-      }
-    });
-
-    // Szám alapú ár felismerés (pl. "100 ezer", "50000")
-    const priceMatch = lowerQuery.match(/(\d+)\s*(ezer|000|k)/i);
-    if (priceMatch) {
-      const amount = parseInt(priceMatch[1]) * (priceMatch[2].toLowerCase() === 'ezer' || priceMatch[2] === 'k' ? 1000 : 1);
-      if (lowerQuery.includes('alatt') || lowerQuery.includes('max')) {
-        detectedPriceMax = amount;
-      } else if (lowerQuery.includes('felett') || lowerQuery.includes('min')) {
-        detectedPriceMin = amount;
-      }
-    }
-
-    // Pontozásos keresés
-    const scored = products.map(p => {
-      const name = (p.name || '').toLowerCase();
-      const category = (p.category || '').toLowerCase();
-      const desc = (p.description || p.params || '').toLowerCase();
-      const price = p.salePrice || p.price || 0;
-      
-      // Ár szűrés
-      if (detectedPriceMax && price > detectedPriceMax) return { product: p, score: -1 };
-      if (detectedPriceMin && price < detectedPriceMin) return { product: p, score: -1 };
-      
-      let score = 0;
-      
-      expandedTerms.forEach(term => {
-        // Pontos egyezés a névben
-        if (name.includes(term)) score += 15;
-        // Kategória egyezés
-        if (category.includes(term)) score += 10;
-        // Leírás egyezés
-        if (desc.includes(term)) score += 5;
-      });
-      
-      // Bónusz akciós termékekre
-      if (p.salePrice && p.salePrice < p.price) score += 3;
-      
-      // Bónusz ha van kép
-      if (p.images?.length > 0 || p.image) score += 2;
-      
-      return { product: p, score };
-    });
-
-    return scored
-      .filter(s => s.score > 0)
-      .sort((a, b) => b.score - a.score)
-      .slice(0, maxResults)
-      .map(s => s.product);
-  }, [products, synonymMap, priceKeywords]);
+    const { limit = 12 } = options;
+    return smartSearch(products, query, { limit, includeDebugInfo: false });
+  }, [products]);
 
   // Kategória alapú ajánlások
   const getCategoryProducts = useCallback((categoryName, limit = 6) => {
@@ -225,31 +124,71 @@ const AIChatAssistant = ({ products, onShowProducts }) => {
       .slice(0, limit);
   }, [products]);
 
+  // Proaktív javaslatok
+  const proactiveSuggestions = useMemo(() => {
+    return getProactiveSuggestions(products);
+  }, [products]);
+
   const generateMessageId = () => {
     messageIdRef.current += 1;
     return `msg_${Date.now()}_${messageIdRef.current}`;
   };
 
-  // Inicializálás
+  // Inicializálás - Szuper személyre szabott üdvözlés
   useEffect(() => {
     const savedContext = getChatContext();
     const recentlyViewed = getViewedProducts(3);
+    const topCats = getTopCategories(2);
+    const styleDNA = getStyleDNA();
     
-    let welcomeMessage = `Szia! 👋 A Marketly AI tanácsadója vagyok.\n\n`;
-    welcomeMessage += `📦 **${catalogStats?.total?.toLocaleString('hu-HU') || 0}** termék közül segítek választani!\n`;
-    welcomeMessage += `💡 Kérdezz bátran, ismerem a teljes kínálatot.`;
+    let welcomeMessage = '';
+    let welcomeProducts = [];
     
     if (recentlyViewed.length > 0) {
-      welcomeMessage = `Szia újra! 👋\n\nLátom, hogy a **${recentlyViewed[0].name}** terméket nézted.\nSegíthetek hasonlót találni, vagy valami mást keresel?\n\n📦 ${catalogStats?.total?.toLocaleString('hu-HU') || 0} termék áll rendelkezésre!`;
+      // Visszatérő látogató - személyes üdvözlés
+      const lastProduct = recentlyViewed[0];
+      welcomeMessage = `Szia újra! 👋\n\nLátom, a "${lastProduct.name}" érdekelt.\n`;
+      
+      if (lastProduct.price) {
+        welcomeMessage += `💡 Hasonló árban (${Math.round(lastProduct.price/1000)}k Ft körül) még több szuper darabot tudok mutatni!\n\n`;
+      }
+      
+      // Hasonló termékek előkészítése
+      const cat = lastProduct.category?.split(' > ')[0];
+      if (cat) {
+        welcomeProducts = getCategoryProducts(cat, 4).filter(p => p.id !== lastProduct.id);
+      }
+      
+      welcomeMessage += `📦 ${catalogStats?.total?.toLocaleString('hu-HU') || 0} termékből segítek kiválasztani a TÖKÉLETESET!`;
+      
+    } else if (styleDNA?.styleDNA) {
+      // Van stílus profilja
+      welcomeMessage = `Szia! 👋 A Marketly AI tanácsadója vagyok.\n\n`;
+      welcomeMessage += `✨ Látom, a ${styleDNA.styleDNA} stílust kedveled!\n`;
+      welcomeMessage += `📦 ${catalogStats?.total?.toLocaleString('hu-HU') || 0} termék közül pont a NEKED valót keresem!\n\n`;
+      welcomeMessage += `💬 Mondd el, mit keresel, és máris ajánlok!`;
+      
+    } else {
+      // Új látogató
+      welcomeMessage = `Szia! 👋 A Marketly AI bútortanácsadója vagyok.\n\n`;
+      welcomeMessage += `📦 ${catalogStats?.total?.toLocaleString('hu-HU') || 0} termék közül segítek választani!\n`;
+      welcomeMessage += `💰 Árak: ${Math.round((catalogStats?.priceRange?.min || 0)/1000)}k - ${Math.round((catalogStats?.priceRange?.max || 0)/1000)}k Ft\n`;
+      
+      if (catalogStats?.onSaleCount > 0) {
+        welcomeMessage += `🏷️ ${catalogStats.onSaleCount} termék most AKCIÓBAN!\n\n`;
+      }
+      
+      welcomeMessage += `💬 Kérdezz bátran - pl. "modern kanapé 150 ezer alatt"`;
     }
     
     setMessages([{
       id: generateMessageId(),
       role: 'assistant',
       content: welcomeMessage,
-      timestamp: new Date()
+      timestamp: new Date(),
+      products: welcomeProducts.length > 0 ? welcomeProducts : undefined
     }]);
-  }, [catalogStats]);
+  }, [catalogStats, getCategoryProducts]);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -304,12 +243,16 @@ const AIChatAssistant = ({ products, onShowProducts }) => {
     setIsLoading(true);
 
     try {
-      // Okos keresés
-      const relevantProducts = smartSearch(userMessage, { maxResults: 12 });
+      // Szuperokos keresés az aiSearchService-ből
+      const searchResult = performSmartSearch(userMessage, { limit: 12 });
+      const relevantProducts = searchResult.results || [];
+      const searchIntent = searchResult.intent;
       
       // Személyre szabott kontextus
       const personalContext = getPersonalizedContext();
       const recentViewed = getViewedProducts(3);
+      const topCats = getTopCategories(3);
+      const styleDNA = getStyleDNA();
       
       // Beszélgetés előzménye
       const conversationHistory = messages
@@ -335,39 +278,58 @@ const AIChatAssistant = ({ products, onShowProducts }) => {
         ? `Korábban nézett: ${recentViewed.map(p => p.name).join(', ')}`
         : '';
 
-      const prompt = `Te a Marketly bútorwebshop SZAKÉRTŐ AI tanácsadója vagy. Tökéletesen ismered a teljes kínálatot!
+      // Keresési szándék elemzése az AI-nak
+      const intentInfo = searchIntent ? `
+FELISMERT SZÁNDÉK:
+- Termék típus: ${searchIntent.productTypes.join(', ') || 'nincs megadva'}
+- Stílus: ${searchIntent.styles.join(', ') || 'nincs megadva'}
+- Szín: ${searchIntent.colors.join(', ') || 'nincs megadva'}
+- Szoba: ${searchIntent.rooms.join(', ') || 'nincs megadva'}
+- Ártartomány: ${searchIntent.priceRange ? `${searchIntent.priceRange.min.toLocaleString()} - ${searchIntent.priceRange.max === Infinity ? '∞' : searchIntent.priceRange.max.toLocaleString()} Ft` : 'nincs megadva'}
+- Akciót keres: ${searchIntent.isOnSale ? 'IGEN' : 'nem'}` : '';
 
-===== WEBSHOP ADATOK =====
-Összes termék: ${catalogStats?.total?.toLocaleString('hu-HU') || 0} db
-Árkategória: ${Math.round((catalogStats?.priceRange?.min || 0)/1000)}k - ${Math.round((catalogStats?.priceRange?.max || 0)/1000)}k Ft
+      // Stílus profil
+      const styleProfile = styleDNA?.styleDNA ? `Stílus preferencia: ${styleDNA.styleDNA}` : '';
+
+      const prompt = `Te a Marketly bútorwebshop LEGJOBB AI tanácsadója vagy! A világ legokosabb bútorszakértője. Teljes kínálatot ismered.
+
+===== WEBSHOP KATALÓGUS =====
+📦 Összes termék: ${catalogStats?.total?.toLocaleString('hu-HU') || 0} db
+💰 Árkategória: ${Math.round((catalogStats?.priceRange?.min || 0)/1000)}k - ${Math.round((catalogStats?.priceRange?.max || 0)/1000)}k Ft
+🏷️ Akciós termékek: ${catalogStats?.onSaleCount || 0} db
+🎨 Stílusok: ${catalogStats?.availableStyles?.join(', ') || 'modern, skandináv, klasszikus'}
 
 TOP KATEGÓRIÁK:
 ${categoryInfo}
 
-===== BESZÉLGETÉS =====
-${conversationHistory || 'Új beszélgetés'}
+===== VÁSÁRLÓ KÉRDÉSE =====
+"${userMessage}"
+${intentInfo}
 
 ===== VÁSÁRLÓ PROFILJA =====
 ${personalContext || 'Új látogató'}
+${styleProfile}
 ${viewedInfo}
+Kedvelt kategóriák: ${topCats.join(', ') || 'még nincs'}
 
-===== KÉRDÉS =====
-"${userMessage}"
+===== BESZÉLGETÉS ELŐZMÉNYE =====
+${conversationHistory || 'Új beszélgetés'}
 
-===== TALÁLT TERMÉKEK =====
+===== TALÁLT TERMÉKEK (${relevantProducts.length} db) =====
 ${productList}
-${relevantProducts.length > 0 ? `\n(Összesen ${relevantProducts.length} releváns termék)` : ''}
 
-===== FELADATOD =====
-1. MINDIG válaszolj magyarul, tegezve, barátságosan de professzionálisan
-2. Ha vannak releváns termékek, ajánlj KONKRÉTAN 2-4 darabot névvel és árral
-3. Ha nincs pontos találat, javasolj KATEGÓRIÁT vagy szűkítést
-4. Adj hasznos tanácsot (méret, stílus, kombináció)
-5. Ha ár kérdés volt, hangsúlyozd az ár-érték arányt
-6. Maximum 4-5 mondat, lényegre törően
-7. Ha termékeket mutatsz, zárd: "👇 Kattints rájuk lent a részletekért!"
+===== VÁLASZOLÁSI SZABÁLYOK =====
+1. ✅ Magyarul, tegezve, BARÁTSÁGOSAN és LELKESEN
+2. ✅ Ha vannak termékek: KONKRÉTAN ajánlj 2-3 darabot NÉVVEL és ÁRRAL
+3. ✅ Ha drágának találja: mutass olcsóbb alternatívát is
+4. ✅ Adj PRO TIPPET (méret, kombináció, karbantartás)
+5. ✅ Ha akciót keres: emeld ki a kedvezményeket!
+6. ✅ MAX 4-5 mondat, LÉNYEGRE TÖRŐEN
+7. ✅ Zárd: "👇 Kattints a termékekre lent a részletekért!"
+8. ❌ NE használj markdown formázást (**bold** helyett CAPS)
+9. ❌ NE kérdezz vissza, AJÁNLJ azonnal
 
-VÁLASZOLJ MOST:`;
+VÁLASZOLJ MOST a fenti szabályok szerint:`;
 
       const result = await generateText(prompt, { temperature: 0.7, maxTokens: 500 });
 
@@ -424,34 +386,47 @@ VÁLASZOLJ MOST:`;
     }
   };
 
-  // Gyors kérdések - okosabb javaslatok
+  // Gyors kérdések - szuperokos személyre szabott javaslatok
   const quickSuggestions = useMemo(() => {
-    const viewed = getViewedProducts(2);
-    const searches = getSearchHistory(2);
-    
     const suggestions = [];
     
-    // Személyre szabott javaslatok
+    // Proaktív javaslatok az aiSearchService-ből
+    proactiveSuggestions.slice(0, 2).forEach(s => {
+      suggestions.push(s.text);
+    });
+    
+    // Személyre szabott a megtekintett termékekből
+    const viewed = getViewedProducts(2);
     if (viewed.length > 0) {
       const cat = viewed[0].category?.split(' > ')[0];
-      if (cat) suggestions.push(`${cat} ajánlatok`);
+      if (cat && !suggestions.some(s => s.includes(cat))) {
+        suggestions.push(`${cat} 100 ezer alatt`);
+      }
     }
     
-    if (searches.length > 0 && searches[0].query) {
+    // Keresési előzmények
+    const searches = getSearchHistory(2);
+    if (searches.length > 0 && searches[0].query && !suggestions.includes(searches[0].query)) {
       suggestions.push(searches[0].query);
     }
 
-    // Alapértelmezett javaslatok
+    // Alapértelmezett javaslatok (csak ha kell)
     const defaults = [
       'Modern kanapé 150 ezer alatt',
-      'Étkezőasztal 6 személyes',
       'Skandináv stílusú bútorok',
+      'Akciós termékek',
       'Hálószoba berendezés',
-      'Akciós termékek'
+      'Étkező bútorok'
     ];
     
-    return [...suggestions, ...defaults].slice(0, 5);
-  }, []);
+    defaults.forEach(d => {
+      if (suggestions.length < 5 && !suggestions.includes(d)) {
+        suggestions.push(d);
+      }
+    });
+    
+    return suggestions.slice(0, 5);
+  }, [proactiveSuggestions]);
 
   const formatPrice = (price) => {
     return (price || 0).toLocaleString('hu-HU') + ' Ft';

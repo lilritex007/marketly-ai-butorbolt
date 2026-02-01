@@ -1,0 +1,869 @@
+/**
+ * AI Search Service - Világszínvonalú bútor kereső motor
+ * 
+ * Funkciók:
+ * - Természetes nyelvű keresés (NLP)
+ * - Szinonimák és magyar nyelvi sajátosságok kezelése
+ * - Fuzzy matching (elgépelések tolerálása)
+ * - Kontextus-tudatos keresés
+ * - AI-alapú szándék felismerés
+ * - Szemantikai keresés
+ * - Proaktív javaslatok
+ */
+
+import { generateText } from './geminiService';
+import { 
+  getViewedProducts, 
+  getSearchHistory, 
+  getTopCategories, 
+  getStyleDNA,
+  getLikedProducts 
+} from './userPreferencesService';
+
+// ==================== MAGYAR NYELVI TUDÁSBÁZIS ====================
+
+// Átfogó szinonima térkép - MINDEN bútorral kapcsolatos kifejezés
+const SYNONYM_DATABASE = {
+  // Ülőbútorok
+  'kanapé': ['szófa', 'ülőgarnitúra', 'couch', 'sofa', 'kanape', 'rekamié', 'heverő'],
+  'fotel': ['karosszék', 'szék', 'pihenőfotel', 'relax fotel', 'füles fotel', 'armchair'],
+  'ülőgarnitúra': ['kanapé szett', 'sarokülő', 'sarokkanapé', 'U-kanapé', 'garnitúra'],
+  'puff': ['ülőke', 'zsámoly', 'lábtartó', 'ottoman', 'pouffe'],
+  
+  // Asztalok
+  'asztal': ['tábla', 'table'],
+  'dohányzóasztal': ['kávéasztal', 'coffee table', 'nappali asztal', 'kisasztal'],
+  'étkezőasztal': ['ebédlőasztal', 'dining table', 'étkező asztal', 'konyhaasztal'],
+  'íróasztal': ['munkaasztal', 'desk', 'dolgozó asztal', 'számítógépasztal', 'iroda asztal'],
+  'éjjeliszekrény': ['éjjeli asztal', 'nightstand', 'ágy melletti'],
+  
+  // Székek
+  'szék': ['ülőalkalmatosság', 'chair', 'szekek'],
+  'étkezőszék': ['konyhai szék', 'dining chair', 'étkező szék'],
+  'irodai szék': ['forgószék', 'gamer szék', 'office chair', 'dolgozó szék'],
+  'bárszék': ['pultszék', 'bar stool', 'magas szék'],
+  
+  // Tárolás
+  'szekrény': ['gardróbszekrény', 'ruhásszekrény', 'cabinet', 'szekreny', 'szekrenyek'],
+  'komód': ['fiókos szekrény', 'drawer', 'komod', 'tárolószekrény'],
+  'polc': ['könyvespolc', 'falipolc', 'shelf', 'polcrendszer', 'stellázs'],
+  'vitrin': ['üvegszekrény', 'tálaló', 'display cabinet'],
+  'tv szekrény': ['tv állvány', 'médiaállvány', 'tv bútor', 'szórakoztatóközpont'],
+  
+  // Hálószoba
+  'ágy': ['franciaágy', 'bed', 'agy', 'heverő', 'agyak'],
+  'matrac': ['habmatrac', 'rugós matrac', 'mattress', 'fekvőalkalmatosság'],
+  'ágyneműtartó': ['ágy alatti tároló', 'storage bed'],
+  
+  // Stílusok
+  'modern': ['kortárs', 'minimalista', 'letisztult', 'contemporary', 'dizájn'],
+  'skandináv': ['nordic', 'északi', 'skandinav', 'scandi', 'finn'],
+  'rusztikus': ['vidéki', 'country', 'provence', 'farmhouse', 'natural'],
+  'indusztriális': ['industrial', 'loft', 'ipari', 'gyári'],
+  'klasszikus': ['tradicionális', 'hagyományos', 'elegáns', 'antik'],
+  'bohém': ['boho', 'színes', 'eklektikus'],
+  'luxus': ['prémium', 'exkluzív', 'high-end', 'designer'],
+  
+  // Színek
+  'fehér': ['feher', 'white', 'hófehér', 'krém'],
+  'fekete': ['dark', 'sötét', 'black', 'antracit'],
+  'szürke': ['gray', 'grey', 'szurke', 'graphite', 'grafit'],
+  'barna': ['fa szín', 'dió', 'tölgy', 'brown', 'bézs', 'mogyoró'],
+  'bézs': ['krém', 'homok', 'beige', 'natúr'],
+  'kék': ['blue', 'kek', 'navy', 'tengerkék', 'égkék'],
+  'zöld': ['green', 'zold', 'olíva', 'mohazöld', 'smaragd'],
+  'piros': ['red', 'bordó', 'vörös'],
+  'sárga': ['yellow', 'mustár', 'arany'],
+  
+  // Anyagok
+  'fa': ['tömörfa', 'furnér', 'wooden', 'fából'],
+  'fém': ['acél', 'vas', 'metal', 'króm', 'réz'],
+  'bőr': ['valódi bőr', 'műbőr', 'leather', 'textilbőr'],
+  'szövet': ['textil', 'fabric', 'huzat', 'kárpit'],
+  'üveg': ['glass', 'tükör', 'edzett üveg'],
+  
+  // Szobák
+  'nappali': ['living room', 'lakószoba', 'társalgó'],
+  'hálószoba': ['bedroom', 'háló', 'haloszoba', 'alvó'],
+  'konyha': ['kitchen', 'étkező', 'ebédlő'],
+  'iroda': ['dolgozószoba', 'office', 'munkaszoba', 'home office'],
+  'gyerekszoba': ['kids room', 'gyerek', 'baba', 'ifjúsági'],
+  'fürdőszoba': ['bathroom', 'fürdő', 'mosdó'],
+  'előszoba': ['hall', 'belépő', 'közlekedő'],
+  'erkély': ['terasz', 'balkon', 'kert', 'outdoor'],
+  
+  // Ár kategóriák
+  'olcsó': ['akciós', 'kedvezményes', 'akció', 'budget', 'gazdaságos', 'alacsony árú'],
+  'drága': ['prémium', 'luxus', 'minőségi', 'high-end'],
+  
+  // Méretek
+  'kicsi': ['kisméretű', 'kompakt', 'mini', 'small'],
+  'nagy': ['nagyméretű', 'tágas', 'large', 'big', 'extra'],
+  '2 személyes': ['kétszemélyes', 'dupla', 'páros'],
+  '3 személyes': ['háromszemélyes', 'családi'],
+  'sarok': ['L-alakú', 'sarokkanapé', 'corner'],
+};
+
+// Ár kulcsszavak és tartományok
+const PRICE_KEYWORDS = {
+  'olcsó': { min: 0, max: 50000, label: 'olcsó (0-50.000 Ft)' },
+  'budget': { min: 0, max: 50000, label: 'budget (0-50.000 Ft)' },
+  'akciós': { min: 0, max: 80000, label: 'akciós termékek' },
+  'megfizethető': { min: 30000, max: 100000, label: 'megfizethető (30-100.000 Ft)' },
+  'közepes': { min: 50000, max: 150000, label: 'közepes árú (50-150.000 Ft)' },
+  'közép': { min: 50000, max: 150000, label: 'közép kategória' },
+  'minőségi': { min: 100000, max: 300000, label: 'minőségi (100-300.000 Ft)' },
+  'prémium': { min: 200000, max: 500000, label: 'prémium (200-500.000 Ft)' },
+  'luxus': { min: 400000, max: Infinity, label: 'luxus (400.000 Ft+)' },
+  'drága': { min: 300000, max: Infinity, label: 'drága (300.000 Ft+)' },
+};
+
+// Ékezet eltávolítás
+const removeAccents = (str) => {
+  if (!str) return '';
+  return str
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/ő/g, 'o').replace(/Ő/g, 'O')
+    .replace(/ű/g, 'u').replace(/Ű/g, 'U')
+    .toLowerCase()
+    .trim();
+};
+
+// Levenshtein távolság fuzzy matching-hez
+const levenshteinDistance = (str1, str2) => {
+  const m = str1.length;
+  const n = str2.length;
+  const dp = Array(m + 1).fill(null).map(() => Array(n + 1).fill(0));
+  
+  for (let i = 0; i <= m; i++) dp[i][0] = i;
+  for (let j = 0; j <= n; j++) dp[0][j] = j;
+  
+  for (let i = 1; i <= m; i++) {
+    for (let j = 1; j <= n; j++) {
+      if (str1[i - 1] === str2[j - 1]) {
+        dp[i][j] = dp[i - 1][j - 1];
+      } else {
+        dp[i][j] = Math.min(dp[i - 1][j - 1], dp[i - 1][j], dp[i][j - 1]) + 1;
+      }
+    }
+  }
+  return dp[m][n];
+};
+
+// Fuzzy match - elfogadja a kis elgépeléseket
+const fuzzyMatch = (query, target, threshold = 0.3) => {
+  const q = removeAccents(query);
+  const t = removeAccents(target);
+  
+  // Pontos egyezés
+  if (t.includes(q) || q.includes(t)) return 1;
+  
+  // Szavankénti egyezés
+  const qWords = q.split(/\s+/);
+  const tWords = t.split(/\s+/);
+  
+  let matches = 0;
+  for (const qw of qWords) {
+    if (qw.length < 3) continue;
+    for (const tw of tWords) {
+      if (tw.length < 3) continue;
+      
+      // Részleges egyezés (szó eleje)
+      if (tw.startsWith(qw.slice(0, 3)) || qw.startsWith(tw.slice(0, 3))) {
+        matches += 0.8;
+        continue;
+      }
+      
+      // Levenshtein fuzzy
+      const maxLen = Math.max(qw.length, tw.length);
+      const distance = levenshteinDistance(qw, tw);
+      const similarity = 1 - (distance / maxLen);
+      
+      if (similarity >= (1 - threshold)) {
+        matches += similarity;
+      }
+    }
+  }
+  
+  return matches / Math.max(qWords.length, 1);
+};
+
+// Összes szinonima lekérése egy szóhoz
+const getAllSynonyms = (word) => {
+  const lower = word.toLowerCase();
+  const noAccent = removeAccents(word);
+  const result = new Set([lower, noAccent]);
+  
+  for (const [key, values] of Object.entries(SYNONYM_DATABASE)) {
+    const keyNoAccent = removeAccents(key);
+    
+    // Ha a kulcs egyezik
+    if (keyNoAccent === noAccent || lower === key || keyNoAccent.includes(noAccent) || noAccent.includes(keyNoAccent)) {
+      result.add(key);
+      values.forEach(v => result.add(v.toLowerCase()));
+    }
+    
+    // Ha bármelyik érték egyezik
+    for (const val of values) {
+      const valNoAccent = removeAccents(val);
+      if (valNoAccent === noAccent || val.toLowerCase() === lower || valNoAccent.includes(noAccent) || noAccent.includes(valNoAccent)) {
+        result.add(key);
+        values.forEach(v => result.add(v.toLowerCase()));
+        break;
+      }
+    }
+  }
+  
+  return Array.from(result);
+};
+
+// ==================== KERESÉSI SZÁNDÉK FELISMERÉS ====================
+
+/**
+ * Felismeri a keresési szándékot és paramétereket a query-ből
+ */
+export const parseSearchIntent = (query) => {
+  const intent = {
+    originalQuery: query,
+    productTypes: [],      // pl. ['kanapé', 'fotel']
+    styles: [],            // pl. ['modern', 'skandináv']
+    colors: [],            // pl. ['fehér', 'szürke']
+    materials: [],         // pl. ['fa', 'bőr']
+    rooms: [],             // pl. ['nappali', 'hálószoba']
+    priceRange: null,      // { min, max }
+    sizes: [],             // pl. ['nagy', '3 személyes']
+    features: [],          // egyéb jellemzők
+    isOnSale: false,       // akciót keres
+    keywords: [],          // tisztított kulcsszavak
+  };
+  
+  const words = query.toLowerCase().split(/[\s,\-]+/).filter(w => w.length > 1);
+  const fullQueryNoAccent = removeAccents(query);
+  
+  // Termék típusok felismerése
+  const productTypes = ['kanapé', 'fotel', 'asztal', 'szék', 'szekrény', 'polc', 'ágy', 'matrac', 'komód', 
+    'dohányzóasztal', 'étkezőasztal', 'íróasztal', 'éjjeliszekrény', 'puff', 'vitrin', 'tv szekrény',
+    'ülőgarnitúra', 'sarokkanapé', 'bárszék', 'könyvespolc'];
+  
+  for (const type of productTypes) {
+    const syns = getAllSynonyms(type);
+    if (syns.some(s => fullQueryNoAccent.includes(removeAccents(s)))) {
+      intent.productTypes.push(type);
+    }
+  }
+  
+  // Stílusok felismerése
+  const styles = ['modern', 'skandináv', 'rusztikus', 'indusztriális', 'klasszikus', 'bohém', 'luxus', 'minimalista', 'vintage', 'retro'];
+  for (const style of styles) {
+    const syns = getAllSynonyms(style);
+    if (syns.some(s => fullQueryNoAccent.includes(removeAccents(s)))) {
+      intent.styles.push(style);
+    }
+  }
+  
+  // Színek felismerése
+  const colors = ['fehér', 'fekete', 'szürke', 'barna', 'bézs', 'kék', 'zöld', 'piros', 'sárga', 'natúr'];
+  for (const color of colors) {
+    const syns = getAllSynonyms(color);
+    if (syns.some(s => fullQueryNoAccent.includes(removeAccents(s)))) {
+      intent.colors.push(color);
+    }
+  }
+  
+  // Anyagok felismerése
+  const materials = ['fa', 'fém', 'bőr', 'szövet', 'üveg', 'műanyag', 'rattan'];
+  for (const mat of materials) {
+    const syns = getAllSynonyms(mat);
+    if (syns.some(s => fullQueryNoAccent.includes(removeAccents(s)))) {
+      intent.materials.push(mat);
+    }
+  }
+  
+  // Szobák felismerése
+  const rooms = ['nappali', 'hálószoba', 'konyha', 'iroda', 'gyerekszoba', 'fürdőszoba', 'előszoba', 'erkély'];
+  for (const room of rooms) {
+    const syns = getAllSynonyms(room);
+    if (syns.some(s => fullQueryNoAccent.includes(removeAccents(s)))) {
+      intent.rooms.push(room);
+    }
+  }
+  
+  // Méret felismerése
+  const sizes = ['kicsi', 'nagy', '2 személyes', '3 személyes', 'sarok', 'kompakt'];
+  for (const size of sizes) {
+    if (fullQueryNoAccent.includes(removeAccents(size))) {
+      intent.sizes.push(size);
+    }
+  }
+  
+  // Ár tartomány felismerése (szövegből)
+  for (const [keyword, range] of Object.entries(PRICE_KEYWORDS)) {
+    if (fullQueryNoAccent.includes(removeAccents(keyword))) {
+      intent.priceRange = range;
+      if (keyword === 'akciós' || keyword === 'akció') {
+        intent.isOnSale = true;
+      }
+      break;
+    }
+  }
+  
+  // Konkrét ár felismerése (pl. "100 ezer alatt", "50000 és 100000 között")
+  const pricePatterns = [
+    /(\d+)\s*(ezer|e|k)\s*(ft|forint)?\s*(alatt|ig)/i,
+    /(\d+)\s*(ezer|e|k)\s*(ft|forint)?\s*(felett|fölött|tól)/i,
+    /(\d+)\s*-\s*(\d+)\s*(ezer|e|k)/i,
+    /(\d{4,})\s*(ft|forint)?\s*(alatt|ig)/i,
+    /(\d{4,})\s*(ft|forint)?\s*(felett|fölött|tól)/i,
+  ];
+  
+  for (const pattern of pricePatterns) {
+    const match = query.match(pattern);
+    if (match) {
+      let value = parseInt(match[1]);
+      const multiplier = match[2]?.toLowerCase();
+      if (multiplier === 'ezer' || multiplier === 'e' || multiplier === 'k') {
+        value *= 1000;
+      }
+      
+      if (query.includes('alatt') || query.includes('ig')) {
+        intent.priceRange = { min: 0, max: value };
+      } else if (query.includes('felett') || query.includes('fölött') || query.includes('tól')) {
+        intent.priceRange = { min: value, max: Infinity };
+      } else if (match[2] && !isNaN(parseInt(match[2]))) {
+        // range: 50-100 ezer
+        intent.priceRange = { min: value, max: parseInt(match[2]) * 1000 };
+      }
+      break;
+    }
+  }
+  
+  // Tisztított kulcsszavak
+  intent.keywords = words.filter(w => w.length > 2);
+  
+  return intent;
+};
+
+// ==================== TERMÉK PONTOZÁS ====================
+
+/**
+ * Termék relevancia pontszám számítása
+ */
+const calculateRelevanceScore = (product, intent, userContext = {}) => {
+  let score = 0;
+  const bonuses = [];
+  
+  const name = (product.name || '').toLowerCase();
+  const category = (product.category || '').toLowerCase();
+  const description = (product.description || product.leiras || '').toLowerCase();
+  const fullText = `${name} ${category} ${description}`;
+  const fullTextNoAccent = removeAccents(fullText);
+  
+  const price = product.salePrice || product.price || 0;
+  const originalPrice = product.originalPrice || product.price || price;
+  const isDiscounted = originalPrice > price;
+  
+  // 1. TERMÉK TÍPUS EGYEZÉS (nagyon fontos) - max 100 pont
+  for (const type of intent.productTypes) {
+    const syns = getAllSynonyms(type);
+    for (const syn of syns) {
+      const synNoAccent = removeAccents(syn);
+      if (name.includes(synNoAccent) || removeAccents(name).includes(synNoAccent)) {
+        score += 100;
+        bonuses.push(`Termék típus: ${type}`);
+        break;
+      }
+      if (category.includes(synNoAccent) || removeAccents(category).includes(synNoAccent)) {
+        score += 60;
+        bonuses.push(`Kategória: ${type}`);
+        break;
+      }
+    }
+  }
+  
+  // 2. STÍLUS EGYEZÉS - max 50 pont
+  for (const style of intent.styles) {
+    const syns = getAllSynonyms(style);
+    if (syns.some(s => fullTextNoAccent.includes(removeAccents(s)))) {
+      score += 50;
+      bonuses.push(`Stílus: ${style}`);
+    }
+  }
+  
+  // 3. SZÍN EGYEZÉS - max 40 pont
+  for (const color of intent.colors) {
+    const syns = getAllSynonyms(color);
+    if (syns.some(s => fullTextNoAccent.includes(removeAccents(s)))) {
+      score += 40;
+      bonuses.push(`Szín: ${color}`);
+    }
+  }
+  
+  // 4. ANYAG EGYEZÉS - max 35 pont
+  for (const mat of intent.materials) {
+    const syns = getAllSynonyms(mat);
+    if (syns.some(s => fullTextNoAccent.includes(removeAccents(s)))) {
+      score += 35;
+      bonuses.push(`Anyag: ${mat}`);
+    }
+  }
+  
+  // 5. SZOBA EGYEZÉS - max 30 pont
+  for (const room of intent.rooms) {
+    const syns = getAllSynonyms(room);
+    if (syns.some(s => fullTextNoAccent.includes(removeAccents(s)))) {
+      score += 30;
+      bonuses.push(`Szoba: ${room}`);
+    }
+  }
+  
+  // 6. MÉRET EGYEZÉS - max 25 pont
+  for (const size of intent.sizes) {
+    if (fullTextNoAccent.includes(removeAccents(size))) {
+      score += 25;
+      bonuses.push(`Méret: ${size}`);
+    }
+  }
+  
+  // 7. ÁR TARTOMÁNY EGYEZÉS - max 50 pont
+  if (intent.priceRange) {
+    const { min, max } = intent.priceRange;
+    if (price >= min && price <= max) {
+      score += 50;
+      bonuses.push('Árban illeszkedik');
+    } else if (price >= min * 0.8 && price <= max * 1.2) {
+      score += 20; // Közel van az árkategóriához
+    }
+  }
+  
+  // 8. AKCIÓ - max 40 pont
+  if (intent.isOnSale && isDiscounted) {
+    const discountPercent = Math.round((1 - price / originalPrice) * 100);
+    score += 40 + Math.min(discountPercent / 2, 20); // Nagyobb kedvezmény = több pont
+    bonuses.push(`${discountPercent}% kedvezmény`);
+  }
+  
+  // 9. KULCSSZÓ EGYEZÉS (fallback) - max 30 pont per szó
+  for (const keyword of intent.keywords) {
+    const syns = getAllSynonyms(keyword);
+    let matched = false;
+    
+    for (const syn of syns) {
+      const synNoAccent = removeAccents(syn);
+      if (removeAccents(name).includes(synNoAccent)) {
+        score += 30;
+        matched = true;
+        break;
+      }
+      if (removeAccents(category).includes(synNoAccent)) {
+        score += 15;
+        matched = true;
+        break;
+      }
+      if (removeAccents(description).includes(synNoAccent)) {
+        score += 8;
+        matched = true;
+        break;
+      }
+    }
+    
+    // Fuzzy matching ha nincs pontos egyezés
+    if (!matched && keyword.length >= 4) {
+      const fuzzyScore = fuzzyMatch(keyword, name);
+      if (fuzzyScore > 0.5) {
+        score += fuzzyScore * 20;
+      }
+    }
+  }
+  
+  // 10. SZEMÉLYRE SZABOTT BÓNUSZOK
+  if (userContext.topCategories) {
+    for (const cat of userContext.topCategories) {
+      if (category.includes(removeAccents(cat).toLowerCase())) {
+        score += 15;
+        bonuses.push('Kedvelt kategória');
+        break;
+      }
+    }
+  }
+  
+  if (userContext.styleDNA) {
+    // Ha a stílus DNA egyezik
+    const styleText = userContext.styleDNA.toLowerCase();
+    if (fullTextNoAccent.includes(removeAccents(styleText).slice(0, 20))) {
+      score += 10;
+    }
+  }
+  
+  // 11. NÉPSZERŰSÉGI BÓNUSZ (ha van rating)
+  if (product.rating && product.rating >= 4) {
+    score += (product.rating - 3) * 5;
+  }
+  
+  return { score, bonuses };
+};
+
+// ==================== FŐ KERESÉSI FUNKCIÓK ====================
+
+/**
+ * Intelligens keresés - a fő keresési funkció
+ */
+export const smartSearch = (products, query, options = {}) => {
+  const { limit = 20, includeDebugInfo = false } = options;
+  
+  if (!query || !query.trim() || !products || products.length === 0) {
+    return { results: [], intent: null, suggestions: [] };
+  }
+  
+  // 1. Szándék felismerés
+  const intent = parseSearchIntent(query.trim());
+  
+  // 2. Felhasználói kontextus
+  const userContext = {
+    topCategories: getTopCategories(3),
+    styleDNA: getStyleDNA()?.styleDNA,
+    viewedProducts: getViewedProducts(5),
+  };
+  
+  // 3. Termékek pontozása
+  const scoredProducts = products.map(product => {
+    const { score, bonuses } = calculateRelevanceScore(product, intent, userContext);
+    return {
+      product,
+      score,
+      bonuses: includeDebugInfo ? bonuses : undefined,
+    };
+  });
+  
+  // 4. Rendezés és szűrés
+  const results = scoredProducts
+    .filter(s => s.score > 0)
+    .sort((a, b) => b.score - a.score)
+    .slice(0, limit)
+    .map(s => includeDebugInfo ? s : s.product);
+  
+  // 5. Javaslatok generálása, ha kevés találat
+  const suggestions = [];
+  if (results.length < 3) {
+    if (intent.priceRange) {
+      suggestions.push({
+        type: 'expand_price',
+        text: 'Próbáld szélesebb ártartománnyal',
+        action: query.replace(/\d+\s*(ezer|e|k)?(\s*(ft|forint))?\s*(alatt|ig|felett|fölött|tól)/gi, '').trim(),
+      });
+    }
+    if (intent.colors.length > 0) {
+      suggestions.push({
+        type: 'remove_color',
+        text: `Próbáld ${intent.colors[0]} szín nélkül`,
+        action: query.replace(new RegExp(intent.colors.join('|'), 'gi'), '').trim(),
+      });
+    }
+    if (intent.productTypes.length > 0) {
+      // Ajánlj hasonló kategóriákat
+      const alternatives = {
+        'kanapé': ['fotel', 'ülőgarnitúra'],
+        'asztal': ['dohányzóasztal', 'íróasztal'],
+        'szék': ['fotel', 'puff'],
+      };
+      for (const type of intent.productTypes) {
+        if (alternatives[type]) {
+          suggestions.push({
+            type: 'alternative',
+            text: `Hasonló: ${alternatives[type].join(', ')}`,
+            action: query.replace(new RegExp(type, 'gi'), alternatives[type][0]),
+          });
+        }
+      }
+    }
+  }
+  
+  return {
+    results,
+    intent,
+    suggestions,
+    totalMatches: scoredProducts.filter(s => s.score > 0).length,
+  };
+};
+
+/**
+ * Autocomplete javaslatok - gépelés közben
+ */
+export const getAutocompleteSuggestions = (products, partialQuery, limit = 8) => {
+  if (!partialQuery || partialQuery.length < 2 || !products) {
+    return [];
+  }
+  
+  const query = partialQuery.toLowerCase().trim();
+  const queryNoAccent = removeAccents(query);
+  const suggestions = new Map(); // text -> { text, type, count, product? }
+  
+  // 1. Terméknév alapú javaslatok (legfontosabb)
+  for (const product of products) {
+    const name = product.name || '';
+    const nameNoAccent = removeAccents(name);
+    
+    if (nameNoAccent.includes(queryNoAccent)) {
+      // Teljes terméknév
+      if (!suggestions.has(name)) {
+        suggestions.set(name, {
+          text: name,
+          type: 'product',
+          product: product,
+          score: nameNoAccent.startsWith(queryNoAccent) ? 100 : 50,
+        });
+      }
+      
+      // Szavak a névből, amik illeszkednek
+      const words = name.split(/[\s,\-\/]+/).filter(w => w.length > 3);
+      for (const word of words) {
+        if (removeAccents(word).startsWith(queryNoAccent) && !suggestions.has(word)) {
+          suggestions.set(word, {
+            text: word,
+            type: 'keyword',
+            score: 30,
+          });
+        }
+      }
+    }
+  }
+  
+  // 2. Kategória alapú javaslatok
+  const categories = [...new Set(products.map(p => p.category).filter(Boolean))];
+  for (const cat of categories) {
+    const catNoAccent = removeAccents(cat);
+    if (catNoAccent.includes(queryNoAccent)) {
+      const mainCat = cat.split(' > ')[0];
+      if (!suggestions.has(mainCat)) {
+        suggestions.set(mainCat, {
+          text: mainCat,
+          type: 'category',
+          score: 40,
+        });
+      }
+    }
+  }
+  
+  // 3. Szinonima/kapcsolódó javaslatok
+  const intent = parseSearchIntent(partialQuery);
+  if (intent.productTypes.length > 0) {
+    for (const type of intent.productTypes) {
+      const syns = getAllSynonyms(type).slice(0, 3);
+      for (const syn of syns) {
+        if (syn !== query && !suggestions.has(syn)) {
+          suggestions.set(syn, {
+            text: syn,
+            type: 'synonym',
+            score: 25,
+          });
+        }
+      }
+    }
+  }
+  
+  // 4. Kombinált javaslatok (pl. "modern kanapé", "fehér szekrény")
+  const popularCombos = [
+    'modern kanapé', 'skandináv bútor', 'fehér szekrény', 'fa asztal',
+    'bőr fotel', 'akciós termékek', 'nappali bútor', 'hálószoba bútor',
+  ];
+  for (const combo of popularCombos) {
+    if (removeAccents(combo).includes(queryNoAccent) && !suggestions.has(combo)) {
+      suggestions.set(combo, {
+        text: combo,
+        type: 'popular',
+        score: 35,
+      });
+    }
+  }
+  
+  // Rendezés és visszaadás
+  return Array.from(suggestions.values())
+    .sort((a, b) => b.score - a.score)
+    .slice(0, limit);
+};
+
+/**
+ * AI-alapú keresés - természetes nyelvű kérdésekre
+ */
+export const aiSearch = async (products, naturalQuery) => {
+  if (!products || products.length === 0) {
+    return { results: [], aiResponse: 'Nincs elérhető termék az adatbázisban.' };
+  }
+  
+  // Termékkatalógus összefoglaló az AI-nak
+  const categories = [...new Set(products.map(p => p.category?.split(' > ')[0]).filter(Boolean))];
+  const priceRange = {
+    min: Math.min(...products.map(p => p.salePrice || p.price || 0).filter(p => p > 0)),
+    max: Math.max(...products.map(p => p.salePrice || p.price || 0)),
+  };
+  
+  const prompt = `Te egy profi bútorszakértő vagy. A feladatod, hogy segíts a vásárlónak megtalálni a tökéletes bútort.
+
+KATALÓGUS ADATOK:
+- Összes termék: ${products.length} db
+- Kategóriák: ${categories.join(', ')}
+- Árkategória: ${priceRange.min.toLocaleString()} - ${priceRange.max.toLocaleString()} Ft
+
+VÁSÁRLÓ KÉRDÉSE: "${naturalQuery}"
+
+FELADAT: Elemezd a kérdést és adj vissza egy JSON objektumot a következő mezőkkel:
+{
+  "searchTerms": ["keresési kifejezés 1", "keresési kifejezés 2"],
+  "filters": {
+    "priceMin": null vagy szám,
+    "priceMax": null vagy szám,
+    "style": null vagy "modern/skandináv/klasszikus/stb",
+    "color": null vagy szín,
+    "room": null vagy "nappali/hálószoba/stb"
+  },
+  "shortAnswer": "Rövid, barátságos válasz a vásárlónak (max 2 mondat)",
+  "recommendation": "Mit ajánlanál és miért (1 mondat)"
+}
+
+FONTOS: Csak a JSON objektumot add vissza, semmi mást!`;
+
+  try {
+    const response = await generateText(prompt, { temperature: 0.3 });
+    
+    if (!response.success) {
+      // Fallback: használj lokális keresést
+      return smartSearch(products, naturalQuery, { limit: 12 });
+    }
+    
+    // Parse AI response
+    const text = response.text || '';
+    const jsonMatch = text.match(/\{[\s\S]*\}/);
+    
+    if (jsonMatch) {
+      const aiResult = JSON.parse(jsonMatch[0]);
+      
+      // Keresés az AI által javasolt kifejezésekkel
+      let results = [];
+      for (const term of aiResult.searchTerms || [naturalQuery]) {
+        const { results: termResults } = smartSearch(products, term, { limit: 8 });
+        results = [...results, ...termResults];
+      }
+      
+      // Szűrés az AI filterek alapján
+      if (aiResult.filters) {
+        const { priceMin, priceMax, style, color, room } = aiResult.filters;
+        
+        results = results.filter(p => {
+          const price = p.salePrice || p.price || 0;
+          const fullText = `${p.name} ${p.category} ${p.description || ''}`.toLowerCase();
+          
+          if (priceMin && price < priceMin) return false;
+          if (priceMax && price > priceMax) return false;
+          if (style && !fullText.includes(style.toLowerCase())) return false;
+          if (color && !fullText.includes(color.toLowerCase())) return false;
+          if (room && !fullText.includes(room.toLowerCase())) return false;
+          
+          return true;
+        });
+      }
+      
+      // Deduplikálás
+      const seen = new Set();
+      results = results.filter(p => {
+        if (seen.has(p.id)) return false;
+        seen.add(p.id);
+        return true;
+      }).slice(0, 12);
+      
+      return {
+        results,
+        aiResponse: aiResult.shortAnswer || 'Íme a találatok:',
+        recommendation: aiResult.recommendation,
+        searchTerms: aiResult.searchTerms,
+      };
+    }
+  } catch (error) {
+    console.error('[AI Search] Error:', error);
+  }
+  
+  // Fallback
+  return smartSearch(products, naturalQuery, { limit: 12 });
+};
+
+/**
+ * Proaktív javaslatok generálása
+ */
+export const getProactiveSuggestions = (products, userContext = {}) => {
+  const suggestions = [];
+  
+  // 1. Korábbi keresések alapján
+  const searchHistory = getSearchHistory(3);
+  if (searchHistory.length > 0) {
+    const lastSearch = searchHistory[0].query;
+    suggestions.push({
+      type: 'recent',
+      icon: '🕐',
+      text: `Folytasd: "${lastSearch}"`,
+      query: lastSearch,
+    });
+  }
+  
+  // 2. Megtekintett termékek alapján
+  const viewed = getViewedProducts(3);
+  if (viewed.length > 0) {
+    const cat = viewed[0].category?.split(' > ')[0];
+    if (cat) {
+      suggestions.push({
+        type: 'based_on_viewed',
+        icon: '👁️',
+        text: `Több ${cat} ajánlat`,
+        query: cat,
+      });
+    }
+  }
+  
+  // 3. Stílus DNA alapján
+  const styleDNA = getStyleDNA();
+  if (styleDNA?.answers?.space) {
+    const styleNames = {
+      modern: 'modern', scandinavian: 'skandináv', industrial: 'indusztriális',
+      vintage: 'vintage', bohemian: 'bohém',
+    };
+    const style = styleNames[styleDNA.answers.space] || 'modern';
+    suggestions.push({
+      type: 'style',
+      icon: '✨',
+      text: `${style.charAt(0).toUpperCase() + style.slice(1)} stílusú bútorok`,
+      query: `${style} bútor`,
+    });
+  }
+  
+  // 4. Akciós termékek
+  const onSaleCount = products.filter(p => (p.originalPrice || p.price) > (p.salePrice || p.price)).length;
+  if (onSaleCount > 5) {
+    suggestions.push({
+      type: 'sale',
+      icon: '🏷️',
+      text: `${onSaleCount} akciós termék`,
+      query: 'akciós',
+    });
+  }
+  
+  // 5. Szezonális/trendi
+  const month = new Date().getMonth();
+  if (month >= 3 && month <= 5) {
+    suggestions.push({ type: 'seasonal', icon: '🌸', text: 'Tavaszi megújulás', query: 'modern nappali' });
+  } else if (month >= 9 && month <= 11) {
+    suggestions.push({ type: 'seasonal', icon: '🍂', text: 'Őszi kényelem', query: 'meleg kanapé' });
+  } else if (month === 11 || month === 0) {
+    suggestions.push({ type: 'seasonal', icon: '🎄', text: 'Ünnepi hangulatban', query: 'étkező' });
+  }
+  
+  return suggestions.slice(0, 5);
+};
+
+export default {
+  smartSearch,
+  getAutocompleteSuggestions,
+  aiSearch,
+  getProactiveSuggestions,
+  parseSearchIntent,
+  getAllSynonyms,
+  SYNONYM_DATABASE,
+  PRICE_KEYWORDS,
+};

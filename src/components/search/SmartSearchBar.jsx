@@ -1,64 +1,100 @@
-import React, { useState, useRef, useEffect, useMemo } from 'react';
-import { Search, X, Clock, TrendingUp, ArrowRight, Sparkles, Package, Filter, ChevronRight } from 'lucide-react';
-import { getSearchHistory, trackSearch, getViewedProducts } from '../../services/userPreferencesService';
+import React, { useState, useRef, useEffect, useMemo, useCallback } from 'react';
+import { 
+  Search, X, Clock, TrendingUp, ArrowRight, Sparkles, Package, 
+  Filter, ChevronRight, Lightbulb, Tag, Eye, Zap, Star, Wand2,
+  ShoppingBag, ArrowUpRight, Percent, History, Mic, Camera
+} from 'lucide-react';
+import { 
+  smartSearch, 
+  getAutocompleteSuggestions, 
+  getProactiveSuggestions,
+  parseSearchIntent 
+} from '../../services/aiSearchService';
+import { trackSearch, getSearchHistory, getViewedProducts } from '../../services/userPreferencesService';
 
 /**
- * SmartSearchBar - Intelligent search with autocomplete and previews
- * Features: image previews, trending searches, recent searches, category filters
+ * SmartSearchBar - Világszínvonalú AI-alapú bútorkereső
+ * 
+ * Funkciók:
+ * - Valós idejű intelligens autocomplete
+ * - Természetes nyelvű keresés
+ * - Szinonimák és magyar nyelvi sajátosságok
+ * - Fuzzy matching (elgépelés toleráns)
+ * - Kontextus-tudatos javaslatok
+ * - Proaktív ajánlások
+ * - Keresési szándék felismerés
+ * - Termék előnézet a találatokban
  */
 const SmartSearchBar = ({ 
   products = [], 
   categories = [],
   onSearch, 
   onProductClick,
-  placeholder = "Keresés bútorok között..." 
+  placeholder = "Mit keresel? pl. 'modern kanapé 200 ezer alatt'" 
 }) => {
   const [query, setQuery] = useState('');
   const [isOpen, setIsOpen] = useState(false);
-  const [activeCategory, setActiveCategory] = useState(null);
+  const [isSearching, setIsSearching] = useState(false);
+  const [activeTab, setActiveTab] = useState('suggestions'); // suggestions, results, filters
   const inputRef = useRef(null);
   const containerRef = useRef(null);
+  const debounceRef = useRef(null);
 
-  // Real recent searches from user preferences
+  // Autocomplete javaslatok - valós időben frissül
+  const autocompleteSuggestions = useMemo(() => {
+    if (!query.trim() || query.length < 2) return [];
+    return getAutocompleteSuggestions(products, query, 6);
+  }, [query, products]);
+
+  // Keresési eredmények - valós időben
+  const searchResults = useMemo(() => {
+    if (!query.trim() || query.length < 2) return { results: [], intent: null };
+    return smartSearch(products, query, { limit: 8, includeDebugInfo: false });
+  }, [query, products]);
+
+  // Felismert keresési szándék megjelenítése
+  const searchIntent = useMemo(() => {
+    if (!query.trim() || query.length < 3) return null;
+    return parseSearchIntent(query);
+  }, [query]);
+
+  // Proaktív javaslatok (amikor nincs query)
+  const proactiveSuggestions = useMemo(() => {
+    return getProactiveSuggestions(products);
+  }, [products, isOpen]);
+
+  // Keresési előzmények
   const recentSearches = useMemo(() => {
-    const history = getSearchHistory(5);
+    const history = getSearchHistory(4);
     return history.map(h => h.query).filter(q => q && q.length > 0);
-  }, [isOpen]); // Re-fetch when dropdown opens
-  
-  // Trending searches - based on popular categories + viewed products
+  }, [isOpen]);
+
+  // Nemrég nézett termékek
+  const recentlyViewed = useMemo(() => {
+    return getViewedProducts(3);
+  }, [isOpen]);
+
+  // Trendi keresések
   const trendingSearches = useMemo(() => {
+    // Kombináljuk a nézett termékek kategóriáit és alapértelmezett trendeket
     const viewed = getViewedProducts(3);
     const viewedCategories = viewed.map(p => p.category?.split(' > ')[0]).filter(Boolean);
     
-    // Default trending + personalized from viewed
-    const defaults = ['modern kanapé', 'skandináv bútor', 'akciós termékek', 'étkező garnitúra'];
-    const personalized = viewedCategories.map(c => `${c} ajánlatok`);
+    const defaults = [
+      { text: 'modern kanapé', icon: '🛋️' },
+      { text: 'skandináv stílus', icon: '🌲' },
+      { text: 'akciós bútorok', icon: '🏷️' },
+      { text: 'kompakt bútor', icon: '📦' },
+    ];
     
-    return [...new Set([...personalized, ...defaults])].slice(0, 4);
+    const personalized = viewedCategories.map(c => ({
+      text: `${c} ajánlatok`,
+      icon: '⭐',
+    }));
+    
+    const combined = [...personalized, ...defaults];
+    return combined.filter((v, i, a) => a.findIndex(t => t.text === v.text) === i).slice(0, 4);
   }, [isOpen]);
-
-  // Filter products based on query
-  const searchResults = useMemo(() => {
-    if (!query.trim()) return [];
-    
-    const lowerQuery = query.toLowerCase();
-    return products
-      .filter(p => {
-        const matchesQuery = p.name?.toLowerCase().includes(lowerQuery) || 
-                            p.category?.toLowerCase().includes(lowerQuery);
-        const matchesCategory = !activeCategory || p.category === activeCategory;
-        return matchesQuery && matchesCategory;
-      })
-      .slice(0, 5);
-  }, [query, products, activeCategory]);
-
-  // Suggested categories based on query
-  const suggestedCategories = useMemo(() => {
-    if (!query.trim()) return categories.slice(0, 4);
-    
-    const lowerQuery = query.toLowerCase();
-    return categories.filter(c => c.toLowerCase().includes(lowerQuery)).slice(0, 4);
-  }, [query, categories]);
 
   // Close on outside click
   useEffect(() => {
@@ -71,53 +107,155 @@ const SmartSearchBar = ({
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
+  // Keyboard navigation
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (!isOpen) return;
+      
+      if (e.key === 'Escape') {
+        setIsOpen(false);
+        inputRef.current?.blur();
+      }
+    };
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen]);
+
+  const handleSubmit = useCallback((e) => {
+    e?.preventDefault();
     if (query.trim()) {
-      trackSearch(query); // Save to search history
-      onSearch?.(query, activeCategory);
+      trackSearch(query);
+      onSearch?.(query);
       setIsOpen(false);
     }
-  };
+  }, [query, onSearch]);
 
-  const handleProductClick = (product) => {
+  const handleInputChange = useCallback((e) => {
+    const value = e.target.value;
+    setQuery(value);
+    
+    if (value.length >= 2) {
+      setActiveTab('results');
+    } else {
+      setActiveTab('suggestions');
+    }
+  }, []);
+
+  const handleProductClick = useCallback((product) => {
     onProductClick?.(product);
     setQuery('');
     setIsOpen(false);
-  };
+  }, [onProductClick]);
 
-  const handleSuggestionClick = (suggestion) => {
-    setQuery(suggestion);
-    trackSearch(suggestion); // Save to search history
-    onSearch?.(suggestion, activeCategory);
+  const handleSuggestionClick = useCallback((suggestion) => {
+    const text = typeof suggestion === 'string' ? suggestion : suggestion.text || suggestion.query;
+    setQuery(text);
+    trackSearch(text);
+    onSearch?.(text);
     setIsOpen(false);
+  }, [onSearch]);
+
+  const handleAutocompleteClick = useCallback((item) => {
+    if (item.type === 'product' && item.product) {
+      handleProductClick(item.product);
+    } else {
+      handleSuggestionClick(item.text);
+    }
+  }, [handleProductClick, handleSuggestionClick]);
+
+  const clearQuery = useCallback(() => {
+    setQuery('');
+    setActiveTab('suggestions');
+    inputRef.current?.focus();
+  }, []);
+
+  // Render intent tags
+  const renderIntentTags = () => {
+    if (!searchIntent) return null;
+    
+    const tags = [];
+    
+    if (searchIntent.productTypes.length > 0) {
+      tags.push({ label: searchIntent.productTypes[0], color: 'primary', icon: ShoppingBag });
+    }
+    if (searchIntent.styles.length > 0) {
+      tags.push({ label: searchIntent.styles[0], color: 'purple', icon: Sparkles });
+    }
+    if (searchIntent.colors.length > 0) {
+      tags.push({ label: searchIntent.colors[0], color: 'blue', icon: Tag });
+    }
+    if (searchIntent.priceRange) {
+      const priceLabel = searchIntent.priceRange.max === Infinity 
+        ? `${(searchIntent.priceRange.min / 1000).toFixed(0)}k+ Ft`
+        : `${(searchIntent.priceRange.min / 1000).toFixed(0)}-${(searchIntent.priceRange.max / 1000).toFixed(0)}k Ft`;
+      tags.push({ label: priceLabel, color: 'green', icon: Tag });
+    }
+    if (searchIntent.isOnSale) {
+      tags.push({ label: 'Akciós', color: 'red', icon: Percent });
+    }
+    
+    if (tags.length === 0) return null;
+    
+    return (
+      <div className="flex flex-wrap gap-1.5 px-4 py-2 border-b border-gray-100 bg-gray-50/50">
+        <span className="text-xs text-gray-500 mr-1 flex items-center gap-1">
+          <Wand2 className="w-3 h-3" />
+          Felismert:
+        </span>
+        {tags.map((tag, i) => (
+          <span 
+            key={i}
+            className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium
+              ${tag.color === 'primary' ? 'bg-primary-100 text-primary-700' : ''}
+              ${tag.color === 'purple' ? 'bg-purple-100 text-purple-700' : ''}
+              ${tag.color === 'blue' ? 'bg-blue-100 text-blue-700' : ''}
+              ${tag.color === 'green' ? 'bg-green-100 text-green-700' : ''}
+              ${tag.color === 'red' ? 'bg-red-100 text-red-700' : ''}
+            `}
+          >
+            <tag.icon className="w-3 h-3" />
+            {tag.label}
+          </span>
+        ))}
+      </div>
+    );
   };
 
   return (
-    <div ref={containerRef} className="relative w-full max-w-2xl mx-auto">
+    <div ref={containerRef} className="relative w-full max-w-3xl mx-auto">
       {/* Search Input */}
       <form onSubmit={handleSubmit} className="relative">
         <div className={`
-          flex items-center gap-2 bg-white rounded-xl sm:rounded-2xl border-2 transition-all
-          ${isOpen ? 'border-primary-400 shadow-lg shadow-primary-100' : 'border-gray-200 hover:border-gray-300'}
+          flex items-center gap-2 bg-white rounded-2xl border-2 transition-all duration-200
+          ${isOpen 
+            ? 'border-primary-400 shadow-xl shadow-primary-100/50 ring-4 ring-primary-50' 
+            : 'border-gray-200 hover:border-gray-300 hover:shadow-md'}
         `}>
-          <Search className="w-5 h-5 text-gray-400 ml-4 shrink-0" />
+          <div className="flex items-center pl-4">
+            {isSearching ? (
+              <div className="w-5 h-5 border-2 border-primary-500 border-t-transparent rounded-full animate-spin" />
+            ) : (
+              <Search className={`w-5 h-5 transition-colors ${isOpen ? 'text-primary-500' : 'text-gray-400'}`} />
+            )}
+          </div>
           
           <input
             ref={inputRef}
             type="text"
             value={query}
-            onChange={(e) => setQuery(e.target.value)}
+            onChange={handleInputChange}
             onFocus={() => setIsOpen(true)}
             placeholder={placeholder}
-            className="flex-1 py-3 sm:py-3.5 bg-transparent text-gray-900 placeholder-gray-400 text-sm sm:text-base focus:outline-none"
+            className="flex-1 py-3.5 sm:py-4 bg-transparent text-gray-900 placeholder-gray-400 text-sm sm:text-base focus:outline-none"
+            autoComplete="off"
+            spellCheck="false"
           />
 
           {query && (
             <button
               type="button"
-              onClick={() => setQuery('')}
-              className="p-2 text-gray-400 hover:text-gray-600"
+              onClick={clearQuery}
+              className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-full transition-colors"
             >
               <X className="w-4 h-4" />
             </button>
@@ -125,7 +263,7 @@ const SmartSearchBar = ({
 
           <button
             type="submit"
-            className="flex items-center gap-1.5 px-4 sm:px-5 py-2 sm:py-2.5 mr-1.5 bg-gradient-to-r from-primary-500 to-secondary-600 text-white font-medium text-sm rounded-lg sm:rounded-xl hover:shadow-md transition-all"
+            className="flex items-center gap-2 px-5 sm:px-6 py-2.5 sm:py-3 mr-1.5 bg-gradient-to-r from-primary-500 to-primary-600 text-white font-semibold text-sm rounded-xl hover:from-primary-600 hover:to-primary-700 hover:shadow-lg hover:shadow-primary-500/25 transition-all active:scale-95"
           >
             <Search className="w-4 h-4" />
             <span className="hidden sm:inline">Keresés</span>
@@ -135,122 +273,282 @@ const SmartSearchBar = ({
 
       {/* Dropdown Panel */}
       {isOpen && (
-        <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-2xl shadow-2xl border border-gray-100 overflow-hidden z-50 max-h-[70vh] overflow-y-auto">
+        <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-2xl shadow-2xl border border-gray-100 overflow-hidden z-[9999] max-h-[75vh] overflow-y-auto">
           
-          {/* Category Filter Pills */}
-          {suggestedCategories.length > 0 && (
-            <div className="p-3 border-b border-gray-100">
-              <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide">
-                <Filter className="w-4 h-4 text-gray-400 shrink-0" />
-                <button
-                  onClick={() => setActiveCategory(null)}
-                  className={`px-3 py-1.5 text-xs font-medium rounded-full whitespace-nowrap transition-all ${
-                    !activeCategory ? 'bg-primary-500 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                  }`}
-                >
-                  Mind
-                </button>
-                {suggestedCategories.map(cat => (
+          {/* Intent Tags - ha van felismert szándék */}
+          {query.length >= 3 && renderIntentTags()}
+
+          {/* Autocomplete javaslatok - gépelés közben */}
+          {query.length >= 2 && autocompleteSuggestions.length > 0 && (
+            <div className="border-b border-gray-100">
+              <div className="p-2">
+                <p className="px-3 py-1.5 text-xs font-semibold text-gray-500 uppercase tracking-wider flex items-center gap-1.5">
+                  <Zap className="w-3.5 h-3.5 text-amber-500" />
+                  Javaslatok
+                </p>
+                {autocompleteSuggestions.map((item, idx) => (
                   <button
-                    key={cat}
-                    onClick={() => setActiveCategory(activeCategory === cat ? null : cat)}
-                    className={`px-3 py-1.5 text-xs font-medium rounded-full whitespace-nowrap transition-all ${
-                      activeCategory === cat ? 'bg-primary-500 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                    }`}
+                    key={idx}
+                    onClick={() => handleAutocompleteClick(item)}
+                    className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-primary-50 transition-colors text-left group"
                   >
-                    {cat}
+                    <div className={`
+                      w-8 h-8 rounded-lg flex items-center justify-center shrink-0
+                      ${item.type === 'product' ? 'bg-primary-100' : ''}
+                      ${item.type === 'category' ? 'bg-secondary-100' : ''}
+                      ${item.type === 'keyword' ? 'bg-gray-100' : ''}
+                      ${item.type === 'synonym' ? 'bg-purple-100' : ''}
+                      ${item.type === 'popular' ? 'bg-amber-100' : ''}
+                    `}>
+                      {item.type === 'product' && item.product?.image ? (
+                        <img src={item.product.image} alt="" className="w-full h-full object-cover rounded-lg" />
+                      ) : (
+                        <>
+                          {item.type === 'product' && <Package className="w-4 h-4 text-primary-600" />}
+                          {item.type === 'category' && <Filter className="w-4 h-4 text-secondary-600" />}
+                          {item.type === 'keyword' && <Search className="w-4 h-4 text-gray-500" />}
+                          {item.type === 'synonym' && <Sparkles className="w-4 h-4 text-purple-600" />}
+                          {item.type === 'popular' && <TrendingUp className="w-4 h-4 text-amber-600" />}
+                        </>
+                      )}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <span className="text-sm text-gray-800 font-medium">{item.text}</span>
+                      {item.type === 'product' && item.product && (
+                        <p className="text-xs text-primary-600 font-semibold">
+                          {item.product.price?.toLocaleString()} Ft
+                        </p>
+                      )}
+                    </div>
+                    <ArrowUpRight className="w-4 h-4 text-gray-300 group-hover:text-primary-500 transition-colors" />
                   </button>
                 ))}
               </div>
             </div>
           )}
 
-          {/* Search Results with Images */}
-          {searchResults.length > 0 && (
+          {/* Keresési találatok - termékek */}
+          {query.length >= 2 && searchResults.results.length > 0 && (
             <div className="p-2">
-              <p className="px-3 py-2 text-xs font-medium text-gray-500 uppercase tracking-wide">Termékek</p>
-              {searchResults.map(product => (
-                <button
-                  key={product.id}
-                  onClick={() => handleProductClick(product)}
-                  className="w-full flex items-center gap-3 p-2 rounded-xl hover:bg-gray-50 transition-colors text-left"
-                >
-                  <div className="w-14 h-14 bg-gray-100 rounded-lg overflow-hidden shrink-0">
-                    {product.image ? (
-                      <img src={product.image} alt={product.name} className="w-full h-full object-cover" />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center">
-                        <Package className="w-6 h-6 text-gray-300" />
-                      </div>
-                    )}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <h4 className="font-medium text-gray-900 text-sm truncate">{product.name}</h4>
-                    <p className="text-xs text-gray-500">{product.category}</p>
-                    <p className="text-sm font-bold text-primary-600 mt-0.5">{product.price?.toLocaleString()} Ft</p>
-                  </div>
-                  <ChevronRight className="w-4 h-4 text-gray-400 shrink-0" />
-                </button>
-              ))}
-            </div>
-          )}
-
-          {/* No Results */}
-          {query && searchResults.length === 0 && (
-            <div className="p-6 text-center">
-              <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-3">
-                <Search className="w-6 h-6 text-gray-400" />
+              <div className="flex items-center justify-between px-3 py-1.5">
+                <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider flex items-center gap-1.5">
+                  <ShoppingBag className="w-3.5 h-3.5 text-primary-500" />
+                  Termékek ({searchResults.totalMatches} találat)
+                </p>
+                {searchResults.totalMatches > 8 && (
+                  <button 
+                    onClick={handleSubmit}
+                    className="text-xs text-primary-600 hover:text-primary-700 font-medium flex items-center gap-1"
+                  >
+                    Mind megtekintése
+                    <ArrowRight className="w-3 h-3" />
+                  </button>
+                )}
               </div>
-              <p className="text-gray-600 font-medium">Nincs találat: "{query}"</p>
-              <p className="text-sm text-gray-500 mt-1">Próbálj más kulcsszavakat</p>
+              <div className="space-y-1">
+                {searchResults.results.slice(0, 6).map(product => (
+                  <button
+                    key={product.id}
+                    onClick={() => handleProductClick(product)}
+                    className="w-full flex items-center gap-3 p-2.5 rounded-xl hover:bg-gray-50 transition-colors text-left group"
+                  >
+                    <div className="w-14 h-14 bg-gray-100 rounded-xl overflow-hidden shrink-0 ring-1 ring-gray-200">
+                      {product.image ? (
+                        <img src={product.image} alt={product.name} className="w-full h-full object-cover" />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center">
+                          <Package className="w-6 h-6 text-gray-300" />
+                        </div>
+                      )}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <h4 className="font-medium text-gray-900 text-sm truncate group-hover:text-primary-600 transition-colors">
+                        {product.name}
+                      </h4>
+                      <p className="text-xs text-gray-500 truncate">{product.category}</p>
+                      <div className="flex items-center gap-2 mt-1">
+                        <span className="text-sm font-bold text-primary-600">
+                          {(product.salePrice || product.price)?.toLocaleString()} Ft
+                        </span>
+                        {product.originalPrice && product.originalPrice > (product.salePrice || product.price) && (
+                          <>
+                            <span className="text-xs text-gray-400 line-through">
+                              {product.originalPrice.toLocaleString()} Ft
+                            </span>
+                            <span className="text-xs bg-red-100 text-red-600 px-1.5 py-0.5 rounded-full font-medium">
+                              -{Math.round((1 - (product.salePrice || product.price) / product.originalPrice) * 100)}%
+                            </span>
+                          </>
+                        )}
+                      </div>
+                    </div>
+                    <ChevronRight className="w-5 h-5 text-gray-300 group-hover:text-primary-500 transition-colors shrink-0" />
+                  </button>
+                ))}
+              </div>
             </div>
           )}
 
-          {/* Recent & Trending - Show when no query */}
-          {!query && (
-            <>
-              {/* Recent Searches */}
-              {recentSearches.length > 0 && (
-                <div className="p-2 border-b border-gray-100">
-                  <p className="px-3 py-2 text-xs font-medium text-gray-500 uppercase tracking-wide flex items-center gap-1.5">
-                    <Clock className="w-3.5 h-3.5" />
-                    Legutóbbi keresések
-                  </p>
-                  {recentSearches.map((search, idx) => (
+          {/* Nincs találat */}
+          {query.length >= 2 && searchResults.results.length === 0 && autocompleteSuggestions.length === 0 && (
+            <div className="p-8 text-center">
+              <div className="w-16 h-16 bg-gray-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                <Search className="w-8 h-8 text-gray-300" />
+              </div>
+              <p className="text-gray-800 font-semibold mb-1">Nincs találat: "{query}"</p>
+              <p className="text-sm text-gray-500 mb-4">Próbálj más kulcsszavakat vagy egyszerűsítsd a keresést</p>
+              
+              {/* Javaslatok */}
+              {searchResults.suggestions?.length > 0 && (
+                <div className="space-y-2">
+                  <p className="text-xs text-gray-500 uppercase tracking-wide">Tippek:</p>
+                  {searchResults.suggestions.map((sug, i) => (
                     <button
-                      key={idx}
-                      onClick={() => handleSuggestionClick(search)}
-                      className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-gray-50 transition-colors text-left"
+                      key={i}
+                      onClick={() => handleSuggestionClick({ text: sug.action })}
+                      className="inline-flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-primary-50 text-gray-700 hover:text-primary-700 rounded-full text-sm transition-colors mr-2"
                     >
-                      <Clock className="w-4 h-4 text-gray-400" />
-                      <span className="text-sm text-gray-700">{search}</span>
-                      <ArrowRight className="w-4 h-4 text-gray-300 ml-auto" />
+                      <Lightbulb className="w-4 h-4" />
+                      {sug.text}
                     </button>
                   ))}
                 </div>
               )}
+            </div>
+          )}
 
-              {/* Trending Searches */}
-              <div className="p-2">
-                <p className="px-3 py-2 text-xs font-medium text-gray-500 uppercase tracking-wide flex items-center gap-1.5">
+          {/* Kezdőállapot - amikor nincs query */}
+          {query.length < 2 && (
+            <>
+              {/* Proaktív AI javaslatok */}
+              {proactiveSuggestions.length > 0 && (
+                <div className="p-3 border-b border-gray-100 bg-gradient-to-r from-primary-50/50 to-secondary-50/50">
+                  <p className="px-2 py-1 text-xs font-semibold text-gray-600 uppercase tracking-wider flex items-center gap-1.5 mb-2">
+                    <Sparkles className="w-3.5 h-3.5 text-primary-500" />
+                    Személyre szabott ajánlatok
+                  </p>
+                  <div className="flex flex-wrap gap-2">
+                    {proactiveSuggestions.map((sug, idx) => (
+                      <button
+                        key={idx}
+                        onClick={() => handleSuggestionClick(sug)}
+                        className="flex items-center gap-2 px-4 py-2 bg-white hover:bg-primary-50 border border-gray-200 hover:border-primary-300 text-gray-700 hover:text-primary-700 rounded-xl text-sm font-medium transition-all hover:shadow-sm"
+                      >
+                        <span>{sug.icon}</span>
+                        {sug.text}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Korábbi keresések */}
+              {recentSearches.length > 0 && (
+                <div className="p-3 border-b border-gray-100">
+                  <p className="px-2 py-1 text-xs font-semibold text-gray-500 uppercase tracking-wider flex items-center gap-1.5">
+                    <History className="w-3.5 h-3.5" />
+                    Korábbi keresések
+                  </p>
+                  <div className="mt-2 space-y-1">
+                    {recentSearches.map((search, idx) => (
+                      <button
+                        key={idx}
+                        onClick={() => handleSuggestionClick(search)}
+                        className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-gray-50 transition-colors text-left group"
+                      >
+                        <Clock className="w-4 h-4 text-gray-400" />
+                        <span className="flex-1 text-sm text-gray-700">{search}</span>
+                        <ArrowRight className="w-4 h-4 text-gray-300 group-hover:text-primary-500 transition-colors" />
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Nemrég nézett termékek */}
+              {recentlyViewed.length > 0 && (
+                <div className="p-3 border-b border-gray-100">
+                  <p className="px-2 py-1 text-xs font-semibold text-gray-500 uppercase tracking-wider flex items-center gap-1.5">
+                    <Eye className="w-3.5 h-3.5" />
+                    Nemrég nézett
+                  </p>
+                  <div className="mt-2 flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
+                    {recentlyViewed.map((product, idx) => (
+                      <button
+                        key={idx}
+                        onClick={() => handleProductClick(product)}
+                        className="flex-shrink-0 w-24 group"
+                      >
+                        <div className="w-24 h-24 bg-gray-100 rounded-xl overflow-hidden ring-1 ring-gray-200 group-hover:ring-primary-300 transition-all">
+                          {product.image ? (
+                            <img src={product.image} alt={product.name} className="w-full h-full object-cover" />
+                          ) : (
+                            <div className="w-full h-full flex items-center justify-center">
+                              <Package className="w-8 h-8 text-gray-300" />
+                            </div>
+                          )}
+                        </div>
+                        <p className="mt-1.5 text-xs text-gray-700 truncate group-hover:text-primary-600 transition-colors font-medium">
+                          {product.name}
+                        </p>
+                        <p className="text-xs text-primary-600 font-semibold">
+                          {product.price?.toLocaleString()} Ft
+                        </p>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Trendi keresések */}
+              <div className="p-3">
+                <p className="px-2 py-1 text-xs font-semibold text-gray-500 uppercase tracking-wider flex items-center gap-1.5">
                   <TrendingUp className="w-3.5 h-3.5 text-primary-500" />
                   Népszerű keresések
                 </p>
-                <div className="flex flex-wrap gap-2 px-3 py-2">
-                  {trendingSearches.map((search, idx) => (
+                <div className="mt-2 flex flex-wrap gap-2">
+                  {trendingSearches.map((item, idx) => (
                     <button
                       key={idx}
-                      onClick={() => handleSuggestionClick(search)}
-                      className="flex items-center gap-1.5 px-3 py-1.5 bg-primary-50 text-primary-700 rounded-full text-sm font-medium hover:bg-primary-100 transition-colors"
+                      onClick={() => handleSuggestionClick(item.text)}
+                      className="flex items-center gap-2 px-4 py-2 bg-primary-50 hover:bg-primary-100 text-primary-700 rounded-xl text-sm font-medium transition-colors"
                     >
-                      <Sparkles className="w-3 h-3" />
-                      {search}
+                      <span>{item.icon}</span>
+                      {item.text}
                     </button>
                   ))}
                 </div>
               </div>
+
+              {/* Gyors kategóriák */}
+              {categories.length > 0 && (
+                <div className="p-3 pt-0">
+                  <p className="px-2 py-1 text-xs font-semibold text-gray-500 uppercase tracking-wider flex items-center gap-1.5">
+                    <Filter className="w-3.5 h-3.5" />
+                    Kategóriák
+                  </p>
+                  <div className="mt-2 flex flex-wrap gap-2">
+                    {categories.slice(0, 6).map((cat, idx) => (
+                      <button
+                        key={idx}
+                        onClick={() => handleSuggestionClick(cat)}
+                        className="px-3 py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg text-sm transition-colors"
+                      >
+                        {cat}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
             </>
           )}
+
+          {/* Footer - keresési tippek */}
+          <div className="px-4 py-3 bg-gray-50 border-t border-gray-100">
+            <p className="text-xs text-gray-500 text-center">
+              💡 <span className="font-medium">Tipp:</span> Keress természetesen, pl. "fehér kanapé 150 ezer alatt" vagy "modern nappali bútor"
+            </p>
+          </div>
         </div>
       )}
     </div>
