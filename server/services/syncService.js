@@ -146,7 +146,7 @@ export async function syncProductsFromUnas(options = {}) {
     console.log('💾 Saving to database batch-by-batch (memory efficient)');
     
     let offset = 0;
-    const batchSize = 500; // Smaller batches for full data (descriptions + params = more memory)
+    const batchSize = 2000; // Full data needs more memory - upgrade Railway if OOM
     let hasMore = true;
     let batchCount = 0;
     let totalFetched = 0;
@@ -286,8 +286,8 @@ export async function syncProductsFromUnas(options = {}) {
         totalFetched += batchProducts.length;
         offset += batchSize;
         
-        // Progress update every 20 batches (500/batch = more frequent)
-        if (batchCount % 20 === 0) {
+        // Progress update every 10 batches
+        if (batchCount % 10 === 0) {
           const estimatedProgress = Math.min(100, (totalFetched / 170000 * 100)).toFixed(1);
           console.log(`📈 Progress: ~${estimatedProgress}% (${totalFetched.toLocaleString()} products fetched)`);
         }
