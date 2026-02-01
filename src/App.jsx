@@ -1001,9 +1001,6 @@ const Testimonials = () => (
 );
 
 const ProductModal = ({ product, isOpen, onClose, allProducts = [], onAddToCart }) => {
-    // #region agent log
-    fetch('http://127.0.0.1:7243/ingest/ce754df7-7b1e-4d67-97a6-01293e3ab261',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'ProductModal:render',message:'ProductModal rendering',data:{isOpen,hasProduct:!!product,productId:product?.id,allProductsCount:allProducts?.length},timestamp:Date.now(),sessionId:'debug-session',hypothesisId:'A'})}).catch(()=>{});
-    // #endregion
     const [aiTip, setAiTip] = useState(null);
     const [loadingTip, setLoadingTip] = useState(false);
     
@@ -1012,10 +1009,6 @@ const ProductModal = ({ product, isOpen, onClose, allProducts = [], onAddToCart 
     }, [product]);
 
     if (!isOpen || !product) return null;
-    
-    // #region agent log
-    fetch('http://127.0.0.1:7243/ingest/ce754df7-7b1e-4d67-97a6-01293e3ab261',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'ProductModal:renderContent',message:'ProductModal rendering content',data:{productName:product?.name,productPrice:product?.price,hasImages:!!(product?.images?.length)},timestamp:Date.now(),sessionId:'debug-session',hypothesisId:'A'})}).catch(()=>{});
-    // #endregion
 
     const generateStyleTip = async () => {
         setLoadingTip(true);
@@ -1137,14 +1130,14 @@ const ProductModal = ({ product, isOpen, onClose, allProducts = [], onAddToCart 
                         </div>
                       )} */}
 
-                      {/* Price History - temporarily disabled for debugging */}
-                      {/* <div className="mb-6">
+                      {/* Price History */}
+                      <div className="mb-6">
                         <PriceHistory
                           currentPrice={product.price}
                           productId={product.id}
                           onSetAlert={(id, price) => console.log('Alert set for', id, price)}
                         />
-                      </div> */}
+                      </div>
 
                       {/* Product Tabs - Details, Specs, Reviews */}
                       <div className="mb-6">
@@ -1337,16 +1330,6 @@ const RoomPlanner = ({ products }) => {
 };
 
 const App = () => {
-  // #region agent log - Global error handler
-  React.useEffect(() => {
-    const handleError = (event) => {
-      fetch('http://127.0.0.1:7243/ingest/ce754df7-7b1e-4d67-97a6-01293e3ab261',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'App.jsx:globalErrorHandler',message:'Uncaught error',data:{error:event.error?.message || event.message,stack:event.error?.stack?.slice(0,800),filename:event.filename,lineno:event.lineno,colno:event.colno},timestamp:Date.now(),sessionId:'debug-session',hypothesisId:'GLOBAL'})}).catch(()=>{});
-    };
-    window.addEventListener('error', handleError);
-    return () => window.removeEventListener('error', handleError);
-  }, []);
-  // #endregion
-  
   const [activeTab, setActiveTab] = useState('shop');
   const [products, setProducts] = useState([]);
   const [totalProductsCount, setTotalProductsCount] = useState(0);
@@ -1419,24 +1402,9 @@ const App = () => {
   
   // Track product views - both for RecentlyViewed component and user preferences
   const handleProductView = (product) => {
-    // #region agent log
-    fetch('http://127.0.0.1:7243/ingest/ce754df7-7b1e-4d67-97a6-01293e3ab261',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'App.jsx:handleProductView:entry',message:'handleProductView called',data:{productId:product?.id,productName:product?.name,hasPrice:!!product?.price},timestamp:Date.now(),sessionId:'debug-session',hypothesisId:'B'})}).catch(()=>{});
-    // #endregion
-    try {
-      trackProductView(product); // RecentlyViewed component
-      trackProductViewPref(product); // User preferences service (for AI personalization)
-      // #region agent log
-      fetch('http://127.0.0.1:7243/ingest/ce754df7-7b1e-4d67-97a6-01293e3ab261',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'App.jsx:handleProductView:beforeSetSelected',message:'About to setSelectedProduct',data:{productId:product?.id},timestamp:Date.now(),sessionId:'debug-session',hypothesisId:'B'})}).catch(()=>{});
-      // #endregion
-      setSelectedProduct(product);
-      // #region agent log
-      fetch('http://127.0.0.1:7243/ingest/ce754df7-7b1e-4d67-97a6-01293e3ab261',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'App.jsx:handleProductView:success',message:'setSelectedProduct completed',data:{productId:product?.id},timestamp:Date.now(),sessionId:'debug-session',hypothesisId:'B'})}).catch(()=>{});
-      // #endregion
-    } catch (err) {
-      // #region agent log
-      fetch('http://127.0.0.1:7243/ingest/ce754df7-7b1e-4d67-97a6-01293e3ab261',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'App.jsx:handleProductView:error',message:'Error in handleProductView',data:{error:err?.message,stack:err?.stack?.slice(0,500)},timestamp:Date.now(),sessionId:'debug-session',hypothesisId:'B'})}).catch(()=>{});
-      // #endregion
-    }
+    trackProductView(product); // RecentlyViewed component
+    trackProductViewPref(product); // User preferences service (for AI personalization)
+    setSelectedProduct(product);
   };
   
   // Handle AI recommended products - scroll to products and show them
@@ -1881,8 +1849,8 @@ const App = () => {
               />
             )}
 
-            {/* New premium features - temporarily disabled for debugging */}
-            {/* <div className="w-full max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-10 py-8 sm:py-10 lg:py-12">
+            {/* New premium features */}
+            <div className="w-full max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-10 py-8 sm:py-10 lg:py-12">
               <VirtualShowroom
                 products={products}
                 onProductClick={handleProductView}
@@ -1911,7 +1879,7 @@ const App = () => {
                 onRemoveItem={(id) => toggleWishlist(id)}
                 onShare={() => {}}
               />
-            </div> */}
+            </div>
             
             <FadeInOnScroll direction="up">
               <Features />
@@ -2152,18 +2120,13 @@ const App = () => {
       
       {/* Similar Products AI Recommendation */}
       {selectedProduct && (
-        <>
-          {/* #region agent log */}
-          {(() => { fetch('http://127.0.0.1:7243/ingest/ce754df7-7b1e-4d67-97a6-01293e3ab261',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'App.jsx:SimilarProducts:render',message:'Rendering SimilarProducts',data:{selectedProductId:selectedProduct?.id},timestamp:Date.now(),sessionId:'debug-session',hypothesisId:'D'})}).catch(()=>{}); return null; })()}
-          {/* #endregion */}
-          <SimilarProducts
-            currentProduct={selectedProduct}
-            allProducts={products}
-            onToggleWishlist={toggleWishlist}
-            wishlist={wishlist}
-            onQuickView={handleProductView}
-          />
-        </>
+        <SimilarProducts
+          currentProduct={selectedProduct}
+          allProducts={products}
+          onToggleWishlist={toggleWishlist}
+          wishlist={wishlist}
+          onQuickView={handleProductView}
+        />
       )}
       
       {/* Product Comparison */}
@@ -2290,17 +2253,12 @@ const App = () => {
 
       {/* Sticky Add to Cart (shows for selected product) */}
       {selectedProduct && (
-        <>
-          {/* #region agent log */}
-          {(() => { fetch('http://127.0.0.1:7243/ingest/ce754df7-7b1e-4d67-97a6-01293e3ab261',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'App.jsx:StickyAddToCart:render',message:'Rendering StickyAddToCart',data:{selectedProductId:selectedProduct?.id,wishlistIncludes:wishlist.includes(selectedProduct.id)},timestamp:Date.now(),sessionId:'debug-session',hypothesisId:'C'})}).catch(()=>{}); return null; })()}
-          {/* #endregion */}
-          <StickyAddToCart
-            product={selectedProduct}
-            onAddToCart={handleAddToCart}
-            onToggleWishlist={toggleWishlist}
-            isWishlisted={wishlist.includes(selectedProduct.id)}
-          />
-        </>
+        <StickyAddToCart
+          product={selectedProduct}
+          onAddToCart={handleAddToCart}
+          onToggleWishlist={toggleWishlist}
+          isWishlisted={wishlist.includes(selectedProduct.id)}
+        />
       )}
 
       {/* Exit Intent Popup */}
