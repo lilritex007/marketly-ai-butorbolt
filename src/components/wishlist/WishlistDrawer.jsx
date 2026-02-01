@@ -61,17 +61,17 @@ const WishlistDrawer = ({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 lg:top-[60px] z-[80]">
+    <div className="fixed inset-0 z-[80]">
       {/* Backdrop */}
       <div 
-        className={`absolute inset-0 bg-black transition-opacity duration-300 ${isClosing ? 'opacity-0' : 'opacity-50'}`}
+        className={`absolute inset-0 lg:top-[60px] bg-black transition-opacity duration-300 ${isClosing ? 'opacity-0' : 'opacity-50'}`}
         onClick={handleClose}
       />
 
       {/* Drawer */}
       <div 
         className={`
-          absolute top-0 right-0 h-full lg:h-[calc(100vh-60px)] w-full max-w-md bg-white shadow-2xl
+          absolute top-0 lg:top-[60px] right-0 h-full lg:h-[calc(100vh-60px)] w-full max-w-md bg-white shadow-2xl
           transition-transform duration-300 ease-out
           ${isClosing ? 'translate-x-full' : 'translate-x-0'}
         `}
