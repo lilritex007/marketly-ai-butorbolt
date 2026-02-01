@@ -1117,8 +1117,8 @@ const ProductModal = ({ product, isOpen, onClose, allProducts = [], onAddToCart 
                         </div>
                       )}
 
-                      {/* Smart Bundle - AI-powered bundle deals */}
-                      {allProducts.length > 0 && (
+                      {/* Smart Bundle - temporarily disabled for debugging */}
+                      {/* {allProducts.length > 0 && (
                         <div className="mb-6">
                           <SmartBundle
                             currentProduct={product}
@@ -1128,16 +1128,16 @@ const ProductModal = ({ product, isOpen, onClose, allProducts = [], onAddToCart 
                             }}
                           />
                         </div>
-                      )}
+                      )} */}
 
-                      {/* Price History - Dynamic pricing */}
-                      <div className="mb-6">
+                      {/* Price History - temporarily disabled for debugging */}
+                      {/* <div className="mb-6">
                         <PriceHistory
                           currentPrice={product.price}
                           productId={product.id}
                           onSetAlert={(id, price) => console.log('Alert set for', id, price)}
                         />
-                      </div>
+                      </div> */}
 
                       {/* Product Tabs - Details, Specs, Reviews */}
                       <div className="mb-6">
@@ -1849,8 +1849,8 @@ const App = () => {
               />
             )}
 
-            {/* Virtual Showroom - Interactive room designer */}
-            <div className="w-full max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-10 py-8 sm:py-10 lg:py-12">
+            {/* New premium features - temporarily disabled for debugging */}
+            {/* <div className="w-full max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-10 py-8 sm:py-10 lg:py-12">
               <VirtualShowroom
                 products={products}
                 onProductClick={handleProductView}
@@ -1858,12 +1858,10 @@ const App = () => {
               />
             </div>
 
-            {/* Photo Reviews Section */}
             <div className="w-full max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
               <PhotoReviews productId="featured" />
             </div>
 
-            {/* Loyalty Program Section */}
             <div className="w-full max-w-[500px] mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
               <LoyaltyProgram
                 currentPoints={2450}
@@ -1874,7 +1872,6 @@ const App = () => {
               />
             </div>
 
-            {/* Gift Registry Section */}
             <div className="w-full max-w-[600px] mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
               <GiftRegistry
                 items={wishlist.map(id => products.find(p => p.id === id)).filter(Boolean)}
@@ -1882,7 +1879,7 @@ const App = () => {
                 onRemoveItem={(id) => toggleWishlist(id)}
                 onShare={() => {}}
               />
-            </div>
+            </div> */}
             
             <FadeInOnScroll direction="up">
               <Features />
