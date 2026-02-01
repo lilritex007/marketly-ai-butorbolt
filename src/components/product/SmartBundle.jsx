@@ -6,8 +6,15 @@ import { Package, Sparkles, Check, Plus, Minus, ShoppingCart, Tag, ArrowRight, G
  * Beautiful UI with animated selections and savings calculator
  */
 const SmartBundle = ({ currentProduct, allProducts = [], onAddBundle }) => {
-  const [selectedItems, setSelectedItems] = useState(new Set([currentProduct?.id]));
+  const [selectedItems, setSelectedItems] = useState(new Set());
   const [isExpanded, setIsExpanded] = useState(true);
+
+  // Update selected items when currentProduct changes
+  React.useEffect(() => {
+    if (currentProduct?.id) {
+      setSelectedItems(new Set([currentProduct.id]));
+    }
+  }, [currentProduct?.id]);
 
   // Generate smart bundle suggestions based on current product
   const bundleSuggestions = useMemo(() => {

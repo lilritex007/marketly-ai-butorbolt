@@ -14,39 +14,46 @@ const PriceHistory = ({
   const [isExpanded, setIsExpanded] = useState(false);
   const [alertSet, setAlertSet] = useState(false);
 
+  // Early return if no valid price
+  const validPrice = currentPrice && currentPrice > 0 ? currentPrice : 100000;
+
   // Generate mock price history if not provided
   const history = useMemo(() => {
     if (priceHistory.length > 0) return priceHistory;
     
     // Generate 6 months of price data
     const months = ['Aug', 'Szept', 'Okt', 'Nov', 'Dec', 'Jan'];
-    const basePrice = currentPrice;
+    const basePrice = validPrice;
     
     return months.map((month, idx) => {
       const variance = (Math.random() - 0.5) * 0.3; // ±15% variance
       const price = Math.round(basePrice * (1 + variance));
       return {
         month,
-        price,
+        price: price || basePrice, // Ensure price is never 0
         date: new Date(2025, 7 + idx, 1)
       };
     });
-  }, [currentPrice, priceHistory]);
+  }, [validPrice, priceHistory]);
 
   // Calculate stats
   const stats = useMemo(() => {
-    const prices = history.map(h => h.price);
-    const min = Math.min(...prices);
-    const max = Math.max(...prices);
-    const avg = Math.round(prices.reduce((a, b) => a + b, 0) / prices.length);
-    const previousPrice = history[history.length - 2]?.price || currentPrice;
-    const priceChange = currentPrice - previousPrice;
-    const changePercent = ((priceChange / previousPrice) * 100).toFixed(1);
-    const isLowest = currentPrice <= min * 1.05; // Within 5% of lowest
-    const isHighest = currentPrice >= max * 0.95;
+    if (!history || history.length === 0) {
+      return { min: validPrice, max: validPrice, avg: validPrice, priceChange: 0, changePercent: '0.0', isLowest: false, isHighest: false, previousPrice: validPrice };
+    }
+    
+    const prices = history.map(h => h.price || validPrice);
+    const min = Math.min(...prices) || validPrice;
+    const max = Math.max(...prices) || validPrice;
+    const avg = Math.round(prices.reduce((a, b) => a + b, 0) / prices.length) || validPrice;
+    const previousPrice = history[history.length - 2]?.price || validPrice;
+    const priceChange = validPrice - previousPrice;
+    const changePercent = previousPrice > 0 ? ((priceChange / previousPrice) * 100).toFixed(1) : '0.0';
+    const isLowest = validPrice <= min * 1.05; // Within 5% of lowest
+    const isHighest = validPrice >= max * 0.95;
     
     return { min, max, avg, priceChange, changePercent, isLowest, isHighest, previousPrice };
-  }, [history, currentPrice]);
+  }, [history, validPrice]);
 
   // Chart dimensions
   const chartHeight = 60;
