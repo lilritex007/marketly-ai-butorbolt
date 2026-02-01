@@ -146,7 +146,7 @@ export async function syncProductsFromUnas(options = {}) {
     console.log('💾 Saving to database batch-by-batch (memory efficient)');
     
     let offset = 0;
-    const batchSize = 1000; // Reduced for Railway free tier memory limits
+    const batchSize = 2000; // Railway Hobby plan - plenty of memory!
     let hasMore = true;
     let batchCount = 0;
     let totalFetched = 0;
