@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { Search, X, Clock, TrendingUp, ArrowRight, Sparkles, Package, Filter, ChevronRight } from 'lucide-react';
+import { getSearchHistory, trackSearch, getViewedProducts } from '../../services/userPreferencesService';
 
 /**
  * SmartSearchBar - Intelligent search with autocomplete and previews
@@ -18,11 +19,23 @@ const SmartSearchBar = ({
   const inputRef = useRef(null);
   const containerRef = useRef(null);
 
-  // Recent searches (mock - would be from localStorage in real app)
-  const recentSearches = ['kanapé', 'étkező asztal', 'könyvespolc'];
+  // Real recent searches from user preferences
+  const recentSearches = useMemo(() => {
+    const history = getSearchHistory(5);
+    return history.map(h => h.query).filter(q => q && q.length > 0);
+  }, [isOpen]); // Re-fetch when dropdown opens
   
-  // Trending searches
-  const trendingSearches = ['skandináv kanapé', 'minimál íróasztal', 'bőr fotel', 'tölgyfa komód'];
+  // Trending searches - based on popular categories + viewed products
+  const trendingSearches = useMemo(() => {
+    const viewed = getViewedProducts(3);
+    const viewedCategories = viewed.map(p => p.category?.split(' > ')[0]).filter(Boolean);
+    
+    // Default trending + personalized from viewed
+    const defaults = ['modern kanapé', 'skandináv bútor', 'akciós termékek', 'étkező garnitúra'];
+    const personalized = viewedCategories.map(c => `${c} ajánlatok`);
+    
+    return [...new Set([...personalized, ...defaults])].slice(0, 4);
+  }, [isOpen]);
 
   // Filter products based on query
   const searchResults = useMemo(() => {
@@ -61,6 +74,7 @@ const SmartSearchBar = ({
   const handleSubmit = (e) => {
     e.preventDefault();
     if (query.trim()) {
+      trackSearch(query); // Save to search history
       onSearch?.(query, activeCategory);
       setIsOpen(false);
     }
@@ -74,6 +88,7 @@ const SmartSearchBar = ({
 
   const handleSuggestionClick = (suggestion) => {
     setQuery(suggestion);
+    trackSearch(suggestion); // Save to search history
     onSearch?.(suggestion, activeCategory);
     setIsOpen(false);
   };
