@@ -1117,6 +1117,28 @@ const ProductModal = ({ product, isOpen, onClose, allProducts = [], onAddToCart 
                         </div>
                       )}
 
+                      {/* Smart Bundle - AI-powered bundle deals */}
+                      {allProducts.length > 0 && (
+                        <div className="mb-6">
+                          <SmartBundle
+                            currentProduct={product}
+                            allProducts={allProducts}
+                            onAddBundle={(items, price) => {
+                              items.forEach(item => onAddToCart(item, 1));
+                            }}
+                          />
+                        </div>
+                      )}
+
+                      {/* Price History - Dynamic pricing */}
+                      <div className="mb-6">
+                        <PriceHistory
+                          currentPrice={product.price}
+                          productId={product.id}
+                          onSetAlert={(id, price) => console.log('Alert set for', id, price)}
+                        />
+                      </div>
+
                       {/* Product Tabs - Details, Specs, Reviews */}
                       <div className="mb-6">
                         <ProductTabs product={product} />
@@ -1354,6 +1376,12 @@ const App = () => {
   const [showWishlistDrawer, setShowWishlistDrawer] = useState(false);
   const [cartItems, setCartItems] = useState([]);
   const [recentlyAddedToCart, setRecentlyAddedToCart] = useState(null);
+  
+  // Phase 3 UX states - New premium features
+  const [showARMeasure, setShowARMeasure] = useState(false);
+  const [arMeasureProduct, setArMeasureProduct] = useState(null);
+  const [showOneClickCheckout, setShowOneClickCheckout] = useState(false);
+  const [oneClickProduct, setOneClickProduct] = useState(null);
   
   // Flash sale end time (set to 12 hours from now for demo)
   const flashSaleEndTime = useMemo(() => {
@@ -1834,6 +1862,27 @@ const App = () => {
             <div className="w-full max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
               <PhotoReviews productId="featured" />
             </div>
+
+            {/* Loyalty Program Section */}
+            <div className="w-full max-w-[500px] mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+              <LoyaltyProgram
+                currentPoints={2450}
+                totalSpent={485000}
+                tier="silver"
+                onViewRewards={() => {}}
+                onRedeemPoints={(reward) => console.log('Redeem:', reward)}
+              />
+            </div>
+
+            {/* Gift Registry Section */}
+            <div className="w-full max-w-[600px] mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+              <GiftRegistry
+                items={wishlist.map(id => products.find(p => p.id === id)).filter(Boolean)}
+                onAddItem={() => {}}
+                onRemoveItem={(id) => toggleWishlist(id)}
+                onShare={() => {}}
+              />
+            </div>
             
             <FadeInOnScroll direction="up">
               <Features />
@@ -1872,10 +1921,12 @@ const App = () => {
                     {/* Search & Filters */}
                     <div className="w-full sm:w-auto flex items-center gap-2 sm:gap-3 lg:gap-4">
                       <div className="flex-1 sm:flex-initial sm:w-64 lg:w-80 xl:w-[420px] 2xl:w-[500px]">
-                        <SmartSearch 
+                        <SmartSearchBar 
                           products={products}
+                          categories={categories}
                           onSearch={handleServerSearch}
-                          onSelectProduct={handleProductView}
+                          onProductClick={handleProductView}
+                          placeholder="Keresés bútorok között..."
                         />
                       </div>
                       {/* Desktop filters */}
@@ -2130,6 +2181,49 @@ const App = () => {
             setArProduct(null);
           }}
         />
+      )}
+
+      {/* AR Measure - Room fit checker */}
+      {showARMeasure && arMeasureProduct && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" onClick={() => setShowARMeasure(false)}>
+          <div onClick={e => e.stopPropagation()}>
+            <ARMeasure
+              product={arMeasureProduct}
+              onClose={() => {
+                setShowARMeasure(false);
+                setArMeasureProduct(null);
+              }}
+              onConfirmFit={() => {
+                handleAddToCart(arMeasureProduct);
+                setShowARMeasure(false);
+                setArMeasureProduct(null);
+              }}
+            />
+          </div>
+        </div>
+      )}
+
+      {/* One-Click Checkout */}
+      {showOneClickCheckout && oneClickProduct && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" onClick={() => setShowOneClickCheckout(false)}>
+          <div onClick={e => e.stopPropagation()}>
+            <OneClickCheckout
+              product={oneClickProduct}
+              savedAddress="1234 Budapest, Példa utca 12."
+              userEmail="user@example.com"
+              userName="Felhasználó"
+              onCheckout={({ product }) => {
+                toast.success('Sikeres rendelés!');
+                setShowOneClickCheckout(false);
+                setOneClickProduct(null);
+              }}
+              onClose={() => {
+                setShowOneClickCheckout(false);
+                setOneClickProduct(null);
+              }}
+            />
+          </div>
+        </div>
       )}
 
       {/* Smart Newsletter Popup */}
