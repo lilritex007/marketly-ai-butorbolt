@@ -34,49 +34,65 @@ const SmartSearchBar = ({
 }) => {
   const [query, setQuery] = useState('');
   const [isOpen, setIsOpen] = useState(false);
-  const [isSearching, setIsSearching] = useState(false);
-  const [activeTab, setActiveTab] = useState('suggestions'); // suggestions, results, filters
+  const [debouncedQuery, setDebouncedQuery] = useState('');
   const inputRef = useRef(null);
   const containerRef = useRef(null);
-  const debounceRef = useRef(null);
+  const debounceTimerRef = useRef(null);
 
-  // Autocomplete javaslatok - valós időben frissül
-  const autocompleteSuggestions = useMemo(() => {
-    if (!query.trim() || query.length < 2) return [];
-    return getAutocompleteSuggestions(products, query, 6);
-  }, [query, products]);
-
-  // Keresési eredmények - valós időben
-  const searchResults = useMemo(() => {
-    if (!query.trim() || query.length < 2) return { results: [], intent: null };
-    return smartSearch(products, query, { limit: 8, includeDebugInfo: false });
-  }, [query, products]);
-
-  // Felismert keresési szándék megjelenítése
-  const searchIntent = useMemo(() => {
-    if (!query.trim() || query.length < 3) return null;
-    return parseSearchIntent(query);
+  // Debounce query - csak 300ms után kezdjen keresni
+  useEffect(() => {
+    if (debounceTimerRef.current) {
+      clearTimeout(debounceTimerRef.current);
+    }
+    debounceTimerRef.current = setTimeout(() => {
+      setDebouncedQuery(query);
+    }, 300);
+    return () => {
+      if (debounceTimerRef.current) {
+        clearTimeout(debounceTimerRef.current);
+      }
+    };
   }, [query]);
 
-  // Proaktív javaslatok (amikor nincs query)
-  const proactiveSuggestions = useMemo(() => {
-    return getProactiveSuggestions(products);
-  }, [products, isOpen]);
+  // Autocomplete javaslatok - CSAK ha debounced query változik
+  const autocompleteSuggestions = useMemo(() => {
+    if (!debouncedQuery.trim() || debouncedQuery.length < 2 || !products.length) return [];
+    // Limitáljuk az első 500 termékre a gyorsaság érdekében
+    const limitedProducts = products.slice(0, 500);
+    return getAutocompleteSuggestions(limitedProducts, debouncedQuery, 6);
+  }, [debouncedQuery, products]);
 
-  // Keresési előzmények
+  // Keresési eredmények - CSAK ha debounced query változik
+  const searchResults = useMemo(() => {
+    if (!debouncedQuery.trim() || debouncedQuery.length < 2) return { results: [], intent: null, totalMatches: 0 };
+    return smartSearch(products, debouncedQuery, { limit: 8, includeDebugInfo: false });
+  }, [debouncedQuery, products]);
+
+  // Felismert keresési szándék
+  const searchIntent = useMemo(() => {
+    if (!debouncedQuery.trim() || debouncedQuery.length < 3) return null;
+    return parseSearchIntent(debouncedQuery);
+  }, [debouncedQuery]);
+
+  // Proaktív javaslatok - egyszer számítva, nem minden renderben
+  const proactiveSuggestions = useMemo(() => {
+    // Nem használjuk a products-ot itt, mert lassú lenne
+    return getProactiveSuggestions([]);
+  }, []);
+
+  // Keresési előzmények - egyszer beolvasva
   const recentSearches = useMemo(() => {
     const history = getSearchHistory(4);
     return history.map(h => h.query).filter(q => q && q.length > 0);
-  }, [isOpen]);
+  }, []);
 
-  // Nemrég nézett termékek
+  // Nemrég nézett termékek - egyszer beolvasva
   const recentlyViewed = useMemo(() => {
     return getViewedProducts(3);
-  }, [isOpen]);
+  }, []);
 
-  // Trendi keresések
+  // Trendi keresések - statikus + személyre szabott
   const trendingSearches = useMemo(() => {
-    // Kombináljuk a nézett termékek kategóriáit és alapértelmezett trendeket
     const viewed = getViewedProducts(3);
     const viewedCategories = viewed.map(p => p.category?.split(' > ')[0]).filter(Boolean);
     
@@ -94,7 +110,7 @@ const SmartSearchBar = ({
     
     const combined = [...personalized, ...defaults];
     return combined.filter((v, i, a) => a.findIndex(t => t.text === v.text) === i).slice(0, 4);
-  }, [isOpen]);
+  }, []);
 
   // Close on outside click
   useEffect(() => {
@@ -133,12 +149,6 @@ const SmartSearchBar = ({
   const handleInputChange = useCallback((e) => {
     const value = e.target.value;
     setQuery(value);
-    
-    if (value.length >= 2) {
-      setActiveTab('results');
-    } else {
-      setActiveTab('suggestions');
-    }
   }, []);
 
   const handleProductClick = useCallback((product) => {
@@ -232,7 +242,7 @@ const SmartSearchBar = ({
             : 'border-gray-200 hover:border-gray-300 hover:shadow-md'}
         `}>
           <div className="flex items-center pl-4">
-            {isSearching ? (
+            {query.length >= 2 && query !== debouncedQuery ? (
               <div className="w-5 h-5 border-2 border-primary-500 border-t-transparent rounded-full animate-spin" />
             ) : (
               <Search className={`w-5 h-5 transition-colors ${isOpen ? 'text-primary-500' : 'text-gray-400'}`} />
@@ -276,10 +286,10 @@ const SmartSearchBar = ({
         <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-2xl shadow-2xl border border-gray-100 overflow-hidden z-[9999] max-h-[75vh] overflow-y-auto">
           
           {/* Intent Tags - ha van felismert szándék */}
-          {query.length >= 3 && renderIntentTags()}
+          {debouncedQuery.length >= 3 && renderIntentTags()}
 
           {/* Autocomplete javaslatok - gépelés közben */}
-          {query.length >= 2 && autocompleteSuggestions.length > 0 && (
+          {debouncedQuery.length >= 2 && autocompleteSuggestions.length > 0 && (
             <div className="border-b border-gray-100">
               <div className="p-2">
                 <p className="px-3 py-1.5 text-xs font-semibold text-gray-500 uppercase tracking-wider flex items-center gap-1.5">
@@ -328,7 +338,7 @@ const SmartSearchBar = ({
           )}
 
           {/* Keresési találatok - termékek */}
-          {query.length >= 2 && searchResults.results.length > 0 && (
+          {debouncedQuery.length >= 2 && searchResults.results && searchResults.results.length > 0 && (
             <div className="p-2">
               <div className="flex items-center justify-between px-3 py-1.5">
                 <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider flex items-center gap-1.5">
@@ -390,12 +400,12 @@ const SmartSearchBar = ({
           )}
 
           {/* Nincs találat */}
-          {query.length >= 2 && searchResults.results.length === 0 && autocompleteSuggestions.length === 0 && (
+          {debouncedQuery.length >= 2 && (!searchResults.results || searchResults.results.length === 0) && autocompleteSuggestions.length === 0 && (
             <div className="p-8 text-center">
               <div className="w-16 h-16 bg-gray-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
                 <Search className="w-8 h-8 text-gray-300" />
               </div>
-              <p className="text-gray-800 font-semibold mb-1">Nincs találat: "{query}"</p>
+              <p className="text-gray-800 font-semibold mb-1">Nincs találat: "{debouncedQuery}"</p>
               <p className="text-sm text-gray-500 mb-4">Próbálj más kulcsszavakat vagy egyszerűsítsd a keresést</p>
               
               {/* Javaslatok */}
@@ -417,8 +427,16 @@ const SmartSearchBar = ({
             </div>
           )}
 
+          {/* Betöltés jelző gépelés közben */}
+          {query.length >= 2 && query !== debouncedQuery && (
+            <div className="p-6 text-center">
+              <div className="w-8 h-8 border-2 border-primary-500 border-t-transparent rounded-full animate-spin mx-auto mb-3" />
+              <p className="text-sm text-gray-500">Keresés...</p>
+            </div>
+          )}
+
           {/* Kezdőállapot - amikor nincs query */}
-          {query.length < 2 && (
+          {debouncedQuery.length < 2 && query.length < 2 && (
             <>
               {/* Proaktív AI javaslatok */}
               {proactiveSuggestions.length > 0 && (

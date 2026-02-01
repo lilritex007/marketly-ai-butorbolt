@@ -506,27 +506,69 @@ const calculateRelevanceScore = (product, intent, userContext = {}) => {
 // ==================== FŐ KERESÉSI FUNKCIÓK ====================
 
 /**
- * Intelligens keresés - a fő keresési funkció
+ * Intelligens keresés - a fő keresési funkció (OPTIMALIZÁLT)
  */
 export const smartSearch = (products, query, options = {}) => {
   const { limit = 20, includeDebugInfo = false } = options;
   
   if (!query || !query.trim() || !products || products.length === 0) {
-    return { results: [], intent: null, suggestions: [] };
+    return { results: [], intent: null, suggestions: [], totalMatches: 0 };
   }
   
   // 1. Szándék felismerés
   const intent = parseSearchIntent(query.trim());
   
-  // 2. Felhasználói kontextus
+  // 2. Felhasználói kontextus (egyszer betöltve)
   const userContext = {
     topCategories: getTopCategories(3),
     styleDNA: getStyleDNA()?.styleDNA,
-    viewedProducts: getViewedProducts(5),
   };
   
-  // 3. Termékek pontozása
-  const scoredProducts = products.map(product => {
+  // 3. Gyors előszűrés - csak azokat a termékeket pontozza, amik valószínűleg relevánsak
+  const queryLower = query.toLowerCase();
+  const queryNoAccent = removeAccents(query);
+  const queryWords = queryLower.split(/\s+/).filter(w => w.length > 1);
+  
+  // Kibővített keresőszavak szinonimákkal
+  const expandedWords = new Set();
+  queryWords.forEach(word => {
+    expandedWords.add(word);
+    expandedWords.add(removeAccents(word));
+    const syns = getAllSynonyms(word);
+    syns.forEach(s => {
+      expandedWords.add(s.toLowerCase());
+      expandedWords.add(removeAccents(s));
+    });
+  });
+  
+  // Gyors előszűrés - csak releváns termékek kerülnek pontozásra
+  const relevantProducts = [];
+  for (const product of products) {
+    const name = (product.name || '').toLowerCase();
+    const category = (product.category || '').toLowerCase();
+    const nameNoAccent = removeAccents(name);
+    const catNoAccent = removeAccents(category);
+    const searchText = `${nameNoAccent} ${catNoAccent}`;
+    
+    // Gyors ellenőrzés - van-e BÁRMILYEN egyezés?
+    let hasMatch = false;
+    for (const word of expandedWords) {
+      if (searchText.includes(word)) {
+        hasMatch = true;
+        break;
+      }
+    }
+    
+    if (hasMatch) {
+      relevantProducts.push(product);
+    }
+    
+    // Limitáljuk az előszűrt termékeket 200-ra a teljesítmény érdekében
+    if (relevantProducts.length >= 200) break;
+  }
+  
+  // 4. Csak a releváns termékek pontozása
+  const scoredProducts = relevantProducts.map(product => {
     const { score, bonuses } = calculateRelevanceScore(product, intent, userContext);
     return {
       product,
@@ -587,10 +629,10 @@ export const smartSearch = (products, query, options = {}) => {
 };
 
 /**
- * Autocomplete javaslatok - gépelés közben
+ * Autocomplete javaslatok - gépelés közben (OPTIMALIZÁLT)
  */
 export const getAutocompleteSuggestions = (products, partialQuery, limit = 8) => {
-  if (!partialQuery || partialQuery.length < 2 || !products) {
+  if (!partialQuery || partialQuery.length < 2 || !products || products.length === 0) {
     return [];
   }
   
@@ -598,81 +640,81 @@ export const getAutocompleteSuggestions = (products, partialQuery, limit = 8) =>
   const queryNoAccent = removeAccents(query);
   const suggestions = new Map(); // text -> { text, type, count, product? }
   
+  // Limit how many products we check for performance
+  const maxProductsToCheck = Math.min(products.length, 300);
+  let matchCount = 0;
+  
   // 1. Terméknév alapú javaslatok (legfontosabb)
-  for (const product of products) {
+  for (let i = 0; i < maxProductsToCheck && matchCount < 20; i++) {
+    const product = products[i];
     const name = product.name || '';
     const nameNoAccent = removeAccents(name);
     
     if (nameNoAccent.includes(queryNoAccent)) {
-      // Teljes terméknév
-      if (!suggestions.has(name)) {
+      matchCount++;
+      
+      // Teljes terméknév - csak ha elég jó az egyezés
+      if (nameNoAccent.startsWith(queryNoAccent) && !suggestions.has(name)) {
         suggestions.set(name, {
           text: name,
           type: 'product',
           product: product,
-          score: nameNoAccent.startsWith(queryNoAccent) ? 100 : 50,
+          score: 100,
         });
       }
-      
-      // Szavak a névből, amik illeszkednek
-      const words = name.split(/[\s,\-\/]+/).filter(w => w.length > 3);
-      for (const word of words) {
-        if (removeAccents(word).startsWith(queryNoAccent) && !suggestions.has(word)) {
-          suggestions.set(word, {
-            text: word,
-            type: 'keyword',
-            score: 30,
+    }
+  }
+  
+  // 2. Kategória alapú javaslatok - egyszerűsített
+  const seenCategories = new Set();
+  for (let i = 0; i < Math.min(products.length, 100); i++) {
+    const cat = products[i]?.category;
+    if (cat && !seenCategories.has(cat)) {
+      seenCategories.add(cat);
+      const catNoAccent = removeAccents(cat);
+      if (catNoAccent.includes(queryNoAccent)) {
+        const mainCat = cat.split(' > ')[0];
+        if (!suggestions.has(mainCat)) {
+          suggestions.set(mainCat, {
+            text: mainCat,
+            type: 'category',
+            score: 40,
           });
         }
       }
     }
   }
   
-  // 2. Kategória alapú javaslatok
-  const categories = [...new Set(products.map(p => p.category).filter(Boolean))];
-  for (const cat of categories) {
-    const catNoAccent = removeAccents(cat);
-    if (catNoAccent.includes(queryNoAccent)) {
-      const mainCat = cat.split(' > ')[0];
-      if (!suggestions.has(mainCat)) {
-        suggestions.set(mainCat, {
-          text: mainCat,
-          type: 'category',
-          score: 40,
-        });
-      }
-    }
-  }
-  
-  // 3. Szinonima/kapcsolódó javaslatok
+  // 3. Szinonima/kapcsolódó javaslatok - egyszerűsített
   const intent = parseSearchIntent(partialQuery);
   if (intent.productTypes.length > 0) {
-    for (const type of intent.productTypes) {
-      const syns = getAllSynonyms(type).slice(0, 3);
-      for (const syn of syns) {
-        if (syn !== query && !suggestions.has(syn)) {
-          suggestions.set(syn, {
-            text: syn,
-            type: 'synonym',
-            score: 25,
-          });
-        }
+    const type = intent.productTypes[0]; // Csak az első
+    const syns = getAllSynonyms(type).slice(0, 2);
+    for (const syn of syns) {
+      if (syn !== query && !suggestions.has(syn)) {
+        suggestions.set(syn, {
+          text: syn,
+          type: 'synonym',
+          score: 25,
+        });
       }
     }
   }
   
-  // 4. Kombinált javaslatok (pl. "modern kanapé", "fehér szekrény")
-  const popularCombos = [
-    'modern kanapé', 'skandináv bútor', 'fehér szekrény', 'fa asztal',
-    'bőr fotel', 'akciós termékek', 'nappali bútor', 'hálószoba bútor',
-  ];
-  for (const combo of popularCombos) {
-    if (removeAccents(combo).includes(queryNoAccent) && !suggestions.has(combo)) {
-      suggestions.set(combo, {
-        text: combo,
-        type: 'popular',
-        score: 35,
-      });
+  // 4. Kombinált javaslatok - csak ha kevés találat
+  if (suggestions.size < 4) {
+    const popularCombos = [
+      'modern kanapé', 'skandináv bútor', 'fehér szekrény', 'fa asztal',
+      'bőr fotel', 'akciós termékek', 'nappali bútor', 'hálószoba bútor',
+    ];
+    for (const combo of popularCombos) {
+      if (removeAccents(combo).includes(queryNoAccent) && !suggestions.has(combo)) {
+        suggestions.set(combo, {
+          text: combo,
+          type: 'popular',
+          score: 35,
+        });
+      }
     }
   }
   
