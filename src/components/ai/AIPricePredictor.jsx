@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { TrendingDown, TrendingUp, Bell, BellOff, Sparkles, Calendar, DollarSign } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-
-const GOOGLE_API_KEY = import.meta.env.VITE_GOOGLE_API_KEY || 'AIzaSyDZV-fAFVCvh4Ad2lKlARMdtHoZWNRwZQA';
+import { generateText } from '../../services/geminiService';
 
 /**
  * AIPricePredictor - AI-powered price prediction and smart alerts
@@ -51,25 +50,20 @@ VÁLASZ FORMÁTUM (JSON):
 Adj reális elemzést a bútoráruház kontextusában.
 `;
 
-      const response = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=${GOOGLE_API_KEY}`,
-        {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            contents: [{ parts: [{ text: prompt }] }],
-            generationConfig: {
-              temperature: 0.7,
-              responseMimeType: 'application/json'
-            }
-          })
-        }
-      );
-
-      const data = await response.json();
-      const result = JSON.parse(data.candidates?.[0]?.content?.parts?.[0]?.text || '{}');
+      const aiResult = await generateText(prompt, { temperature: 0.7 });
       
-      setPrediction(result);
+      if (aiResult.success && aiResult.text) {
+        // Try to parse JSON from the response
+        const jsonMatch = aiResult.text.match(/\{[\s\S]*\}/);
+        if (jsonMatch) {
+          const result = JSON.parse(jsonMatch[0]);
+          setPrediction(result);
+        } else {
+          throw new Error('Invalid JSON response');
+        }
+      } else {
+        throw new Error('AI request failed');
+      }
 
     } catch (error) {
       setPrediction({

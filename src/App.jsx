@@ -3,6 +3,7 @@ import { ShoppingCart, Camera, MessageCircle, X, Send, Plus, Move, Trash2, Home,
 // framer-motion removed due to Vite production build TDZ issues
 import { fetchUnasProducts, refreshUnasProducts, fetchCategories } from './services/unasApi';
 import { trackProductView as trackProductViewPref, getPersonalizedRecommendations, getSimilarProducts } from './services/userPreferencesService';
+import { generateText, analyzeImage as analyzeImageAI } from './services/geminiService';
 
 // New UI Components
 import { ProductCardSkeleton, ProductGridSkeleton, CategorySkeleton } from './components/ui/Skeleton';
@@ -91,7 +92,6 @@ import { PLACEHOLDER_IMAGE } from './utils/helpers';
 
 /* --- 1. KONFIGURÁCIÓ & ADATOK --- */
 
-const GOOGLE_API_KEY = import.meta.env.VITE_GOOGLE_API_KEY || "AIzaSyDZV-fAFVCvh4Ad2lKlARMdtHoZWNRwZQA"; 
 const WEBSHOP_DOMAIN = "https://www.marketly.hu";
 const SHOP_ID = "81697"; 
 
@@ -1016,13 +1016,12 @@ const ProductModal = ({ product, isOpen, onClose, allProducts = [], onAddToCart 
             Paraméterek: ${product.params || "Nincs adat"}
             Válaszolj magyarul, emojikkal.`;
 
-            const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${GOOGLE_API_KEY}`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
-            });
-            const data = await response.json();
-            setAiTip(data.candidates?.[0]?.content?.parts?.[0]?.text);
+            const result = await generateText(prompt);
+            if (result.success) {
+                setAiTip(result.text);
+            } else {
+                setAiTip("Sajnos most nem tudok tippet adni.");
+            }
         } catch (error) {
             setAiTip("Sajnos most nem tudok tippet adni.");
         } finally {
@@ -1182,16 +1181,13 @@ const ChatWidget = ({ products }) => {
           ? "Nincs pontos találat."
           : relevantProducts.map(p => `- ${p.name} (${p.category}): ${formatPrice(p.price)}. Adatok: ${p.params}. Link: ${p.link}`).join('\n');
 
-      const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${GOOGLE_API_KEY}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ contents: [{ parts: [{ text: `Te egy segítőkész webshop asszisztens vagy a Marketly bútorboltban.
+      const chatPrompt = `Te egy segítőkész webshop asszisztens vagy a Marketly bútorboltban.
         VEVŐ: "${userMsg}"
         KÉSZLETÜNK: ${contextText}
-        Instrukciók: Válaszolj röviden, kedvesen, magyarul. Ajánlj konkrét terméket linkkel.` }] }] })
-      });
-      const data = await response.json();
-      setMessages(prev => [...prev, { role: 'system', text: data.candidates?.[0]?.content?.parts?.[0]?.text || "Hiba történt." }]);
+        Instrukciók: Válaszolj röviden, kedvesen, magyarul. Ajánlj konkrét terméket linkkel.`;
+      
+      const result = await generateText(chatPrompt);
+      setMessages(prev => [...prev, { role: 'system', text: result.success ? result.text : "Hiba történt." }]);
     } catch (error) { setMessages(prev => [...prev, { role: 'system', text: "Hiba az AI kapcsolódásban." }]); } 
     finally { setIsLoading(false); }
   };
@@ -1241,17 +1237,19 @@ const VisualSearch = ({ products }) => {
     setIsAnalyzing(true); setSearchResults([]); setAnalysisText("Elemzés...");
     try {
       const base64Data = base64Image.split(',')[1];
-      const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${GOOGLE_API_KEY}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ contents: [{ role: "user", parts: [{ text: "Elemezd a bútort. JSON: { \"style\": \"...\", \"category\": \"...\", \"color\": \"...\" } Magyarul." }, { inlineData: { mimeType: "image/jpeg", data: base64Data } }] }], generationConfig: { responseMimeType: "application/json" } })
-      });
-      const data = await response.json();
-      const analysis = JSON.parse(data.candidates?.[0]?.content?.parts?.[0]?.text);
-      if (analysis) {
-        setAnalysisText(`Felismerve: ${analysis.style} stílusú ${analysis.color} ${analysis.category}.`);
-        const relevant = products.filter(p => p.category.toLowerCase().includes(analysis.category.toLowerCase()) || p.name.toLowerCase().includes(analysis.category.toLowerCase())).slice(0, 4);
-        setSearchResults(relevant);
+      const prompt = "Elemezd a bútort. JSON: { \"style\": \"...\", \"category\": \"...\", \"color\": \"...\" } Magyarul.";
+      
+      const result = await analyzeImageAI(base64Data, "image/jpeg", prompt);
+      
+      if (result.success && result.text) {
+        const analysis = JSON.parse(result.text);
+        if (analysis) {
+          setAnalysisText(`Felismerve: ${analysis.style} stílusú ${analysis.color} ${analysis.category}.`);
+          const relevant = products.filter(p => p.category.toLowerCase().includes(analysis.category.toLowerCase()) || p.name.toLowerCase().includes(analysis.category.toLowerCase())).slice(0, 4);
+          setSearchResults(relevant);
+        }
+      } else {
+        setAnalysisText("Hiba az elemzésben.");
       }
     } catch (error) { setAnalysisText("Hiba az elemzésben."); } 
     finally { setIsAnalyzing(false); }
