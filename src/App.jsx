@@ -1923,7 +1923,7 @@ const App = () => {
                       <div className="flex-1 sm:flex-initial sm:w-64 lg:w-80 xl:w-[420px] 2xl:w-[500px]">
                         <SmartSearchBar 
                           products={products}
-                          categories={categories}
+                          categories={categories.map(c => typeof c === 'string' ? c : c.name)}
                           onSearch={handleServerSearch}
                           onProductClick={handleProductView}
                           placeholder="Keresés bútorok között..."
