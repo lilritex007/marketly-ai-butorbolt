@@ -81,52 +81,53 @@ export async function syncProductsFromUnas(options = {}) {
       throw new Error('UNAS_API_KEY must be configured');
     }
 
-    // STEP 1: Login to get Bearer Token
-    console.log('🔐 Logging in to UNAS API...');
-    
-    const loginXml = `<?xml version="1.0" encoding="UTF-8"?>
+    // Helper function to get a fresh token
+    const getToken = async () => {
+      console.log('🔐 Logging in to UNAS API...');
+      
+      const loginXml = `<?xml version="1.0" encoding="UTF-8"?>
 <Params>
     <ApiKey>${apiKey}</ApiKey>
 </Params>`;
 
-    const loginResponse = await fetchWithRetry('https://api.unas.eu/shop/login', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/xml; charset=UTF-8'
-      },
-      body: loginXml,
-      timeoutMs: 60000 // 1 min for login
-    }, MAX_RETRIES);
+      const loginResponse = await fetchWithRetry('https://api.unas.eu/shop/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/xml; charset=UTF-8'
+        },
+        body: loginXml,
+        timeoutMs: 60000
+      }, MAX_RETRIES);
 
-    if (!loginResponse.ok) {
-      const errorText = await loginResponse.text();
-      console.error('UNAS Login Error:', errorText);
-      throw new Error(`UNAS Login failed: ${loginResponse.status}`);
-    }
+      if (!loginResponse.ok) {
+        const errorText = await loginResponse.text();
+        console.error('UNAS Login Error:', errorText);
+        throw new Error(`UNAS Login failed: ${loginResponse.status}`);
+      }
 
-    const loginData = await loginResponse.text();
-    console.log('📦 Parsing login response...');
+      const loginData = await loginResponse.text();
+      const xml2js = await import('xml2js');
+      const parser = new xml2js.Parser({ explicitArray: false });
+      const loginResult = await parser.parseStringPromise(loginData);
 
-    // Parse login XML to get Token
-    const xml2js = await import('xml2js');
-    const parser = new xml2js.Parser({ explicitArray: false });
-    const loginResult = await parser.parseStringPromise(loginData);
+      if (loginResult.Error) {
+        throw new Error(`UNAS Login Error: ${loginResult.Error}`);
+      }
 
-    if (loginResult.Error) {
-      throw new Error(`UNAS Login Error: ${loginResult.Error}`);
-    }
+      const newToken = loginResult.Login?.Token || 
+                    loginResult.Token || 
+                    loginResult.Response?.Token;
+      
+      if (!newToken) {
+        throw new Error('No token received from UNAS login.');
+      }
 
-    // UNAS returns <Login><Token>...</Token></Login>
-    const token = loginResult.Login?.Token || 
-                  loginResult.Token || 
-                  loginResult.Response?.Token;
-    
-    if (!token) {
-      console.error('❌ No token found. Full response:', JSON.stringify(loginResult, null, 2));
-      throw new Error('No token received from UNAS login. Check API Key.');
-    }
+      console.log('✅ Login successful, token received');
+      return newToken;
+    };
 
-    console.log('✅ Login successful, token received');
+    // STEP 1: Get initial token
+    let token = await getToken();
 
     // STEP 2: NO category filtering during sync - sync ALL products
     // Category filtering happens at DISPLAY time (via EXCLUDED_MAIN_CATEGORIES in productService)
@@ -232,6 +233,14 @@ export async function syncProductsFromUnas(options = {}) {
 
       if (!response.ok) {
         console.error('UNAS API Error Response:', (rawData || '').substring(0, 500));
+        
+        // Check for TOKEN EXPIRATION - get new token and retry this batch
+        if (rawData && (rawData.includes('expired Token') || rawData.includes('Authentication Error'))) {
+          console.log('🔄 Token expired, getting fresh token...');
+          token = await getToken();
+          console.log('🔄 Retrying batch with new token...');
+          continue; // Retry this batch with new token
+        }
         
         // Check for rate limit
         if (rawData && (rawData.includes('Too much') || rawData.includes('banned'))) {
