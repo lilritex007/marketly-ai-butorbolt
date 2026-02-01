@@ -197,9 +197,10 @@ export async function syncProductsFromUnas(options = {}) {
       console.log(`📦 Batch ${batchCount}: Fetching products ${offset}-${offset + batchSize}...`);
       
       // NO StatusBase filter = ALL products (active + inactive)
+      // ContentType=full: LEÍRÁSOK + PARAMÉTEREK a jobb kereséshez!
       const productXml = `<?xml version="1.0" encoding="UTF-8"?>
 <Params>
-    <ContentType>short</ContentType>
+    <ContentType>full</ContentType>
     <LimitNum>${batchSize}</LimitNum>
     <LimitStart>${offset}</LimitStart>
 </Params>`;

@@ -1491,9 +1491,10 @@ const App = () => {
     }
     
     try {
-      // Load ALL products at once - slim mode + GZIP makes this fast (~2-3 sec)
+      // Load ALL products with FULL data (descriptions + params for search)
+      // GZIP compression keeps it fast (~3-5 sec)
       const params = { 
-        slim: true,
+        // NO slim mode - we need description + params for intelligent search!
         ...(search && { search }),
         ...(category && category !== 'Összes' && { category })
       };
@@ -1501,8 +1502,13 @@ const App = () => {
       const data = await fetchUnasProducts(params);
       const newProducts = (data.products || []).map(p => ({
         ...p,
-        images: p.image ? [p.image] : [],
-        inStock: p.inStock ?? true
+        // Ensure images array exists
+        images: p.images || (p.image ? [p.image] : []),
+        image: p.images?.[0] || p.image,
+        inStock: p.inStock ?? p.in_stock ?? true,
+        // Keep description and params for search
+        description: p.description || '',
+        params: p.params || ''
       }));
       
       const totalCount = data.total ?? newProducts.length;

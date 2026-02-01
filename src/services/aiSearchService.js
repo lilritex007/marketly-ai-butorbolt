@@ -348,6 +348,7 @@ export const parseSearchIntent = (query) => {
 
 /**
  * Termék relevancia pontszám számítása
+ * FULL DATA: név + kategória + leírás + paraméterek!
  */
 const calculateRelevanceScore = (product, intent, userContext = {}) => {
   let score = 0;
@@ -356,8 +357,17 @@ const calculateRelevanceScore = (product, intent, userContext = {}) => {
   const name = (product.name || '').toLowerCase();
   const category = (product.category || '').toLowerCase();
   const description = (product.description || product.leiras || '').toLowerCase();
-  const fullText = `${name} ${category} ${description}`;
+  const params = (product.params || '').toLowerCase(); // Paraméterek: anyag, szín, méret, stb.
+  
+  // FULL TEXT: mindent keresünk!
+  const fullText = `${name} ${category} ${description} ${params}`;
   const fullTextNoAccent = removeAccents(fullText);
+  
+  // Külön változók a súlyozáshoz
+  const nameNoAccent = removeAccents(name);
+  const categoryNoAccent = removeAccents(category);
+  const descNoAccent = removeAccents(description);
+  const paramsNoAccent = removeAccents(params);
   
   const price = product.salePrice || product.price || 0;
   const originalPrice = product.originalPrice || product.price || price;
@@ -443,35 +453,49 @@ const calculateRelevanceScore = (product, intent, userContext = {}) => {
     bonuses.push(`${discountPercent}% kedvezmény`);
   }
   
-  // 9. KULCSSZÓ EGYEZÉS (fallback) - max 30 pont per szó
+  // 9. KULCSSZÓ EGYEZÉS - TELJES KERESÉS (név, kategória, leírás, paraméterek)
   for (const keyword of intent.keywords) {
     const syns = getAllSynonyms(keyword);
     let matched = false;
+    let keywordScore = 0;
     
     for (const syn of syns) {
       const synNoAccent = removeAccents(syn);
-      if (removeAccents(name).includes(synNoAccent)) {
-        score += 30;
+      
+      // Név egyezés - legmagasabb súly
+      if (nameNoAccent.includes(synNoAccent)) {
+        keywordScore = Math.max(keywordScore, 35);
         matched = true;
-        break;
       }
-      if (removeAccents(category).includes(synNoAccent)) {
-        score += 15;
+      // Kategória egyezés
+      if (categoryNoAccent.includes(synNoAccent)) {
+        keywordScore = Math.max(keywordScore, 20);
         matched = true;
-        break;
       }
-      if (removeAccents(description).includes(synNoAccent)) {
-        score += 8;
+      // Paraméterek egyezés (anyag, szín, méret) - FONTOS!
+      if (paramsNoAccent.includes(synNoAccent)) {
+        keywordScore = Math.max(keywordScore, 25);
         matched = true;
-        break;
+      }
+      // Leírás egyezés
+      if (descNoAccent.includes(synNoAccent)) {
+        keywordScore = Math.max(keywordScore, 12);
+        matched = true;
       }
     }
+    
+    score += keywordScore;
     
     // Fuzzy matching ha nincs pontos egyezés
     if (!matched && keyword.length >= 4) {
       const fuzzyScore = fuzzyMatch(keyword, name);
-      if (fuzzyScore > 0.5) {
-        score += fuzzyScore * 20;
+      if (fuzzyScore > 0.6) {
+        score += fuzzyScore * 25;
+      }
+      // Fuzzy a paraméterekben is
+      const fuzzyParamsScore = fuzzyMatch(keyword, params);
+      if (fuzzyParamsScore > 0.6) {
+        score += fuzzyParamsScore * 15;
       }
     }
   }
