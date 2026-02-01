@@ -1367,6 +1367,12 @@ const App = () => {
   const [showARPreview, setShowARPreview] = useState(false);
   const [arProduct, setArProduct] = useState(null);
   
+  // AR Measure & One-Click Checkout states
+  const [showARMeasure, setShowARMeasure] = useState(false);
+  const [arMeasureProduct, setArMeasureProduct] = useState(null);
+  const [showOneClickCheckout, setShowOneClickCheckout] = useState(false);
+  const [oneClickProduct, setOneClickProduct] = useState(null);
+  
   // New UX states
   const [showConfetti, setShowConfetti] = useState(false);
   const [showFilterSheet, setShowFilterSheet] = useState(false);
@@ -1376,12 +1382,6 @@ const App = () => {
   const [showWishlistDrawer, setShowWishlistDrawer] = useState(false);
   const [cartItems, setCartItems] = useState([]);
   const [recentlyAddedToCart, setRecentlyAddedToCart] = useState(null);
-  
-  // Phase 3 UX states - New premium features
-  const [showARMeasure, setShowARMeasure] = useState(false);
-  const [arMeasureProduct, setArMeasureProduct] = useState(null);
-  const [showOneClickCheckout, setShowOneClickCheckout] = useState(false);
-  const [oneClickProduct, setOneClickProduct] = useState(null);
   
   // Flash sale end time (set to 12 hours from now for demo)
   const flashSaleEndTime = useMemo(() => {
