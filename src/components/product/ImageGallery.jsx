@@ -81,7 +81,7 @@ const ImageGallery = ({ images = [], productName = 'Termék' }) => {
   // Fullscreen Gallery Modal
   if (isFullscreen) {
     return (
-      <div className="fixed inset-0 z-[100] bg-black flex items-center justify-center">
+      <div className="fixed inset-0 lg:top-[60px] z-[100] bg-black flex items-center justify-center">
         {/* Close button */}
         <button
           onClick={() => setIsFullscreen(false)}

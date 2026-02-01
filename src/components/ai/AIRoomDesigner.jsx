@@ -286,7 +286,7 @@ TIPP: [1 mondat személyre szabott tanács magyarul, tegezve]`;
 
   return (
     <div 
-      className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
+      className="fixed inset-0 lg:top-[60px] z-[60] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
       onClick={handleClose}
     >
       <div

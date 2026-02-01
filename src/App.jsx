@@ -1031,7 +1031,7 @@ const ProductModal = ({ product, isOpen, onClose, allProducts = [], onAddToCart 
     };
 
     return (
-        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-fade-in" onClick={onClose}>
+        <div className="fixed inset-0 lg:top-[60px] z-[60] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-fade-in" onClick={onClose}>
             <div className="bg-white rounded-3xl w-full max-w-6xl max-h-[90vh] overflow-hidden shadow-2xl flex flex-col relative" onClick={e => e.stopPropagation()}>
                 <button onClick={onClose} className="absolute top-4 right-4 z-10 bg-white/80 p-2 rounded-full hover:bg-gray-100 transition-colors"><X className="w-6 h-6 text-gray-600" /></button>
                 
@@ -2200,7 +2200,7 @@ const App = () => {
 
       {/* One-Click Checkout */}
       {showOneClickCheckout && oneClickProduct && (
-        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" onClick={() => setShowOneClickCheckout(false)}>
+        <div className="fixed inset-0 lg:top-[60px] bg-black/50 z-50 flex items-center justify-center p-4" onClick={() => setShowOneClickCheckout(false)}>
           <div onClick={e => e.stopPropagation()}>
             <OneClickCheckout
               product={oneClickProduct}

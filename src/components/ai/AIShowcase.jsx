@@ -148,7 +148,7 @@ export const AIOnboarding = ({ isOpen, onClose, targetFeature }) => {
   const TipIcon = content.icon || Lightbulb;
 
   return (
-    <div className="fixed inset-0 z-[80] flex items-center justify-center bg-black/50 backdrop-blur-sm animate-fade-in p-4" onClick={onClose}>
+    <div className="fixed inset-0 lg:top-[60px] z-[80] flex items-center justify-center bg-black/50 backdrop-blur-sm animate-fade-in p-4" onClick={onClose}>
       <div className="bg-white rounded-2xl lg:rounded-3xl p-6 sm:p-8 lg:p-10 max-w-md lg:max-w-lg xl:max-w-xl w-full shadow-2xl animate-scale-in" onClick={e => e.stopPropagation()}>
         <div className="flex items-center justify-between mb-4 lg:mb-6">
           <div className="flex items-center gap-3 lg:gap-4">

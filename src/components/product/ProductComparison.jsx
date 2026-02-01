@@ -30,7 +30,7 @@ export const ProductComparison = ({
 
       {/* Comparison Modal */}
       {isExpanded && (
-        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 animate-fade-in" onClick={() => setIsExpanded(false)}>
+        <div className="fixed inset-0 lg:top-[60px] z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 animate-fade-in" onClick={() => setIsExpanded(false)}>
           <div className="bg-white rounded-3xl w-full max-w-6xl max-h-[90vh] overflow-hidden shadow-2xl flex flex-col" onClick={e => e.stopPropagation()}>
             {/* Header */}
             <div className="p-6 border-b border-gray-200 flex justify-between items-center bg-gradient-to-r from-primary-50 to-secondary-50">
