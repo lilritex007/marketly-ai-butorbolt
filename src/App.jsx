@@ -33,7 +33,6 @@ import { SocialProof, LiveShowcase, InteractiveCTA } from './components/landing/
 
 // Product Components
 import { EnhancedProductCard } from './components/product/EnhancedProductCard';
-import { SmartSearch } from './components/product/SmartSearch';
 import { SimilarProducts } from './components/product/SimilarProducts';
 import { RecentlyViewed, trackProductView } from './components/product/RecentlyViewed';
 import { ProductComparison, useComparison } from './components/product/ProductComparison';
@@ -58,7 +57,6 @@ import ImageGallery from './components/product/ImageGallery';
 import StickyAddToCart from './components/product/StickyAddToCart';
 import PriceAlert from './components/product/PriceAlert';
 import { FadeInOnScroll, Confetti, CountUp } from './components/ui/Animations';
-import SwipeableProductCard from './components/mobile/SwipeableProductCard';
 import BottomSheet, { FilterBottomSheet } from './components/mobile/BottomSheet';
 
 // New UX Components - Phase 2
