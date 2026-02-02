@@ -15,6 +15,22 @@ import {
 } from '../../services/aiSearchService';
 import { trackSearch, getSearchHistory, getViewedProducts } from '../../services/userPreferencesService';
 
+// Keresett szó kiemelése a szövegben (case-insensitive, split tartalmazza a találatokat)
+const highlightMatch = (text, query) => {
+  if (!text || !query || query.length < 2) return text;
+  const q = query.trim().replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const re = new RegExp(`(${q})`, 'gi');
+  const parts = String(text).split(re);
+  if (parts.length <= 1) return text;
+  return parts.map((part, i) =>
+    i % 2 === 1 ? (
+      <mark key={i} className="bg-amber-200/80 text-gray-900 rounded px-0.5 font-semibold">{part}</mark>
+    ) : (
+      part
+    )
+  );
+};
+
 /**
  * SmartSearchBar - Világszínvonalú AI-alapú bútorkereső
  * 
@@ -27,6 +43,7 @@ import { trackSearch, getSearchHistory, getViewedProducts } from '../../services
  * - Proaktív ajánlások
  * - Keresési szándék felismerés
  * - Termék előnézet a találatokban
+ * - UX: találat kiemelés, / fókusz, animációk
  */
 const SmartSearchBar = ({ 
   products = [], 
@@ -157,6 +174,20 @@ const SmartSearchBar = ({
     };
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  // Keyboard shortcut: "/" focuses search (unless already in input/textarea)
+  useEffect(() => {
+    const handleGlobalKeyDown = (e) => {
+      if (e.key !== '/' || e.ctrlKey || e.metaKey || e.altKey) return;
+      const target = e.target;
+      if (target && (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable)) return;
+      e.preventDefault();
+      inputRef.current?.focus();
+      setIsOpen(true);
+    };
+    document.addEventListener('keydown', handleGlobalKeyDown);
+    return () => document.removeEventListener('keydown', handleGlobalKeyDown);
   }, []);
 
   // === CALLBACK DEFINÍCIÓK (useEffect ELŐTT kell lenniük!) ===
@@ -317,9 +348,9 @@ const SmartSearchBar = ({
     if (tags.length === 0) return null;
     
     return (
-      <div className="flex flex-wrap gap-1.5 px-4 py-2 border-b border-gray-100 bg-gray-50/50">
-        <span className="text-xs text-gray-500 mr-1 flex items-center gap-1">
-          <Wand2 className="w-3 h-3" />
+      <div className="flex flex-wrap gap-1.5 px-4 py-2.5 border-b border-gray-100 bg-gradient-to-r from-primary-50/40 to-transparent">
+        <span className="text-xs text-gray-500 mr-1 flex items-center gap-1.5 font-medium">
+          <Wand2 className="w-3.5 h-3.5 text-primary-500" />
           Felismert:
         </span>
         {tags.map((tag, i) => (
@@ -343,9 +374,16 @@ const SmartSearchBar = ({
 
   return (
     <div ref={containerRef} className="relative w-full max-w-3xl mx-auto">
+      {/* Backdrop - subtle overlay when dropdown open (mobile-friendly) */}
+      {isOpen && (
+        <div 
+          className="search-dropdown-backdrop fixed inset-0 bg-black/5 z-[9998] sm:bg-transparent sm:pointer-events-none"
+          aria-hidden="true"
+        />
+      )}
       {/* Search Input */}
       <form onSubmit={handleSubmit} className="relative">
-        <div className={`
+        <div className={`search-input-wrapper
           flex items-center gap-2 bg-white rounded-2xl border-2 transition-all duration-200
           ${isOpen 
             ? 'border-primary-400 shadow-xl shadow-primary-100/50 ring-4 ring-primary-50' 
@@ -395,7 +433,7 @@ const SmartSearchBar = ({
 
       {/* Dropdown Panel */}
       {isOpen && (
-        <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-2xl shadow-2xl border border-gray-100 overflow-hidden z-[9999] max-h-[75vh] overflow-y-auto">
+        <div className="search-dropdown-enter search-dropdown-scroll absolute top-full left-0 right-0 mt-2 bg-white/95 backdrop-blur-md rounded-2xl border border-gray-100 overflow-hidden z-[9999] max-h-[75vh] overflow-y-auto">
           
           {/* Intent Tags - ha van felismert szándék */}
           {debouncedQuery.length >= 3 && renderIntentTags()}
@@ -441,7 +479,9 @@ const SmartSearchBar = ({
                       )}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <span className="text-sm text-gray-800 font-medium">{item.text}</span>
+                      <span className="text-sm text-gray-800 font-medium">
+                        {item.type === 'product' && debouncedQuery ? highlightMatch(item.text, debouncedQuery) : item.text}
+                      </span>
                       {item.type === 'product' && item.product && (
                         <p className="text-xs text-primary-600 font-semibold">
                           {item.product.price?.toLocaleString()} Ft
@@ -459,18 +499,23 @@ const SmartSearchBar = ({
           {/* Keresési találatok - termékek */}
           {debouncedQuery.length >= 2 && searchResults.results && searchResults.results.length > 0 && (
             <div className="p-3">
-              <div className="flex items-center justify-between px-2 py-2 mb-2">
-                <p className="text-xs font-bold text-gray-600 uppercase tracking-wider flex items-center gap-2">
-                  <ShoppingBag className="w-4 h-4 text-primary-500" />
-                  <span>{searchResults.totalMatches.toLocaleString()} találat</span>
-                  {searchResults.searchTime && (
-                    <span className="text-gray-400 font-normal">({searchResults.searchTime.toFixed(0)}ms)</span>
+              <div className="flex items-center justify-between px-2 py-2 mb-2 gap-2">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <p className="text-xs font-bold text-gray-600 uppercase tracking-wider flex items-center gap-2">
+                    <ShoppingBag className="w-4 h-4 text-primary-500" />
+                    <span>{searchResults.totalMatches.toLocaleString()} találat</span>
+                  </p>
+                  {searchResults.searchTime != null && (
+                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 text-xs font-medium">
+                      <Zap className="w-3 h-3" />
+                      {searchResults.searchTime < 1 ? '<1' : Math.round(searchResults.searchTime)} ms
+                    </span>
                   )}
-                </p>
+                </div>
                 {searchResults.totalMatches > 6 && (
                   <button 
                     onClick={handleSubmit}
-                    className="text-xs text-primary-600 hover:text-primary-700 font-semibold flex items-center gap-1 px-3 py-1.5 bg-primary-50 hover:bg-primary-100 rounded-lg transition-colors"
+                    className="text-xs text-primary-600 hover:text-primary-700 font-semibold flex items-center gap-1 px-3 py-1.5 bg-primary-50 hover:bg-primary-100 rounded-lg transition-colors shrink-0"
                   >
                     Mind megtekintése
                     <ArrowRight className="w-3.5 h-3.5" />
@@ -486,16 +531,17 @@ const SmartSearchBar = ({
                   <button
                     key={product.id}
                     onClick={() => handleProductClick(product)}
-                    className={`w-full flex items-center gap-3 p-3 rounded-xl border transition-all text-left group
+                    style={{ animationDelay: `${idx * 35}ms` }}
+                    className={`search-item-enter w-full flex items-center gap-3 p-3 rounded-xl border transition-all duration-200 text-left group
                       ${isSelected 
-                        ? 'bg-gradient-to-r from-primary-100 to-primary-50 border-primary-300 ring-2 ring-primary-400 ring-inset shadow-md' 
-                        : 'border-transparent hover:bg-gradient-to-r hover:from-primary-50 hover:to-white hover:border-primary-100'
+                        ? 'bg-gradient-to-r from-primary-100 to-primary-50 border-primary-300 ring-2 ring-primary-400 ring-inset shadow-md scale-[1.01]' 
+                        : 'border-transparent hover:bg-gradient-to-r hover:from-primary-50/80 hover:to-white hover:border-primary-100 hover:shadow-md hover:scale-[1.01] active:scale-[0.99]'
                       }`}
                   >
-                    <div className="relative">
-                      <div className="w-16 h-16 bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl overflow-hidden shrink-0 ring-1 ring-gray-200 group-hover:ring-primary-300 transition-all shadow-sm group-hover:shadow-md">
+                    <div className="relative shrink-0">
+                      <div className="w-16 h-16 bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl overflow-hidden ring-1 ring-gray-200 group-hover:ring-primary-300 transition-all duration-200 shadow-sm group-hover:shadow-md group-hover:scale-105">
                         {product.image ? (
-                          <img src={product.image} alt={product.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                          <img src={product.image} alt={product.name} className="w-full h-full object-cover transition-transform duration-300" />
                         ) : (
                           <div className="w-full h-full flex items-center justify-center">
                             <Package className="w-7 h-7 text-gray-300" />
@@ -511,7 +557,7 @@ const SmartSearchBar = ({
                     </div>
                     <div className="flex-1 min-w-0">
                       <h4 className="font-semibold text-gray-900 text-sm leading-tight line-clamp-2 group-hover:text-primary-700 transition-colors">
-                        {product.name}
+                        {highlightMatch(product.name, debouncedQuery)}
                       </h4>
                       <p className="text-xs text-gray-500 mt-0.5 truncate flex items-center gap-1">
                         <Tag className="w-3 h-3" />
@@ -566,14 +612,14 @@ const SmartSearchBar = ({
             </div>
           )}
 
-          {/* Nincs találat */}
+          {/* Nincs találat - finomított empty state */}
           {debouncedQuery.length >= 2 && (!searchResults.results || searchResults.results.length === 0) && autocompleteSuggestions.length === 0 && (
             <div className="p-8 text-center">
-              <div className="w-16 h-16 bg-gradient-to-br from-gray-100 to-gray-200 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-inner">
-                <Search className="w-8 h-8 text-gray-400" />
+              <div className="w-20 h-20 bg-gradient-to-br from-gray-50 to-gray-100 rounded-2xl flex items-center justify-center mx-auto mb-5 shadow-sm border border-gray-100 ring-4 ring-gray-50/80">
+                <Search className="w-10 h-10 text-gray-300" strokeWidth={1.5} />
               </div>
-              <p className="text-gray-800 font-semibold mb-1">Nincs találat: "{debouncedQuery}"</p>
-              <p className="text-sm text-gray-500 mb-4">Próbálj más kulcsszavakat vagy egyszerűsítsd a keresést</p>
+              <p className="text-gray-800 font-semibold mb-1 text-base">Nincs találat: &quot;{debouncedQuery}&quot;</p>
+              <p className="text-sm text-gray-500 mb-5 max-w-xs mx-auto">Próbálj más kulcsszavakat, szinonimákat vagy egyszerűsítsd a keresést.</p>
               
               {/* Javaslatok */}
               {searchResults.suggestions?.length > 0 && (
@@ -612,11 +658,18 @@ const SmartSearchBar = ({
             </div>
           )}
 
-          {/* Betöltés jelző gépelés közben */}
+          {/* Betöltés jelző gépelés közben - shimmer UX */}
           {query.length >= 2 && query !== debouncedQuery && (
-            <div className="p-6 text-center">
-              <div className="w-8 h-8 border-2 border-primary-500 border-t-transparent rounded-full animate-spin mx-auto mb-3" />
-              <p className="text-sm text-gray-500">Keresés...</p>
+            <div className="p-6">
+              <div className="flex items-center justify-center gap-3 mb-4">
+                <div className="w-8 h-8 border-2 border-primary-500 border-t-transparent rounded-full animate-spin shrink-0" />
+                <span className="text-sm font-medium text-gray-600">Keresés...</span>
+              </div>
+              <div className="space-y-2">
+                {[1, 2, 3].map((i) => (
+                  <div key={i} className="search-loading-shimmer h-16 rounded-xl" />
+                ))}
+              </div>
             </div>
           )}
 
@@ -748,7 +801,7 @@ const SmartSearchBar = ({
 
           {/* Footer - keresési tippek és keyboard hints */}
           <div className="px-4 py-3 bg-gradient-to-r from-gray-50 to-white border-t border-gray-100">
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between flex-wrap gap-2">
               <div className="flex items-center gap-3 text-xs text-gray-500">
                 {indexStatus.building ? (
                   <span className="flex items-center gap-1.5 text-amber-600">
@@ -757,20 +810,30 @@ const SmartSearchBar = ({
                   </span>
                 ) : indexStatus.ready ? (
                   <span className="flex items-center gap-1.5 text-green-600">
-                    <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
+                    <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
                     🧠 {indexStatus.count?.toLocaleString()} termék betanulva
                   </span>
                 ) : (
-                  <span>💡 Keress természetesen, pl. "fehér kanapé 150e alatt"</span>
+                  <span>💡 Keress természetesen, pl. &quot;fehér kanapé 150e alatt&quot;</span>
                 )}
               </div>
-              <div className="hidden sm:flex items-center gap-2 text-xs text-gray-400">
-                <kbd className="px-1.5 py-0.5 bg-gray-100 rounded border border-gray-200 font-mono">↑↓</kbd>
-                <span>navigálás</span>
-                <kbd className="px-1.5 py-0.5 bg-gray-100 rounded border border-gray-200 font-mono">Enter</kbd>
-                <span>kiválasztás</span>
-                <kbd className="px-1.5 py-0.5 bg-gray-100 rounded border border-gray-200 font-mono">Esc</kbd>
-                <span>bezárás</span>
+              <div className="flex items-center gap-3 text-xs text-gray-400 flex-wrap">
+                <span className="hidden sm:inline-flex items-center gap-1">
+                  <kbd className="px-1.5 py-0.5 bg-gray-100 rounded border border-gray-200 font-mono text-[10px]">/</kbd>
+                  <span>keresés</span>
+                </span>
+                <span className="hidden sm:inline-flex items-center gap-1">
+                  <kbd className="px-1.5 py-0.5 bg-gray-100 rounded border border-gray-200 font-mono text-[10px]">↑↓</kbd>
+                  <span>navigálás</span>
+                </span>
+                <span className="hidden sm:inline-flex items-center gap-1">
+                  <kbd className="px-1.5 py-0.5 bg-gray-100 rounded border border-gray-200 font-mono text-[10px]">Enter</kbd>
+                  <span>kiválasztás</span>
+                </span>
+                <span className="hidden sm:inline-flex items-center gap-1">
+                  <kbd className="px-1.5 py-0.5 bg-gray-100 rounded border border-gray-200 font-mono text-[10px]">Esc</kbd>
+                  <span>bezárás</span>
+                </span>
               </div>
             </div>
           </div>

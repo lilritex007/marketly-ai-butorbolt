@@ -113,6 +113,74 @@
   }
 }
 
+/* ========================================
+   SEARCH UX ANIMATIONS & DIZÁJN
+   ======================================== */
+#mkt-butorbolt-app .search-dropdown-enter {
+  animation: searchDropdownIn 0.22s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15), 0 0 0 1px rgba(0, 0, 0, 0.04);
+  backdrop-filter: blur(12px);
+}
+#mkt-butorbolt-app .search-dropdown-backdrop {
+  animation: searchBackdropIn 0.18s ease-out forwards;
+}
+#mkt-butorbolt-app .search-item-enter {
+  opacity: 0;
+  transform: translateY(8px);
+  animation: searchItemIn 0.28s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+#mkt-butorbolt-app .search-input-wrapper:focus-within {
+  box-shadow: 0 0 0 3px rgba(255, 138, 0, 0.2);
+}
+@keyframes searchDropdownIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+@keyframes searchBackdropIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes searchItemIn {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+/* Kereső dropdown scrollbar - vékony, szép */
+#mkt-butorbolt-app .search-dropdown-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(0, 0, 0, 0.2) transparent;
+}
+#mkt-butorbolt-app .search-dropdown-scroll::-webkit-scrollbar {
+  width: 8px;
+}
+#mkt-butorbolt-app .search-dropdown-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+#mkt-butorbolt-app .search-dropdown-scroll::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.15);
+  border-radius: 4px;
+}
+#mkt-butorbolt-app .search-dropdown-scroll::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.25);
+}
+/* Keresés betöltés shimmer */
+#mkt-butorbolt-app .search-loading-shimmer {
+  background: linear-gradient(90deg, #f3f4f6 25%, #e5e7eb 50%, #f3f4f6 75%);
+  background-size: 200% 100%;
+  animation: searchShimmer 1.2s ease-in-out infinite;
+}
+@keyframes searchShimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
 /* Responsive text size overrides - sm: breakpoint (640px) */
 @media (min-width: 640px) {
   #mkt-butorbolt-app .sm\:text-xs { font-size: 12px !important; }
