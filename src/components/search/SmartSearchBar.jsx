@@ -44,44 +44,35 @@ const SmartSearchBar = ({
   const containerRef = useRef(null);
   const debounceTimerRef = useRef(null);
   const resultsRef = useRef(null);
-  const indexedCountRef = useRef(0); // Track if we need to rebuild
+  const indexedCountRef = useRef(0);
 
-  // 🧠 BUILD SEARCH INDEX when products are loaded
+  // 🧠 BUILD SEARCH INDEX when products are loaded (async, non-blocking)
   useEffect(() => {
-    // Only rebuild if product count changed significantly
     if (products.length > 0 && products.length !== indexedCountRef.current) {
-      console.log(`📊 Products changed: ${indexedCountRef.current} → ${products.length}, rebuilding index...`);
+      console.log(`📊 Products: ${products.length}, starting async index build...`);
       setIndexStatus({ ready: false, building: true, count: 0 });
       
-      // Use requestIdleCallback or setTimeout to not block UI
-      const buildIndex = () => {
-        const startTime = performance.now();
-        const success = buildSearchIndex(products);
-        const elapsed = performance.now() - startTime;
-        
-        if (success) {
-          const stats = getIndexStats();
-          console.log(`✅ INDEX READY: ${stats.productCount.toLocaleString()} products, ${stats.wordCount.toLocaleString()} words in ${elapsed.toFixed(0)}ms`);
-          indexedCountRef.current = products.length;
-          setIndexStatus({ 
-            ready: true, 
-            building: false, 
-            count: stats.productCount,
-            words: stats.wordCount,
-            buildTime: elapsed
-          });
-        } else {
-          console.error('❌ Index build failed');
+      // Build async
+      const doBuild = async () => {
+        try {
+          const success = await buildSearchIndex(products);
+          if (success) {
+            const stats = getIndexStats();
+            indexedCountRef.current = products.length;
+            setIndexStatus({ 
+              ready: true, 
+              building: false, 
+              count: stats.productCount 
+            });
+          }
+        } catch (err) {
+          console.error('Index build error:', err);
           setIndexStatus({ ready: false, building: false, count: 0 });
         }
       };
-
-      // Build in next tick to let UI update
-      if (typeof requestIdleCallback !== 'undefined') {
-        requestIdleCallback(buildIndex, { timeout: 5000 });
-      } else {
-        setTimeout(buildIndex, 100);
-      }
+      
+      // Start after small delay to let UI render
+      setTimeout(doBuild, 50);
     }
   }, [products.length]);
 
