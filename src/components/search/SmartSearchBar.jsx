@@ -35,9 +35,11 @@ const SmartSearchBar = ({
   const [query, setQuery] = useState('');
   const [isOpen, setIsOpen] = useState(false);
   const [debouncedQuery, setDebouncedQuery] = useState('');
+  const [selectedIndex, setSelectedIndex] = useState(-1); // Keyboard navigation
   const inputRef = useRef(null);
   const containerRef = useRef(null);
   const debounceTimerRef = useRef(null);
+  const resultsRef = useRef(null);
 
   // Debounce query - csak 300ms után kezdjen keresni
   useEffect(() => {
@@ -122,19 +124,86 @@ const SmartSearchBar = ({
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
+  // Összes navigálható elem (autocomplete + search results)
+  const allNavigableItems = useMemo(() => {
+    const items = [];
+    
+    // Autocomplete javaslatok
+    if (debouncedQuery.length >= 2 && autocompleteSuggestions.length > 0) {
+      autocompleteSuggestions.forEach((sug, idx) => {
+        items.push({ type: 'autocomplete', item: sug, index: idx });
+      });
+    }
+    
+    // Keresési eredmények
+    if (debouncedQuery.length >= 2 && searchResults.results?.length > 0) {
+      searchResults.results.slice(0, 6).forEach((product, idx) => {
+        items.push({ type: 'result', item: product, index: idx });
+      });
+    }
+    
+    return items;
+  }, [debouncedQuery, autocompleteSuggestions, searchResults.results]);
+
+  // Reset selection when results change
+  useEffect(() => {
+    setSelectedIndex(-1);
+  }, [debouncedQuery]);
+
   // Keyboard navigation
   useEffect(() => {
     const handleKeyDown = (e) => {
       if (!isOpen) return;
       
-      if (e.key === 'Escape') {
-        setIsOpen(false);
-        inputRef.current?.blur();
+      const totalItems = allNavigableItems.length;
+      
+      switch (e.key) {
+        case 'ArrowDown':
+          e.preventDefault();
+          setSelectedIndex(prev => {
+            const next = prev < totalItems - 1 ? prev + 1 : 0;
+            return next;
+          });
+          break;
+          
+        case 'ArrowUp':
+          e.preventDefault();
+          setSelectedIndex(prev => {
+            const next = prev > 0 ? prev - 1 : totalItems - 1;
+            return next;
+          });
+          break;
+          
+        case 'Enter':
+          if (selectedIndex >= 0 && selectedIndex < totalItems) {
+            e.preventDefault();
+            const selected = allNavigableItems[selectedIndex];
+            if (selected.type === 'autocomplete') {
+              handleAutocompleteClick(selected.item);
+            } else if (selected.type === 'result') {
+              handleProductClick(selected.item);
+            }
+          }
+          break;
+          
+        case 'Escape':
+          setIsOpen(false);
+          setSelectedIndex(-1);
+          inputRef.current?.blur();
+          break;
+          
+        case 'Tab':
+          if (totalItems > 0) {
+            e.preventDefault();
+            setSelectedIndex(prev => (prev + 1) % totalItems);
+          }
+          break;
       }
     };
+    
     document.addEventListener('keydown', handleKeyDown);
     return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [isOpen]);
+  }, [isOpen, allNavigableItems, selectedIndex, handleAutocompleteClick, handleProductClick]);
 
   const handleSubmit = useCallback((e) => {
     e?.preventDefault();
@@ -295,11 +364,17 @@ const SmartSearchBar = ({
                   <Zap className="w-3.5 h-3.5 text-amber-500" />
                   Javaslatok
                 </p>
-                {autocompleteSuggestions.map((item, idx) => (
+                {autocompleteSuggestions.map((item, idx) => {
+                  const isSelected = selectedIndex === idx;
+                  return (
                   <button
                     key={idx}
                     onClick={() => handleAutocompleteClick(item)}
-                    className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-primary-50 transition-colors text-left group"
+                    className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all text-left group
+                      ${isSelected 
+                        ? 'bg-primary-100 ring-2 ring-primary-400 ring-inset' 
+                        : 'hover:bg-primary-50'
+                      }`}
                   >
                     <div className={`
                       w-8 h-8 rounded-lg flex items-center justify-center shrink-0
@@ -331,7 +406,8 @@ const SmartSearchBar = ({
                     </div>
                     <ArrowUpRight className="w-4 h-4 text-gray-300 group-hover:text-primary-500 transition-colors" />
                   </button>
-                ))}
+                  );
+                })}
               </div>
             </div>
           )}
@@ -357,12 +433,20 @@ const SmartSearchBar = ({
                   </button>
                 )}
               </div>
-              <div className="space-y-1.5">
-                {searchResults.results.slice(0, 6).map((product, idx) => (
+              <div className="space-y-1.5" ref={resultsRef}>
+                {searchResults.results.slice(0, 6).map((product, idx) => {
+                  // Calculate actual index for keyboard navigation (after autocomplete items)
+                  const actualIndex = autocompleteSuggestions.length + idx;
+                  const isSelected = selectedIndex === actualIndex;
+                  return (
                   <button
                     key={product.id}
                     onClick={() => handleProductClick(product)}
-                    className="w-full flex items-center gap-3 p-3 rounded-xl hover:bg-gradient-to-r hover:from-primary-50 hover:to-white border border-transparent hover:border-primary-100 transition-all text-left group"
+                    className={`w-full flex items-center gap-3 p-3 rounded-xl border transition-all text-left group
+                      ${isSelected 
+                        ? 'bg-gradient-to-r from-primary-100 to-primary-50 border-primary-300 ring-2 ring-primary-400 ring-inset shadow-md' 
+                        : 'border-transparent hover:bg-gradient-to-r hover:from-primary-50 hover:to-white hover:border-primary-100'
+                      }`}
                   >
                     <div className="relative">
                       <div className="w-16 h-16 bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl overflow-hidden shrink-0 ring-1 ring-gray-200 group-hover:ring-primary-300 transition-all shadow-sm group-hover:shadow-md">
@@ -411,11 +495,12 @@ const SmartSearchBar = ({
                       </div>
                     </div>
                     <div className="flex flex-col items-center gap-1">
-                      <ChevronRight className="w-5 h-5 text-gray-300 group-hover:text-primary-500 group-hover:translate-x-1 transition-all shrink-0" />
-                      <Eye className="w-4 h-4 text-gray-300 group-hover:text-primary-400 transition-colors" />
+                      <ChevronRight className={`w-5 h-5 transition-all shrink-0 ${isSelected ? 'text-primary-500 translate-x-1' : 'text-gray-300 group-hover:text-primary-500 group-hover:translate-x-1'}`} />
+                      <Eye className={`w-4 h-4 transition-colors ${isSelected ? 'text-primary-400' : 'text-gray-300 group-hover:text-primary-400'}`} />
                     </div>
                   </button>
-                ))}
+                  );
+                })}
               </div>
             </div>
           )}
@@ -617,11 +702,21 @@ const SmartSearchBar = ({
             </>
           )}
 
-          {/* Footer - keresési tippek */}
-          <div className="px-4 py-3 bg-gray-50 border-t border-gray-100">
-            <p className="text-xs text-gray-500 text-center">
-              💡 <span className="font-medium">Tipp:</span> Keress természetesen, pl. "fehér kanapé 150 ezer alatt" vagy "modern nappali bútor"
-            </p>
+          {/* Footer - keresési tippek és keyboard hints */}
+          <div className="px-4 py-3 bg-gradient-to-r from-gray-50 to-white border-t border-gray-100">
+            <div className="flex items-center justify-between">
+              <p className="text-xs text-gray-500">
+                💡 <span className="font-medium">Tipp:</span> Keress természetesen, pl. "fehér kanapé 150 ezer alatt"
+              </p>
+              <div className="hidden sm:flex items-center gap-2 text-xs text-gray-400">
+                <kbd className="px-1.5 py-0.5 bg-gray-100 rounded border border-gray-200 font-mono">↑↓</kbd>
+                <span>navigálás</span>
+                <kbd className="px-1.5 py-0.5 bg-gray-100 rounded border border-gray-200 font-mono">Enter</kbd>
+                <span>kiválasztás</span>
+                <kbd className="px-1.5 py-0.5 bg-gray-100 rounded border border-gray-200 font-mono">Esc</kbd>
+                <span>bezárás</span>
+              </div>
+            </div>
           </div>
         </div>
       )}
