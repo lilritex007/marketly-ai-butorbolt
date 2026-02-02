@@ -27,26 +27,44 @@ let staticProductsCache = null;
 
 /**
  * Load products from static JSON file (fallback)
+ * Tries multiple paths to find the products.json
  */
 const loadStaticProducts = async () => {
   if (staticProductsCache) return staticProductsCache;
   
-  try {
-    console.log('📦 Loading static products.json as fallback...');
-    const res = await fetch('/products.json');
-    if (!res.ok) throw new Error('Static products not found');
-    const data = await res.json();
-    const products = Array.isArray(data) ? data : (data.products || []);
-    staticProductsCache = products.map(p => ({
-      ...p,
-      inStock: p.inStock !== undefined ? p.inStock : Boolean(p.in_stock)
-    }));
-    console.log(`✅ Loaded ${staticProductsCache.length} products from static file`);
-    return staticProductsCache;
-  } catch (err) {
-    console.error('Failed to load static products:', err);
-    return [];
+  // Possible paths where products.json might be
+  const possiblePaths = [
+    '/dist/products.json',    // Railway server serves /dist/*
+    '/public/products.json',  // Railway server serves /public/*
+    '/products.json',         // Direct path (dev server)
+    './products.json',        // Relative path
+  ];
+  
+  for (const path of possiblePaths) {
+    try {
+      console.log(`📦 Trying to load products from: ${path}`);
+      const res = await fetch(path);
+      if (!res.ok) continue;
+      
+      const data = await res.json();
+      const products = Array.isArray(data) ? data : (data.products || []);
+      
+      if (products.length > 1000) {
+        staticProductsCache = products.map(p => ({
+          ...p,
+          inStock: p.inStock !== undefined ? p.inStock : Boolean(p.in_stock)
+        }));
+        console.log(`✅ Loaded ${staticProductsCache.length.toLocaleString()} products from ${path}`);
+        return staticProductsCache;
+      }
+    } catch (err) {
+      // Try next path
+      continue;
+    }
   }
+  
+  console.error('❌ Failed to load static products from any path');
+  return [];
 };
 
 /**

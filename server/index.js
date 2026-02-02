@@ -3,6 +3,7 @@ import cors from 'cors';
 import compression from 'compression';
 import dotenv from 'dotenv';
 import path from 'path';
+import fs from 'fs';
 import { fileURLToPath } from 'url';
 import './database/db.js'; // Initialize database
 
@@ -79,6 +80,27 @@ app.use('/public', express.static(publicPath, {
     res.setHeader('Expires', '0');
   }
 }));
+
+// Serve products.json from root path (for static product loading)
+// Check both dist and public folders
+app.get('/products.json', (req, res) => {
+  const distFile = path.join(__dirname, '..', 'dist', 'products.json');
+  const publicFile = path.join(__dirname, '..', 'public', 'products.json');
+  
+  // Try dist first, then public
+  const filePath = fs.existsSync(distFile) ? distFile : 
+                   fs.existsSync(publicFile) ? publicFile : null;
+  
+  if (filePath) {
+    console.log(`📦 Serving products.json from: ${filePath}`);
+    res.setHeader('Content-Type', 'application/json');
+    res.setHeader('Cache-Control', 'public, max-age=300'); // 5 min cache
+    res.sendFile(filePath);
+  } else {
+    console.error('❌ products.json not found in dist or public');
+    res.status(404).json({ error: 'products.json not found' });
+  }
+});
 
 // Health check – DB elérhetőség is (Railway/monitoring)
 app.get('/health', (req, res) => {
