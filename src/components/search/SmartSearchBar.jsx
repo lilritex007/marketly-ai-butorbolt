@@ -124,6 +124,55 @@ const SmartSearchBar = ({
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
+  // === CALLBACK DEFINÍCIÓK (useEffect ELŐTT kell lenniük!) ===
+  
+  const handleSubmit = useCallback((e) => {
+    e?.preventDefault();
+    if (query.trim()) {
+      trackSearch(query);
+      onSearch?.(query);
+      setIsOpen(false);
+    }
+  }, [query, onSearch]);
+
+  const handleInputChange = useCallback((e) => {
+    const value = e.target.value;
+    setQuery(value);
+  }, []);
+
+  const handleProductClickFn = useCallback((product) => {
+    onProductClick?.(product);
+    setQuery('');
+    setIsOpen(false);
+  }, [onProductClick]);
+
+  const handleSuggestionClick = useCallback((suggestion) => {
+    const text = typeof suggestion === 'string' ? suggestion : suggestion.text || suggestion.query;
+    setQuery(text);
+    trackSearch(text);
+    onSearch?.(text);
+    setIsOpen(false);
+  }, [onSearch]);
+
+  const handleAutocompleteClickFn = useCallback((item) => {
+    if (item.type === 'product' && item.product) {
+      handleProductClickFn(item.product);
+    } else {
+      handleSuggestionClick(item.text);
+    }
+  }, [handleProductClickFn, handleSuggestionClick]);
+
+  const clearQuery = useCallback(() => {
+    setQuery('');
+    inputRef.current?.focus();
+  }, []);
+
+  // Alias for backwards compatibility
+  const handleProductClick = handleProductClickFn;
+  const handleAutocompleteClick = handleAutocompleteClickFn;
+
+  // === NAVIGÁLHATÓ ELEMEK ===
+  
   // Összes navigálható elem (autocomplete + search results)
   const allNavigableItems = useMemo(() => {
     const items = [];
@@ -179,9 +228,9 @@ const SmartSearchBar = ({
             e.preventDefault();
             const selected = allNavigableItems[selectedIndex];
             if (selected.type === 'autocomplete') {
-              handleAutocompleteClick(selected.item);
+              handleAutocompleteClickFn(selected.item);
             } else if (selected.type === 'result') {
-              handleProductClick(selected.item);
+              handleProductClickFn(selected.item);
             }
           }
           break;
@@ -203,49 +252,7 @@ const SmartSearchBar = ({
     
     document.addEventListener('keydown', handleKeyDown);
     return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [isOpen, allNavigableItems, selectedIndex, handleAutocompleteClick, handleProductClick]);
-
-  const handleSubmit = useCallback((e) => {
-    e?.preventDefault();
-    if (query.trim()) {
-      trackSearch(query);
-      onSearch?.(query);
-      setIsOpen(false);
-    }
-  }, [query, onSearch]);
-
-  const handleInputChange = useCallback((e) => {
-    const value = e.target.value;
-    setQuery(value);
-  }, []);
-
-  const handleProductClick = useCallback((product) => {
-    onProductClick?.(product);
-    setQuery('');
-    setIsOpen(false);
-  }, [onProductClick]);
-
-  const handleSuggestionClick = useCallback((suggestion) => {
-    const text = typeof suggestion === 'string' ? suggestion : suggestion.text || suggestion.query;
-    setQuery(text);
-    trackSearch(text);
-    onSearch?.(text);
-    setIsOpen(false);
-  }, [onSearch]);
-
-  const handleAutocompleteClick = useCallback((item) => {
-    if (item.type === 'product' && item.product) {
-      handleProductClick(item.product);
-    } else {
-      handleSuggestionClick(item.text);
-    }
-  }, [handleProductClick, handleSuggestionClick]);
-
-  const clearQuery = useCallback(() => {
-    setQuery('');
-    setActiveTab('suggestions');
-    inputRef.current?.focus();
-  }, []);
+  }, [isOpen, allNavigableItems, selectedIndex, handleAutocompleteClickFn, handleProductClickFn]);
 
   // Render intent tags
   const renderIntentTags = () => {
