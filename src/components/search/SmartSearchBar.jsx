@@ -338,45 +338,59 @@ const SmartSearchBar = ({
 
           {/* Keresési találatok - termékek */}
           {debouncedQuery.length >= 2 && searchResults.results && searchResults.results.length > 0 && (
-            <div className="p-2">
-              <div className="flex items-center justify-between px-3 py-1.5">
-                <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider flex items-center gap-1.5">
-                  <ShoppingBag className="w-3.5 h-3.5 text-primary-500" />
-                  Termékek ({searchResults.totalMatches} találat)
+            <div className="p-3">
+              <div className="flex items-center justify-between px-2 py-2 mb-2">
+                <p className="text-xs font-bold text-gray-600 uppercase tracking-wider flex items-center gap-2">
+                  <ShoppingBag className="w-4 h-4 text-primary-500" />
+                  <span>{searchResults.totalMatches.toLocaleString()} találat</span>
+                  {searchResults.searchTime && (
+                    <span className="text-gray-400 font-normal">({searchResults.searchTime.toFixed(0)}ms)</span>
+                  )}
                 </p>
-                {searchResults.totalMatches > 8 && (
+                {searchResults.totalMatches > 6 && (
                   <button 
                     onClick={handleSubmit}
-                    className="text-xs text-primary-600 hover:text-primary-700 font-medium flex items-center gap-1"
+                    className="text-xs text-primary-600 hover:text-primary-700 font-semibold flex items-center gap-1 px-3 py-1.5 bg-primary-50 hover:bg-primary-100 rounded-lg transition-colors"
                   >
                     Mind megtekintése
-                    <ArrowRight className="w-3 h-3" />
+                    <ArrowRight className="w-3.5 h-3.5" />
                   </button>
                 )}
               </div>
-              <div className="space-y-1">
-                {searchResults.results.slice(0, 6).map(product => (
+              <div className="space-y-1.5">
+                {searchResults.results.slice(0, 6).map((product, idx) => (
                   <button
                     key={product.id}
                     onClick={() => handleProductClick(product)}
-                    className="w-full flex items-center gap-3 p-2.5 rounded-xl hover:bg-gray-50 transition-colors text-left group"
+                    className="w-full flex items-center gap-3 p-3 rounded-xl hover:bg-gradient-to-r hover:from-primary-50 hover:to-white border border-transparent hover:border-primary-100 transition-all text-left group"
                   >
-                    <div className="w-14 h-14 bg-gray-100 rounded-xl overflow-hidden shrink-0 ring-1 ring-gray-200">
-                      {product.image ? (
-                        <img src={product.image} alt={product.name} className="w-full h-full object-cover" />
-                      ) : (
-                        <div className="w-full h-full flex items-center justify-center">
-                          <Package className="w-6 h-6 text-gray-300" />
+                    <div className="relative">
+                      <div className="w-16 h-16 bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl overflow-hidden shrink-0 ring-1 ring-gray-200 group-hover:ring-primary-300 transition-all shadow-sm group-hover:shadow-md">
+                        {product.image ? (
+                          <img src={product.image} alt={product.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center">
+                            <Package className="w-7 h-7 text-gray-300" />
+                          </div>
+                        )}
+                      </div>
+                      {/* Pozíció badge */}
+                      {idx < 3 && (
+                        <div className="absolute -top-1 -left-1 w-5 h-5 bg-primary-500 text-white text-xs font-bold rounded-full flex items-center justify-center shadow">
+                          {idx + 1}
                         </div>
                       )}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <h4 className="font-medium text-gray-900 text-sm truncate group-hover:text-primary-600 transition-colors">
+                      <h4 className="font-semibold text-gray-900 text-sm leading-tight line-clamp-2 group-hover:text-primary-700 transition-colors">
                         {product.name}
                       </h4>
-                      <p className="text-xs text-gray-500 truncate">{product.category}</p>
-                      <div className="flex items-center gap-2 mt-1">
-                        <span className="text-sm font-bold text-primary-600">
+                      <p className="text-xs text-gray-500 mt-0.5 truncate flex items-center gap-1">
+                        <Tag className="w-3 h-3" />
+                        {product.category?.split(' > ').slice(-1)[0] || product.category}
+                      </p>
+                      <div className="flex items-center gap-2 mt-1.5">
+                        <span className="text-base font-bold text-primary-600">
                           {(product.salePrice || product.price)?.toLocaleString()} Ft
                         </span>
                         {product.originalPrice && product.originalPrice > (product.salePrice || product.price) && (
@@ -384,45 +398,88 @@ const SmartSearchBar = ({
                             <span className="text-xs text-gray-400 line-through">
                               {product.originalPrice.toLocaleString()} Ft
                             </span>
-                            <span className="text-xs bg-red-100 text-red-600 px-1.5 py-0.5 rounded-full font-medium">
+                            <span className="text-xs bg-gradient-to-r from-red-500 to-pink-500 text-white px-2 py-0.5 rounded-full font-bold shadow-sm">
                               -{Math.round((1 - (product.salePrice || product.price) / product.originalPrice) * 100)}%
                             </span>
                           </>
                         )}
+                        {product.inStock === false && (
+                          <span className="text-xs bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full">
+                            Elfogyott
+                          </span>
+                        )}
                       </div>
                     </div>
-                    <ChevronRight className="w-5 h-5 text-gray-300 group-hover:text-primary-500 transition-colors shrink-0" />
+                    <div className="flex flex-col items-center gap-1">
+                      <ChevronRight className="w-5 h-5 text-gray-300 group-hover:text-primary-500 group-hover:translate-x-1 transition-all shrink-0" />
+                      <Eye className="w-4 h-4 text-gray-300 group-hover:text-primary-400 transition-colors" />
+                    </div>
                   </button>
                 ))}
               </div>
             </div>
           )}
 
+          {/* "Erre gondoltál?" javaslat */}
+          {debouncedQuery.length >= 2 && searchResults.didYouMean && (
+            <div className="px-4 py-3 bg-gradient-to-r from-amber-50 to-orange-50 border-b border-amber-100">
+              <button
+                onClick={() => handleSuggestionClick(searchResults.didYouMean.query)}
+                className="flex items-center gap-2 text-sm group"
+              >
+                <Lightbulb className="w-4 h-4 text-amber-500" />
+                <span className="text-gray-600">Erre gondoltál?</span>
+                <span className="font-semibold text-amber-700 group-hover:text-amber-800 underline underline-offset-2">
+                  {searchResults.didYouMean.query}
+                </span>
+                <ArrowRight className="w-4 h-4 text-amber-500 group-hover:translate-x-1 transition-transform" />
+              </button>
+            </div>
+          )}
+
           {/* Nincs találat */}
           {debouncedQuery.length >= 2 && (!searchResults.results || searchResults.results.length === 0) && autocompleteSuggestions.length === 0 && (
             <div className="p-8 text-center">
-              <div className="w-16 h-16 bg-gray-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                <Search className="w-8 h-8 text-gray-300" />
+              <div className="w-16 h-16 bg-gradient-to-br from-gray-100 to-gray-200 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-inner">
+                <Search className="w-8 h-8 text-gray-400" />
               </div>
               <p className="text-gray-800 font-semibold mb-1">Nincs találat: "{debouncedQuery}"</p>
               <p className="text-sm text-gray-500 mb-4">Próbálj más kulcsszavakat vagy egyszerűsítsd a keresést</p>
               
               {/* Javaslatok */}
               {searchResults.suggestions?.length > 0 && (
-                <div className="space-y-2">
-                  <p className="text-xs text-gray-500 uppercase tracking-wide">Tippek:</p>
-                  {searchResults.suggestions.map((sug, i) => (
+                <div className="space-y-3">
+                  <p className="text-xs text-gray-500 uppercase tracking-wide font-semibold">Próbáld ezeket:</p>
+                  <div className="flex flex-wrap justify-center gap-2">
+                    {searchResults.suggestions.map((sug, i) => (
+                      <button
+                        key={i}
+                        onClick={() => handleSuggestionClick({ text: sug.action })}
+                        className="inline-flex items-center gap-2 px-4 py-2.5 bg-white border border-gray-200 hover:border-primary-300 hover:bg-primary-50 text-gray-700 hover:text-primary-700 rounded-xl text-sm font-medium transition-all shadow-sm hover:shadow"
+                      >
+                        <Lightbulb className="w-4 h-4 text-amber-500" />
+                        {sug.text}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+              
+              {/* Népszerű keresések fallback */}
+              <div className="mt-6 pt-4 border-t border-gray-100">
+                <p className="text-xs text-gray-400 mb-3">Népszerű keresések:</p>
+                <div className="flex flex-wrap justify-center gap-2">
+                  {['kanapé', 'fotel', 'asztal', 'szekrény', 'ágy'].map(term => (
                     <button
-                      key={i}
-                      onClick={() => handleSuggestionClick({ text: sug.action })}
-                      className="inline-flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-primary-50 text-gray-700 hover:text-primary-700 rounded-full text-sm transition-colors mr-2"
+                      key={term}
+                      onClick={() => handleSuggestionClick(term)}
+                      className="px-3 py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-600 rounded-lg text-sm transition-colors"
                     >
-                      <Lightbulb className="w-4 h-4" />
-                      {sug.text}
+                      {term}
                     </button>
                   ))}
                 </div>
-              )}
+              </div>
             </div>
           )}
 

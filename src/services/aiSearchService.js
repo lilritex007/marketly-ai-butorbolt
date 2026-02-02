@@ -1,14 +1,17 @@
 /**
- * AI Search Service - Világszínvonalú bútor kereső motor
+ * AI Search Service - VILÁGSZÍNVONALÚ BÚTOR KERESŐ MOTOR
  * 
- * Funkciók:
+ * A legjobb bútor kereső - 160.000+ termék, azonnali találatok
+ * 
+ * FUNKCIÓK:
+ * - Villámgyors keresés szó-index alapján
+ * - Pontos márka/terméknév felismerés
+ * - Magyar nyelvi szinonimák és ékezet kezelés
+ * - Fuzzy matching elgépelésekhez
  * - Természetes nyelvű keresés (NLP)
- * - Szinonimák és magyar nyelvi sajátosságok kezelése
- * - Fuzzy matching (elgépelések tolerálása)
- * - Kontextus-tudatos keresés
- * - AI-alapú szándék felismerés
- * - Szemantikai keresés
- * - Proaktív javaslatok
+ * - Ár és szűrő felismerés
+ * - Személyre szabott találatok
+ * - "Erre gondoltál?" javaslatok
  */
 
 import { generateText } from './geminiService';
@@ -19,6 +22,66 @@ import {
   getStyleDNA,
   getLikedProducts 
 } from './userPreferencesService';
+
+// ==================== KERESÉSI INDEX (GYORS LOOKUP) ====================
+let searchIndex = null;
+let indexedProductCount = 0;
+
+/**
+ * Szó-alapú index építése a gyors kereséshez
+ * Minden szóhoz tároljuk mely termékek tartalmazzák
+ */
+const buildSearchIndex = (products) => {
+  if (searchIndex && indexedProductCount === products.length) {
+    return searchIndex; // Már van index, nem kell újraépíteni
+  }
+  
+  console.log('🔍 Building search index for', products.length, 'products...');
+  const startTime = performance.now();
+  
+  const index = {
+    byWord: new Map(),        // szó -> [productIndex, ...]
+    byPrefix: new Map(),      // prefix (3 char) -> [productIndex, ...]
+    products: products,       // referencia
+  };
+  
+  products.forEach((product, idx) => {
+    const name = (product.name || '').toLowerCase();
+    const category = (product.category || '').toLowerCase();
+    const text = `${name} ${category}`;
+    
+    // Szavak kinyerése
+    const words = text.split(/[\s\-_,\.\/\(\)]+/).filter(w => w.length >= 2);
+    
+    words.forEach(word => {
+      const wordNoAccent = removeAccents(word);
+      
+      // Teljes szó index
+      if (!index.byWord.has(wordNoAccent)) {
+        index.byWord.set(wordNoAccent, []);
+      }
+      index.byWord.get(wordNoAccent).push(idx);
+      
+      // Prefix index (első 3 karakter) - gyors fuzzy kereséshez
+      if (wordNoAccent.length >= 3) {
+        const prefix = wordNoAccent.slice(0, 3);
+        if (!index.byPrefix.has(prefix)) {
+          index.byPrefix.set(prefix, new Set());
+        }
+        index.byPrefix.get(prefix).add(idx);
+      }
+    });
+  });
+  
+  searchIndex = index;
+  indexedProductCount = products.length;
+  
+  console.log(`✅ Search index built in ${(performance.now() - startTime).toFixed(0)}ms`);
+  console.log(`   - ${index.byWord.size} unique words`);
+  console.log(`   - ${index.byPrefix.size} prefixes`);
+  
+  return index;
+};
 
 // ==================== MAGYAR NYELVI TUDÁSBÁZIS ====================
 
@@ -350,7 +413,7 @@ export const parseSearchIntent = (query) => {
  * Termék relevancia pontszám számítása
  * FULL DATA: név + kategória + leírás + paraméterek!
  */
-const calculateRelevanceScore = (product, intent, userContext = {}) => {
+const calculateRelevanceScore = (product, intent, userContext = {}, queryNoAccent = '') => {
   let score = 0;
   const bonuses = [];
   
@@ -530,96 +593,118 @@ const calculateRelevanceScore = (product, intent, userContext = {}) => {
 // ==================== FŐ KERESÉSI FUNKCIÓK ====================
 
 /**
- * Intelligens keresés - a fő keresési funkció (OPTIMALIZÁLT)
+ * VILÁGSZÍNVONALÚ INTELLIGENS KERESÉS
+ * - Index-alapú gyors keresés
+ * - Pontos egyezések prioritása
+ * - Fuzzy matching elgépelésekhez
+ * - Szinonimák és NLP
  */
 export const smartSearch = (products, query, options = {}) => {
   const { limit = 20, includeDebugInfo = false } = options;
   
   if (!query || !query.trim() || !products || products.length === 0) {
-    return { results: [], intent: null, suggestions: [], totalMatches: 0 };
+    return { results: [], intent: null, suggestions: [], totalMatches: 0, didYouMean: null };
   }
   
-  // 1. Szándék felismerés
+  const startTime = performance.now();
+  
+  // 1. Index építése (cache-elve)
+  const index = buildSearchIndex(products);
+  
+  // 2. Szándék felismerés
   const intent = parseSearchIntent(query.trim());
   
-  // 2. Felhasználói kontextus (egyszer betöltve)
+  // 3. Felhasználói kontextus
   const userContext = {
     topCategories: getTopCategories(3),
     styleDNA: getStyleDNA()?.styleDNA,
   };
   
-  // 3. Gyors előszűrés - csak azokat a termékeket pontozza, amik valószínűleg relevánsak
-  const queryLower = query.toLowerCase();
-  const queryNoAccent = removeAccents(query);
-  const queryWords = queryLower.split(/\s+/).filter(w => w.length > 1);
+  // 4. Keresőszavak előkészítése
+  const queryLower = query.toLowerCase().trim();
+  const queryNoAccent = removeAccents(queryLower);
+  const queryWords = queryLower.split(/[\s\-_,\.]+/).filter(w => w.length >= 2);
   
-  // Kibővített keresőszavak szinonimákkal
-  const expandedWords = new Set();
-  queryWords.forEach(word => {
-    expandedWords.add(word);
-    expandedWords.add(removeAccents(word));
-    const syns = getAllSynonyms(word);
-    syns.forEach(s => {
-      expandedWords.add(s.toLowerCase());
-      expandedWords.add(removeAccents(s));
-    });
-  });
+  // 5. INDEX-ALAPÚ GYORS KERESÉS
+  const candidateIndices = new Set();
+  const exactMatchIndices = new Set();
   
-  // Gyors előszűrés - releváns termékek keresése a TELJES katalógusban
-  const relevantProducts = [];
-  const exactMatches = []; // Pontos egyezések külön (prioritás!)
-  
-  for (const product of products) {
-    const name = (product.name || '').toLowerCase();
-    const category = (product.category || '').toLowerCase();
-    const nameNoAccent = removeAccents(name);
-    const catNoAccent = removeAccents(category);
-    const searchText = `${nameNoAccent} ${catNoAccent}`;
-    
-    // PONTOS EGYEZÉS a keresőkifejezésre - LEGMAGASABB PRIORITÁS
-    if (nameNoAccent.includes(queryNoAccent) || name.includes(queryLower)) {
-      exactMatches.push(product);
-      continue;
-    }
-    
-    // Gyors ellenőrzés - van-e BÁRMILYEN szó egyezés?
-    let hasMatch = false;
-    for (const word of expandedWords) {
-      if (word.length >= 3 && searchText.includes(word)) {
-        hasMatch = true;
-        break;
-      }
-    }
-    
-    if (hasMatch) {
-      relevantProducts.push(product);
+  // 5a. PONTOS QUERY EGYEZÉS (legmagasabb prioritás)
+  // Ha a teljes keresőkifejezés benne van a terméknevekben
+  for (let i = 0; i < products.length; i++) {
+    const nameNoAccent = removeAccents((products[i].name || '').toLowerCase());
+    if (nameNoAccent.includes(queryNoAccent)) {
+      exactMatchIndices.add(i);
     }
   }
   
-  // Kombináljuk: pontos egyezések ELŐRE, utána a többi
-  // Max 2000 termék pontozásra (teljesítmény vs pontosság)
-  const toScore = [...exactMatches, ...relevantProducts].slice(0, 2000);
-  
-  // 4. Pontozás - pontos egyezések + releváns termékek
-  const scoredProducts = toScore.map(product => {
-    const { score, bonuses } = calculateRelevanceScore(product, intent, userContext);
-    return {
-      product,
-      score,
-      bonuses: includeDebugInfo ? bonuses : undefined,
-    };
+  // 5b. SZÓ-ALAPÚ KERESÉS AZ INDEXBŐL
+  queryWords.forEach(word => {
+    const wordNoAccent = removeAccents(word);
+    
+    // Pontos szó egyezés
+    if (index.byWord.has(wordNoAccent)) {
+      index.byWord.get(wordNoAccent).forEach(idx => candidateIndices.add(idx));
+    }
+    
+    // Szinonimák keresése
+    const syns = getAllSynonyms(word);
+    syns.forEach(syn => {
+      const synNoAccent = removeAccents(syn);
+      if (index.byWord.has(synNoAccent)) {
+        index.byWord.get(synNoAccent).forEach(idx => candidateIndices.add(idx));
+      }
+    });
+    
+    // Prefix-alapú fuzzy keresés (ha nincs pontos találat)
+    if (candidateIndices.size < 100 && wordNoAccent.length >= 3) {
+      const prefix = wordNoAccent.slice(0, 3);
+      if (index.byPrefix.has(prefix)) {
+        index.byPrefix.get(prefix).forEach(idx => candidateIndices.add(idx));
+      }
+    }
   });
   
-  // 4. Rendezés és szűrés
-  const results = scoredProducts
+  // 6. JELÖLTEK ÖSSZEGYŰJTÉSE - pontos egyezések ELŐRE
+  const allCandidates = [
+    ...Array.from(exactMatchIndices),
+    ...Array.from(candidateIndices).filter(i => !exactMatchIndices.has(i))
+  ];
+  
+  // Max 3000 jelölt pontozásra
+  const toScore = allCandidates.slice(0, 3000).map(i => products[i]);
+  
+  // 7. PONTOZÁS
+  const scoredProducts = toScore.map(product => {
+    const { score, bonuses } = calculateRelevanceScore(product, intent, userContext, queryNoAccent);
+    
+    // EXTRA BÓNUSZ pontos query egyezésért
+    const nameNoAccent = removeAccents((product.name || '').toLowerCase());
+    let finalScore = score;
+    if (nameNoAccent.includes(queryNoAccent)) {
+      finalScore += 200; // Nagy bónusz pontos egyezésért
+    }
+    
+    return { product, score: finalScore, bonuses };
+  });
+  
+  // 8. RENDEZÉS ÉS SZŰRÉS
+  const filteredResults = scoredProducts
     .filter(s => s.score > 0)
-    .sort((a, b) => b.score - a.score)
+    .sort((a, b) => b.score - a.score);
+  
+  const results = filteredResults
     .slice(0, limit)
     .map(s => includeDebugInfo ? s : s.product);
   
-  // 5. Javaslatok generálása, ha kevés találat
+  // 9. "ERRE GONDOLTÁL?" JAVASLATOK
+  let didYouMean = null;
   const suggestions = [];
+  
   if (results.length < 3) {
+    // Próbálj alternatív kereséseket találni
+    didYouMean = generateDidYouMean(query, products, index);
+    
     if (intent.priceRange) {
       suggestions.push({
         type: 'expand_price',
@@ -635,73 +720,168 @@ export const smartSearch = (products, query, options = {}) => {
       });
     }
     if (intent.productTypes.length > 0) {
-      // Ajánlj hasonló kategóriákat
       const alternatives = {
-        'kanapé': ['fotel', 'ülőgarnitúra'],
-        'asztal': ['dohányzóasztal', 'íróasztal'],
-        'szék': ['fotel', 'puff'],
+        'kanapé': ['fotel', 'ülőgarnitúra', 'sarokkanapé'],
+        'asztal': ['dohányzóasztal', 'íróasztal', 'étkezőasztal'],
+        'szék': ['fotel', 'puff', 'bárszék'],
+        'fotel': ['kanapé', 'puff', 'relax fotel'],
       };
       for (const type of intent.productTypes) {
         if (alternatives[type]) {
           suggestions.push({
             type: 'alternative',
             text: `Hasonló: ${alternatives[type].join(', ')}`,
-            action: query.replace(new RegExp(type, 'gi'), alternatives[type][0]),
+            action: alternatives[type][0],
           });
         }
       }
     }
   }
   
+  const searchTime = performance.now() - startTime;
+  if (includeDebugInfo) {
+    console.log(`🔍 Search completed in ${searchTime.toFixed(0)}ms - ${filteredResults.length} matches`);
+  }
+  
   return {
     results,
     intent,
     suggestions,
-    totalMatches: scoredProducts.filter(s => s.score > 0).length,
+    didYouMean,
+    totalMatches: filteredResults.length,
+    searchTime,
   };
 };
 
 /**
- * Autocomplete javaslatok - TELJES KATALÓGUSBÓL keres
+ * "Erre gondoltál?" javaslat generálása
  */
-export const getAutocompleteSuggestions = (products, partialQuery, limit = 8) => {
+const generateDidYouMean = (query, products, index) => {
+  const queryNoAccent = removeAccents(query.toLowerCase());
+  const words = queryNoAccent.split(/\s+/).filter(w => w.length >= 3);
+  
+  if (words.length === 0) return null;
+  
+  // Próbálj hasonló szavakat találni az indexben
+  const suggestions = [];
+  
+  for (const word of words) {
+    // Fuzzy keresés az indexben
+    for (const [indexedWord] of index.byWord.entries()) {
+      if (indexedWord.length >= 3 && Math.abs(indexedWord.length - word.length) <= 2) {
+        const distance = levenshteinDistance(word, indexedWord);
+        const similarity = 1 - (distance / Math.max(word.length, indexedWord.length));
+        
+        if (similarity >= 0.6 && similarity < 1 && word !== indexedWord) {
+          suggestions.push({
+            original: word,
+            suggestion: indexedWord,
+            similarity,
+            count: index.byWord.get(indexedWord).length,
+          });
+        }
+      }
+    }
+  }
+  
+  // Legjobb javaslat
+  if (suggestions.length > 0) {
+    suggestions.sort((a, b) => (b.similarity * b.count) - (a.similarity * a.count));
+    const best = suggestions[0];
+    const newQuery = query.toLowerCase().replace(best.original, best.suggestion);
+    return {
+      query: newQuery,
+      reason: `"${best.original}" → "${best.suggestion}"`,
+    };
+  }
+  
+  return null;
+};
+
+/**
+ * VILLÁMGYORS AUTOCOMPLETE - Index alapú
+ */
+export const getAutocompleteSuggestions = (products, partialQuery, limit = 10) => {
   if (!partialQuery || partialQuery.length < 2 || !products || products.length === 0) {
     return [];
   }
   
   const query = partialQuery.toLowerCase().trim();
   const queryNoAccent = removeAccents(query);
-  const suggestions = new Map(); // text -> { text, type, count, product? }
+  const suggestions = new Map();
   
-  // TELJES KATALÓGUS átkeresése - de early exit ha elég találat van
-  const maxSuggestions = 50; // Gyűjtünk max 50-et, majd rendezünk
-  let exactMatches = [];
-  let partialMatches = [];
+  // Index használata a gyors kereséshez
+  const index = buildSearchIndex(products);
   
-  // 1. Terméknév alapú javaslatok - TELJES KATALÓGUS
-  for (const product of products) {
+  // 1. INDEX-ALAPÚ KERESÉS - sokkal gyorsabb!
+  const candidateIndices = new Set();
+  
+  // Prefix alapú keresés
+  if (queryNoAccent.length >= 3) {
+    const prefix = queryNoAccent.slice(0, 3);
+    if (index.byPrefix.has(prefix)) {
+      index.byPrefix.get(prefix).forEach(idx => candidateIndices.add(idx));
+    }
+  }
+  
+  // Szó alapú keresés
+  const queryWords = queryNoAccent.split(/\s+/).filter(w => w.length >= 2);
+  queryWords.forEach(word => {
+    if (index.byWord.has(word)) {
+      index.byWord.get(word).forEach(idx => candidateIndices.add(idx));
+    }
+    // Szinonimák is
+    const syns = getAllSynonyms(word);
+    syns.forEach(syn => {
+      const synNoAccent = removeAccents(syn);
+      if (index.byWord.has(synNoAccent)) {
+        index.byWord.get(synNoAccent).forEach(idx => candidateIndices.add(idx));
+      }
+    });
+  });
+  
+  // 2. JELÖLTEK PONTOZÁSA
+  const scoredMatches = [];
+  
+  for (const idx of candidateIndices) {
+    const product = products[idx];
     const name = product.name || '';
     const nameLower = name.toLowerCase();
     const nameNoAccent = removeAccents(nameLower);
     
-    // PONTOS egyezés a lekérdezésre (prioritás!)
+    let score = 0;
+    
+    // Pontos query egyezés a névben
     if (nameNoAccent.includes(queryNoAccent)) {
-      // Prefix match = legjobb
       if (nameNoAccent.startsWith(queryNoAccent)) {
-        exactMatches.push({ name, product, score: 100 });
+        score = 100; // Prefix match = legjobb
       } else {
-        partialMatches.push({ name, product, score: 60 });
+        score = 70; // Contains match
       }
-      
-      // Early exit ha elég jó találat van
-      if (exactMatches.length >= maxSuggestions) break;
+    } else {
+      // Szó egyezések
+      const words = nameNoAccent.split(/\s+/);
+      for (const word of queryWords) {
+        if (words.some(w => w.startsWith(word))) {
+          score += 30;
+        } else if (words.some(w => w.includes(word))) {
+          score += 15;
+        }
+      }
     }
+    
+    if (score > 0) {
+      scoredMatches.push({ name, product, score });
+    }
+    
+    // Early exit ha elég
+    if (scoredMatches.length >= 100) break;
   }
   
-  // Kombináljuk: pontos egyezések előre
-  const allMatches = [...exactMatches, ...partialMatches].slice(0, maxSuggestions);
+  // Rendezés és deduplikálás
+  scoredMatches.sort((a, b) => b.score - a.score);
   
-  for (const match of allMatches) {
+  for (const match of scoredMatches.slice(0, 30)) {
     if (!suggestions.has(match.name)) {
       suggestions.set(match.name, {
         text: match.name,
@@ -712,16 +892,16 @@ export const getAutocompleteSuggestions = (products, partialQuery, limit = 8) =>
     }
   }
   
-  // 2. Kategória alapú javaslatok - egyszerűsített
+  // 3. KATEGÓRIA JAVASLATOK
   const seenCategories = new Set();
-  for (let i = 0; i < Math.min(products.length, 100); i++) {
-    const cat = products[i]?.category;
+  for (const idx of Array.from(candidateIndices).slice(0, 200)) {
+    const cat = products[idx]?.category;
     if (cat && !seenCategories.has(cat)) {
       seenCategories.add(cat);
-      const catNoAccent = removeAccents(cat);
+      const catNoAccent = removeAccents(cat.toLowerCase());
       if (catNoAccent.includes(queryNoAccent)) {
         const mainCat = cat.split(' > ')[0];
-        if (!suggestions.has(mainCat)) {
+        if (!suggestions.has(mainCat) && mainCat.length > 2) {
           suggestions.set(mainCat, {
             text: mainCat,
             type: 'category',
@@ -732,27 +912,29 @@ export const getAutocompleteSuggestions = (products, partialQuery, limit = 8) =>
     }
   }
   
-  // 3. Szinonima/kapcsolódó javaslatok - egyszerűsített
+  // 4. SZINONIMA JAVASLATOK
   const intent = parseSearchIntent(partialQuery);
   if (intent.productTypes.length > 0) {
-    const type = intent.productTypes[0]; // Csak az első
-    const syns = getAllSynonyms(type).slice(0, 2);
-    for (const syn of syns) {
-      if (syn !== query && !suggestions.has(syn)) {
-        suggestions.set(syn, {
-          text: syn,
-          type: 'synonym',
-          score: 25,
-        });
-      }
-    }
+    intent.productTypes.forEach(type => {
+      const syns = getAllSynonyms(type).slice(0, 3);
+      syns.forEach(syn => {
+        if (syn !== query && syn.length > 2 && !suggestions.has(syn)) {
+          suggestions.set(syn, {
+            text: syn,
+            type: 'synonym',
+            score: 25,
+          });
+        }
+      });
+    });
   }
   
-  // 4. Kombinált javaslatok - csak ha kevés találat
-  if (suggestions.size < 4) {
+  // 5. NÉPSZERŰ KOMBINÁCIÓK (ha kevés találat)
+  if (suggestions.size < 5) {
     const popularCombos = [
       'modern kanapé', 'skandináv bútor', 'fehér szekrény', 'fa asztal',
       'bőr fotel', 'akciós termékek', 'nappali bútor', 'hálószoba bútor',
+      'relax fotel', 'étkezőasztal', 'sarokkanapé', 'tv szekrény',
     ];
     for (const combo of popularCombos) {
       if (removeAccents(combo).includes(queryNoAccent) && !suggestions.has(combo)) {
