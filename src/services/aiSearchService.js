@@ -565,8 +565,10 @@ export const smartSearch = (products, query, options = {}) => {
     });
   });
   
-  // Gyors előszűrés - csak releváns termékek kerülnek pontozásra
+  // Gyors előszűrés - releváns termékek keresése a TELJES katalógusban
   const relevantProducts = [];
+  const exactMatches = []; // Pontos egyezések külön (prioritás!)
+  
   for (const product of products) {
     const name = (product.name || '').toLowerCase();
     const category = (product.category || '').toLowerCase();
@@ -574,10 +576,16 @@ export const smartSearch = (products, query, options = {}) => {
     const catNoAccent = removeAccents(category);
     const searchText = `${nameNoAccent} ${catNoAccent}`;
     
-    // Gyors ellenőrzés - van-e BÁRMILYEN egyezés?
+    // PONTOS EGYEZÉS a keresőkifejezésre - LEGMAGASABB PRIORITÁS
+    if (nameNoAccent.includes(queryNoAccent) || name.includes(queryLower)) {
+      exactMatches.push(product);
+      continue;
+    }
+    
+    // Gyors ellenőrzés - van-e BÁRMILYEN szó egyezés?
     let hasMatch = false;
     for (const word of expandedWords) {
-      if (searchText.includes(word)) {
+      if (word.length >= 3 && searchText.includes(word)) {
         hasMatch = true;
         break;
       }
@@ -586,13 +594,14 @@ export const smartSearch = (products, query, options = {}) => {
     if (hasMatch) {
       relevantProducts.push(product);
     }
-    
-    // Limitáljuk az előszűrt termékeket 200-ra a teljesítmény érdekében
-    if (relevantProducts.length >= 200) break;
   }
   
-  // 4. Csak a releváns termékek pontozása
-  const scoredProducts = relevantProducts.map(product => {
+  // Kombináljuk: pontos egyezések ELŐRE, utána a többi
+  // Max 2000 termék pontozásra (teljesítmény vs pontosság)
+  const toScore = [...exactMatches, ...relevantProducts].slice(0, 2000);
+  
+  // 4. Pontozás - pontos egyezések + releváns termékek
+  const scoredProducts = toScore.map(product => {
     const { score, bonuses } = calculateRelevanceScore(product, intent, userContext);
     return {
       product,
@@ -653,7 +662,7 @@ export const smartSearch = (products, query, options = {}) => {
 };
 
 /**
- * Autocomplete javaslatok - gépelés közben (OPTIMALIZÁLT)
+ * Autocomplete javaslatok - TELJES KATALÓGUSBÓL keres
  */
 export const getAutocompleteSuggestions = (products, partialQuery, limit = 8) => {
   if (!partialQuery || partialQuery.length < 2 || !products || products.length === 0) {
@@ -664,28 +673,42 @@ export const getAutocompleteSuggestions = (products, partialQuery, limit = 8) =>
   const queryNoAccent = removeAccents(query);
   const suggestions = new Map(); // text -> { text, type, count, product? }
   
-  // Limit how many products we check for performance
-  const maxProductsToCheck = Math.min(products.length, 300);
-  let matchCount = 0;
+  // TELJES KATALÓGUS átkeresése - de early exit ha elég találat van
+  const maxSuggestions = 50; // Gyűjtünk max 50-et, majd rendezünk
+  let exactMatches = [];
+  let partialMatches = [];
   
-  // 1. Terméknév alapú javaslatok (legfontosabb)
-  for (let i = 0; i < maxProductsToCheck && matchCount < 20; i++) {
-    const product = products[i];
+  // 1. Terméknév alapú javaslatok - TELJES KATALÓGUS
+  for (const product of products) {
     const name = product.name || '';
-    const nameNoAccent = removeAccents(name);
+    const nameLower = name.toLowerCase();
+    const nameNoAccent = removeAccents(nameLower);
     
+    // PONTOS egyezés a lekérdezésre (prioritás!)
     if (nameNoAccent.includes(queryNoAccent)) {
-      matchCount++;
-      
-      // Teljes terméknév - csak ha elég jó az egyezés
-      if (nameNoAccent.startsWith(queryNoAccent) && !suggestions.has(name)) {
-        suggestions.set(name, {
-          text: name,
-          type: 'product',
-          product: product,
-          score: 100,
-        });
+      // Prefix match = legjobb
+      if (nameNoAccent.startsWith(queryNoAccent)) {
+        exactMatches.push({ name, product, score: 100 });
+      } else {
+        partialMatches.push({ name, product, score: 60 });
       }
+      
+      // Early exit ha elég jó találat van
+      if (exactMatches.length >= maxSuggestions) break;
+    }
+  }
+  
+  // Kombináljuk: pontos egyezések előre
+  const allMatches = [...exactMatches, ...partialMatches].slice(0, maxSuggestions);
+  
+  for (const match of allMatches) {
+    if (!suggestions.has(match.name)) {
+      suggestions.set(match.name, {
+        text: match.name,
+        type: 'product',
+        product: match.product,
+        score: match.score,
+      });
     }
   }
   

@@ -54,12 +54,11 @@ const SmartSearchBar = ({
     };
   }, [query]);
 
-  // Autocomplete javaslatok - CSAK ha debounced query változik
+  // Autocomplete javaslatok - TELJES katalógusból keres
   const autocompleteSuggestions = useMemo(() => {
     if (!debouncedQuery.trim() || debouncedQuery.length < 2 || !products.length) return [];
-    // Limitáljuk az első 500 termékre a gyorsaság érdekében
-    const limitedProducts = products.slice(0, 500);
-    return getAutocompleteSuggestions(limitedProducts, debouncedQuery, 6);
+    // TELJES katalógus használata - a getAutocompleteSuggestions már optimalizált
+    return getAutocompleteSuggestions(products, debouncedQuery, 8);
   }, [debouncedQuery, products]);
 
   // Keresési eredmények - CSAK ha debounced query változik
