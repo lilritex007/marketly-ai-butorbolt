@@ -283,9 +283,15 @@ export function smartSearch(products, query, options = {}) {
     return { results: [], totalMatches: 0, searchTime: 0 };
   }
   
+  // If no products provided and no index, nothing to search
+  if ((!products || products.length === 0) && !INDEX.ready) {
+    console.warn('⚠️ smartSearch: No products and no index');
+    return { results: [], totalMatches: 0, searchTime: 0 };
+  }
+  
   const queryNorm = normalize(query.trim());
   
-  // Check cache
+  // Check cache first
   const cacheKey = `${queryNorm}:${limit}`;
   if (INDEX.cache.has(cacheKey)) {
     const cached = INDEX.cache.get(cacheKey);
@@ -295,15 +301,18 @@ export function smartSearch(products, query, options = {}) {
   
   const startTime = performance.now();
   
-  // Build index if needed
-  if (!INDEX.ready) {
+  // Build index if needed (sync fallback)
+  if (!INDEX.ready && !INDEX.building) {
     if (products && products.length > 0) {
-      // Sync build for first search (unavoidable)
       console.log('⚠️ Building index synchronously for first search...');
       buildSearchIndexSync(products);
-    } else {
-      return { results: [], totalMatches: 0, searchTime: 0 };
     }
+  }
+  
+  // If still building async, use direct search on products array
+  if (!INDEX.ready) {
+    console.log('⚠️ Index not ready, using direct search fallback...');
+    return directSearch(products, queryNorm, limit);
   }
   
   // Get query words and expand
@@ -414,6 +423,8 @@ export function smartSearch(products, query, options = {}) {
 
 // Sync version for first search
 function buildSearchIndexSync(products) {
+  if (INDEX.building) return; // Don't interrupt async build
+  
   INDEX.products = products;
   INDEX.normalized = [];
   INDEX.wordToProducts = new Map();
@@ -438,6 +449,51 @@ function buildSearchIndexSync(products) {
   
   INDEX.ready = true;
   INDEX.stats = { products: products.length, words: INDEX.wordToProducts.size, buildTime: 0 };
+  console.log(`✅ Sync index built: ${products.length} products`);
+}
+
+// Direct search fallback when index not ready
+function directSearch(products, queryNorm, limit) {
+  if (!products || products.length === 0) {
+    return { results: [], totalMatches: 0, searchTime: 0 };
+  }
+  
+  const startTime = performance.now();
+  const queryWords = getWords(queryNorm);
+  const expandedQuery = expandWithSynonyms(queryWords);
+  const scored = [];
+  
+  for (let i = 0; i < products.length; i++) {
+    const p = products[i];
+    const nameNorm = normalize(p.name || '');
+    const catNorm = normalize(p.category || '');
+    
+    let score = 0;
+    
+    // Direct query match in name
+    if (nameNorm.includes(queryNorm)) {
+      score += 1000;
+      if (nameNorm.startsWith(queryNorm)) score += 500;
+    }
+    
+    // Word matches
+    for (const word of expandedQuery) {
+      if (nameNorm.includes(word)) score += 50;
+      if (catNorm.includes(word)) score += 20;
+    }
+    
+    if (score > 0) {
+      scored.push({ product: p, score });
+    }
+  }
+  
+  scored.sort((a, b) => b.score - a.score);
+  const results = scored.slice(0, limit).map(s => s.product);
+  const searchTime = performance.now() - startTime;
+  
+  console.log(`🔍 Direct search: "${queryNorm}" → ${results.length} results in ${searchTime.toFixed(0)}ms`);
+  
+  return { results, totalMatches: scored.length, searchTime };
 }
 
 // ============================================================================

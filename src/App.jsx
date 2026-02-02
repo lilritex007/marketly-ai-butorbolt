@@ -3,6 +3,7 @@ import { ShoppingCart, Camera, MessageCircle, X, Send, Plus, Move, Trash2, Home,
 // framer-motion removed due to Vite production build TDZ issues
 import { fetchUnasProducts, refreshUnasProducts, fetchCategories } from './services/unasApi';
 import { trackProductView as trackProductViewPref, getPersonalizedRecommendations, getSimilarProducts } from './services/userPreferencesService';
+import { smartSearch } from './services/aiSearchService';
 import { generateText, analyzeImage as analyzeImageAI } from './services/geminiService';
 
 // New UI Components
@@ -1530,22 +1531,19 @@ const App = () => {
     }
   }, []);
 
-  // Debounced server-side search
+  // LOCAL AI search - no server call needed, instant results!
   const handleServerSearch = useCallback((query) => {
     setSearchQuery(query);
-    if (searchTimeoutRef.current) clearTimeout(searchTimeoutRef.current);
-    searchTimeoutRef.current = setTimeout(() => {
-      setServerSearchQuery(query);
-      loadUnasData({ search: query, category: serverCategory });
-    }, 300); // 300ms debounce
-  }, [loadUnasData, serverCategory]);
+    setVisibleCount(DISPLAY_BATCH); // Reset visible count on new search
+    // NO API call - we use local AI search in filteredAndSortedProducts
+  }, []);
 
-  // Server-side category filter
+  // LOCAL category filter - no server call needed
   const handleCategoryChange = useCallback((category) => {
     setCategoryFilter(category);
-    setServerCategory(category);
-    loadUnasData({ search: serverSearchQuery, category });
-  }, [loadUnasData, serverSearchQuery]);
+    setVisibleCount(DISPLAY_BATCH); // Reset visible count
+    // NO API call - filtering is done client-side in filteredAndSortedProducts
+  }, []);
 
   // Load more is now just showing more from already-loaded products
   // All products are loaded at once, so no server fetch needed
@@ -1565,17 +1563,46 @@ const App = () => {
     return () => clearInterval(t);
   }, []);
   
-  // Products are already filtered server-side (search + category)
-  // Only apply client-side sorting and advanced filters
+  // LOCAL AI SEARCH + client-side filtering
   const filteredAndSortedProducts = useMemo(() => {
       let result = products;
-      // Advanced filters (price range, etc.) - still client-side for now
-      if (Object.keys(advancedFilters).length > 0) result = applyFilters(result, advancedFilters);
+      
+      // 🔍 AI SEARCH - use local smartSearch for instant results!
+      if (searchQuery && searchQuery.trim().length >= 2) {
+        console.log(`🔍 Searching for: "${searchQuery}" in ${products.length} products`);
+        const searchResult = smartSearch(products, searchQuery, { limit: 5000 });
+        result = searchResult.results || [];
+        console.log(`🔍 Search result: ${result.length} products found`);
+        
+        // If no results from smartSearch but we have products, something's wrong
+        if (result.length === 0 && products.length > 0) {
+          console.warn('⚠️ No search results - falling back to basic filter');
+          // Basic fallback filter
+          const queryLower = searchQuery.toLowerCase();
+          result = products.filter(p => 
+            (p.name && p.name.toLowerCase().includes(queryLower)) ||
+            (p.category && p.category.toLowerCase().includes(queryLower))
+          );
+          console.log(`🔍 Fallback filter found: ${result.length} products`);
+        }
+      }
+      
+      // Category filter (client-side)
+      if (categoryFilter && categoryFilter !== 'Összes') {
+        result = result.filter(p => p.category && p.category.includes(categoryFilter));
+      }
+      
+      // Advanced filters (price range, etc.)
+      if (Object.keys(advancedFilters).length > 0) {
+        result = applyFilters(result, advancedFilters);
+      }
+      
       // Sorting
       if (sortOption === 'price-asc') result = [...result].sort((a, b) => (a.price || 0) - (b.price || 0));
       if (sortOption === 'price-desc') result = [...result].sort((a, b) => (b.price || 0) - (a.price || 0));
+      
       return result;
-  }, [products, sortOption, advancedFilters]);
+  }, [products, searchQuery, categoryFilter, sortOption, advancedFilters]);
 
   // Update ref after filteredAndSortedProducts is defined
   filteredLengthRef.current = filteredAndSortedProducts.length;
@@ -1843,12 +1870,38 @@ const App = () => {
                 <div className="sticky top-16 sm:top-20 z-40 mx-0 sm:-mx-4 lg:-mx-8 xl:-mx-10 px-3 sm:px-4 lg:px-8 xl:px-10 py-3 sm:py-4 lg:py-5 xl:py-6 mb-3 sm:mb-4 lg:mb-8 bg-white/95 backdrop-blur-md border-b border-gray-100 shadow-sm">
                   <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-4 lg:gap-6">
                     {/* Title & Count */}
-                    <div className="flex items-baseline gap-2 sm:gap-3 lg:gap-4">
-                      <h2 className="text-xl sm:text-2xl lg:text-3xl xl:text-4xl 2xl:text-5xl font-bold text-gray-900">Termékek</h2>
+                    <div className="flex items-baseline gap-2 sm:gap-3 lg:gap-4 flex-wrap">
+                      <h2 className="text-xl sm:text-2xl lg:text-3xl xl:text-4xl 2xl:text-5xl font-bold text-gray-900">
+                        {searchQuery ? 'Keresés' : 'Termékek'}
+                      </h2>
                       {!isLoadingUnas && (
                         <span className="text-sm sm:text-base lg:text-lg xl:text-xl 2xl:text-2xl text-gray-500">
-                          <span className="font-semibold text-primary-500">{products.length.toLocaleString('hu-HU')}</span> db
+                          <span className="font-semibold text-primary-500">
+                            {searchQuery 
+                              ? filteredAndSortedProducts.length.toLocaleString('hu-HU')
+                              : products.length.toLocaleString('hu-HU')
+                            }
+                          </span> db
+                          {searchQuery && products.length > 0 && (
+                            <span className="text-gray-400 text-xs sm:text-sm ml-1">
+                              / {products.length.toLocaleString('hu-HU')}
+                            </span>
+                          )}
                         </span>
+                      )}
+                      {searchQuery && (
+                        <div className="flex items-center gap-2 ml-2">
+                          <span className="px-3 py-1 bg-primary-100 text-primary-700 rounded-full text-sm font-medium">
+                            "{searchQuery}"
+                          </span>
+                          <button 
+                            onClick={() => setSearchQuery('')}
+                            className="p-1 hover:bg-gray-100 rounded-full transition-colors"
+                            title="Keresés törlése"
+                          >
+                            <X className="w-4 h-4 text-gray-500" />
+                          </button>
+                        </div>
                       )}
                     </div>
                     
@@ -1941,7 +1994,7 @@ const App = () => {
                   searchQuery ? (
                     <NoSearchResults 
                       query={searchQuery}
-                      onClear={() => { setSearchQuery(''); handleServerSearch(''); }}
+                      onClear={() => setSearchQuery('')}
                     />
                   ) : (
                     <NoFilterResults 
