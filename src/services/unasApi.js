@@ -22,8 +22,35 @@ const getBackendOrigin = () => {
   return api ? api.replace(/\/api\/?$/, '') : '';
 };
 
+// Static products cache (loaded once)
+let staticProductsCache = null;
+
 /**
- * Termékek betöltése – csak backend API (DB). Nincs static JSON, mindig friss adat.
+ * Load products from static JSON file (fallback)
+ */
+const loadStaticProducts = async () => {
+  if (staticProductsCache) return staticProductsCache;
+  
+  try {
+    console.log('📦 Loading static products.json as fallback...');
+    const res = await fetch('/products.json');
+    if (!res.ok) throw new Error('Static products not found');
+    const data = await res.json();
+    const products = Array.isArray(data) ? data : (data.products || []);
+    staticProductsCache = products.map(p => ({
+      ...p,
+      inStock: p.inStock !== undefined ? p.inStock : Boolean(p.in_stock)
+    }));
+    console.log(`✅ Loaded ${staticProductsCache.length} products from static file`);
+    return staticProductsCache;
+  } catch (err) {
+    console.error('Failed to load static products:', err);
+    return [];
+  }
+};
+
+/**
+ * Termékek betöltése – backend API (DB) + fallback statikus JSON-ra ha üres.
  * Never throws: hiba esetén üres tömb + error, UI ne omoljon össze.
  */
 export const fetchUnasProducts = async (filters = {}) => {
@@ -42,13 +69,43 @@ export const fetchUnasProducts = async (filters = {}) => {
     const res = await fetch(url, { method: 'GET' });
     if (!res.ok) {
       const err = await res.json().catch(() => ({}));
+      // API failed - try static fallback
+      const staticProducts = await loadStaticProducts();
+      if (staticProducts.length > 0) {
+        return { 
+          products: staticProducts, 
+          total: staticProducts.length, 
+          count: staticProducts.length, 
+          lastSync: null, 
+          source: 'static',
+          fallback: true 
+        };
+      }
       return { products: [], total: 0, count: 0, lastSync: null, source: 'api', error: err.message || String(res.status) };
     }
     const data = await res.json();
-    const products = (data.products || []).map(p => ({
+    let products = (data.products || []).map(p => ({
       ...p,
       inStock: p.inStock !== undefined ? p.inStock : Boolean(p.in_stock)
     }));
+    
+    // FALLBACK: If API returns few/no products, use static JSON
+    if (products.length < 1000) {
+      console.log(`⚠️ API returned only ${products.length} products, loading static fallback...`);
+      const staticProducts = await loadStaticProducts();
+      if (staticProducts.length > products.length) {
+        console.log(`✅ Using ${staticProducts.length} products from static file`);
+        return {
+          products: staticProducts,
+          total: staticProducts.length,
+          count: staticProducts.length,
+          lastSync: data.lastSync ?? null,
+          source: 'static',
+          fallback: true
+        };
+      }
+    }
+    
     return {
       products,
       total: data.total ?? 0,
@@ -57,6 +114,18 @@ export const fetchUnasProducts = async (filters = {}) => {
       source: 'api'
     };
   } catch (error) {
+    // Network error - try static fallback
+    const staticProducts = await loadStaticProducts();
+    if (staticProducts.length > 0) {
+      return { 
+        products: staticProducts, 
+        total: staticProducts.length, 
+        count: staticProducts.length, 
+        lastSync: null, 
+        source: 'static',
+        fallback: true 
+      };
+    }
     return { products: [], total: 0, count: 0, lastSync: null, source: 'api', error: error.message };
   }
 };
