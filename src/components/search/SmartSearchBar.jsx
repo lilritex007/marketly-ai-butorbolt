@@ -8,7 +8,10 @@ import {
   smartSearch, 
   getAutocompleteSuggestions, 
   getProactiveSuggestions,
-  parseSearchIntent 
+  parseSearchIntent,
+  buildSearchIndex,
+  isIndexReady,
+  getIndexStats
 } from '../../services/aiSearchService';
 import { trackSearch, getSearchHistory, getViewedProducts } from '../../services/userPreferencesService';
 
@@ -36,10 +39,51 @@ const SmartSearchBar = ({
   const [isOpen, setIsOpen] = useState(false);
   const [debouncedQuery, setDebouncedQuery] = useState('');
   const [selectedIndex, setSelectedIndex] = useState(-1); // Keyboard navigation
+  const [indexStatus, setIndexStatus] = useState({ ready: false, building: false, count: 0 });
   const inputRef = useRef(null);
   const containerRef = useRef(null);
   const debounceTimerRef = useRef(null);
   const resultsRef = useRef(null);
+  const indexedCountRef = useRef(0); // Track if we need to rebuild
+
+  // 🧠 BUILD SEARCH INDEX when products are loaded
+  useEffect(() => {
+    // Only rebuild if product count changed significantly
+    if (products.length > 0 && products.length !== indexedCountRef.current) {
+      console.log(`📊 Products changed: ${indexedCountRef.current} → ${products.length}, rebuilding index...`);
+      setIndexStatus({ ready: false, building: true, count: 0 });
+      
+      // Use requestIdleCallback or setTimeout to not block UI
+      const buildIndex = () => {
+        const startTime = performance.now();
+        const success = buildSearchIndex(products);
+        const elapsed = performance.now() - startTime;
+        
+        if (success) {
+          const stats = getIndexStats();
+          console.log(`✅ INDEX READY: ${stats.productCount.toLocaleString()} products, ${stats.wordCount.toLocaleString()} words in ${elapsed.toFixed(0)}ms`);
+          indexedCountRef.current = products.length;
+          setIndexStatus({ 
+            ready: true, 
+            building: false, 
+            count: stats.productCount,
+            words: stats.wordCount,
+            buildTime: elapsed
+          });
+        } else {
+          console.error('❌ Index build failed');
+          setIndexStatus({ ready: false, building: false, count: 0 });
+        }
+      };
+
+      // Build in next tick to let UI update
+      if (typeof requestIdleCallback !== 'undefined') {
+        requestIdleCallback(buildIndex, { timeout: 5000 });
+      } else {
+        setTimeout(buildIndex, 100);
+      }
+    }
+  }, [products.length]);
 
   // Debounce query - csak 300ms után kezdjen keresni
   useEffect(() => {
@@ -317,7 +361,9 @@ const SmartSearchBar = ({
             : 'border-gray-200 hover:border-gray-300 hover:shadow-md'}
         `}>
           <div className="flex items-center pl-4">
-            {query.length >= 2 && query !== debouncedQuery ? (
+            {indexStatus.building ? (
+              <div className="w-5 h-5 border-2 border-amber-500 border-t-transparent rounded-full animate-spin" title="Index építése..." />
+            ) : query.length >= 2 && query !== debouncedQuery ? (
               <div className="w-5 h-5 border-2 border-primary-500 border-t-transparent rounded-full animate-spin" />
             ) : (
               <Search className={`w-5 h-5 transition-colors ${isOpen ? 'text-primary-500' : 'text-gray-400'}`} />
@@ -712,9 +758,21 @@ const SmartSearchBar = ({
           {/* Footer - keresési tippek és keyboard hints */}
           <div className="px-4 py-3 bg-gradient-to-r from-gray-50 to-white border-t border-gray-100">
             <div className="flex items-center justify-between">
-              <p className="text-xs text-gray-500">
-                💡 <span className="font-medium">Tipp:</span> Keress természetesen, pl. "fehér kanapé 150 ezer alatt"
-              </p>
+              <div className="flex items-center gap-3 text-xs text-gray-500">
+                {indexStatus.building ? (
+                  <span className="flex items-center gap-1.5 text-amber-600">
+                    <div className="w-3 h-3 border-2 border-amber-500 border-t-transparent rounded-full animate-spin" />
+                    🧠 Tanulás folyamatban...
+                  </span>
+                ) : indexStatus.ready ? (
+                  <span className="flex items-center gap-1.5 text-green-600">
+                    <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
+                    🧠 {indexStatus.count?.toLocaleString()} termék betanulva
+                  </span>
+                ) : (
+                  <span>💡 Keress természetesen, pl. "fehér kanapé 150e alatt"</span>
+                )}
+              </div>
               <div className="hidden sm:flex items-center gap-2 text-xs text-gray-400">
                 <kbd className="px-1.5 py-0.5 bg-gray-100 rounded border border-gray-200 font-mono">↑↓</kbd>
                 <span>navigálás</span>
