@@ -36,6 +36,6 @@ data/
 *.db-shm
 *.db-wal
 
-# Large product exports (generated on Railway)
-public/products.json
-dist/products.json
+# Large product exports - NOT ignored anymore, needed for static fallback
+# public/products.json
+# dist/products.json

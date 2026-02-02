@@ -50,51 +50,76 @@ const loadStaticProducts = async () => {
 };
 
 /**
- * Termékek betöltése – backend API (DB) + fallback statikus JSON-ra ha üres.
- * Never throws: hiba esetén üres tömb + error, UI ne omoljon össze.
+ * Termékek betöltése – MINDIG STATIC JSON FIRST (gyors, megbízható)
+ * A statikus fájl 200k terméket tartalmaz, azonnal betölt.
+ * Backend API csak frissítéskor/szűréskor kell.
  */
 export const fetchUnasProducts = async (filters = {}) => {
   if (typeof window === 'undefined') return { products: [], total: 0, count: 0, lastSync: null, source: 'api' };
 
+  // STRATEGY: Always load from static JSON first (fast, reliable, 200k products)
+  // This ensures search/chat ALWAYS has products to work with
   try {
+    console.log('🚀 Loading products...');
+    
+    // If no filters, load from static JSON (fastest path)
+    const hasFilters = filters.category || filters.search;
+    
+    if (!hasFilters) {
+      // Try static JSON first (200k products, ~65MB, cached by browser)
+      const staticProducts = await loadStaticProducts();
+      if (staticProducts.length > 10000) {
+        console.log(`✅ Loaded ${staticProducts.length.toLocaleString()} products from static cache`);
+        return {
+          products: staticProducts,
+          total: staticProducts.length,
+          count: staticProducts.length,
+          lastSync: null,
+          source: 'static'
+        };
+      }
+    }
+    
+    // Filtered request or static failed → try API
     const API_BASE = getApiBase();
     const params = new URLSearchParams();
     if (filters.category) params.append('category', filters.category);
     if (filters.search) params.append('search', filters.search);
     if (filters.limit) params.append('limit', filters.limit);
     if (filters.offset) params.append('offset', filters.offset);
-    if (filters.slim) params.append('slim', 'true'); // Slim mode: only essential fields
+    // Always use slim mode for API (full data is too large)
+    params.append('slim', 'true');
     const url = `${API_BASE}/products${params.toString() ? '?' + params.toString() : ''}`;
 
+    console.log('📡 Fetching from API:', url);
     const res = await fetch(url, { method: 'GET' });
+    
     if (!res.ok) {
-      const err = await res.json().catch(() => ({}));
-      // API failed - try static fallback
+      console.warn('⚠️ API failed, using static fallback');
       const staticProducts = await loadStaticProducts();
-      if (staticProducts.length > 0) {
-        return { 
-          products: staticProducts, 
-          total: staticProducts.length, 
-          count: staticProducts.length, 
-          lastSync: null, 
-          source: 'static',
-          fallback: true 
-        };
-      }
-      return { products: [], total: 0, count: 0, lastSync: null, source: 'api', error: err.message || String(res.status) };
+      return { 
+        products: staticProducts, 
+        total: staticProducts.length, 
+        count: staticProducts.length, 
+        lastSync: null, 
+        source: 'static',
+        fallback: true 
+      };
     }
+    
     const data = await res.json();
     let products = (data.products || []).map(p => ({
       ...p,
       inStock: p.inStock !== undefined ? p.inStock : Boolean(p.in_stock)
     }));
     
-    // FALLBACK: If API returns few/no products, use static JSON
-    if (products.length < 1000) {
-      console.log(`⚠️ API returned only ${products.length} products, loading static fallback...`);
+    console.log(`✅ API returned ${products.length.toLocaleString()} products`);
+    
+    // If API returned few products but we have more in static, use static
+    if (products.length < 1000 && !hasFilters) {
       const staticProducts = await loadStaticProducts();
       if (staticProducts.length > products.length) {
-        console.log(`✅ Using ${staticProducts.length} products from static file`);
+        console.log(`📦 Using static (${staticProducts.length.toLocaleString()}) instead of API (${products.length})`);
         return {
           products: staticProducts,
           total: staticProducts.length,
@@ -108,15 +133,17 @@ export const fetchUnasProducts = async (filters = {}) => {
     
     return {
       products,
-      total: data.total ?? 0,
+      total: data.total ?? products.length,
       count: data.count ?? products.length,
       lastSync: data.lastSync ?? null,
       source: 'api'
     };
   } catch (error) {
-    // Network error - try static fallback
+    console.error('❌ Fetch error:', error.message);
+    // Always fallback to static
     const staticProducts = await loadStaticProducts();
     if (staticProducts.length > 0) {
+      console.log(`🔄 Fallback: ${staticProducts.length.toLocaleString()} products from static`);
       return { 
         products: staticProducts, 
         total: staticProducts.length, 
