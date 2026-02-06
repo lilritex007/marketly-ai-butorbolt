@@ -190,6 +190,16 @@ const SmartSearchBar = ({
     return () => document.removeEventListener('keydown', handleGlobalKeyDown);
   }, []);
 
+  // Fejléc „Keresés” gomb: scroll után fókusz + dropdown nyitás
+  useEffect(() => {
+    const handleFocusSearch = () => {
+      inputRef.current?.focus();
+      setIsOpen(true);
+    };
+    window.addEventListener('mkt-focus-search', handleFocusSearch);
+    return () => window.removeEventListener('mkt-focus-search', handleFocusSearch);
+  }, []);
+
   // === CALLBACK DEFINÍCIÓK (useEffect ELŐTT kell lenniük!) ===
   
   const handleSubmit = useCallback((e) => {
