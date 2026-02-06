@@ -29,9 +29,9 @@ const POPULAR_CATEGORIES = [
 const MEGA_MENU_COLORS = ['from-primary-500 to-secondary-700', 'from-orange-500 to-red-600', 'from-cyan-500 to-blue-600', 'from-green-500 to-teal-600', 'from-yellow-500 to-orange-600', 'from-pink-500 to-rose-600', 'from-indigo-500 to-purple-600', 'from-amber-500 to-orange-600', 'from-emerald-500 to-teal-600'];
 
 /**
- * Navbar – fejléc, kategória mega menu, mobil menü, announcement sáv.
- * Props: activeTab, setActiveTab, wishlistCount, productCount, categories, onOpenWishlist, onCategorySelect, onScrollToShop, recentlyViewed?, fixUrl?, onRecentProductClick?
- * Mobil: overlay kattintás / Escape zárja; fókusz a bezáró gombra nyitáskor, hamburgerre záráskor. Utoljára nézett localStorage-ból vagy prop, kattintás → onRecentProductClick + bezárás.
+ * Navbar – fejléc, kategória mega menu (fő + alkategóriák), mobil menü, announcement sáv.
+ * Props: activeTab, setActiveTab, wishlistCount, productCount, categories, categoryHierarchy?, onOpenWishlist, onCategorySelect, onScrollToShop, recentlyViewed?, fixUrl?, onRecentProductClick?
+ * categoryHierarchy: [ { name, productCount, children: [ { name, productCount } ] } ] – ha megadva, csak fő kategóriák + alkategóriák jelennek meg.
  */
 export default function Navbar({
   activeTab,
@@ -39,6 +39,7 @@ export default function Navbar({
   wishlistCount,
   productCount = 0,
   categories = [],
+  categoryHierarchy = [],
   onOpenWishlist,
   onCategorySelect,
   onScrollToShop,
@@ -58,6 +59,8 @@ export default function Navbar({
   const [recentlyViewedLocal, setRecentlyViewedLocal] = useState([]);
   const [recentCategories, setRecentCategories] = useState([]);
   const [mobileCategoriesExpanded, setMobileCategoriesExpanded] = useState(false);
+  const [mobileExpandedMain, setMobileExpandedMain] = useState(null);
+  const [megaMenuHoverMain, setMegaMenuHoverMain] = useState(null);
   const mobileMenuRef = useRef(null);
   const megaMenuRef = useRef(null);
   const megaMenuPanelRef = useRef(null);
@@ -201,6 +204,7 @@ export default function Navbar({
     if (navigator.vibrate) navigator.vibrate(10);
     setMobileMenuClosing(true);
     setMobileCategoriesExpanded(false);
+    setMobileExpandedMain(null);
     setTimeout(() => {
       setMobileMenuOpen(false);
       setMobileMenuClosing(false);
@@ -275,6 +279,75 @@ export default function Navbar({
                   <ChevronDown className={`w-4 h-4 xl:w-5 xl:h-5 transition-transform ${showMegaMenu ? 'rotate-180' : ''}`} />
                 </button>
                 {showMegaMenu && (() => {
+                  const hasHierarchy = Array.isArray(categoryHierarchy) && categoryHierarchy.length > 0;
+                  if (hasHierarchy) {
+                    return (
+                      <div ref={megaMenuPanelRef} className="absolute top-full left-0 mt-2 w-[640px] xl:w-[720px] 2xl:w-[800px] bg-white rounded-2xl xl:rounded-3xl shadow-2xl border border-gray-100 overflow-hidden animate-fade-in-up z-50" role="dialog" aria-label="Kategóriák menü">
+                        <div className="p-4 xl:p-5 border-b border-gray-100 bg-gray-50/50">
+                          <p className="text-xs text-gray-400 font-medium" aria-hidden="true">Termékek &gt; Kategóriák</p>
+                          <h3 className="text-sm xl:text-base font-bold text-gray-500 uppercase tracking-wider mt-0.5">Böngéssz kategóriák szerint</h3>
+                        </div>
+                        <div className="p-5 xl:p-6 2xl:p-7 max-h-[70vh] overflow-y-auto">
+                          <div className="grid grid-cols-2 xl:grid-cols-3 gap-5 xl:gap-6">
+                            {categoryHierarchy.slice(0, 12).map((main, idx) => {
+                              const isHover = megaMenuHoverMain === main.name;
+                              const children = (main.children || []).slice(0, 8);
+                              const MainIcon = getCategoryIcon(main.name);
+                              const color = MEGA_MENU_COLORS[idx % MEGA_MENU_COLORS.length];
+                              return (
+                                <div
+                                  key={main.name}
+                                  className="rounded-xl xl:rounded-2xl border border-gray-100 bg-gray-50/30 hover:bg-primary-50/50 hover:border-primary-100 transition-colors duration-200"
+                                  onMouseEnter={() => setMegaMenuHoverMain(main.name)}
+                                  onMouseLeave={() => setMegaMenuHoverMain(null)}
+                                >
+                                  <button
+                                    onClick={() => { pushRecentCategory(main.name); onCategorySelect?.(main.name); setActiveTab('shop'); setShowMegaMenu(false); setTimeout(() => onScrollToShop?.(), 80); }}
+                                    className={`w-full flex items-center gap-3 p-3 xl:p-4 rounded-t-xl xl:rounded-t-2xl text-left min-h-[44px] transition-all ${isHover ? 'bg-primary-50' : 'hover:bg-white'}`}
+                                    data-nav-action="category"
+                                    data-nav-target={main.name}
+                                    aria-label={`Fő kategória: ${main.name}`}
+                                  >
+                                    <div className={`w-10 h-10 xl:w-12 xl:h-12 rounded-xl bg-gradient-to-br ${color} flex items-center justify-center text-white shrink-0 shadow-md`}>
+                                      <MainIcon className="w-5 h-5 xl:w-6 xl:h-6" />
+                                    </div>
+                                    <div className="min-w-0 flex-1">
+                                      <span className="font-bold text-gray-800 text-sm xl:text-base block truncate">{main.name}</span>
+                                      <span className="text-xs text-gray-500">{Number(main.productCount || 0).toLocaleString('hu-HU')} termék</span>
+                                    </div>
+                                    <ChevronRight className="w-4 h-4 text-gray-400 shrink-0" />
+                                  </button>
+                                  {children.length > 0 && (
+                                    <div className="px-3 xl:px-4 pb-3 xl:pb-4 pt-0 flex flex-wrap gap-1.5">
+                                      {children.map((child) => (
+                                        <button
+                                          key={child.name}
+                                          onClick={() => { pushRecentCategory(child.name); onCategorySelect?.(child.name); setActiveTab('shop'); setShowMegaMenu(false); setTimeout(() => onScrollToShop?.(), 80); }}
+                                          className="px-2.5 py-1.5 text-xs xl:text-sm font-medium text-gray-600 hover:text-primary-600 hover:bg-primary-100 rounded-lg transition-colors min-h-[32px]"
+                                          data-nav-action="category"
+                                          data-nav-target={child.name}
+                                          aria-label={`Alkategória: ${child.name}`}
+                                        >
+                                          {child.name}
+                                          {child.productCount != null && <span className="text-gray-400 ml-1">({Number(child.productCount).toLocaleString('hu-HU')})</span>}
+                                        </button>
+                                      ))}
+                                    </div>
+                                  )}
+                                </div>
+                              );
+                            })}
+                          </div>
+                        </div>
+                        <div className="px-5 xl:px-6 2xl:px-7 pb-5 xl:pb-6 2xl:pb-7 pt-0 border-t border-gray-100">
+                          <button onClick={() => { onCategorySelect?.('Összes'); setActiveTab('shop'); setShowMegaMenu(false); setTimeout(() => onScrollToShop?.(), 80); }} className="w-full flex items-center justify-center gap-2 xl:gap-3 py-3 xl:py-3.5 text-sm xl:text-base 2xl:text-lg text-primary-600 hover:bg-primary-50 rounded-xl xl:rounded-2xl font-bold transition-all border border-primary-200 hover:border-primary-300 min-h-[44px]" data-nav-action="category" data-nav-target="Összes" aria-label="Összes kategória megtekintése">
+                            Összes kategória megtekintése
+                            <ArrowRight className="w-4 h-4 xl:w-5 xl:h-5" />
+                          </button>
+                        </div>
+                      </div>
+                    );
+                  }
                   const menuCategories = (Array.isArray(categories) && categories.length > 0) ? categories.filter(c => c && c.name && c.name !== 'Összes').slice(0, 12) : POPULAR_CATEGORIES;
                   const isRealCategories = menuCategories.length > 0 && typeof menuCategories[0]?.count === 'number';
                   return (
@@ -436,38 +509,96 @@ export default function Navbar({
                   </div>
                 </div>
               )}
-              <p className="text-xs text-white/60 font-bold uppercase tracking-wider mb-2">Összes kategória</p>
-              {(() => {
-                const realCats = (Array.isArray(categories) && categories.length > 0) ? categories.filter(c => c && c.name && c.name !== 'Összes') : [];
-                const list = realCats.length > 0 ? realCats : POPULAR_CATEGORIES;
-                const initialCount = 6;
-                const shown = mobileCategoriesExpanded ? list : list.slice(0, initialCount);
-                const hasMore = list.length > initialCount;
-                return (
-                  <>
-                    <div className="grid grid-cols-4 gap-1.5 sm:gap-2">
-                      {shown.map((cat, idx) => {
-                        const name = typeof cat?.name === 'string' ? cat.name : (cat?.name ?? '');
-                        const isReal = realCats.length > 0;
-                        const Icon = isReal ? getCategoryIcon(name) : (cat?.icon ?? Grid3X3);
-                        const color = isReal ? MEGA_MENU_COLORS[idx % MEGA_MENU_COLORS.length] : (cat?.color ?? 'from-primary-500 to-secondary-700');
-                        return (
-                          <button key={isReal ? name : (cat?.id ?? `m-${idx}`)} onClick={() => { pushRecentCategory(name); onCategorySelect?.(name); setActiveTab('shop'); closeMobileMenu(); setTimeout(() => onScrollToShop?.(), 400); }} className="flex flex-col items-center gap-1 py-2 px-1 bg-white/10 backdrop-blur-xl rounded-lg hover:bg-white/20 active:bg-white/25 hover:scale-[1.02] active:scale-[0.98] transition-all min-h-[44px]" data-nav-action="category" data-nav-target={name} aria-label={`Kategória: ${name}`}>
-                            <div className={`w-9 h-9 sm:w-10 sm:h-10 rounded-lg bg-gradient-to-br ${color} flex items-center justify-center shrink-0`}><Icon className="w-4 h-4 sm:w-5 sm:h-5 text-white" /></div>
-                            <span className="text-[10px] sm:text-xs font-semibold text-center line-clamp-2 leading-tight">{name}</span>
-                          </button>
-                        );
-                      })}
-                    </div>
-                    {hasMore && (
-                      <button type="button" onClick={() => setMobileCategoriesExpanded((v) => !v)} className="mt-2 w-full flex items-center justify-center gap-2 py-3 bg-white/10 backdrop-blur-xl rounded-lg hover:bg-white/20 transition-all min-h-[44px] text-white font-semibold text-sm" aria-expanded={mobileCategoriesExpanded} aria-label={mobileCategoriesExpanded ? 'Kevesebb kategória' : 'Több kategória megjelenítése'}>
-                        {mobileCategoriesExpanded ? 'Kevesebb' : 'Több megjelenítése'}
-                        {mobileCategoriesExpanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
-                      </button>
-                    )}
-                  </>
-                );
-              })()}
+              <p className="text-xs text-white/60 font-bold uppercase tracking-wider mb-2">Kategóriák</p>
+              {Array.isArray(categoryHierarchy) && categoryHierarchy.length > 0 ? (
+                <div className="space-y-1">
+                  {categoryHierarchy.slice(0, 16).map((main, idx) => {
+                    const isExpanded = mobileExpandedMain === main.name;
+                    const children = (main.children || []).slice(0, 10);
+                    const MainIcon = getCategoryIcon(main.name);
+                    const color = MEGA_MENU_COLORS[idx % MEGA_MENU_COLORS.length];
+                    return (
+                      <div key={main.name} className="rounded-xl overflow-hidden bg-white/10 backdrop-blur-xl">
+                        <button
+                          type="button"
+                          onClick={() => setMobileExpandedMain((v) => (v === main.name ? null : main.name))}
+                          className="w-full flex items-center gap-3 px-4 py-3.5 min-h-[44px] text-left hover:bg-white/15 active:bg-white/20 transition-all"
+                          aria-expanded={isExpanded}
+                          aria-label={isExpanded ? `${main.name} összecsukása` : `${main.name} kategória megnyitása`}
+                          data-nav-action="category-expand"
+                          data-nav-target={main.name}
+                        >
+                          <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${color} flex items-center justify-center text-white shrink-0`}>
+                            <MainIcon className="w-5 h-5" />
+                          </div>
+                          <span className="font-bold text-white flex-1">{main.name}</span>
+                          <span className="text-white/60 text-sm">{Number(main.productCount || 0).toLocaleString('hu-HU')}</span>
+                          {isExpanded ? <ChevronUp className="w-5 h-5 text-white/70" /> : <ChevronDown className="w-5 h-5 text-white/70" />}
+                        </button>
+                        {isExpanded && children.length > 0 && (
+                          <div className="px-4 pb-3 pt-0 flex flex-wrap gap-2 border-t border-white/10">
+                            <button
+                              onClick={() => { pushRecentCategory(main.name); onCategorySelect?.(main.name); setActiveTab('shop'); closeMobileMenu(); setTimeout(() => onScrollToShop?.(), 400); }}
+                              className="px-3 py-2 text-sm font-semibold text-white/90 bg-white/15 rounded-lg hover:bg-white/25 min-h-[44px]"
+                              data-nav-action="category"
+                              data-nav-target={main.name}
+                            >
+                              Összes ({main.name})
+                            </button>
+                            {children.map((child) => (
+                              <button
+                                key={child.name}
+                                onClick={() => { pushRecentCategory(child.name); onCategorySelect?.(child.name); setActiveTab('shop'); closeMobileMenu(); setTimeout(() => onScrollToShop?.(), 400); }}
+                                className="px-3 py-2 text-sm font-medium text-white/80 bg-white/10 rounded-lg hover:bg-white/20 min-h-[44px]"
+                                data-nav-action="category"
+                                data-nav-target={child.name}
+                              >
+                                {child.name}
+                              </button>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                  <button onClick={() => { onCategorySelect?.('Összes'); setActiveTab('shop'); closeMobileMenu(); setTimeout(() => onScrollToShop?.(), 400); }} className="w-full flex items-center justify-center gap-2 py-3.5 mt-2 bg-white/15 backdrop-blur-xl rounded-xl font-bold text-white hover:bg-white/25 min-h-[44px]" data-nav-action="category" data-nav-target="Összes">
+                    Összes termék
+                    <ArrowRight className="w-5 h-5" />
+                  </button>
+                </div>
+              ) : (
+                (() => {
+                  const realCats = (Array.isArray(categories) && categories.length > 0) ? categories.filter(c => c && c.name && c.name !== 'Összes') : [];
+                  const list = realCats.length > 0 ? realCats : POPULAR_CATEGORIES;
+                  const initialCount = 6;
+                  const shown = mobileCategoriesExpanded ? list : list.slice(0, initialCount);
+                  const hasMore = list.length > initialCount;
+                  return (
+                    <>
+                      <div className="grid grid-cols-4 gap-1.5 sm:gap-2">
+                        {shown.map((cat, idx) => {
+                          const name = typeof cat?.name === 'string' ? cat.name : (cat?.name ?? '');
+                          const isReal = realCats.length > 0;
+                          const Icon = isReal ? getCategoryIcon(name) : (cat?.icon ?? Grid3X3);
+                          const color = isReal ? MEGA_MENU_COLORS[idx % MEGA_MENU_COLORS.length] : (cat?.color ?? 'from-primary-500 to-secondary-700');
+                          return (
+                            <button key={isReal ? name : (cat?.id ?? `m-${idx}`)} onClick={() => { pushRecentCategory(name); onCategorySelect?.(name); setActiveTab('shop'); closeMobileMenu(); setTimeout(() => onScrollToShop?.(), 400); }} className="flex flex-col items-center gap-1 py-2 px-1 bg-white/10 backdrop-blur-xl rounded-lg hover:bg-white/20 active:bg-white/25 hover:scale-[1.02] active:scale-[0.98] transition-all min-h-[44px]" data-nav-action="category" data-nav-target={name} aria-label={`Kategória: ${name}`}>
+                              <div className={`w-9 h-9 sm:w-10 sm:h-10 rounded-lg bg-gradient-to-br ${color} flex items-center justify-center shrink-0`}><Icon className="w-4 h-4 sm:w-5 sm:h-5 text-white" /></div>
+                              <span className="text-[10px] sm:text-xs font-semibold text-center line-clamp-2 leading-tight">{name}</span>
+                            </button>
+                          );
+                        })}
+                      </div>
+                      {hasMore && (
+                        <button type="button" onClick={() => setMobileCategoriesExpanded((v) => !v)} className="mt-2 w-full flex items-center justify-center gap-2 py-3 bg-white/10 backdrop-blur-xl rounded-lg hover:bg-white/20 transition-all min-h-[44px] text-white font-semibold text-sm" aria-expanded={mobileCategoriesExpanded} aria-label={mobileCategoriesExpanded ? 'Kevesebb kategória' : 'Több kategória megjelenítése'}>
+                          {mobileCategoriesExpanded ? 'Kevesebb' : 'Több megjelenítése'}
+                          {mobileCategoriesExpanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+                        </button>
+                      )}
+                    </>
+                  );
+                })()
+              )}
             </div>
             <div className="space-y-3 mb-6" role="region" aria-label="Navigáció">
               <p className="text-sm sm:text-base text-white/70 font-bold uppercase tracking-wider mb-3 sm:mb-4">Navigáció</p>

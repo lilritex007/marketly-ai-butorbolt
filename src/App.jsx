@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { ShoppingCart, Camera, MessageCircle, X, Send, Plus, Move, Trash2, Home, ZoomIn, ZoomOut, Upload, Settings, Link as LinkIcon, FileText, RefreshCw, AlertCircle, Database, Lock, Search, ChevronLeft, ChevronRight, Filter, Heart, ArrowDownUp, Info, Check, Star, Truck, ShieldCheck, Phone, ArrowRight, Mail, Eye, Sparkles, Lightbulb, Image as ImageIcon, MousePointer2, Menu, Bot, Moon, Sun, Clock, Gift, Zap, TrendingUp, Instagram, Facebook, MapPin, Sofa, Lamp, BedDouble, Armchair, Grid3X3, ExternalLink, Timer, ChevronDown } from 'lucide-react';
 // framer-motion removed due to Vite production build TDZ issues
-import { fetchUnasProducts, refreshUnasProducts, fetchCategories } from './services/unasApi';
+import { fetchUnasProducts, refreshUnasProducts, fetchCategories, fetchCategoryHierarchy } from './services/unasApi';
 import { trackProductView as trackProductViewPref, getPersonalizedRecommendations, getSimilarProducts } from './services/userPreferencesService';
 import { smartSearch } from './services/aiSearchService';
 import { generateText, analyzeImage as analyzeImageAI } from './services/geminiService';
@@ -648,6 +648,7 @@ const App = () => {
   const [showAIOnboarding, setShowAIOnboarding] = useState(false);
   const [onboardingFeature, setOnboardingFeature] = useState('chat');
   const [advancedFilters, setAdvancedFilters] = useState({});
+  const [categoryHierarchy, setCategoryHierarchy] = useState({ mainCategories: [] });
   
   // AI Feature states
   const [showStyleQuiz, setShowStyleQuiz] = useState(false);
@@ -921,6 +922,14 @@ const App = () => {
   }, []);
 
   useEffect(() => {
+    let cancelled = false;
+    fetchCategoryHierarchy().then((data) => {
+      if (!cancelled && data?.mainCategories) setCategoryHierarchy(data);
+    });
+    return () => { cancelled = true; };
+  }, []);
+
+  useEffect(() => {
     const t = setInterval(() => loadUnasDataRef.current?.({ silent: true }), 300000);
     return () => clearInterval(t);
   }, []);
@@ -949,9 +958,15 @@ const App = () => {
         }
       }
       
-      // Category filter (client-side)
+      // Category filter (client-side): support main category (path first segment) or leaf (category)
       if (categoryFilter && categoryFilter !== 'Összes') {
-        result = result.filter(p => p.category && p.category.includes(categoryFilter));
+        result = result.filter((p) => {
+          if (p.category_path && typeof p.category_path === 'string') {
+            const main = p.category_path.split('|')[0].trim();
+            if (main === categoryFilter) return true;
+          }
+          return p.category && (p.category === categoryFilter || p.category.includes(categoryFilter));
+        });
       }
       
       // Advanced filters (price range, etc.)
@@ -1019,6 +1034,7 @@ const App = () => {
         wishlistCount={wishlist.length}
         productCount={totalProductsCount || products.length}
         categories={categories}
+        categoryHierarchy={categoryHierarchy.mainCategories}
         onOpenWishlist={() => setShowWishlistDrawer(true)}
         onCategorySelect={handleCategoryChange}
         onScrollToShop={() => document.getElementById('products-section')?.scrollIntoView({ behavior: 'smooth', block: 'start' })}

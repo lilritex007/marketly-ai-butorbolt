@@ -197,6 +197,23 @@ export const fetchCategories = async () => {
 };
 
 /**
+ * Fetch category hierarchy (main + children) for navbar/mobile menu
+ * Returns { mainCategories: [ { name, productCount, children: [ { name, productCount } ] } ] }
+ */
+export const fetchCategoryHierarchy = async () => {
+  try {
+    const API_BASE = getApiBase();
+    const res = await fetch(`${API_BASE}/categories/hierarchy`);
+    if (!res.ok) return { mainCategories: [] };
+    const data = await res.json();
+    return { mainCategories: Array.isArray(data.mainCategories) ? data.mainCategories : [] };
+  } catch (error) {
+    console.error('Error fetching category hierarchy:', error);
+    return { mainCategories: [] };
+  }
+};
+
+/**
  * Force refresh products from UNAS (trigger sync)
  */
 export const refreshUnasProducts = async () => {

@@ -19,6 +19,7 @@ import {
   getCategories,
   getCategoriesAdmin,
   getMainCategories,
+  getCategoryHierarchy,
   toggleCategory,
   getStatistics
 } from './services/productService.js';
@@ -234,6 +235,23 @@ app.get('/api/categories/main', async (req, res) => {
     console.error('Error fetching main categories:', error);
     res.status(500).json({
       error: 'Failed to fetch main categories',
+      message: error.message
+    });
+  }
+});
+
+/**
+ * Get category hierarchy (main + children) for navbar/mobile menu
+ * Returns { mainCategories: [ { name, productCount, children: [ { name, productCount } ] } ] }
+ */
+app.get('/api/categories/hierarchy', async (req, res) => {
+  try {
+    const data = getCategoryHierarchy();
+    res.json(data);
+  } catch (error) {
+    console.error('Error fetching category hierarchy:', error);
+    res.status(500).json({
+      error: 'Failed to fetch category hierarchy',
       message: error.message
     });
   }
@@ -681,6 +699,7 @@ app.listen(PORT, () => {
   console.log('    GET  /api/products/:id - Get single product');
   console.log('    GET  /api/categories - Get available categories');
   console.log('    GET  /api/categories/main - Get main categories (for AI shop filter)');
+  console.log('    GET  /api/categories/hierarchy - Get main + children (for navbar/mobile menu)');
   console.log('    GET  /api/stats - Get statistics');
   console.log('  Admin API:');
   console.log('    POST   /api/admin/sync - Trigger UNAS sync');

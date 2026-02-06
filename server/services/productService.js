@@ -321,6 +321,63 @@ export function getMainCategories(limit = null) {
 }
 
 /**
+ * Get category hierarchy: main categories with their subcategories (children).
+ * - If category_path contains '|', first segment = main, category = leaf (child)
+ * - Excludes EXCLUDED_MAIN_CATEGORIES and non-AI products
+ * Returns { mainCategories: [ { name, productCount, children: [ { name, productCount } ] } ] }
+ */
+export function getCategoryHierarchy() {
+  const placeholders = EXCLUDED_MAIN_CATEGORIES.map(() => '?').join(',');
+  const withPathSql = `
+    SELECT
+      trim(substr(category_path, 1, instr(category_path, '|') - 1)) AS main_name,
+      category AS child_name,
+      COUNT(*) AS productCount
+    FROM products
+    WHERE show_in_ai = 1 AND price > 0
+      AND category_path IS NOT NULL AND category_path != '' AND instr(category_path, '|') > 0
+      AND trim(substr(category_path, 1, instr(category_path, '|') - 1)) NOT IN (${placeholders})
+    GROUP BY main_name, child_name
+    ORDER BY main_name ASC, productCount DESC
+  `;
+  const rows = db.prepare(withPathSql).all(...EXCLUDED_MAIN_CATEGORIES);
+
+  if (rows.length > 0) {
+    const byMain = new Map();
+    for (const row of rows) {
+      const main = row.main_name;
+      if (!byMain.has(main)) {
+        byMain.set(main, { productCount: 0, children: [] });
+      }
+      const group = byMain.get(main);
+      group.productCount += row.productCount;
+      group.children.push({ name: row.child_name, productCount: row.productCount });
+    }
+    const mainCategories = Array.from(byMain.entries())
+      .map(([name, data]) => ({
+        name,
+        productCount: data.productCount,
+        children: data.children.slice(0, 12)
+      }))
+      .sort((a, b) => b.productCount - a.productCount);
+    return { mainCategories };
+  }
+
+  const fallbackSql = `
+    SELECT category AS name, COUNT(*) AS productCount
+    FROM products
+    WHERE show_in_ai = 1 AND price > 0 AND category IS NOT NULL AND category != ''
+    GROUP BY category
+    ORDER BY productCount DESC
+  `;
+  const flat = db.prepare(fallbackSql).all();
+  const mainCategories = flat
+    .filter(row => !EXCLUDED_MAIN_CATEGORIES.includes(row.name))
+    .map(row => ({ name: row.name, productCount: row.productCount, children: [] }));
+  return { mainCategories };
+}
+
+/**
  * Add or update category
  */
 export function upsertCategory(name, categoryPath = null, enabled = true) {
