@@ -959,17 +959,18 @@ const App = () => {
         }
       }
       
-      // Category filter (client-side): display main (rawSegments) or path first segment or leaf (category)
+      // Category filter (client-side): main = összes alatta lévő (path first segment VAGY leaf a children közül)
       if (categoryFilter && categoryFilter !== 'Összes') {
         const mainGroup = categoryHierarchy?.mainCategories?.find((m) => m.name === categoryFilter);
         const rawSegments = mainGroup?.rawSegments;
+        const childNames = mainGroup?.children?.map((c) => c.name) ?? [];
         result = result.filter((p) => {
           if (p.category_path && typeof p.category_path === 'string') {
             const main = p.category_path.split('|')[0].trim();
-            if (rawSegments?.length) {
-              if (rawSegments.includes(main)) return true;
-            } else if (main === categoryFilter) return true;
+            if (rawSegments?.length && rawSegments.includes(main)) return true;
+            if (!rawSegments?.length && main === categoryFilter) return true;
           }
+          if (p.category && childNames.length > 0 && childNames.includes(p.category)) return true;
           return p.category && (p.category === categoryFilter || p.category.includes(categoryFilter));
         });
       }
@@ -1040,6 +1041,7 @@ const App = () => {
         productCount={totalProductsCount || products.length}
         categories={categories}
         categoryHierarchy={categoryHierarchy.mainCategories}
+        activeCategory={categoryFilter}
         onOpenWishlist={() => setShowWishlistDrawer(true)}
         onCategorySelect={handleCategoryChange}
         onScrollToShop={() => document.getElementById('products-section')?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
@@ -1232,8 +1234,16 @@ const App = () => {
               />
             ) : (
             <section id="products-section" className="container-app section-padding">
-                {/* Sticky products header - PROMINENT */}
-                <div className="sticky top-16 sm:top-20 z-40 mx-0 sm:-mx-4 lg:-mx-8 xl:-mx-10 px-3 sm:px-4 lg:px-8 xl:px-10 py-3 sm:py-4 lg:py-5 xl:py-6 mb-3 sm:mb-4 lg:mb-8 bg-white/95 backdrop-blur-md border-b border-gray-100 shadow-sm">
+                {/* Sticky products header - solid, breadcrumb when category selected */}
+                <div className="sticky top-16 sm:top-20 z-40 mx-0 sm:-mx-4 lg:-mx-8 xl:-mx-10 px-3 sm:px-4 lg:px-8 xl:px-10 py-3 sm:py-4 lg:py-5 xl:py-6 mb-3 sm:mb-4 lg:mb-8 bg-white border-b border-gray-200 shadow-sm">
+                  {categoryFilter && categoryFilter !== 'Összes' && (
+                    <div className="flex items-center gap-2 mb-2 sm:mb-3 text-sm text-gray-500">
+                      <button type="button" onClick={() => handleCategoryChange('Összes')} className="hover:text-primary-600 font-medium transition-colors" aria-label="Összes kategória">Termékek</button>
+                      <span aria-hidden="true">/</span>
+                      <span className="font-semibold text-gray-700">{categoryFilter}</span>
+                      <span className="text-gray-400">({filteredAndSortedProducts.length.toLocaleString('hu-HU')} termék)</span>
+                    </div>
+                  )}
                   <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-4 lg:gap-6">
                     {/* Title & Count */}
                     <div className="flex items-baseline gap-2 sm:gap-3 lg:gap-4 flex-wrap">
