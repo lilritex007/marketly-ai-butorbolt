@@ -910,12 +910,13 @@ const App = () => {
     // NO API call - filtering is done client-side in filteredAndSortedProducts
   }, []);
 
-  // Bármely kategória kattintás után a termékek szekcióhoz görgetünk; kezdeti betöltéskor nem (csak ha categoryFilter tényleg megváltozott)
-  const prevCategoryFilterRef = useRef(categoryFilter);
+  // Bármely kategória kattintás után a termékek szekcióhoz görgetünk; csak a mountot hagyjuk ki, utána minden váltáskor görgetünk
+  const didMountScrollRef = useRef(false);
   useEffect(() => {
-    const prev = prevCategoryFilterRef.current;
-    prevCategoryFilterRef.current = categoryFilter;
-    if (prev === categoryFilter) return;
+    if (!didMountScrollRef.current) {
+      didMountScrollRef.current = true;
+      return;
+    }
     const t = setTimeout(() => {
       const el = document.getElementById('products-section');
       if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start', inline: 'nearest' });
