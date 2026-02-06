@@ -29,7 +29,8 @@ const MEGA_MENU_COLORS = ['from-primary-500 to-secondary-700', 'from-orange-500 
 
 /**
  * Navbar – fejléc, kategória mega menu, mobil menü, announcement sáv.
- * Props: activeTab, setActiveTab, wishlistCount, productCount, categories, onOpenWishlist, onCategorySelect, onScrollToShop, webshopDomain?, recentlyViewed?, fixUrl?
+ * Props: activeTab, setActiveTab, wishlistCount, productCount, categories, onOpenWishlist, onCategorySelect, onScrollToShop, webshopDomain?, recentlyViewed?, fixUrl?, onRecentProductClick?
+ * Mobil: overlay kattintás / Escape zárja; fókusz a bezáró gombra nyitáskor, hamburgerre záráskor. Utoljára nézett localStorage-ból vagy prop, kattintás → onRecentProductClick + bezárás.
  */
 export default function Navbar({
   activeTab,
@@ -41,8 +42,9 @@ export default function Navbar({
   onCategorySelect,
   onScrollToShop,
   webshopDomain = DEFAULT_WEBSHOP_DOMAIN,
-  recentlyViewed = [],
-  fixUrl = (url) => url || ''
+  recentlyViewed: recentlyViewedProp = [],
+  fixUrl = (url) => url || '',
+  onRecentProductClick
 }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
@@ -53,7 +55,10 @@ export default function Navbar({
   const [userName, setUserName] = useState('');
   const [mobileMenuClosing, setMobileMenuClosing] = useState(false);
   const [touchStartX, setTouchStartX] = useState(0);
+  const [recentlyViewedLocal, setRecentlyViewedLocal] = useState([]);
   const mobileMenuRef = useRef(null);
+  const megaMenuRef = useRef(null);
+  const hamburgerButtonRef = useRef(null);
 
   useEffect(() => {
     const lastVisit = localStorage.getItem('mkt_last_visit');
@@ -63,6 +68,25 @@ export default function Navbar({
       if (savedName) setUserName(savedName);
     }
     localStorage.setItem('mkt_last_visit', Date.now().toString());
+  }, []);
+
+  useEffect(() => {
+    const load = () => {
+      try {
+        const raw = localStorage.getItem('recently_viewed');
+        const list = raw ? JSON.parse(raw) : [];
+        setRecentlyViewedLocal(Array.isArray(list) ? list.slice(0, 4) : []);
+      } catch {
+        setRecentlyViewedLocal([]);
+      }
+    };
+    load();
+    window.addEventListener('recently-viewed-updated', load);
+    window.addEventListener('storage', load);
+    return () => {
+      window.removeEventListener('recently-viewed-updated', load);
+      window.removeEventListener('storage', load);
+    };
   }, []);
 
   useEffect(() => {
@@ -85,9 +109,27 @@ export default function Navbar({
   }, []);
 
   useEffect(() => {
+    if (!showMegaMenu) return;
+    const handleClickOutside = (e) => {
+      if (megaMenuRef.current && !megaMenuRef.current.contains(e.target)) setShowMegaMenu(false);
+    };
+    document.addEventListener('click', handleClickOutside);
+    return () => document.removeEventListener('click', handleClickOutside);
+  }, [showMegaMenu]);
+
+  useEffect(() => {
     if (mobileMenuOpen) document.body.style.overflow = 'hidden';
     else document.body.style.overflow = '';
     return () => { document.body.style.overflow = ''; };
+  }, [mobileMenuOpen]);
+
+  useEffect(() => {
+    if (mobileMenuOpen) {
+      const handleEsc = (e) => { if (e.key === 'Escape') closeMobileMenu(); };
+      window.addEventListener('keydown', handleEsc);
+      const t = setTimeout(() => mobileMenuRef.current?.querySelector('button[aria-label="Menü bezárása"]')?.focus(), 100);
+      return () => { window.removeEventListener('keydown', handleEsc); clearTimeout(t); };
+    }
   }, [mobileMenuOpen]);
 
   useEffect(() => {
@@ -104,7 +146,19 @@ export default function Navbar({
   const closeMobileMenu = () => {
     if (navigator.vibrate) navigator.vibrate(10);
     setMobileMenuClosing(true);
-    setTimeout(() => { setMobileMenuOpen(false); setMobileMenuClosing(false); }, 300);
+    setTimeout(() => {
+      setMobileMenuOpen(false);
+      setMobileMenuClosing(false);
+      hamburgerButtonRef.current?.focus();
+    }, 300);
+  };
+
+  const focusSearchAndClose = () => {
+    closeMobileMenu();
+    setTimeout(() => {
+      document.getElementById('shop-scroll-target')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      window.dispatchEvent(new CustomEvent('mkt-focus-search'));
+    }, 350);
   };
 
   const openMobileMenu = () => {
@@ -158,7 +212,7 @@ export default function Navbar({
             </div>
 
             <div className="hidden lg:flex items-center gap-2 xl:gap-3 2xl:gap-4">
-              <div className="relative" onMouseEnter={() => setShowMegaMenu(true)} onMouseLeave={() => setShowMegaMenu(false)}>
+              <div ref={megaMenuRef} className="relative" onMouseEnter={() => setShowMegaMenu(true)} onMouseLeave={() => setShowMegaMenu(false)}>
                 <button className="flex items-center gap-2 xl:gap-3 px-4 xl:px-6 2xl:px-7 py-2.5 xl:py-3.5 2xl:py-4 rounded-xl xl:rounded-2xl text-gray-600 hover:text-gray-900 hover:bg-gray-100 font-bold text-base xl:text-lg 2xl:text-xl transition-all" aria-label="Kategóriák menü" aria-expanded={showMegaMenu} aria-haspopup="true">
                   <Grid3X3 className="w-5 h-5 xl:w-6 xl:h-6" />
                   <span>Kategóriák</span>
@@ -217,7 +271,7 @@ export default function Navbar({
                 <Heart className={`w-5 h-5 sm:w-6 sm:h-6 lg:w-7 lg:h-7 transition-all group-hover:scale-110 ${wishlistCount > 0 ? 'fill-red-500 text-red-500' : ''}`} />
                 {wishlistCount > 0 && <span className="absolute -top-1 -right-1 min-w-[20px] lg:min-w-[24px] h-5 lg:h-6 flex items-center justify-center px-1.5 lg:px-2 text-xs lg:text-sm font-bold text-white bg-red-500 rounded-full shadow-lg animate-scale-in">{wishlistCount}</span>}
               </button>
-              <button type="button" className="lg:hidden p-2.5 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-xl bg-gradient-to-r from-primary-500 to-secondary-700 text-white shadow-lg hover:shadow-xl transition-all" onClick={openMobileMenu} aria-label="Menü megnyitása">
+              <button ref={hamburgerButtonRef} type="button" className="lg:hidden p-2.5 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-xl bg-gradient-to-r from-primary-500 to-secondary-700 text-white shadow-lg hover:shadow-xl transition-all" onClick={openMobileMenu} aria-label="Menü megnyitása">
                 <Menu className="w-6 h-6" />
               </button>
               <a href={webshopDomain} target="_blank" rel="noopener noreferrer" className="hidden md:flex items-center gap-2 xl:gap-3 bg-gradient-to-r from-gray-900 to-gray-800 hover:from-gray-800 hover:to-gray-700 text-white px-5 lg:px-7 xl:px-9 2xl:px-10 py-2.5 lg:py-3.5 xl:py-4 2xl:py-5 rounded-xl lg:rounded-2xl text-sm lg:text-base xl:text-lg 2xl:text-xl font-bold transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-0.5" aria-label="Fő webshop megnyitása új lapon">
@@ -263,8 +317,10 @@ export default function Navbar({
       )}
 
       {mobileMenuOpen && (
-        <div ref={mobileMenuRef} className={`fixed inset-0 z-[200] lg:hidden ${mobileMenuClosing ? 'animate-slide-out-right' : 'animate-slide-in-right'}`} style={{ bottom: '40px' }} role="dialog" aria-label="Navigációs menü" onTouchStart={handleTouchStart} onTouchEnd={handleTouchEnd}>
-          <div className="absolute inset-0 bg-gradient-to-br from-primary-500 via-secondary-700 to-secondary-600" />
+        <>
+          <button type="button" className="fixed inset-0 z-[199] lg:hidden bg-black/40 backdrop-blur-sm" onClick={closeMobileMenu} aria-label="Menü bezárása (háttér)" />
+          <div ref={mobileMenuRef} className={`fixed top-0 right-0 bottom-[40px] w-full max-w-sm z-[200] lg:hidden ${mobileMenuClosing ? 'animate-slide-out-right' : 'animate-slide-in-right'}`} role="dialog" aria-modal="true" aria-label="Navigációs menü" onTouchStart={handleTouchStart} onTouchEnd={handleTouchEnd} onClick={(e) => e.stopPropagation()}>
+          <div className="absolute inset-0 bg-gradient-to-br from-primary-500 via-secondary-700 to-secondary-600 rounded-l-2xl overflow-hidden" />
           <div className="absolute inset-0 overflow-hidden pointer-events-none">
             <div className="absolute top-10 left-5 w-48 h-48 bg-white/10 rounded-full blur-3xl animate-float-slow" />
             <div className="absolute bottom-32 right-5 w-64 h-64 bg-pink-400/15 rounded-full blur-3xl animate-float-medium" />
@@ -282,7 +338,7 @@ export default function Navbar({
               <button type="button" className="p-3 min-w-[48px] min-h-[48px] flex items-center justify-center rounded-xl bg-white/10 hover:bg-white/20 backdrop-blur-xl transition-colors" onClick={closeMobileMenu} aria-label="Menü bezárása"><X className="w-7 h-7" /></button>
             </div>
             <div className="flex gap-3 sm:gap-4 mb-6">
-              <button onClick={() => { closeMobileMenu(); setTimeout(() => { document.getElementById('shop-scroll-target')?.scrollIntoView({ behavior: 'smooth', block: 'start' }); window.dispatchEvent(new CustomEvent('mkt-focus-search')); }, 350); }} className="flex-1 flex items-center justify-center gap-2.5 py-4 bg-white/15 backdrop-blur-xl rounded-xl font-bold text-base sm:text-lg" aria-label="Keresés"><Search className="w-5 h-5 sm:w-6 sm:h-6" /><span>Keresés</span></button>
+              <button onClick={focusSearchAndClose} className="flex-1 flex items-center justify-center gap-2.5 py-4 bg-white/15 backdrop-blur-xl rounded-xl font-bold text-base sm:text-lg" aria-label="Keresés"><Search className="w-5 h-5 sm:w-6 sm:h-6" /><span>Keresés</span></button>
               <button onClick={() => { onOpenWishlist?.(); closeMobileMenu(); }} className="flex-1 flex items-center justify-center gap-2.5 py-4 bg-white/15 backdrop-blur-xl rounded-xl font-bold text-base sm:text-lg relative" aria-label="Kedvencek">
                 <Heart className={`w-5 h-5 sm:w-6 sm:h-6 ${wishlistCount > 0 ? 'fill-white' : ''}`} /><span>Kedvencek</span>
                 {wishlistCount > 0 && <span className="absolute -top-1 -right-1 w-6 h-6 bg-red-500 rounded-full text-sm flex items-center justify-center font-bold">{wishlistCount}</span>}
@@ -325,17 +381,17 @@ export default function Navbar({
                 </button>
               ))}
             </div>
-            {recentlyViewed && recentlyViewed.length > 0 && (
+            {((recentlyViewedProp?.length ? recentlyViewedProp : recentlyViewedLocal) || []).length > 0 && (
               <div className="mb-4">
                 <p className="text-xs text-white/60 font-semibold uppercase tracking-wider mb-2 flex items-center gap-1.5"><Clock className="w-3.5 h-3.5" />Utoljára nézett</p>
                 <div className="flex gap-2 overflow-x-auto pb-2 -mx-1 px-1">
-                  {recentlyViewed.slice(0, 4).map((product) => (
-                    <div key={product?.id ?? 'rv'} className="shrink-0 w-20">
+                  {(recentlyViewedProp?.length ? recentlyViewedProp : recentlyViewedLocal).slice(0, 4).map((product) => (
+                    <button key={product?.id ?? 'rv'} type="button" onClick={() => { onRecentProductClick?.(product); closeMobileMenu(); }} className="shrink-0 w-20 text-left rounded-lg hover:bg-white/10 transition-colors focus:outline-none focus:ring-2 focus:ring-white/50">
                       <div className="w-20 h-20 bg-white/10 backdrop-blur-xl rounded-lg overflow-hidden mb-1">
                         <img src={fixUrl(product?.imageUrl ?? product?.images?.[0])} alt={product?.name ?? ''} className="w-full h-full object-cover" loading="lazy" />
                       </div>
                       <p className="text-[10px] text-white/80 truncate">{product?.name ?? ''}</p>
-                    </div>
+                    </button>
                   ))}
                 </div>
               </div>
@@ -363,6 +419,7 @@ export default function Navbar({
             </div>
           </div>
         </div>
+        </>
       )}
     </>
   );

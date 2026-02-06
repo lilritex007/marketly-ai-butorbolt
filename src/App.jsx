@@ -1023,6 +1023,8 @@ const App = () => {
         onCategorySelect={handleCategoryChange}
         onScrollToShop={() => document.getElementById('shop-scroll-target')?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
         webshopDomain={WEBSHOP_DOMAIN}
+        fixUrl={fixUrl}
+        onRecentProductClick={handleProductView}
       />
       
       {/* AI Onboarding */}
