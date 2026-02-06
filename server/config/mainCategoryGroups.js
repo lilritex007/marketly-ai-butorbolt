@@ -1,5 +1,5 @@
 /**
- * Otthon / bútor / lakberendezés shop: a navban nem a path első szegmense a "fő kategória",
+ * Otthon / bútor / lakberendezés shop: a navban és a főoldalon nem a path első szegmense a "fő kategória",
  * hanem ezek a csoportok. Több raw fő kategória (path első szegmens) egy megjelenített fő alá tartozik.
  *
  * Példa: "Bútor" és "Bútorok" → egy "Bútor" fő; "Otthon", "Lakberendezés" → "Otthon és lakberendezés".
@@ -10,6 +10,9 @@ export const MAIN_CATEGORY_GROUPS = {
   'Otthon és lakberendezés': ['Otthon', 'Lakberendezés', 'Otthon és lakberendezés'],
   'Kert és Barkács': ['Kert', 'Barkács', 'Kert és barkács', 'Kert és Barkács', 'Otthon és kert'],
 };
+
+/** Megjelenítési sorrend: ebben a sorrendben jelennek meg a fő kategóriák a navban és a főoldalon. */
+export const MAIN_CATEGORY_DISPLAY_ORDER = ['Bútor', 'Otthon és lakberendezés', 'Kert és Barkács'];
 
 /**
  * Adott raw (path első szegmens) kategória melyik megjelenített fő alá tartozik.

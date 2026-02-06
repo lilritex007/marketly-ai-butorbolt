@@ -271,24 +271,24 @@ export default function Navbar({
               </div>
             </div>
 
-            <div className="hidden lg:flex items-center gap-2 xl:gap-3 2xl:gap-4">
+            <div className="hidden md:flex items-center gap-2 lg:gap-3 xl:gap-4 2xl:gap-4">
               <div ref={megaMenuRef} className="relative" onMouseEnter={() => setShowMegaMenu(true)} onMouseLeave={() => setShowMegaMenu(false)}>
-                <button className={`flex items-center gap-2 xl:gap-3 px-4 xl:px-6 2xl:px-7 py-2.5 xl:py-3.5 2xl:py-4 rounded-xl xl:rounded-2xl font-bold text-base xl:text-lg 2xl:text-xl transition-all min-h-[44px] ${showMegaMenu ? 'bg-primary-50 text-primary-700 ring-2 ring-primary-200' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'}`} aria-label="Kategóriák menü" aria-expanded={showMegaMenu} aria-haspopup="true">
-                  <Grid3X3 className="w-5 h-5 xl:w-6 xl:h-6" />
+                <button className={`flex items-center gap-2 lg:gap-3 xl:gap-3 px-3 lg:px-4 xl:px-6 2xl:px-7 py-2.5 lg:py-3 xl:py-3.5 2xl:py-4 rounded-xl lg:rounded-2xl font-bold text-sm lg:text-base xl:text-lg 2xl:text-xl transition-all duration-200 min-h-[44px] ${showMegaMenu ? 'bg-primary-50 text-primary-700 ring-2 ring-primary-200 shadow-sm' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'}`} aria-label="Kategóriák menü" aria-expanded={showMegaMenu} aria-haspopup="true">
+                  <Grid3X3 className="w-5 h-5 lg:w-5 xl:w-6 xl:h-6" />
                   <span>Kategóriák</span>
-                  <ChevronDown className={`w-4 h-4 xl:w-5 xl:h-5 transition-transform ${showMegaMenu ? 'rotate-180' : ''}`} />
+                  <ChevronDown className={`w-4 h-4 lg:w-5 xl:w-5 transition-transform duration-200 ${showMegaMenu ? 'rotate-180' : ''}`} />
                 </button>
                 {showMegaMenu && (() => {
                   const hasHierarchy = Array.isArray(categoryHierarchy) && categoryHierarchy.length > 0;
                   if (hasHierarchy) {
                     return (
-                      <div ref={megaMenuPanelRef} className="absolute top-full left-0 mt-2 w-[640px] xl:w-[720px] 2xl:w-[800px] bg-white rounded-2xl xl:rounded-3xl shadow-2xl border border-gray-100 overflow-hidden animate-fade-in-up z-50" role="dialog" aria-label="Kategóriák menü">
-                        <div className="p-4 xl:p-5 border-b border-gray-100 bg-gray-50/50">
+                      <div ref={megaMenuPanelRef} className="absolute top-full left-0 mt-2 w-[min(90vw,640px)] md:w-[min(92vw,680px)] lg:w-[640px] xl:w-[720px] 2xl:w-[800px] bg-white/98 backdrop-blur-xl rounded-2xl lg:rounded-3xl shadow-2xl shadow-gray-200/60 ring-1 ring-gray-100 overflow-hidden animate-fade-in-up z-50" role="dialog" aria-label="Kategóriák menü">
+                        <div className="p-4 lg:p-5 xl:p-5 border-b border-gray-100 bg-gradient-to-r from-gray-50/80 to-primary-50/30">
                           <p className="text-xs text-gray-400 font-medium" aria-hidden="true">Termékek &gt; Kategóriák</p>
-                          <h3 className="text-sm xl:text-base font-bold text-gray-500 uppercase tracking-wider mt-0.5">Böngéssz kategóriák szerint</h3>
+                          <h3 className="text-sm lg:text-base font-bold text-gray-600 uppercase tracking-wider mt-0.5">Böngéssz kategóriák szerint</h3>
                         </div>
-                        <div className="p-5 xl:p-6 2xl:p-7 max-h-[70vh] overflow-y-auto">
-                          <div className="grid grid-cols-2 xl:grid-cols-3 gap-5 xl:gap-6">
+                        <div className="p-4 lg:p-5 xl:p-6 2xl:p-7 max-h-[65vh] md:max-h-[70vh] overflow-y-auto">
+                          <div className="grid grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-5 xl:gap-6">
                             {categoryHierarchy.slice(0, 12).map((main, idx) => {
                               const isHover = megaMenuHoverMain === main.name;
                               const children = (main.children || []).slice(0, 8);
@@ -339,10 +339,10 @@ export default function Navbar({
                             })}
                           </div>
                         </div>
-                        <div className="px-5 xl:px-6 2xl:px-7 pb-5 xl:pb-6 2xl:pb-7 pt-0 border-t border-gray-100">
-                          <button onClick={() => { onCategorySelect?.('Összes'); setActiveTab('shop'); setShowMegaMenu(false); setTimeout(() => onScrollToShop?.(), 80); }} className="w-full flex items-center justify-center gap-2 xl:gap-3 py-3 xl:py-3.5 text-sm xl:text-base 2xl:text-lg text-primary-600 hover:bg-primary-50 rounded-xl xl:rounded-2xl font-bold transition-all border border-primary-200 hover:border-primary-300 min-h-[44px]" data-nav-action="category" data-nav-target="Összes" aria-label="Összes kategória megtekintése">
+                        <div className="px-4 lg:px-5 xl:px-6 2xl:px-7 pb-4 lg:pb-5 xl:pb-6 2xl:pb-7 pt-0 border-t border-gray-100 bg-gray-50/30">
+                          <button onClick={() => { onCategorySelect?.('Összes'); setActiveTab('shop'); setShowMegaMenu(false); setTimeout(() => onScrollToShop?.(), 80); }} className="w-full flex items-center justify-center gap-2 lg:gap-3 py-3 lg:py-3.5 text-sm lg:text-base xl:text-lg text-primary-600 hover:bg-primary-50 rounded-xl lg:rounded-2xl font-bold transition-all border border-primary-200 hover:border-primary-300 min-h-[44px]" data-nav-action="category" data-nav-target="Összes" aria-label="Összes kategória megtekintése">
                             Összes kategória megtekintése
-                            <ArrowRight className="w-4 h-4 xl:w-5 xl:h-5" />
+                            <ArrowRight className="w-4 h-4 lg:w-5 xl:w-5" />
                           </button>
                         </div>
                       </div>
@@ -351,7 +351,7 @@ export default function Navbar({
                   const menuCategories = (Array.isArray(categories) && categories.length > 0) ? categories.filter(c => c && c.name && c.name !== 'Összes').slice(0, 12) : POPULAR_CATEGORIES;
                   const isRealCategories = menuCategories.length > 0 && typeof menuCategories[0]?.count === 'number';
                   return (
-                    <div ref={megaMenuPanelRef} className="absolute top-full left-0 mt-2 w-[640px] xl:w-[720px] 2xl:w-[800px] bg-white rounded-2xl xl:rounded-3xl shadow-2xl border border-gray-100 overflow-hidden animate-fade-in-up z-50" role="dialog" aria-label="Kategóriák menü">
+                    <div ref={megaMenuPanelRef} className="absolute top-full left-0 mt-2 w-[min(90vw,640px)] md:w-[min(92vw,680px)] lg:w-[640px] xl:w-[720px] 2xl:w-[800px] bg-white/98 backdrop-blur-xl rounded-2xl lg:rounded-3xl shadow-2xl shadow-gray-200/60 ring-1 ring-gray-100 overflow-hidden animate-fade-in-up z-50" role="dialog" aria-label="Kategóriák menü">
                       <div className="p-4 xl:p-5 border-b border-gray-100 bg-gray-50/50">
                         <p className="text-xs text-gray-400 font-medium" aria-hidden="true">Termékek &gt; Kategóriák</p>
                         <h3 className="text-sm xl:text-base font-bold text-gray-500 uppercase tracking-wider mt-0.5">Böngéssz kategóriák szerint</h3>
@@ -385,8 +385,8 @@ export default function Navbar({
                 })()}
               </div>
               {navItems.map((item) => (
-                <button key={item.id} onClick={() => setActiveTab(item.id)} className={`relative flex items-center gap-2 xl:gap-3 px-4 xl:px-6 2xl:px-7 py-2.5 xl:py-3.5 2xl:py-4 rounded-xl xl:rounded-2xl font-bold text-base xl:text-lg 2xl:text-xl transition-all duration-200 min-h-[44px] hover:scale-[1.02] active:scale-[0.98] ${activeTab === item.id ? 'bg-gradient-to-r from-primary-500 to-secondary-700 text-white shadow-lg shadow-primary-300/50' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'}`} aria-current={activeTab === item.id ? 'page' : undefined} aria-label={item.label} data-nav-action="tab" data-nav-target={item.id}>
-                  <item.icon className="w-5 h-5 xl:w-6 xl:h-6" />
+                <button key={item.id} onClick={() => setActiveTab(item.id)} className={`relative flex items-center gap-2 lg:gap-3 xl:gap-3 px-3 lg:px-4 xl:px-6 2xl:px-7 py-2.5 lg:py-3 xl:py-3.5 2xl:py-4 rounded-xl lg:rounded-2xl font-bold text-sm lg:text-base xl:text-lg 2xl:text-xl transition-all duration-200 min-h-[44px] hover:scale-[1.02] active:scale-[0.98] ${activeTab === item.id ? 'bg-gradient-to-r from-primary-500 to-secondary-700 text-white shadow-lg shadow-primary-300/50' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'}`} aria-current={activeTab === item.id ? 'page' : undefined} aria-label={item.label} data-nav-action="tab" data-nav-target={item.id}>
+                  <item.icon className="w-5 h-5 lg:w-5 xl:w-6 xl:h-6" />
                   <span>{item.label}</span>
                   {item.isAI && activeTab !== item.id && <span className="px-2 py-0.5 xl:px-2.5 xl:py-1 text-[10px] xl:text-xs font-bold bg-gradient-to-r from-primary-100 to-secondary-100 text-primary-500 rounded-full">AI</span>}
                   {item.badge && activeTab !== item.id && <span className="px-2 py-0.5 xl:px-2.5 xl:py-1 text-[10px] xl:text-xs font-bold bg-green-100 text-green-700 rounded-full">{item.badge}</span>}
@@ -395,18 +395,18 @@ export default function Navbar({
             </div>
 
             <div className="flex items-center gap-2 sm:gap-3 lg:gap-4">
-              <button onClick={() => { setActiveTab('shop'); setTimeout(() => { document.getElementById('products-section')?.scrollIntoView({ behavior: 'smooth', block: 'start' }); window.dispatchEvent(new CustomEvent('mkt-focus-search')); }, 150); }} className="hidden lg:flex items-center gap-2 xl:gap-3 px-4 xl:px-5 py-2.5 xl:py-3 min-h-[44px] bg-gray-100 hover:bg-gray-200 rounded-xl xl:rounded-2xl text-gray-600 hover:text-gray-900 hover:scale-[1.02] active:scale-[0.98] transition-all" aria-label="Keresés" data-nav-action="search">
-                <Search className="w-5 h-5 xl:w-6 xl:h-6" />
-                <span className="text-sm xl:text-base font-bold">Keresés</span>
+              <button onClick={() => { setActiveTab('shop'); setTimeout(() => { document.getElementById('products-section')?.scrollIntoView({ behavior: 'smooth', block: 'start' }); window.dispatchEvent(new CustomEvent('mkt-focus-search')); }, 150); }} className="hidden md:flex items-center gap-2 lg:gap-3 xl:gap-3 px-3 lg:px-4 xl:px-5 py-2.5 lg:py-3 min-h-[44px] bg-gray-100 hover:bg-gray-200 rounded-xl lg:rounded-2xl text-gray-600 hover:text-gray-900 hover:scale-[1.02] active:scale-[0.98] transition-all" aria-label="Keresés" data-nav-action="search">
+                <Search className="w-5 h-5 lg:w-5 xl:w-6 xl:h-6" />
+                <span className="text-sm lg:text-base font-bold">Keresés</span>
               </button>
-              <button onClick={() => setIsDarkMode(!isDarkMode)} className="hidden sm:flex p-2.5 sm:p-3 lg:p-3.5 xl:p-4 min-w-[44px] min-h-[44px] lg:min-w-[52px] lg:min-h-[52px] xl:min-w-[56px] xl:min-h-[56px] items-center justify-center text-gray-600 hover:text-gray-900 rounded-xl xl:rounded-2xl hover:bg-gray-100 transition-all" aria-label={isDarkMode ? 'Világos mód' : 'Sötét mód'}>
-                {isDarkMode ? <Sun className="w-5 h-5 sm:w-6 sm:h-6 lg:w-7 lg:h-7" /> : <Moon className="w-5 h-5 sm:w-6 sm:h-6 lg:w-7 lg:h-7" />}
+              <button onClick={() => setIsDarkMode(!isDarkMode)} className="hidden sm:flex p-2.5 sm:p-3 min-w-[44px] min-h-[44px] items-center justify-center text-gray-600 hover:text-gray-900 rounded-xl lg:rounded-2xl hover:bg-gray-100 transition-all" aria-label={isDarkMode ? 'Világos mód' : 'Sötét mód'}>
+                {isDarkMode ? <Sun className="w-5 h-5 sm:w-6 sm:h-6" /> : <Moon className="w-5 h-5 sm:w-6 sm:h-6" />}
               </button>
-              <button onClick={onOpenWishlist} className="relative p-2.5 sm:p-3 lg:p-3.5 xl:p-4 min-w-[44px] min-h-[44px] lg:min-w-[52px] lg:min-h-[52px] xl:min-w-[56px] xl:min-h-[56px] flex items-center justify-center text-gray-600 hover:text-red-500 rounded-xl xl:rounded-2xl hover:bg-red-50 transition-all group" aria-label="Kívánságlista">
-                <Heart className={`w-5 h-5 sm:w-6 sm:h-6 lg:w-7 lg:h-7 transition-all group-hover:scale-110 ${wishlistCount > 0 ? 'fill-red-500 text-red-500' : ''}`} />
-                {wishlistCount > 0 && <span className="absolute -top-1 -right-1 min-w-[20px] lg:min-w-[24px] h-5 lg:h-6 flex items-center justify-center px-1.5 lg:px-2 text-xs lg:text-sm font-bold text-white bg-red-500 rounded-full shadow-lg animate-scale-in">{wishlistCount}</span>}
+              <button onClick={onOpenWishlist} className="relative p-2.5 sm:p-3 min-w-[44px] min-h-[44px] flex items-center justify-center text-gray-600 hover:text-red-500 rounded-xl lg:rounded-2xl hover:bg-red-50 transition-all group" aria-label="Kívánságlista">
+                <Heart className={`w-5 h-5 sm:w-6 sm:h-6 transition-all group-hover:scale-110 ${wishlistCount > 0 ? 'fill-red-500 text-red-500' : ''}`} />
+                {wishlistCount > 0 && <span className="absolute -top-1 -right-1 min-w-[20px] h-5 flex items-center justify-center px-1.5 text-xs font-bold text-white bg-red-500 rounded-full shadow-lg animate-scale-in">{wishlistCount}</span>}
               </button>
-              <button ref={hamburgerButtonRef} type="button" className="lg:hidden p-2.5 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-xl bg-gradient-to-r from-primary-500 to-secondary-700 text-white shadow-lg hover:shadow-xl transition-all" onClick={openMobileMenu} aria-label="Menü megnyitása">
+              <button ref={hamburgerButtonRef} type="button" className="md:hidden p-2.5 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-xl bg-gradient-to-r from-primary-500 to-secondary-700 text-white shadow-lg hover:shadow-xl transition-all" onClick={openMobileMenu} aria-label="Menü megnyitása">
                 <Menu className="w-6 h-6" />
               </button>
             </div>
@@ -509,37 +509,37 @@ export default function Navbar({
                   </div>
                 </div>
               )}
-              <p className="text-xs text-white/60 font-bold uppercase tracking-wider mb-2">Kategóriák</p>
+              <p className="text-xs text-white/60 font-bold uppercase tracking-wider mb-3">Kategóriák</p>
               {Array.isArray(categoryHierarchy) && categoryHierarchy.length > 0 ? (
-                <div className="space-y-1">
+                <div className="space-y-2">
                   {categoryHierarchy.slice(0, 16).map((main, idx) => {
                     const isExpanded = mobileExpandedMain === main.name;
                     const children = (main.children || []).slice(0, 10);
                     const MainIcon = getCategoryIcon(main.name);
                     const color = MEGA_MENU_COLORS[idx % MEGA_MENU_COLORS.length];
                     return (
-                      <div key={main.name} className="rounded-xl overflow-hidden bg-white/10 backdrop-blur-xl">
+                      <div key={main.name} className="rounded-xl overflow-hidden bg-white/10 backdrop-blur-xl border border-white/10">
                         <button
                           type="button"
                           onClick={() => setMobileExpandedMain((v) => (v === main.name ? null : main.name))}
-                          className="w-full flex items-center gap-3 px-4 py-3.5 min-h-[44px] text-left hover:bg-white/15 active:bg-white/20 transition-all"
+                          className="w-full flex items-center gap-3 px-4 py-4 min-h-[48px] text-left hover:bg-white/15 active:bg-white/20 transition-colors duration-150"
                           aria-expanded={isExpanded}
                           aria-label={isExpanded ? `${main.name} összecsukása` : `${main.name} kategória megnyitása`}
                           data-nav-action="category-expand"
                           data-nav-target={main.name}
                         >
-                          <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${color} flex items-center justify-center text-white shrink-0`}>
+                          <div className={`w-11 h-11 rounded-xl bg-gradient-to-br ${color} flex items-center justify-center text-white shrink-0 shadow-md`}>
                             <MainIcon className="w-5 h-5" />
                           </div>
-                          <span className="font-bold text-white flex-1">{main.name}</span>
-                          <span className="text-white/60 text-sm">{Number(main.productCount || 0).toLocaleString('hu-HU')}</span>
-                          {isExpanded ? <ChevronUp className="w-5 h-5 text-white/70" /> : <ChevronDown className="w-5 h-5 text-white/70" />}
+                          <span className="font-bold text-white flex-1 text-left">{main.name}</span>
+                          <span className="text-white/70 text-sm tabular-nums">{Number(main.productCount || 0).toLocaleString('hu-HU')}</span>
+                          <span className="text-white/50">{isExpanded ? <ChevronUp className="w-5 h-5" /> : <ChevronDown className="w-5 h-5" />}</span>
                         </button>
                         {isExpanded && children.length > 0 && (
-                          <div className="px-4 pb-3 pt-0 flex flex-wrap gap-2 border-t border-white/10">
+                          <div className="px-4 pb-4 pt-1 flex flex-wrap gap-2 border-t border-white/10 bg-white/5">
                             <button
                               onClick={() => { pushRecentCategory(main.name); onCategorySelect?.(main.name); setActiveTab('shop'); closeMobileMenu(); setTimeout(() => onScrollToShop?.(), 400); }}
-                              className="px-3 py-2 text-sm font-semibold text-white/90 bg-white/15 rounded-lg hover:bg-white/25 min-h-[44px]"
+                              className="px-3 py-2.5 text-sm font-semibold text-white bg-white/20 rounded-xl hover:bg-white/30 min-h-[44px] transition-colors"
                               data-nav-action="category"
                               data-nav-target={main.name}
                             >
@@ -549,7 +549,7 @@ export default function Navbar({
                               <button
                                 key={child.name}
                                 onClick={() => { pushRecentCategory(child.name); onCategorySelect?.(child.name); setActiveTab('shop'); closeMobileMenu(); setTimeout(() => onScrollToShop?.(), 400); }}
-                                className="px-3 py-2 text-sm font-medium text-white/80 bg-white/10 rounded-lg hover:bg-white/20 min-h-[44px]"
+                                className="px-3 py-2.5 text-sm font-medium text-white/90 bg-white/10 rounded-xl hover:bg-white/20 min-h-[44px] transition-colors"
                                 data-nav-action="category"
                                 data-nav-target={child.name}
                               >
@@ -561,7 +561,7 @@ export default function Navbar({
                       </div>
                     );
                   })}
-                  <button onClick={() => { onCategorySelect?.('Összes'); setActiveTab('shop'); closeMobileMenu(); setTimeout(() => onScrollToShop?.(), 400); }} className="w-full flex items-center justify-center gap-2 py-3.5 mt-2 bg-white/15 backdrop-blur-xl rounded-xl font-bold text-white hover:bg-white/25 min-h-[44px]" data-nav-action="category" data-nav-target="Összes">
+                  <button onClick={() => { onCategorySelect?.('Összes'); setActiveTab('shop'); closeMobileMenu(); setTimeout(() => onScrollToShop?.(), 400); }} className="w-full flex items-center justify-center gap-2 py-4 mt-3 bg-white/15 backdrop-blur-xl rounded-xl font-bold text-white hover:bg-white/25 active:scale-[0.99] min-h-[48px] transition-all border border-white/10" data-nav-action="category" data-nav-target="Összes">
                     Összes termék
                     <ArrowRight className="w-5 h-5" />
                   </button>

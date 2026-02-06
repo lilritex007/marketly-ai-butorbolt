@@ -90,6 +90,13 @@ const CATEGORY_ICONS = {
   'Dekoráció': Flower2,
   'Lakástextil': Home,
   'Kiegészítő': Gift,
+  'Otthon': Home,
+  'Lakberendezés': Home,
+  'Otthon és lakberendezés': Home,
+  'Bútor': Sofa,
+  'Bútorok': Sofa,
+  'Barkács': Warehouse,
+  'Kert és Barkács': TreeDeciduous,
 };
 
 /**

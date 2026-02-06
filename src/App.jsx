@@ -22,6 +22,7 @@ import AIDebugPanel from './components/debug/AIDebugPanel';
 // Category Components
 import CategorySwipe from './components/category/CategorySwipe';
 import CategoryPage from './components/category/CategoryPage';
+import MainCategoriesSection from './components/category/MainCategoriesSection';
 import Navbar from './components/layout/Navbar';
 
 // UX Components
@@ -1310,14 +1311,35 @@ const App = () => {
                   </div>
                 </div>
                 
-                {/* Category Navigation */}
+                {/* Main categories (from hierarchy) + quick filter swipe */}
+                {categoryHierarchy?.mainCategories?.length > 0 && (
+                  <MainCategoriesSection
+                    mainCategories={categoryHierarchy.mainCategories}
+                    activeCategory={categoryFilter}
+                    onCategorySelect={handleCategoryChange}
+                    totalProductCount={products.length}
+                  />
+                )}
                 <CategorySwipe
-                  categories={categories.map((cat, idx) => ({
-                    id: cat.name,
-                    name: cat.name,
-                    totalCount: cat.count,
-                    icon: null // Icons handled by CategorySwipe component
-                  }))}
+                  categories={(() => {
+                    if (categoryHierarchy?.mainCategories?.length > 0) {
+                      return [
+                        { id: 'Összes', name: 'Összes', totalCount: products.length },
+                        ...categoryHierarchy.mainCategories.map((m) => ({
+                          id: m.name,
+                          name: m.name,
+                          totalCount: m.productCount ?? 0,
+                          icon: null,
+                        })),
+                      ];
+                    }
+                    return categories.map((cat) => ({
+                      id: cat.name,
+                      name: cat.name,
+                      totalCount: cat.count,
+                      icon: null,
+                    }));
+                  })()}
                   activeCategory={categoryFilter}
                   onCategoryChange={handleCategoryChange}
                   displayedCount={Math.min(visibleCount, filteredAndSortedProducts.length)}

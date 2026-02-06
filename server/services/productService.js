@@ -1,6 +1,6 @@
 import db from '../database/db.js';
 import { EXCLUDED_MAIN_CATEGORIES } from '../config/excludedCategories.js';
-import { getDisplayMainName } from '../config/mainCategoryGroups.js';
+import { getDisplayMainName, MAIN_CATEGORY_DISPLAY_ORDER } from '../config/mainCategoryGroups.js';
 
 /**
  * Get all products (with optional filtering)
@@ -369,17 +369,19 @@ export function getCategoryHierarchy() {
         group.childrenMap.set(ch.name, prev + (ch.productCount || 0));
       }
     }
+    const orderMap = new Map(MAIN_CATEGORY_DISPLAY_ORDER.map((name, i) => [name, i]));
     const mainCategories = Array.from(byDisplayMain.entries())
       .map(([name, data]) => ({
         name,
         productCount: data.productCount,
         rawSegments: data.rawSegments,
+        displayOrder: orderMap.has(name) ? orderMap.get(name) : 999,
         children: Array.from(data.childrenMap.entries())
           .map(([childName, productCount]) => ({ name: childName, productCount }))
           .sort((a, b) => (b.productCount || 0) - (a.productCount || 0))
           .slice(0, 12)
       }))
-      .sort((a, b) => b.productCount - a.productCount);
+      .sort((a, b) => (a.displayOrder ?? 999) - (b.displayOrder ?? 999));
     return { mainCategories };
   }
 
