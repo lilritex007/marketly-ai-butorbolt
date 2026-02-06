@@ -910,14 +910,17 @@ const App = () => {
     // NO API call - filtering is done client-side in filteredAndSortedProducts
   }, []);
 
-  // Kategória választás után mindig a termékek szekcióhoz görgetünk (mobil, tablet, desktop)
+  // Bármely kategória (fő, alkategória, Összes) kattintás után a termékek szekcióhoz görgetünk; kezdeti betöltéskor nem
+  const categoryScrollSkipRef = useRef(true);
   useEffect(() => {
-    if (categoryFilter && categoryFilter !== 'Összes') {
-      const t = setTimeout(() => {
-        document.getElementById('products-section')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      }, 350);
-      return () => clearTimeout(t);
+    if (categoryScrollSkipRef.current) {
+      categoryScrollSkipRef.current = false;
+      return;
     }
+    const t = setTimeout(() => {
+      document.getElementById('products-section')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 350);
+    return () => clearTimeout(t);
   }, [categoryFilter]);
 
   // Load more is now just showing more from already-loaded products
