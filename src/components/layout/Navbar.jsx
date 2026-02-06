@@ -496,14 +496,14 @@ export default function Navbar({
             <div className="mb-4" role="region" aria-label="Kategóriák">
               {recentCategories.length > 0 && (
                 <div className="mb-3">
-                  <p className="text-xs text-white/80 font-bold uppercase tracking-wider mb-1.5">Gyakran nézett</p>
-                  <div className="flex flex-wrap gap-2">
+                  <p className="text-xs text-white/90 font-bold uppercase tracking-wider mb-1.5">Gyakran nézett</p>
+                  <div className="flex flex-wrap gap-2 justify-start">
                     {recentCategories.map((name) => {
                       const Icon = getCategoryIcon(name);
                       const idx = recentCategories.indexOf(name);
                       const color = MEGA_MENU_COLORS[idx % MEGA_MENU_COLORS.length];
                       return (
-                        <button key={name} onClick={() => { pushRecentCategory(name); onCategorySelect?.(name); setActiveTab('shop'); closeMobileMenu(); setTimeout(() => onScrollToShop?.(), 400); }} className="flex items-center gap-2 py-2.5 px-3.5 bg-gray-800 rounded-xl hover:bg-gray-700 active:scale-[0.98] transition-all min-h-[44px] min-w-[44px] focus:outline-none focus-visible:ring-2 focus-visible:ring-white" data-nav-action="category" data-nav-target={name} aria-label={`Kategória: ${name}`}>
+                        <button key={name} onClick={() => { pushRecentCategory(name); onCategorySelect?.(name); setActiveTab('shop'); closeMobileMenu(); }} className="flex items-center gap-2 py-2.5 px-3.5 bg-white/15 rounded-xl hover:bg-white/25 active:scale-[0.98] transition-all min-h-[44px] min-w-[44px] focus:outline-none focus-visible:ring-2 focus-visible:ring-white border border-white/20" data-nav-action="category" data-nav-target={name} aria-label={`Kategória: ${name}`}>
                           <div className={`w-8 h-8 rounded-lg bg-gradient-to-br ${color} flex items-center justify-center shrink-0 shadow`}><Icon className="w-4 h-4 text-white" /></div>
                           <span className="text-xs font-semibold text-left text-white">{name}</span>
                         </button>
@@ -512,7 +512,7 @@ export default function Navbar({
                   </div>
                 </div>
               )}
-              <p className="text-xs text-white/80 font-bold uppercase tracking-wider mb-3">Kategóriák</p>
+              <p className="text-xs text-white/90 font-bold uppercase tracking-wider mb-3">Kategóriák</p>
               {Array.isArray(categoryHierarchy) && categoryHierarchy.length > 0 ? (
                 <div className="space-y-2">
                   {categoryHierarchy.slice(0, 16).map((main, idx) => {
@@ -522,11 +522,11 @@ export default function Navbar({
                     const MainIcon = getCategoryIcon(main.name);
                     const color = MEGA_MENU_COLORS[idx % MEGA_MENU_COLORS.length];
                     return (
-                      <div key={main.name} className="rounded-xl overflow-hidden bg-gray-800 border border-gray-700 shadow-lg">
+                      <div key={main.name} className="rounded-xl overflow-hidden bg-white/15 border border-white/25 shadow-lg">
                         <button
                           type="button"
                           onClick={() => setMobileExpandedMain((v) => (v === main.name ? null : main.name))}
-                          className={`w-full flex items-center gap-3 px-4 py-4 min-h-[48px] text-left transition-colors duration-150 focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-inset ${isExpanded ? 'bg-gray-700' : 'hover:bg-gray-700/80'}`}
+                          className={`w-full flex items-center gap-3 px-4 py-4 min-h-[48px] text-left transition-colors duration-150 focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-inset ${isExpanded ? 'bg-white/20' : 'hover:bg-white/20'}`}
                           aria-expanded={isExpanded}
                           aria-label={isExpanded ? `${main.name} összecsukása` : `${main.name} kategória megnyitása`}
                           data-nav-action="category-expand"
@@ -536,39 +536,41 @@ export default function Navbar({
                             <MainIcon className="w-5 h-5" />
                           </div>
                           <span className="font-bold text-white flex-1 text-left">{main.name}</span>
-                          <span className="text-white/80 text-sm tabular-nums">{Number(main.productCount || 0).toLocaleString('hu-HU')}</span>
-                          <span className="text-white/60">{isExpanded ? <ChevronUp className="w-5 h-5" /> : <ChevronDown className="w-5 h-5" />}</span>
+                          <span className="text-white/90 text-sm tabular-nums">{Number(main.productCount || 0).toLocaleString('hu-HU')}</span>
+                          <span className="text-white/70">{isExpanded ? <ChevronUp className="w-5 h-5" /> : <ChevronDown className="w-5 h-5" />}</span>
                         </button>
                         {isExpanded && children.length > 0 && (
-                          <div className="px-4 pb-4 pt-2 flex flex-wrap gap-2 border-t border-gray-700 bg-gray-800/90">
-                            <button
-                              onClick={() => { pushRecentCategory(main.name); onCategorySelect?.(main.name); setActiveTab('shop'); closeMobileMenu(); setTimeout(() => onScrollToShop?.(), 400); }}
-                              className={`px-3 py-2.5 text-sm font-semibold rounded-xl min-h-[44px] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-white ${isActiveMain ? 'bg-primary-500 text-white' : 'bg-gray-700 text-white hover:bg-gray-600'}`}
-                              data-nav-action="category"
-                              data-nav-target={main.name}
-                            >
-                              Összes ({main.name})
-                            </button>
-                            {children.map((child) => {
-                              const isActiveChild = activeCategory === child.name;
-                              return (
-                                <button
-                                  key={child.name}
-                                  onClick={() => { pushRecentCategory(child.name); onCategorySelect?.(child.name); setActiveTab('shop'); closeMobileMenu(); setTimeout(() => onScrollToShop?.(), 400); }}
-                                  className={`px-3 py-2.5 text-sm font-medium rounded-xl min-h-[44px] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-white ${isActiveChild ? 'bg-primary-500 text-white' : 'bg-gray-700 text-white/90 hover:bg-gray-600'}`}
-                                  data-nav-action="category"
-                                  data-nav-target={child.name}
-                                >
-                                  {child.name}
-                                </button>
-                              );
-                            })}
+                          <div className="px-4 pb-4 pt-2 border-t border-white/20 bg-white/10">
+                            <div className="flex flex-wrap gap-2 justify-start text-left">
+                              <button
+                                onClick={() => { pushRecentCategory(main.name); onCategorySelect?.(main.name); setActiveTab('shop'); closeMobileMenu(); }}
+                                className={`px-3 py-2.5 text-sm font-semibold rounded-xl min-h-[44px] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-white ${isActiveMain ? 'bg-primary-500 text-white' : 'bg-white/20 text-white hover:bg-white/30 border border-white/25'}`}
+                                data-nav-action="category"
+                                data-nav-target={main.name}
+                              >
+                                Összes ({main.name})
+                              </button>
+                              {children.map((child) => {
+                                const isActiveChild = activeCategory === child.name;
+                                return (
+                                  <button
+                                    key={child.name}
+                                    onClick={() => { pushRecentCategory(child.name); onCategorySelect?.(child.name); setActiveTab('shop'); closeMobileMenu(); }}
+                                    className={`px-3 py-2.5 text-sm font-medium rounded-xl min-h-[44px] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-white text-left ${isActiveChild ? 'bg-primary-500 text-white' : 'bg-white/20 text-white/95 hover:bg-white/30 border border-white/25'}`}
+                                    data-nav-action="category"
+                                    data-nav-target={child.name}
+                                  >
+                                    {child.name}
+                                  </button>
+                                );
+                              })}
+                            </div>
                           </div>
                         )}
                       </div>
                     );
                   })}
-                  <button onClick={() => { onCategorySelect?.('Összes'); setActiveTab('shop'); closeMobileMenu(); setTimeout(() => onScrollToShop?.(), 400); }} className="w-full flex items-center justify-center gap-2 py-4 mt-3 bg-gray-800 rounded-xl font-bold text-white hover:bg-gray-700 active:scale-[0.99] min-h-[48px] transition-all border-2 border-gray-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-white" data-nav-action="category" data-nav-target="Összes">
+                  <button onClick={() => { onCategorySelect?.('Összes'); setActiveTab('shop'); closeMobileMenu(); }} className="w-full flex items-center justify-center gap-2 py-4 mt-3 bg-white/15 rounded-xl font-bold text-white hover:bg-white/25 active:scale-[0.99] min-h-[48px] transition-all border border-white/25 focus:outline-none focus-visible:ring-2 focus-visible:ring-white" data-nav-action="category" data-nav-target="Összes">
                     Összes termék
                     <ArrowRight className="w-5 h-5" />
                   </button>
@@ -589,7 +591,7 @@ export default function Navbar({
                           const Icon = isReal ? getCategoryIcon(name) : (cat?.icon ?? Grid3X3);
                           const color = isReal ? MEGA_MENU_COLORS[idx % MEGA_MENU_COLORS.length] : (cat?.color ?? 'from-primary-500 to-secondary-700');
                           return (
-                            <button key={isReal ? name : (cat?.id ?? `m-${idx}`)} onClick={() => { pushRecentCategory(name); onCategorySelect?.(name); setActiveTab('shop'); closeMobileMenu(); setTimeout(() => onScrollToShop?.(), 400); }} className="flex flex-col items-center gap-1 py-2.5 px-1 bg-gray-800 rounded-xl hover:bg-gray-700 active:scale-[0.98] transition-all min-h-[44px] focus:outline-none focus-visible:ring-2 focus-visible:ring-white" data-nav-action="category" data-nav-target={name} aria-label={`Kategória: ${name}`}>
+                            <button key={isReal ? name : (cat?.id ?? `m-${idx}`)} onClick={() => { pushRecentCategory(name); onCategorySelect?.(name); setActiveTab('shop'); closeMobileMenu(); }} className="flex flex-col items-center gap-1 py-2.5 px-1 bg-white/15 rounded-xl hover:bg-white/25 active:scale-[0.98] transition-all min-h-[44px] focus:outline-none focus-visible:ring-2 focus-visible:ring-white border border-white/20" data-nav-action="category" data-nav-target={name} aria-label={`Kategória: ${name}`}>
                               <div className={`w-9 h-9 sm:w-10 sm:h-10 rounded-lg bg-gradient-to-br ${color} flex items-center justify-center shrink-0 shadow`}><Icon className="w-4 h-4 sm:w-5 sm:h-5 text-white" /></div>
                               <span className="text-[10px] sm:text-xs font-semibold text-center line-clamp-2 leading-tight text-white">{name}</span>
                             </button>
@@ -597,7 +599,7 @@ export default function Navbar({
                         })}
                       </div>
                       {hasMore && (
-                        <button type="button" onClick={() => setMobileCategoriesExpanded((v) => !v)} className="mt-2 w-full flex items-center justify-center gap-2 py-3.5 bg-gray-800 rounded-xl hover:bg-gray-700 transition-all min-h-[44px] text-white font-semibold text-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-white" aria-expanded={mobileCategoriesExpanded} aria-label={mobileCategoriesExpanded ? 'Kevesebb kategória' : 'Több kategória megjelenítése'}>
+                        <button type="button" onClick={() => setMobileCategoriesExpanded((v) => !v)} className="mt-2 w-full flex items-center justify-center gap-2 py-3.5 bg-white/15 rounded-xl hover:bg-white/25 transition-all min-h-[44px] text-white font-semibold text-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-white border border-white/20" aria-expanded={mobileCategoriesExpanded} aria-label={mobileCategoriesExpanded ? 'Kevesebb kategória' : 'Több kategória megjelenítése'}>
                           {mobileCategoriesExpanded ? 'Kevesebb' : 'Több megjelenítése'}
                           {mobileCategoriesExpanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
                         </button>
