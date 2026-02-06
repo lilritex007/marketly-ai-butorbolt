@@ -1,5 +1,6 @@
 import db from '../database/db.js';
 import { EXCLUDED_MAIN_CATEGORIES } from '../config/excludedCategories.js';
+import { getDisplayMainName } from '../config/mainCategoryGroups.js';
 
 /**
  * Get all products (with optional filtering)
@@ -353,11 +354,30 @@ export function getCategoryHierarchy() {
       group.productCount += row.productCount;
       group.children.push({ name: row.child_name, productCount: row.productCount });
     }
-    const mainCategories = Array.from(byMain.entries())
+    // Merge by display main (Bútor+Bútorok → Bútor; Otthon, Lakberendezés → Otthon és lakberendezés; stb.)
+    const byDisplayMain = new Map();
+    for (const [rawMain, data] of byMain.entries()) {
+      const displayName = getDisplayMainName(rawMain) || rawMain;
+      if (!byDisplayMain.has(displayName)) {
+        byDisplayMain.set(displayName, { productCount: 0, childrenMap: new Map(), rawSegments: [] });
+      }
+      const group = byDisplayMain.get(displayName);
+      group.productCount += data.productCount;
+      if (!group.rawSegments.includes(rawMain)) group.rawSegments.push(rawMain);
+      for (const ch of data.children) {
+        const prev = group.childrenMap.get(ch.name) || 0;
+        group.childrenMap.set(ch.name, prev + (ch.productCount || 0));
+      }
+    }
+    const mainCategories = Array.from(byDisplayMain.entries())
       .map(([name, data]) => ({
         name,
         productCount: data.productCount,
-        children: data.children.slice(0, 12)
+        rawSegments: data.rawSegments,
+        children: Array.from(data.childrenMap.entries())
+          .map(([childName, productCount]) => ({ name: childName, productCount }))
+          .sort((a, b) => (b.productCount || 0) - (a.productCount || 0))
+          .slice(0, 12)
       }))
       .sort((a, b) => b.productCount - a.productCount);
     return { mainCategories };
@@ -373,7 +393,7 @@ export function getCategoryHierarchy() {
   const flat = db.prepare(fallbackSql).all();
   const mainCategories = flat
     .filter(row => !EXCLUDED_MAIN_CATEGORIES.includes(row.name))
-    .map(row => ({ name: row.name, productCount: row.productCount, children: [] }));
+    .map(row => ({ name: row.name, productCount: row.productCount, rawSegments: [row.name], children: [] }));
   return { mainCategories };
 }
 

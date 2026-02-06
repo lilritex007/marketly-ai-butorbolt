@@ -958,12 +958,16 @@ const App = () => {
         }
       }
       
-      // Category filter (client-side): support main category (path first segment) or leaf (category)
+      // Category filter (client-side): display main (rawSegments) or path first segment or leaf (category)
       if (categoryFilter && categoryFilter !== 'Összes') {
+        const mainGroup = categoryHierarchy?.mainCategories?.find((m) => m.name === categoryFilter);
+        const rawSegments = mainGroup?.rawSegments;
         result = result.filter((p) => {
           if (p.category_path && typeof p.category_path === 'string') {
             const main = p.category_path.split('|')[0].trim();
-            if (main === categoryFilter) return true;
+            if (rawSegments?.length) {
+              if (rawSegments.includes(main)) return true;
+            } else if (main === categoryFilter) return true;
           }
           return p.category && (p.category === categoryFilter || p.category.includes(categoryFilter));
         });
@@ -979,7 +983,7 @@ const App = () => {
       if (sortOption === 'price-desc') result = [...result].sort((a, b) => (b.price || 0) - (a.price || 0));
       
       return result;
-  }, [products, searchQuery, categoryFilter, sortOption, advancedFilters]);
+  }, [products, searchQuery, categoryFilter, sortOption, advancedFilters, categoryHierarchy?.mainCategories]);
 
   // Update ref after filteredAndSortedProducts is defined
   filteredLengthRef.current = filteredAndSortedProducts.length;
