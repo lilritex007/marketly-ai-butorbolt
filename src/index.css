@@ -623,6 +623,21 @@
 .animate-float-medium { animation: float-medium 6s ease-in-out infinite; }
 .animate-float-fast { animation: float-fast 4s ease-in-out infinite; }
 
+/* Nav / menu animation token – 150–200ms, ease-out */
+#mkt-butorbolt-app .nav-menu-transition {
+  transition: opacity 0.2s ease-out, transform 0.2s ease-out;
+}
+
+/* Reduced motion: shorten or remove nav/menu animations */
+@media (prefers-reduced-motion: reduce) {
+  .animate-slide-in-right { animation: slide-in-right 0.08s ease-out forwards; }
+  .animate-slide-out-right { animation: slide-out-right 0.08s ease-out forwards; }
+  .animate-fade-in-up { animation: fade-in-up 0.08s ease-out forwards; }
+  .animate-float-slow,
+  .animate-float-medium,
+  .animate-float-fast { animation: none; }
+}
+
 /* Animation delays */
 .animation-delay-100 { animation-delay: 100ms; }
 .animation-delay-200 { animation-delay: 200ms; }

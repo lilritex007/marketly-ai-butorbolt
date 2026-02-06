@@ -1021,7 +1021,7 @@ const App = () => {
         categories={categories}
         onOpenWishlist={() => setShowWishlistDrawer(true)}
         onCategorySelect={handleCategoryChange}
-        onScrollToShop={() => document.getElementById('shop-scroll-target')?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
+        onScrollToShop={() => document.getElementById('products-section')?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
         fixUrl={fixUrl}
         onRecentProductClick={handleProductView}
       />
@@ -1088,7 +1088,7 @@ const App = () => {
             />
             
             {/* AI Super Features Row */}
-            <div className="w-full max-w-[2000px] mx-auto px-4 sm:px-6 lg:px-10 xl:px-16 py-6 sm:py-8 lg:py-12">
+            <div data-ai-features className="w-full max-w-[2000px] mx-auto px-4 sm:px-6 lg:px-10 xl:px-16 py-6 sm:py-8 lg:py-12">
               <div className="text-center mb-6 lg:mb-8">
                 <div className="inline-flex items-center gap-2.5 px-5 py-2.5 bg-primary-100 rounded-full mb-5">
                   <Bot className="w-5 h-5 lg:w-6 lg:h-6 text-primary-500" />

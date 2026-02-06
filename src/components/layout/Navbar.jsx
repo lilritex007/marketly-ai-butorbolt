@@ -1,9 +1,12 @@
 import React, { useState, useEffect, useRef } from 'react';
 import {
-  Home, Sparkles, Grid3X3, ChevronDown, ArrowRight, Search, Sun, Moon, Heart, Menu, X, ChevronRight,
+  Home, Sparkles, Grid3X3, ChevronDown, ChevronUp, ArrowRight, Search, Sun, Moon, Heart, Menu, X, ChevronRight,
   ShoppingCart, Camera, Move, Truck, Gift, Zap, TrendingUp, Star, Sofa, BedDouble, Armchair,
   Lamp, Instagram, Facebook, MapPin, Mail, Phone, Clock
 } from 'lucide-react';
+
+const RECENT_CATEGORIES_KEY = 'mkt_recent_categories';
+const RECENT_CATEGORIES_MAX = 3;
 import { getCategoryIcon } from '../ui/Icons';
 
 const ANNOUNCEMENT_MESSAGES = [
@@ -53,8 +56,11 @@ export default function Navbar({
   const [mobileMenuClosing, setMobileMenuClosing] = useState(false);
   const [touchStartX, setTouchStartX] = useState(0);
   const [recentlyViewedLocal, setRecentlyViewedLocal] = useState([]);
+  const [recentCategories, setRecentCategories] = useState([]);
+  const [mobileCategoriesExpanded, setMobileCategoriesExpanded] = useState(false);
   const mobileMenuRef = useRef(null);
   const megaMenuRef = useRef(null);
+  const megaMenuPanelRef = useRef(null);
   const hamburgerButtonRef = useRef(null);
 
   useEffect(() => {
@@ -87,6 +93,27 @@ export default function Navbar({
   }, []);
 
   useEffect(() => {
+    try {
+      const raw = localStorage.getItem(RECENT_CATEGORIES_KEY);
+      const list = raw ? JSON.parse(raw) : [];
+      setRecentCategories(Array.isArray(list) ? list.slice(0, RECENT_CATEGORIES_MAX) : []);
+    } catch {
+      setRecentCategories([]);
+    }
+  }, []);
+
+  const pushRecentCategory = (name) => {
+    if (!name || name === 'Összes') return;
+    setRecentCategories((prev) => {
+      const next = [name, ...prev.filter((c) => c !== name)].slice(0, RECENT_CATEGORIES_MAX);
+      try {
+        localStorage.setItem(RECENT_CATEGORIES_KEY, JSON.stringify(next));
+      } catch (_) {}
+      return next;
+    });
+  };
+
+  useEffect(() => {
     const interval = setInterval(() => {
       setAnnouncementIndex(prev => (prev + 1) % ANNOUNCEMENT_MESSAGES.length);
     }, 4000);
@@ -112,6 +139,36 @@ export default function Navbar({
     };
     document.addEventListener('click', handleClickOutside);
     return () => document.removeEventListener('click', handleClickOutside);
+  }, [showMegaMenu]);
+
+  useEffect(() => {
+    if (!showMegaMenu || !megaMenuPanelRef.current) return;
+    const panel = megaMenuPanelRef.current;
+    const focusables = panel.querySelectorAll('button:not([disabled])');
+    const first = focusables[0];
+    if (first) {
+      const t = setTimeout(() => first.focus(), 50);
+      const handleKeyDown = (e) => {
+        if (e.key !== 'Tab') return;
+        const idx = Array.from(focusables).indexOf(document.activeElement);
+        if (e.shiftKey) {
+          if (idx <= 0) {
+            e.preventDefault();
+            focusables[focusables.length - 1]?.focus();
+          }
+        } else {
+          if (idx >= focusables.length - 1 || idx === -1) {
+            e.preventDefault();
+            focusables[0]?.focus();
+          }
+        }
+      };
+      panel.addEventListener('keydown', handleKeyDown);
+      return () => {
+        clearTimeout(t);
+        panel.removeEventListener('keydown', handleKeyDown);
+      };
+    }
   }, [showMegaMenu]);
 
   useEffect(() => {
@@ -143,6 +200,7 @@ export default function Navbar({
   const closeMobileMenu = () => {
     if (navigator.vibrate) navigator.vibrate(10);
     setMobileMenuClosing(true);
+    setMobileCategoriesExpanded(false);
     setTimeout(() => {
       setMobileMenuOpen(false);
       setMobileMenuClosing(false);
@@ -151,11 +209,12 @@ export default function Navbar({
   };
 
   const focusSearchAndClose = () => {
+    setActiveTab('shop');
     closeMobileMenu();
     setTimeout(() => {
-      document.getElementById('shop-scroll-target')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      document.getElementById('products-section')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
       window.dispatchEvent(new CustomEvent('mkt-focus-search'));
-    }, 350);
+    }, 400);
   };
 
   const openMobileMenu = () => {
@@ -210,7 +269,7 @@ export default function Navbar({
 
             <div className="hidden lg:flex items-center gap-2 xl:gap-3 2xl:gap-4">
               <div ref={megaMenuRef} className="relative" onMouseEnter={() => setShowMegaMenu(true)} onMouseLeave={() => setShowMegaMenu(false)}>
-                <button className="flex items-center gap-2 xl:gap-3 px-4 xl:px-6 2xl:px-7 py-2.5 xl:py-3.5 2xl:py-4 rounded-xl xl:rounded-2xl text-gray-600 hover:text-gray-900 hover:bg-gray-100 font-bold text-base xl:text-lg 2xl:text-xl transition-all" aria-label="Kategóriák menü" aria-expanded={showMegaMenu} aria-haspopup="true">
+                <button className={`flex items-center gap-2 xl:gap-3 px-4 xl:px-6 2xl:px-7 py-2.5 xl:py-3.5 2xl:py-4 rounded-xl xl:rounded-2xl font-bold text-base xl:text-lg 2xl:text-xl transition-all min-h-[44px] ${showMegaMenu ? 'bg-primary-50 text-primary-700 ring-2 ring-primary-200' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'}`} aria-label="Kategóriák menü" aria-expanded={showMegaMenu} aria-haspopup="true">
                   <Grid3X3 className="w-5 h-5 xl:w-6 xl:h-6" />
                   <span>Kategóriák</span>
                   <ChevronDown className={`w-4 h-4 xl:w-5 xl:h-5 transition-transform ${showMegaMenu ? 'rotate-180' : ''}`} />
@@ -219,9 +278,10 @@ export default function Navbar({
                   const menuCategories = (Array.isArray(categories) && categories.length > 0) ? categories.filter(c => c && c.name && c.name !== 'Összes').slice(0, 12) : POPULAR_CATEGORIES;
                   const isRealCategories = menuCategories.length > 0 && typeof menuCategories[0]?.count === 'number';
                   return (
-                    <div className="absolute top-full left-0 mt-2 w-[640px] xl:w-[720px] 2xl:w-[800px] bg-white rounded-2xl xl:rounded-3xl shadow-2xl border border-gray-100 overflow-hidden animate-fade-in-up z-50">
+                    <div ref={megaMenuPanelRef} className="absolute top-full left-0 mt-2 w-[640px] xl:w-[720px] 2xl:w-[800px] bg-white rounded-2xl xl:rounded-3xl shadow-2xl border border-gray-100 overflow-hidden animate-fade-in-up z-50" role="dialog" aria-label="Kategóriák menü">
                       <div className="p-4 xl:p-5 border-b border-gray-100 bg-gray-50/50">
-                        <h3 className="text-sm xl:text-base font-bold text-gray-500 uppercase tracking-wider">Böngéssz kategóriák szerint</h3>
+                        <p className="text-xs text-gray-400 font-medium" aria-hidden="true">Termékek &gt; Kategóriák</p>
+                        <h3 className="text-sm xl:text-base font-bold text-gray-500 uppercase tracking-wider mt-0.5">Böngéssz kategóriák szerint</h3>
                       </div>
                       <div className="p-5 xl:p-6 2xl:p-7">
                         <div className="grid grid-cols-4 gap-3 xl:gap-4 2xl:gap-5">
@@ -230,8 +290,8 @@ export default function Navbar({
                             const Icon = isRealCategories ? getCategoryIcon(name) : cat?.icon ?? Grid3X3;
                             const color = isRealCategories ? MEGA_MENU_COLORS[idx % MEGA_MENU_COLORS.length] : (cat?.color ?? 'from-primary-500 to-secondary-700');
                             return (
-                              <button key={isRealCategories ? name : (cat?.id ?? `cat-${idx}`)} onClick={() => { onCategorySelect?.(name); setActiveTab('shop'); setShowMegaMenu(false); setTimeout(() => onScrollToShop?.(), 80); }} className="flex flex-col items-center gap-2 xl:gap-2.5 p-3 xl:p-4 rounded-xl xl:rounded-2xl hover:bg-gray-50 active:bg-gray-100 transition-all group">
-                                <div className={`w-11 h-11 xl:w-14 xl:h-14 2xl:w-16 2xl:h-16 rounded-xl xl:rounded-2xl bg-gradient-to-br ${color} flex items-center justify-center text-white group-hover:scale-110 shadow-md group-hover:shadow-lg transition-all`}>
+                              <button key={isRealCategories ? name : (cat?.id ?? `cat-${idx}`)} onClick={() => { pushRecentCategory(name); onCategorySelect?.(name); setActiveTab('shop'); setShowMegaMenu(false); setTimeout(() => onScrollToShop?.(), 80); }} className="flex flex-col items-center gap-2 xl:gap-2.5 p-3 xl:p-4 rounded-xl xl:rounded-2xl hover:bg-gray-50 hover:scale-[1.02] active:scale-[0.98] active:bg-gray-100 transition-all duration-200 group min-h-[44px]" data-nav-action="category" data-nav-target={name} aria-label={`Kategória: ${name}`}>
+                                <div className={`w-11 h-11 xl:w-14 xl:h-14 2xl:w-16 2xl:h-16 rounded-xl xl:rounded-2xl bg-gradient-to-br ${color} flex items-center justify-center text-white group-hover:scale-110 shadow-md group-hover:shadow-lg transition-all duration-200`}>
                                   <Icon className="w-5 h-5 xl:w-7 xl:h-7 2xl:w-8 2xl:h-8" />
                                 </div>
                                 <span className="text-xs xl:text-sm 2xl:text-base font-semibold text-gray-700 text-center leading-tight line-clamp-2">{name}</span>
@@ -242,7 +302,7 @@ export default function Navbar({
                         </div>
                       </div>
                       <div className="px-5 xl:px-6 2xl:px-7 pb-5 xl:pb-6 2xl:pb-7 pt-0">
-                        <button onClick={() => { onCategorySelect?.('Összes'); setActiveTab('shop'); setShowMegaMenu(false); setTimeout(() => onScrollToShop?.(), 80); }} className="w-full flex items-center justify-center gap-2 xl:gap-3 py-3 xl:py-3.5 text-sm xl:text-base 2xl:text-lg text-primary-600 hover:bg-primary-50 rounded-xl xl:rounded-2xl font-bold transition-all border border-primary-200 hover:border-primary-300">
+                        <button onClick={() => { onCategorySelect?.('Összes'); setActiveTab('shop'); setShowMegaMenu(false); setTimeout(() => onScrollToShop?.(), 80); }} className="w-full flex items-center justify-center gap-2 xl:gap-3 py-3 xl:py-3.5 text-sm xl:text-base 2xl:text-lg text-primary-600 hover:bg-primary-50 rounded-xl xl:rounded-2xl font-bold transition-all border border-primary-200 hover:border-primary-300 min-h-[44px]" data-nav-action="category" data-nav-target="Összes" aria-label="Összes kategória megtekintése">
                           Összes kategória megtekintése
                           <ArrowRight className="w-4 h-4 xl:w-5 xl:h-5" />
                         </button>
@@ -252,7 +312,7 @@ export default function Navbar({
                 })()}
               </div>
               {navItems.map((item) => (
-                <button key={item.id} onClick={() => setActiveTab(item.id)} className={`relative flex items-center gap-2 xl:gap-3 px-4 xl:px-6 2xl:px-7 py-2.5 xl:py-3.5 2xl:py-4 rounded-xl xl:rounded-2xl font-bold text-base xl:text-lg 2xl:text-xl transition-all duration-200 ${activeTab === item.id ? 'bg-gradient-to-r from-primary-500 to-secondary-700 text-white shadow-lg shadow-primary-300/50' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'}`} aria-current={activeTab === item.id ? 'page' : undefined} aria-label={item.label}>
+                <button key={item.id} onClick={() => setActiveTab(item.id)} className={`relative flex items-center gap-2 xl:gap-3 px-4 xl:px-6 2xl:px-7 py-2.5 xl:py-3.5 2xl:py-4 rounded-xl xl:rounded-2xl font-bold text-base xl:text-lg 2xl:text-xl transition-all duration-200 min-h-[44px] hover:scale-[1.02] active:scale-[0.98] ${activeTab === item.id ? 'bg-gradient-to-r from-primary-500 to-secondary-700 text-white shadow-lg shadow-primary-300/50' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'}`} aria-current={activeTab === item.id ? 'page' : undefined} aria-label={item.label} data-nav-action="tab" data-nav-target={item.id}>
                   <item.icon className="w-5 h-5 xl:w-6 xl:h-6" />
                   <span>{item.label}</span>
                   {item.isAI && activeTab !== item.id && <span className="px-2 py-0.5 xl:px-2.5 xl:py-1 text-[10px] xl:text-xs font-bold bg-gradient-to-r from-primary-100 to-secondary-100 text-primary-500 rounded-full">AI</span>}
@@ -262,7 +322,7 @@ export default function Navbar({
             </div>
 
             <div className="flex items-center gap-2 sm:gap-3 lg:gap-4">
-              <button onClick={() => { document.getElementById('shop-scroll-target')?.scrollIntoView({ behavior: 'smooth', block: 'start' }); setTimeout(() => window.dispatchEvent(new CustomEvent('mkt-focus-search')), 400); }} className="hidden lg:flex items-center gap-2 xl:gap-3 px-4 xl:px-5 py-2.5 xl:py-3 bg-gray-100 hover:bg-gray-200 rounded-xl xl:rounded-2xl text-gray-600 hover:text-gray-900 transition-all" aria-label="Keresés">
+              <button onClick={() => { setActiveTab('shop'); setTimeout(() => { document.getElementById('products-section')?.scrollIntoView({ behavior: 'smooth', block: 'start' }); window.dispatchEvent(new CustomEvent('mkt-focus-search')); }, 150); }} className="hidden lg:flex items-center gap-2 xl:gap-3 px-4 xl:px-5 py-2.5 xl:py-3 min-h-[44px] bg-gray-100 hover:bg-gray-200 rounded-xl xl:rounded-2xl text-gray-600 hover:text-gray-900 hover:scale-[1.02] active:scale-[0.98] transition-all" aria-label="Keresés" data-nav-action="search">
                 <Search className="w-5 h-5 xl:w-6 xl:h-6" />
                 <span className="text-sm xl:text-base font-bold">Keresés</span>
               </button>
@@ -350,38 +410,69 @@ export default function Navbar({
               </div>
               <button type="button" className="p-3 min-w-[48px] min-h-[48px] flex items-center justify-center rounded-xl bg-white/10 hover:bg-white/20 backdrop-blur-xl transition-colors" onClick={closeMobileMenu} aria-label="Menü bezárása"><X className="w-7 h-7" /></button>
             </div>
-            <div className="flex gap-3 sm:gap-4 mb-6">
-              <button onClick={focusSearchAndClose} className="flex-1 flex items-center justify-center gap-2.5 py-4 bg-white/15 backdrop-blur-xl rounded-xl font-bold text-base sm:text-lg" aria-label="Keresés"><Search className="w-5 h-5 sm:w-6 sm:h-6" /><span>Keresés</span></button>
-              <button onClick={() => { onOpenWishlist?.(); closeMobileMenu(); }} className="flex-1 flex items-center justify-center gap-2.5 py-4 bg-white/15 backdrop-blur-xl rounded-xl font-bold text-base sm:text-lg relative" aria-label="Kedvencek">
+            <div className="flex gap-3 sm:gap-4 mb-6" role="region" aria-label="Gyors műveletek">
+              <button onClick={focusSearchAndClose} className="flex-1 flex items-center justify-center gap-2.5 py-4 min-h-[44px] bg-white/15 backdrop-blur-xl rounded-xl font-bold text-base sm:text-lg hover:bg-white/25 active:scale-[0.98] transition-all" aria-label="Keresés" data-nav-action="search"><Search className="w-5 h-5 sm:w-6 sm:h-6" /><span>Keresés</span></button>
+              <button onClick={() => { onOpenWishlist?.(); closeMobileMenu(); }} className="flex-1 flex items-center justify-center gap-2.5 py-4 min-h-[44px] bg-white/15 backdrop-blur-xl rounded-xl font-bold text-base sm:text-lg relative hover:bg-white/25 active:scale-[0.98] transition-all" aria-label="Kedvencek" data-nav-action="wishlist">
                 <Heart className={`w-5 h-5 sm:w-6 sm:h-6 ${wishlistCount > 0 ? 'fill-white' : ''}`} /><span>Kedvencek</span>
                 {wishlistCount > 0 && <span className="absolute -top-1 -right-1 w-6 h-6 bg-red-500 rounded-full text-sm flex items-center justify-center font-bold">{wishlistCount}</span>}
               </button>
             </div>
-            <div className="mb-4">
-              <p className="text-xs text-white/60 font-bold uppercase tracking-wider mb-2">Kategóriák</p>
-              <div className="grid grid-cols-4 gap-1.5 sm:gap-2">
-                {(() => {
-                  const realCats = (Array.isArray(categories) && categories.length > 0) ? categories.filter(c => c && c.name && c.name !== 'Összes').slice(0, 8) : [];
-                  const list = realCats.length > 0 ? realCats : POPULAR_CATEGORIES.slice(0, 8);
-                  return list.map((cat, idx) => {
-                    const name = typeof cat?.name === 'string' ? cat.name : (cat?.name ?? '');
-                    const isReal = realCats.length > 0;
-                    const Icon = isReal ? getCategoryIcon(name) : (cat?.icon ?? Grid3X3);
-                    const color = isReal ? MEGA_MENU_COLORS[idx % MEGA_MENU_COLORS.length] : (cat?.color ?? 'from-primary-500 to-secondary-700');
-                    return (
-                      <button key={isReal ? name : (cat?.id ?? `m-${idx}`)} onClick={() => { onCategorySelect?.(name); setActiveTab('shop'); closeMobileMenu(); setTimeout(() => onScrollToShop?.(), 400); }} className="flex flex-col items-center gap-1 py-2 px-1 bg-white/10 backdrop-blur-xl rounded-lg hover:bg-white/20 active:bg-white/25 transition-all min-h-[44px]">
-                        <div className={`w-9 h-9 sm:w-10 sm:h-10 rounded-lg bg-gradient-to-br ${color} flex items-center justify-center shrink-0`}><Icon className="w-4 h-4 sm:w-5 sm:h-5 text-white" /></div>
-                        <span className="text-[10px] sm:text-xs font-semibold text-center line-clamp-2 leading-tight">{name}</span>
+            <div className="mb-4" role="region" aria-label="Kategóriák">
+              {recentCategories.length > 0 && (
+                <div className="mb-3">
+                  <p className="text-xs text-white/50 font-bold uppercase tracking-wider mb-1.5">Gyakran nézett</p>
+                  <div className="flex flex-wrap gap-1.5">
+                    {recentCategories.map((name) => {
+                      const Icon = getCategoryIcon(name);
+                      const idx = recentCategories.indexOf(name);
+                      const color = MEGA_MENU_COLORS[idx % MEGA_MENU_COLORS.length];
+                      return (
+                        <button key={name} onClick={() => { pushRecentCategory(name); onCategorySelect?.(name); setActiveTab('shop'); closeMobileMenu(); setTimeout(() => onScrollToShop?.(), 400); }} className="flex items-center gap-2 py-2 px-3 bg-white/10 backdrop-blur-xl rounded-lg hover:bg-white/20 active:bg-white/25 transition-all min-h-[44px] min-w-[44px]" data-nav-action="category" data-nav-target={name} aria-label={`Kategória: ${name}`}>
+                          <div className={`w-8 h-8 rounded-lg bg-gradient-to-br ${color} flex items-center justify-center shrink-0`}><Icon className="w-4 h-4 text-white" /></div>
+                          <span className="text-xs font-semibold text-left">{name}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+              <p className="text-xs text-white/60 font-bold uppercase tracking-wider mb-2">Összes kategória</p>
+              {(() => {
+                const realCats = (Array.isArray(categories) && categories.length > 0) ? categories.filter(c => c && c.name && c.name !== 'Összes') : [];
+                const list = realCats.length > 0 ? realCats : POPULAR_CATEGORIES;
+                const initialCount = 6;
+                const shown = mobileCategoriesExpanded ? list : list.slice(0, initialCount);
+                const hasMore = list.length > initialCount;
+                return (
+                  <>
+                    <div className="grid grid-cols-4 gap-1.5 sm:gap-2">
+                      {shown.map((cat, idx) => {
+                        const name = typeof cat?.name === 'string' ? cat.name : (cat?.name ?? '');
+                        const isReal = realCats.length > 0;
+                        const Icon = isReal ? getCategoryIcon(name) : (cat?.icon ?? Grid3X3);
+                        const color = isReal ? MEGA_MENU_COLORS[idx % MEGA_MENU_COLORS.length] : (cat?.color ?? 'from-primary-500 to-secondary-700');
+                        return (
+                          <button key={isReal ? name : (cat?.id ?? `m-${idx}`)} onClick={() => { pushRecentCategory(name); onCategorySelect?.(name); setActiveTab('shop'); closeMobileMenu(); setTimeout(() => onScrollToShop?.(), 400); }} className="flex flex-col items-center gap-1 py-2 px-1 bg-white/10 backdrop-blur-xl rounded-lg hover:bg-white/20 active:bg-white/25 hover:scale-[1.02] active:scale-[0.98] transition-all min-h-[44px]" data-nav-action="category" data-nav-target={name} aria-label={`Kategória: ${name}`}>
+                            <div className={`w-9 h-9 sm:w-10 sm:h-10 rounded-lg bg-gradient-to-br ${color} flex items-center justify-center shrink-0`}><Icon className="w-4 h-4 sm:w-5 sm:h-5 text-white" /></div>
+                            <span className="text-[10px] sm:text-xs font-semibold text-center line-clamp-2 leading-tight">{name}</span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                    {hasMore && (
+                      <button type="button" onClick={() => setMobileCategoriesExpanded((v) => !v)} className="mt-2 w-full flex items-center justify-center gap-2 py-3 bg-white/10 backdrop-blur-xl rounded-lg hover:bg-white/20 transition-all min-h-[44px] text-white font-semibold text-sm" aria-expanded={mobileCategoriesExpanded} aria-label={mobileCategoriesExpanded ? 'Kevesebb kategória' : 'Több kategória megjelenítése'}>
+                        {mobileCategoriesExpanded ? 'Kevesebb' : 'Több megjelenítése'}
+                        {mobileCategoriesExpanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
                       </button>
-                    );
-                  });
-                })()}
-              </div>
+                    )}
+                  </>
+                );
+              })()}
             </div>
-            <div className="space-y-3 mb-6">
+            <div className="space-y-3 mb-6" role="region" aria-label="Navigáció">
               <p className="text-sm sm:text-base text-white/70 font-bold uppercase tracking-wider mb-3 sm:mb-4">Navigáció</p>
               {navItems.map((item, index) => (
-                <button key={item.id} onClick={() => setTabAndClose(item.id)} className={`w-full flex items-center gap-4 px-4 sm:px-5 py-4 sm:py-5 rounded-xl text-left transition-all ${activeTab === item.id ? 'bg-white text-gray-900 shadow-2xl' : 'bg-white/10 hover:bg-white/20 backdrop-blur-xl'}`} style={{ animationDelay: `${index * 50}ms` }} aria-current={activeTab === item.id ? 'page' : undefined} aria-label={item.label}>
+                <button key={item.id} onClick={() => setTabAndClose(item.id)} className={`w-full flex items-center gap-4 px-4 sm:px-5 py-4 sm:py-5 rounded-xl text-left transition-all min-h-[44px] hover:scale-[1.01] active:scale-[0.99] ${activeTab === item.id ? 'bg-white text-gray-900 shadow-2xl' : 'bg-white/10 hover:bg-white/20 backdrop-blur-xl'}`} style={{ animationDelay: `${index * 50}ms` }} aria-current={activeTab === item.id ? 'page' : undefined} aria-label={item.label} data-nav-action="tab" data-nav-target={item.id}>
                   <div className={`w-12 h-12 sm:w-14 sm:h-14 rounded-xl flex items-center justify-center shrink-0 ${activeTab === item.id ? 'bg-gradient-to-br from-primary-500 to-secondary-700 text-white' : 'bg-white/20'}`}><item.icon className="w-6 h-6 sm:w-7 sm:h-7" /></div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2">
@@ -395,11 +486,11 @@ export default function Navbar({
               ))}
             </div>
             {((recentlyViewedProp?.length ? recentlyViewedProp : recentlyViewedLocal) || []).length > 0 && (
-              <div className="mb-4">
+              <div className="mb-4" role="region" aria-label="Utoljára nézett termékek">
                 <p className="text-xs text-white/60 font-semibold uppercase tracking-wider mb-2 flex items-center gap-1.5"><Clock className="w-3.5 h-3.5" />Utoljára nézett</p>
                 <div className="flex gap-2 overflow-x-auto pb-2 -mx-1 px-1">
                   {(recentlyViewedProp?.length ? recentlyViewedProp : recentlyViewedLocal).slice(0, 4).map((product) => (
-                    <button key={product?.id ?? 'rv'} type="button" onClick={() => { onRecentProductClick?.(product); closeMobileMenu(); }} className="shrink-0 w-20 text-left rounded-lg hover:bg-white/10 transition-colors focus:outline-none focus:ring-2 focus:ring-white/50">
+                    <button key={product?.id ?? 'rv'} type="button" onClick={() => { onRecentProductClick?.(product); closeMobileMenu(); }} className="shrink-0 w-20 min-h-[44px] text-left rounded-lg hover:bg-white/10 hover:scale-[1.02] active:scale-[0.98] transition-all focus:outline-none focus:ring-2 focus:ring-white/50" data-nav-action="recent-product" data-nav-target={product?.id} aria-label={`Termék megnyitása: ${product?.name ?? ''}`}>
                       <div className="w-20 h-20 bg-white/10 backdrop-blur-xl rounded-lg overflow-hidden mb-1">
                         <img src={fixUrl(product?.imageUrl ?? product?.images?.[0])} alt={product?.name ?? ''} className="w-full h-full object-cover" loading="lazy" />
                       </div>
@@ -409,19 +500,19 @@ export default function Navbar({
                 </div>
               </div>
             )}
-            <div className="mt-auto space-y-3 pb-[env(safe-area-inset-bottom,0)]">
-              <button onClick={() => setIsDarkMode(!isDarkMode)} className="w-full flex items-center justify-between px-4 py-3 bg-white/10 backdrop-blur-xl rounded-xl">
+            <div className="mt-auto space-y-3 pb-[env(safe-area-inset-bottom,0)]" role="region" aria-label="Beállítások és elérhetőség">
+              <button onClick={() => setIsDarkMode(!isDarkMode)} className="w-full flex items-center justify-between px-4 py-3 min-h-[44px] bg-white/10 backdrop-blur-xl rounded-xl hover:bg-white/15 transition-all" aria-label={isDarkMode ? 'Világos mód bekapcsolása' : 'Sötét mód bekapcsolása'}>
                 <div className="flex items-center gap-3">{isDarkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}<span className="font-semibold">{isDarkMode ? 'Világos mód' : 'Sötét mód'}</span></div>
                 <div className={`w-10 h-6 rounded-full transition-colors ${isDarkMode ? 'bg-primary-400' : 'bg-white/30'}`}><div className={`w-5 h-5 bg-white rounded-full mt-0.5 transition-transform ${isDarkMode ? 'translate-x-4.5 ml-0.5' : 'translate-x-0.5'}`} /></div>
               </button>
               <div className="flex gap-2">
-                <a href="tel:+36123456789" className="flex-1 flex items-center justify-center gap-2 py-2.5 bg-white/10 backdrop-blur-xl rounded-xl text-sm font-semibold"><Phone className="w-4 h-4" />Hívás</a>
-                <a href="mailto:info@marketly.hu" className="flex-1 flex items-center justify-center gap-2 py-2.5 bg-white/10 backdrop-blur-xl rounded-xl text-sm font-semibold"><Mail className="w-4 h-4" />Email</a>
+                <a href="tel:+36123456789" className="flex-1 flex items-center justify-center gap-2 py-2.5 min-h-[44px] bg-white/10 backdrop-blur-xl rounded-xl text-sm font-semibold hover:bg-white/20 transition-all" aria-label="Hívás"><Phone className="w-4 h-4" />Hívás</a>
+                <a href="mailto:info@marketly.hu" className="flex-1 flex items-center justify-center gap-2 py-2.5 min-h-[44px] bg-white/10 backdrop-blur-xl rounded-xl text-sm font-semibold hover:bg-white/20 transition-all" aria-label="E-mail küldése"><Mail className="w-4 h-4" />Email</a>
               </div>
               <div className="flex justify-center gap-3">
-                <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" className="p-2.5 bg-white/10 backdrop-blur-xl rounded-xl hover:bg-white/20 transition-colors"><Instagram className="w-5 h-5" /></a>
-                <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" className="p-2.5 bg-white/10 backdrop-blur-xl rounded-xl hover:bg-white/20 transition-colors"><Facebook className="w-5 h-5" /></a>
-                <a href="https://maps.google.com" target="_blank" rel="noopener noreferrer" className="p-2.5 bg-white/10 backdrop-blur-xl rounded-xl hover:bg-white/20 transition-colors"><MapPin className="w-5 h-5" /></a>
+                <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" className="p-2.5 min-w-[44px] min-h-[44px] flex items-center justify-center bg-white/10 backdrop-blur-xl rounded-xl hover:bg-white/20 transition-colors" aria-label="Instagram"><Instagram className="w-5 h-5" /></a>
+                <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" className="p-2.5 min-w-[44px] min-h-[44px] flex items-center justify-center bg-white/10 backdrop-blur-xl rounded-xl hover:bg-white/20 transition-colors" aria-label="Facebook"><Facebook className="w-5 h-5" /></a>
+                <a href="https://maps.google.com" target="_blank" rel="noopener noreferrer" className="p-2.5 min-w-[44px] min-h-[44px] flex items-center justify-center bg-white/10 backdrop-blur-xl rounded-xl hover:bg-white/20 transition-colors" aria-label="Térkép"><MapPin className="w-5 h-5" /></a>
               </div>
               <div className="grid grid-cols-3 gap-2">
                 <div className="bg-white/10 backdrop-blur-xl rounded-xl p-2.5 text-center"><p className="text-lg font-bold">{productCount > 0 ? `${(productCount / 1000).toFixed(0)}K+` : '...'}</p><p className="text-[9px] text-white/60">Termék</p></div>

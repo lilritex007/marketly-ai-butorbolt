@@ -437,6 +437,7 @@ VÁLASZOLJ MOST a fenti szabályok szerint:`;
       {/* Lebegő Chat Gomb */}
       {!isOpen && (
         <button
+          id="mkt-butorbolt-chat"
           onClick={() => setIsOpen(true)}
           className="
             fixed bottom-[calc(1.5rem+44px)] md:bottom-6 right-4 md:right-6 z-[100]
