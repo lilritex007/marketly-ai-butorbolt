@@ -1,0 +1,25 @@
+---
+description: Megtartandó főoldali elemek és biztonságos fejlesztés – ne távolíts el működő részt
+globs: src/App.jsx, src/components/landing/**/*, src/components/showroom/**/*, src/components/reviews/**/*
+alwaysApply: false
+---
+
+# Megtartandó elemek és fejlesztési szabályok
+
+## Stabil állapot (tag)
+
+- **Tag:** `stable-showroom-ok` – visszaállítás: `git checkout stable-showroom-ok` vagy `git reset --hard stable-showroom-ok`
+- Részletek: `docs/FEJLESZTES-BIZTONSAGOS.md`
+
+## Amit ne távolíts el és ne bonts szét (hacsak a felhasználó kifejezetten nem kéri)
+
+- **Főoldal:** Virtual Showroom, PhotoReviews / vélemények, Ajándéklista (GiftRegistry), Testimonials – ezek a főoldal szekciói, ne vedd ki vagy kommentezd ki a kódot, csak ha a felhasználó egyértelműen azt kéri.
+- **Termékbetöltés:** Paginált API (`fetchUnasProducts`, limit/offset), kategória paraméter – a jelenlegi logika maradjon, változtatás csak explicit kérésre.
+- **Kategóriák:** A shop kategórialista forrása legyen a termékalapú / shop API (kizárásokkal), ne a config tábla (900+ elem) a listanézethez.
+- **Kereső:** SmartSearchBar és a háttérben futó kereső index – nagy refaktor vagy eltávolítás csak explicit kérésre.
+
+## Fejlesztéskor
+
+- Új funkciót ágon dolgozz (pl. `feature/uj-funkcio`), ne közvetlenül a main-on.
+- Egy commit = egy logikai változtatás.
+- Módosítás előtt: build + gyors teszt (főoldal, terméklista, kategória kattintás, kereső).

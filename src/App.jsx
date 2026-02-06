@@ -75,11 +75,8 @@ import SmartBundle from './components/product/SmartBundle';
 import PriceHistory from './components/product/PriceHistory';
 import OneClickCheckout from './components/checkout/OneClickCheckout';
 import SmartSearchBar from './components/search/SmartSearchBar';
-import VirtualShowroom from './components/showroom/VirtualShowroom';
-import PhotoReviews from './components/reviews/PhotoReviews';
 import LoyaltyProgram from './components/loyalty/LoyaltyProgram';
 import ARMeasure from './components/ar/ARMeasure';
-import GiftRegistry from './components/wishlist/GiftRegistry';
 import StickyAddToCartMobile from './components/mobile/StickyAddToCartMobile';
 import TrustBadges from './components/trust/TrustBadges';
 
@@ -968,37 +965,6 @@ const Features = () => (
     </div>
 );
 
-const Testimonials = () => (
-    <div className="bg-gray-50 py-10 sm:py-12 lg:py-14 mb-10 sm:mb-12 lg:mb-14">
-        <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-10 text-center">
-            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-8 sm:mb-10 lg:mb-12">Mit mondanak rólunk?</h2>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-5 lg:gap-6">
-                {[
-                    { name: "Kovács Anna", text: "Az AI segítségével találtam meg a kanapét, ami pont illik a függönyhöz.", role: "Lakberendező" },
-                    { name: "Nagy Péter", text: "Gyors szállítás, és a minőség is kiváló. A képkereső funkció nagyon hasznos.", role: "Vásárló" },
-                    { name: "Szabó Éva", text: "Végre egy webshop, ahol nem kell órákig görgetni. Az asszisztens azonnal segített.", role: "Vásárló" }
-                ].map((t, i) => (
-                    <div key={i} className="bg-white p-5 sm:p-6 lg:p-7 rounded-xl lg:rounded-2xl shadow-sm hover:shadow-lg transition-shadow text-left">
-                        <div className="flex text-yellow-400 mb-4">
-                            {[...Array(5)].map((_, i) => <Star key={i} className="w-5 h-5 sm:w-5 sm:h-5 lg:w-6 lg:h-6 fill-current" />)}
-                        </div>
-                        <p className="text-gray-600 mb-5 italic text-base sm:text-base lg:text-lg leading-relaxed">"{t.text}"</p>
-                        <div className="flex items-center">
-                            <div className="w-11 h-11 sm:w-12 sm:h-12 lg:w-14 lg:h-14 bg-primary-100 rounded-full flex items-center justify-center font-bold text-primary-500 text-lg sm:text-xl mr-4">
-                                {t.name.charAt(0)}
-                            </div>
-                            <div>
-                                <h4 className="font-bold text-gray-900 text-base sm:text-lg">{t.name}</h4>
-                                <p className="text-sm sm:text-base text-gray-500">{t.role}</p>
-                            </div>
-                        </div>
-                    </div>
-                ))}
-            </div>
-        </div>
-    </div>
-);
-
 const ProductModal = ({ product, isOpen, onClose, allProducts = [], onAddToCart }) => {
     const [aiTip, setAiTip] = useState(null);
     const [loadingTip, setLoadingTip] = useState(false);
@@ -1813,19 +1779,6 @@ const App = () => {
               />
             )}
 
-            {/* New premium features */}
-            <div className="w-full max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-10 py-8 sm:py-10 lg:py-12">
-              <VirtualShowroom
-                products={products}
-                onProductClick={handleProductView}
-                onAddToCart={(p) => handleAddToCart(p)}
-              />
-            </div>
-
-            <div className="w-full max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
-              <PhotoReviews productId="featured" />
-            </div>
-
             <div className="w-full max-w-[500px] mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
               <LoyaltyProgram
                 currentPoints={2450}
@@ -1836,15 +1789,6 @@ const App = () => {
               />
             </div>
 
-            <div className="w-full max-w-[600px] mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
-              <GiftRegistry
-                items={wishlist.map(id => products.find(p => p.id === id)).filter(Boolean)}
-                onAddItem={() => {}}
-                onRemoveItem={(id) => toggleWishlist(id)}
-                onShare={() => {}}
-              />
-            </div>
-            
             <FadeInOnScroll direction="up">
               <Features />
             </FadeInOnScroll>
@@ -2081,10 +2025,6 @@ const App = () => {
               wishlist={wishlist}
               onQuickView={handleProductView}
             />
-            
-            <FadeInOnScroll direction="up" delay={100}>
-              <Testimonials />
-            </FadeInOnScroll>
             
             {/* Final CTA */}
             <InteractiveCTA 
