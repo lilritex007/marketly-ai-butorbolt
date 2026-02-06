@@ -1,12 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
 import {
   Home, Sparkles, Grid3X3, ChevronDown, ArrowRight, Search, Sun, Moon, Heart, Menu, X, ChevronRight,
-  ExternalLink, ShoppingCart, Camera, Move, Truck, Gift, Zap, TrendingUp, Star, Sofa, BedDouble, Armchair,
+  ShoppingCart, Camera, Move, Truck, Gift, Zap, TrendingUp, Star, Sofa, BedDouble, Armchair,
   Lamp, Instagram, Facebook, MapPin, Mail, Phone, Clock
 } from 'lucide-react';
 import { getCategoryIcon } from '../ui/Icons';
-
-const DEFAULT_WEBSHOP_DOMAIN = 'https://www.marketly.hu';
 
 const ANNOUNCEMENT_MESSAGES = [
   { icon: Truck, text: 'Ingyenes szállítás 50.000 Ft felett', highlight: 'Ingyenes' },
@@ -29,7 +27,7 @@ const MEGA_MENU_COLORS = ['from-primary-500 to-secondary-700', 'from-orange-500 
 
 /**
  * Navbar – fejléc, kategória mega menu, mobil menü, announcement sáv.
- * Props: activeTab, setActiveTab, wishlistCount, productCount, categories, onOpenWishlist, onCategorySelect, onScrollToShop, webshopDomain?, recentlyViewed?, fixUrl?, onRecentProductClick?
+ * Props: activeTab, setActiveTab, wishlistCount, productCount, categories, onOpenWishlist, onCategorySelect, onScrollToShop, recentlyViewed?, fixUrl?, onRecentProductClick?
  * Mobil: overlay kattintás / Escape zárja; fókusz a bezáró gombra nyitáskor, hamburgerre záráskor. Utoljára nézett localStorage-ból vagy prop, kattintás → onRecentProductClick + bezárás.
  */
 export default function Navbar({
@@ -41,7 +39,6 @@ export default function Navbar({
   onOpenWishlist,
   onCategorySelect,
   onScrollToShop,
-  webshopDomain = DEFAULT_WEBSHOP_DOMAIN,
   recentlyViewed: recentlyViewedProp = [],
   fixUrl = (url) => url || '',
   onRecentProductClick
@@ -219,28 +216,33 @@ export default function Navbar({
                   <ChevronDown className={`w-4 h-4 xl:w-5 xl:h-5 transition-transform ${showMegaMenu ? 'rotate-180' : ''}`} />
                 </button>
                 {showMegaMenu && (() => {
-                  const menuCategories = (Array.isArray(categories) && categories.length > 0) ? categories.filter(c => c && c.name && c.name !== 'Összes').slice(0, 9) : POPULAR_CATEGORIES;
+                  const menuCategories = (Array.isArray(categories) && categories.length > 0) ? categories.filter(c => c && c.name && c.name !== 'Összes').slice(0, 12) : POPULAR_CATEGORIES;
                   const isRealCategories = menuCategories.length > 0 && typeof menuCategories[0]?.count === 'number';
                   return (
-                    <div className="absolute top-full left-0 mt-2 w-[500px] xl:w-[600px] 2xl:w-[700px] bg-white rounded-2xl xl:rounded-3xl shadow-2xl border border-gray-100 p-6 xl:p-8 animate-fade-in-up z-50">
-                      <div className="grid grid-cols-3 gap-3 xl:gap-4">
-                        {menuCategories.map((cat, idx) => {
-                          const name = cat?.name ?? String(cat?.id ?? idx);
-                          const Icon = isRealCategories ? getCategoryIcon(name) : cat?.icon ?? Grid3X3;
-                          const color = isRealCategories ? MEGA_MENU_COLORS[idx % MEGA_MENU_COLORS.length] : (cat?.color ?? 'from-primary-500 to-secondary-700');
-                          return (
-                            <button key={isRealCategories ? name : (cat?.id ?? `cat-${idx}`)} onClick={() => { onCategorySelect?.(name); setActiveTab('shop'); setShowMegaMenu(false); setTimeout(() => onScrollToShop?.(), 80); }} className="flex flex-col items-center gap-2 xl:gap-3 p-4 xl:p-5 rounded-xl xl:rounded-2xl hover:bg-gray-50 transition-all group">
-                              <div className={`w-12 h-12 xl:w-16 xl:h-16 2xl:w-20 2xl:h-20 rounded-xl xl:rounded-2xl bg-gradient-to-br ${color} flex items-center justify-center text-white group-hover:scale-110 transition-transform`}>
-                                <Icon className="w-6 h-6 xl:w-8 xl:h-8 2xl:w-10 2xl:h-10" />
-                              </div>
-                              <span className="text-sm xl:text-base 2xl:text-lg font-semibold text-gray-700 text-center">{name}</span>
-                              {isRealCategories && cat.count != null && <span className="text-xs text-gray-500">{Number(cat.count).toLocaleString('hu-HU')} db</span>}
-                            </button>
-                          );
-                        })}
+                    <div className="absolute top-full left-0 mt-2 w-[640px] xl:w-[720px] 2xl:w-[800px] bg-white rounded-2xl xl:rounded-3xl shadow-2xl border border-gray-100 overflow-hidden animate-fade-in-up z-50">
+                      <div className="p-4 xl:p-5 border-b border-gray-100 bg-gray-50/50">
+                        <h3 className="text-sm xl:text-base font-bold text-gray-500 uppercase tracking-wider">Böngéssz kategóriák szerint</h3>
                       </div>
-                      <div className="mt-4 xl:mt-6 pt-4 xl:pt-6 border-t border-gray-100">
-                        <button onClick={() => { onCategorySelect?.('Összes'); setActiveTab('shop'); setShowMegaMenu(false); setTimeout(() => onScrollToShop?.(), 80); }} className="w-full flex items-center justify-center gap-2 xl:gap-3 py-3 xl:py-4 text-base xl:text-lg 2xl:text-xl text-primary-500 hover:bg-primary-50 rounded-xl xl:rounded-2xl font-bold transition-all">
+                      <div className="p-5 xl:p-6 2xl:p-7">
+                        <div className="grid grid-cols-4 gap-3 xl:gap-4 2xl:gap-5">
+                          {menuCategories.map((cat, idx) => {
+                            const name = cat?.name ?? String(cat?.id ?? idx);
+                            const Icon = isRealCategories ? getCategoryIcon(name) : cat?.icon ?? Grid3X3;
+                            const color = isRealCategories ? MEGA_MENU_COLORS[idx % MEGA_MENU_COLORS.length] : (cat?.color ?? 'from-primary-500 to-secondary-700');
+                            return (
+                              <button key={isRealCategories ? name : (cat?.id ?? `cat-${idx}`)} onClick={() => { onCategorySelect?.(name); setActiveTab('shop'); setShowMegaMenu(false); setTimeout(() => onScrollToShop?.(), 80); }} className="flex flex-col items-center gap-2 xl:gap-2.5 p-3 xl:p-4 rounded-xl xl:rounded-2xl hover:bg-gray-50 active:bg-gray-100 transition-all group">
+                                <div className={`w-11 h-11 xl:w-14 xl:h-14 2xl:w-16 2xl:h-16 rounded-xl xl:rounded-2xl bg-gradient-to-br ${color} flex items-center justify-center text-white group-hover:scale-110 shadow-md group-hover:shadow-lg transition-all`}>
+                                  <Icon className="w-5 h-5 xl:w-7 xl:h-7 2xl:w-8 2xl:h-8" />
+                                </div>
+                                <span className="text-xs xl:text-sm 2xl:text-base font-semibold text-gray-700 text-center leading-tight line-clamp-2">{name}</span>
+                                {isRealCategories && cat.count != null && <span className="text-[10px] xl:text-xs text-gray-400">{Number(cat.count).toLocaleString('hu-HU')} db</span>}
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </div>
+                      <div className="px-5 xl:px-6 2xl:px-7 pb-5 xl:pb-6 2xl:pb-7 pt-0">
+                        <button onClick={() => { onCategorySelect?.('Összes'); setActiveTab('shop'); setShowMegaMenu(false); setTimeout(() => onScrollToShop?.(), 80); }} className="w-full flex items-center justify-center gap-2 xl:gap-3 py-3 xl:py-3.5 text-sm xl:text-base 2xl:text-lg text-primary-600 hover:bg-primary-50 rounded-xl xl:rounded-2xl font-bold transition-all border border-primary-200 hover:border-primary-300">
                           Összes kategória megtekintése
                           <ArrowRight className="w-4 h-4 xl:w-5 xl:h-5" />
                         </button>
@@ -274,10 +276,6 @@ export default function Navbar({
               <button ref={hamburgerButtonRef} type="button" className="lg:hidden p-2.5 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-xl bg-gradient-to-r from-primary-500 to-secondary-700 text-white shadow-lg hover:shadow-xl transition-all" onClick={openMobileMenu} aria-label="Menü megnyitása">
                 <Menu className="w-6 h-6" />
               </button>
-              <a href={webshopDomain} target="_blank" rel="noopener noreferrer" className="hidden md:flex items-center gap-2 xl:gap-3 bg-gradient-to-r from-gray-900 to-gray-800 hover:from-gray-800 hover:to-gray-700 text-white px-5 lg:px-7 xl:px-9 2xl:px-10 py-2.5 lg:py-3.5 xl:py-4 2xl:py-5 rounded-xl lg:rounded-2xl text-sm lg:text-base xl:text-lg 2xl:text-xl font-bold transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-0.5" aria-label="Fő webshop megnyitása új lapon">
-                <span>Fő webshop</span>
-                <ExternalLink className="w-4 h-4 lg:w-5 lg:h-5 xl:w-6 xl:h-6" />
-              </a>
             </div>
           </div>
         </div>
@@ -319,7 +317,22 @@ export default function Navbar({
       {mobileMenuOpen && (
         <>
           <button type="button" className="fixed inset-0 z-[199] lg:hidden bg-black/40 backdrop-blur-sm" onClick={closeMobileMenu} aria-label="Menü bezárása (háttér)" />
-          <div ref={mobileMenuRef} className={`fixed top-0 right-0 bottom-[40px] w-full max-w-sm z-[200] lg:hidden ${mobileMenuClosing ? 'animate-slide-out-right' : 'animate-slide-in-right'}`} role="dialog" aria-modal="true" aria-label="Navigációs menü" onTouchStart={handleTouchStart} onTouchEnd={handleTouchEnd} onClick={(e) => e.stopPropagation()}>
+          <div
+            ref={mobileMenuRef}
+            className={`fixed top-0 right-0 z-[200] lg:hidden ${mobileMenuClosing ? 'animate-slide-out-right' : 'animate-slide-in-right'}`}
+            style={{
+              width: 'min(400px, 88vw)',
+              minWidth: '280px',
+              maxWidth: '400px',
+              bottom: 'var(--unas-bottom-nav, 40px)',
+            }}
+            role="dialog"
+            aria-modal="true"
+            aria-label="Navigációs menü"
+            onTouchStart={handleTouchStart}
+            onTouchEnd={handleTouchEnd}
+            onClick={(e) => e.stopPropagation()}
+          >
           <div className="absolute inset-0 bg-gradient-to-br from-primary-500 via-secondary-700 to-secondary-600 rounded-l-2xl overflow-hidden" />
           <div className="absolute inset-0 overflow-hidden pointer-events-none">
             <div className="absolute top-10 left-5 w-48 h-48 bg-white/10 rounded-full blur-3xl animate-float-slow" />
@@ -344,21 +357,21 @@ export default function Navbar({
                 {wishlistCount > 0 && <span className="absolute -top-1 -right-1 w-6 h-6 bg-red-500 rounded-full text-sm flex items-center justify-center font-bold">{wishlistCount}</span>}
               </button>
             </div>
-            <div className="mb-6">
-              <p className="text-sm sm:text-base text-white/70 font-bold uppercase tracking-wider mb-3 sm:mb-4">Kategóriák</p>
-              <div className="grid grid-cols-3 gap-2.5 sm:gap-3">
+            <div className="mb-4">
+              <p className="text-xs text-white/60 font-bold uppercase tracking-wider mb-2">Kategóriák</p>
+              <div className="grid grid-cols-4 gap-1.5 sm:gap-2">
                 {(() => {
-                  const realCats = (Array.isArray(categories) && categories.length > 0) ? categories.filter(c => c && c.name && c.name !== 'Összes').slice(0, 6) : [];
-                  const list = realCats.length > 0 ? realCats : POPULAR_CATEGORIES.slice(0, 6);
+                  const realCats = (Array.isArray(categories) && categories.length > 0) ? categories.filter(c => c && c.name && c.name !== 'Összes').slice(0, 8) : [];
+                  const list = realCats.length > 0 ? realCats : POPULAR_CATEGORIES.slice(0, 8);
                   return list.map((cat, idx) => {
                     const name = typeof cat?.name === 'string' ? cat.name : (cat?.name ?? '');
                     const isReal = realCats.length > 0;
                     const Icon = isReal ? getCategoryIcon(name) : (cat?.icon ?? Grid3X3);
                     const color = isReal ? MEGA_MENU_COLORS[idx % MEGA_MENU_COLORS.length] : (cat?.color ?? 'from-primary-500 to-secondary-700');
                     return (
-                      <button key={isReal ? name : (cat?.id ?? `m-${idx}`)} onClick={() => { onCategorySelect?.(name); setActiveTab('shop'); closeMobileMenu(); setTimeout(() => onScrollToShop?.(), 400); }} className="flex flex-col items-center gap-2 sm:gap-2.5 py-3.5 sm:py-4 bg-white/10 backdrop-blur-xl rounded-xl hover:bg-white/20 transition-all min-h-[44px]">
-                        <div className={`w-11 h-11 sm:w-12 sm:h-12 rounded-xl bg-gradient-to-br ${color} flex items-center justify-center`}><Icon className="w-5 h-5 sm:w-6 sm:h-6" /></div>
-                        <span className="text-xs sm:text-sm font-bold text-center line-clamp-2">{name}</span>
+                      <button key={isReal ? name : (cat?.id ?? `m-${idx}`)} onClick={() => { onCategorySelect?.(name); setActiveTab('shop'); closeMobileMenu(); setTimeout(() => onScrollToShop?.(), 400); }} className="flex flex-col items-center gap-1 py-2 px-1 bg-white/10 backdrop-blur-xl rounded-lg hover:bg-white/20 active:bg-white/25 transition-all min-h-[44px]">
+                        <div className={`w-9 h-9 sm:w-10 sm:h-10 rounded-lg bg-gradient-to-br ${color} flex items-center justify-center shrink-0`}><Icon className="w-4 h-4 sm:w-5 sm:h-5 text-white" /></div>
+                        <span className="text-[10px] sm:text-xs font-semibold text-center line-clamp-2 leading-tight">{name}</span>
                       </button>
                     );
                   });
@@ -396,7 +409,7 @@ export default function Navbar({
                 </div>
               </div>
             )}
-            <div className="mt-auto space-y-3">
+            <div className="mt-auto space-y-3 pb-[env(safe-area-inset-bottom,0)]">
               <button onClick={() => setIsDarkMode(!isDarkMode)} className="w-full flex items-center justify-between px-4 py-3 bg-white/10 backdrop-blur-xl rounded-xl">
                 <div className="flex items-center gap-3">{isDarkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}<span className="font-semibold">{isDarkMode ? 'Világos mód' : 'Sötét mód'}</span></div>
                 <div className={`w-10 h-6 rounded-full transition-colors ${isDarkMode ? 'bg-primary-400' : 'bg-white/30'}`}><div className={`w-5 h-5 bg-white rounded-full mt-0.5 transition-transform ${isDarkMode ? 'translate-x-4.5 ml-0.5' : 'translate-x-0.5'}`} /></div>
@@ -415,7 +428,6 @@ export default function Navbar({
                 <div className="bg-white/10 backdrop-blur-xl rounded-xl p-2.5 text-center"><p className="text-lg font-bold">24/7</p><p className="text-[9px] text-white/60">AI Support</p></div>
                 <div className="bg-white/10 backdrop-blur-xl rounded-xl p-2.5 text-center"><p className="text-lg font-bold">4.9★</p><p className="text-[9px] text-white/60">Értékelés</p></div>
               </div>
-              <a href={webshopDomain} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center gap-2 w-full px-4 py-3.5 rounded-xl font-bold text-base bg-white text-gray-900 hover:bg-gray-100 transition-all shadow-2xl" onClick={closeMobileMenu}>Vissza a fő webshopba<ExternalLink className="w-4 h-4" /></a>
             </div>
           </div>
         </div>
