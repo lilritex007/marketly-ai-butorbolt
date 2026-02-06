@@ -910,16 +910,16 @@ const App = () => {
     // NO API call - filtering is done client-side in filteredAndSortedProducts
   }, []);
 
-  // Bármely kategória (fő, alkategória, Összes) kattintás után a termékek szekcióhoz görgetünk; kezdeti betöltéskor nem
-  const categoryScrollSkipRef = useRef(true);
+  // Bármely kategória kattintás után a termékek szekcióhoz görgetünk; kezdeti betöltéskor nem (csak ha categoryFilter tényleg megváltozott)
+  const prevCategoryFilterRef = useRef(categoryFilter);
   useEffect(() => {
-    if (categoryScrollSkipRef.current) {
-      categoryScrollSkipRef.current = false;
-      return;
-    }
+    const prev = prevCategoryFilterRef.current;
+    prevCategoryFilterRef.current = categoryFilter;
+    if (prev === categoryFilter) return;
     const t = setTimeout(() => {
-      document.getElementById('products-section')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }, 350);
+      const el = document.getElementById('products-section');
+      if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start', inline: 'nearest' });
+    }, 400);
     return () => clearTimeout(t);
   }, [categoryFilter]);
 

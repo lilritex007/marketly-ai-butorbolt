@@ -66,6 +66,7 @@ export default function Navbar({
   const mobileMenuRef = useRef(null);
   const megaMenuRef = useRef(null);
   const megaMenuPanelRef = useRef(null);
+  const megaMenuCloseTimeoutRef = useRef(null);
   const hamburgerButtonRef = useRef(null);
 
   useEffect(() => {
@@ -274,7 +275,20 @@ export default function Navbar({
             </div>
 
             <div className="hidden md:flex items-center gap-2 lg:gap-3 xl:gap-4 2xl:gap-4">
-              <div ref={megaMenuRef} className="relative" onMouseEnter={() => setShowMegaMenu(true)} onMouseLeave={() => setShowMegaMenu(false)}>
+              <div
+                ref={megaMenuRef}
+                className="relative"
+                onMouseEnter={() => {
+                  if (megaMenuCloseTimeoutRef.current) {
+                    clearTimeout(megaMenuCloseTimeoutRef.current);
+                    megaMenuCloseTimeoutRef.current = null;
+                  }
+                  setShowMegaMenu(true);
+                }}
+                onMouseLeave={() => {
+                  megaMenuCloseTimeoutRef.current = setTimeout(() => setShowMegaMenu(false), 180);
+                }}
+              >
                 <button className={`flex items-center gap-2 lg:gap-3 xl:gap-3 px-3 lg:px-4 xl:px-6 2xl:px-7 py-2.5 lg:py-3 xl:py-3.5 2xl:py-4 rounded-xl lg:rounded-2xl font-bold text-sm lg:text-base xl:text-lg 2xl:text-xl transition-all duration-200 min-h-[44px] ${showMegaMenu ? 'bg-primary-50 text-primary-700 ring-2 ring-primary-200 shadow-sm' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'}`} aria-label="Kategóriák menü" aria-expanded={showMegaMenu} aria-haspopup="true">
                   <Grid3X3 className="w-5 h-5 lg:w-5 xl:w-6 xl:h-6" />
                   <span>Kategóriák</span>
@@ -284,7 +298,19 @@ export default function Navbar({
                   const hasHierarchy = Array.isArray(categoryHierarchy) && categoryHierarchy.length > 0;
                   if (hasHierarchy) {
                     return (
-                      <div ref={megaMenuPanelRef} className="absolute top-full left-0 mt-2 w-[min(90vw,640px)] md:w-[min(92vw,680px)] lg:w-[640px] xl:w-[720px] 2xl:w-[800px] bg-white rounded-2xl lg:rounded-3xl shadow-[0_20px_60px_-12px_rgba(0,0,0,0.25),0_0_0_1px_rgba(0,0,0,0.06)] overflow-hidden animate-fade-in-up z-50" role="dialog" aria-label="Kategóriák menü">
+                      <div
+                        ref={megaMenuPanelRef}
+                        className="absolute top-full left-0 pt-1 w-[min(90vw,640px)] md:w-[min(92vw,680px)] lg:w-[640px] xl:w-[720px] 2xl:w-[800px] rounded-2xl lg:rounded-3xl z-50"
+                        onMouseEnter={() => {
+                          if (megaMenuCloseTimeoutRef.current) {
+                            clearTimeout(megaMenuCloseTimeoutRef.current);
+                            megaMenuCloseTimeoutRef.current = null;
+                          }
+                        }}
+                        role="dialog"
+                        aria-label="Kategóriák menü"
+                      >
+                        <div className="bg-white rounded-2xl lg:rounded-3xl shadow-[0_20px_60px_-12px_rgba(0,0,0,0.25),0_0_0_1px_rgba(0,0,0,0.06)] overflow-hidden animate-fade-in-up">
                         <div className="p-4 lg:p-5 xl:p-5 border-b border-gray-200 bg-gray-50">
                           <p className="text-xs text-gray-500 font-medium" aria-hidden="true">Termékek &gt; Kategóriák</p>
                           <h3 className="text-sm lg:text-base font-bold text-gray-700 uppercase tracking-wider mt-0.5">Böngéssz kategóriák szerint</h3>
@@ -353,13 +379,15 @@ export default function Navbar({
                             <ArrowRight className="w-4 h-4 lg:w-5 xl:w-5" />
                           </button>
                         </div>
+                        </div>
                       </div>
                     );
                   }
                   const menuCategories = (Array.isArray(categories) && categories.length > 0) ? categories.filter(c => c && c.name && c.name !== 'Összes').slice(0, 12) : POPULAR_CATEGORIES;
                   const isRealCategories = menuCategories.length > 0 && typeof menuCategories[0]?.count === 'number';
                   return (
-                    <div ref={megaMenuPanelRef} className="absolute top-full left-0 mt-2 w-[min(90vw,640px)] md:w-[min(92vw,680px)] lg:w-[640px] xl:w-[720px] 2xl:w-[800px] bg-white rounded-2xl lg:rounded-3xl shadow-[0_20px_60px_-12px_rgba(0,0,0,0.25),0_0_0_1px_rgba(0,0,0,0.06)] overflow-hidden animate-fade-in-up z-50" role="dialog" aria-label="Kategóriák menü">
+                    <div ref={megaMenuPanelRef} className="absolute top-full left-0 pt-1 w-[min(90vw,640px)] md:w-[min(92vw,680px)] lg:w-[640px] xl:w-[720px] 2xl:w-[800px] z-50" onMouseEnter={() => { if (megaMenuCloseTimeoutRef.current) { clearTimeout(megaMenuCloseTimeoutRef.current); megaMenuCloseTimeoutRef.current = null; } }} role="dialog" aria-label="Kategóriák menü">
+                      <div className="bg-white rounded-2xl lg:rounded-3xl shadow-[0_20px_60px_-12px_rgba(0,0,0,0.25),0_0_0_1px_rgba(0,0,0,0.06)] overflow-hidden animate-fade-in-up">
                       <div className="p-4 xl:p-5 border-b border-gray-200 bg-gray-50">
                         <p className="text-xs text-gray-500 font-medium" aria-hidden="true">Termékek &gt; Kategóriák</p>
                         <h3 className="text-sm xl:text-base font-bold text-gray-700 uppercase tracking-wider mt-0.5">Böngéssz kategóriák szerint</h3>
@@ -387,6 +415,7 @@ export default function Navbar({
                           Összes kategória megtekintése
                           <ArrowRight className="w-4 h-4 xl:w-5 xl:h-5" />
                         </button>
+                      </div>
                       </div>
                     </div>
                   );
