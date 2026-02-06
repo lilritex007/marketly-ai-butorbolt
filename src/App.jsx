@@ -902,27 +902,16 @@ const App = () => {
     // NO API call - we use local AI search in filteredAndSortedProducts
   }, []);
 
-  // LOCAL category filter - no server call needed; kategória választásakor shop tabra váltunk
+  // LOCAL category filter - no server call needed; kategória választásakor shop tabra váltunk + mindig görgetünk a termékekhez
   const handleCategoryChange = useCallback((category) => {
     setCategoryFilter(category);
     setVisibleCount(DISPLAY_BATCH); // Reset visible count
     if (category && category !== 'Összes') setActiveTab('shop');
-    // NO API call - filtering is done client-side in filteredAndSortedProducts
-  }, []);
-
-  // Bármely kategória kattintás után a termékek szekcióhoz görgetünk; csak a mountot hagyjuk ki, utána minden váltáskor görgetünk
-  const didMountScrollRef = useRef(false);
-  useEffect(() => {
-    if (!didMountScrollRef.current) {
-      didMountScrollRef.current = true;
-      return;
-    }
-    const t = setTimeout(() => {
+    setTimeout(() => {
       const el = document.getElementById('products-section');
       if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start', inline: 'nearest' });
-    }, 400);
-    return () => clearTimeout(t);
-  }, [categoryFilter]);
+    }, 450);
+  }, []);
 
   // Load more is now just showing more from already-loaded products
   // All products are loaded at once, so no server fetch needed
