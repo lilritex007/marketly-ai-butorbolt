@@ -752,14 +752,7 @@ const App = () => {
     setSearchQuery(''); // Reset search
     
     setActiveTab('shop');
-    setTimeout(() => {
-      requestAnimationFrame(() => requestAnimationFrame(() => {
-        const el = document.getElementById('products-section');
-        if (!el) return;
-        const top = el.getBoundingClientRect().top + (window.scrollY || window.pageYOffset);
-        window.scrollTo({ top: Math.max(0, top - 100), behavior: 'smooth' });
-      }));
-    }, 300);
+    setTimeout(() => scrollToProductsSectionRef.current?.(), 400);
   }, [products]);
   
   // Clear AI recommendations
@@ -904,21 +897,47 @@ const App = () => {
     // NO API call - we use local AI search in filteredAndSortedProducts
   }, []);
 
-  // Központi görgetés a termékek szekcióhoz – window.scrollTo, minden kattintásra kényszerített görgetés
+  // UNAS embed: a görgetés gyakran nem a window-on van, hanem egy belső containeren (main / #content).
+  // Megkeressük a tényleges scroll szülőt és azt görgetjük; ha nincs ilyen, window.
+  const getScrollParent = useCallback((element) => {
+    let parent = element.parentElement;
+    while (parent && parent !== document.body) {
+      const style = getComputedStyle(parent);
+      const oy = style.overflowY;
+      if ((oy === 'auto' || oy === 'scroll' || oy === 'overlay') && parent.scrollHeight > parent.clientHeight) {
+        return parent;
+      }
+      parent = parent.parentElement;
+    }
+    return null;
+  }, []);
+
   const scrollToProductsSection = useCallback(() => {
     const run = () => {
       const el = document.getElementById('products-section');
       if (!el) return;
-      const scrollY = window.scrollY ?? window.pageYOffset;
-      const targetTop = Math.max(0, el.getBoundingClientRect().top + scrollY - 100);
-      // Mindig először 1px-t lépünk, aztán smooth a célra – így a 2. (és minden további) kattintás is görget
-      window.scrollTo({ top: Math.max(0, scrollY - 1), behavior: 'auto' });
-      requestAnimationFrame(() => {
-        window.scrollTo({ top: targetTop, behavior: 'smooth' });
-      });
+      const offset = 100;
+      const scrollParent = getScrollParent(el);
+
+      if (scrollParent) {
+        const elRect = el.getBoundingClientRect();
+        const parentRect = scrollParent.getBoundingClientRect();
+        const targetScrollTop = scrollParent.scrollTop + (elRect.top - parentRect.top) - offset;
+        scrollParent.scrollTo({ top: Math.max(0, targetScrollTop), behavior: 'smooth' });
+      } else {
+        const scrollY = window.scrollY ?? window.pageYOffset;
+        const targetTop = Math.max(0, el.getBoundingClientRect().top + scrollY - offset);
+        window.scrollTo({ top: Math.max(0, scrollY - 1), behavior: 'auto' });
+        requestAnimationFrame(() => {
+          window.scrollTo({ top: targetTop, behavior: 'smooth' });
+        });
+      }
     };
     requestAnimationFrame(() => requestAnimationFrame(run));
-  }, []);
+  }, [getScrollParent]);
+
+  const scrollToProductsSectionRef = useRef(scrollToProductsSection);
+  scrollToProductsSectionRef.current = scrollToProductsSection;
 
   // LOCAL category filter - no server call needed; kategória választásakor shop tabra váltunk + görgetés
   const handleCategoryChange = useCallback((category) => {
