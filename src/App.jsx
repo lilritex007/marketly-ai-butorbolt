@@ -904,13 +904,18 @@ const App = () => {
     // NO API call - we use local AI search in filteredAndSortedProducts
   }, []);
 
-  // Központi görgetés a termékek szekcióhoz – scrollIntoView mindig a tényleges scroll containert használja (embed is ok)
-  // Pontos pozíció: index.css #products-section scroll-margin-top: 5.5rem
+  // Központi görgetés a termékek szekcióhoz – window.scrollTo, minden kattintásra kényszerített görgetés
   const scrollToProductsSection = useCallback(() => {
     const run = () => {
       const el = document.getElementById('products-section');
       if (!el) return;
-      el.scrollIntoView({ behavior: 'smooth', block: 'start', inline: 'nearest' });
+      const scrollY = window.scrollY ?? window.pageYOffset;
+      const targetTop = Math.max(0, el.getBoundingClientRect().top + scrollY - 100);
+      // Mindig először 1px-t lépünk, aztán smooth a célra – így a 2. (és minden további) kattintás is görget
+      window.scrollTo({ top: Math.max(0, scrollY - 1), behavior: 'auto' });
+      requestAnimationFrame(() => {
+        window.scrollTo({ top: targetTop, behavior: 'smooth' });
+      });
     };
     requestAnimationFrame(() => requestAnimationFrame(run));
   }, []);
