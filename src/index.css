@@ -72,6 +72,11 @@
    regardless of UNAS shop's html font-size
    ======================================== */
 
+/* Görgetés pontosan a termékek szekció elejéig (navbar alá) */
+#mkt-butorbolt-app #products-section {
+  scroll-margin-top: 5.5rem; /* ~88px – sticky navbar alá igazítva (top-16 sm:top-20) */
+}
+
 #mkt-butorbolt-app {
   /* Force our own font-size base - UNAS can't override this */
   font-size: 16px !important;
