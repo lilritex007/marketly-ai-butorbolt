@@ -5,6 +5,13 @@ import { Zap, Clock, ArrowRight, X, Flame } from 'lucide-react';
  * FlashSaleBanner - Impactful, urgent sale banner
  * Clear message: SALE + TIME + ACTION
  */
+const FLASH_DISMISS_KEY = 'mkt_flash_dismissed_date';
+
+function getTodayKey() {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+}
+
 const FlashSaleBanner = ({ 
   endTime,
   title = 'Flash Sale',
@@ -14,7 +21,10 @@ const FlashSaleBanner = ({
   variant = 'banner'
 }) => {
   const [timeLeft, setTimeLeft] = useState(calculateTimeLeft());
-  const [isDismissed, setIsDismissed] = useState(false);
+  const [isDismissed, setIsDismissed] = useState(() => {
+    if (typeof sessionStorage === 'undefined') return false;
+    return sessionStorage.getItem(FLASH_DISMISS_KEY) === getTodayKey();
+  });
   const [isExpired, setIsExpired] = useState(false);
 
   function calculateTimeLeft() {
@@ -41,6 +51,9 @@ const FlashSaleBanner = ({
   }, [endTime]);
 
   const handleDismiss = () => {
+    try {
+      sessionStorage.setItem(FLASH_DISMISS_KEY, getTodayKey());
+    } catch (_) {}
     setIsDismissed(true);
     onDismiss?.();
   };
@@ -75,8 +88,10 @@ const FlashSaleBanner = ({
             </div>
           </div>
           <button
+            type="button"
             onClick={handleDismiss}
-            className="p-1.5 text-white/60 hover:text-white rounded-full hover:bg-white/10"
+            className="min-w-[44px] min-h-[44px] flex items-center justify-center p-2 text-white/60 hover:text-white rounded-full hover:bg-white/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/50"
+            aria-label="Banner elrejtése ma"
           >
             <X className="w-4 h-4" />
           </button>
@@ -103,12 +118,14 @@ const FlashSaleBanner = ({
 
         {/* CTA Button - Full width */}
         <button
+          type="button"
           onClick={onViewSale}
-          className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-white text-red-600 font-bold text-sm rounded-lg shadow-lg active:scale-[0.98] transition-transform"
+          className="w-full min-h-[44px] flex items-center justify-center gap-2 px-4 py-3 bg-white text-red-600 font-bold text-sm rounded-lg shadow-lg active:scale-[0.98] transition-transform focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-orange-500"
+          aria-label="Akciók megtekintése"
         >
-          <Zap className="w-4 h-4" />
+          <Zap className="w-4 h-4" aria-hidden />
           Megnézem az akciókat
-          <ArrowRight className="w-4 h-4" />
+          <ArrowRight className="w-4 h-4" aria-hidden />
         </button>
       </div>
 
@@ -154,16 +171,20 @@ const FlashSaleBanner = ({
         {/* Right: CTA + Dismiss */}
         <div className="flex items-center gap-3">
           <button
+            type="button"
             onClick={onViewSale}
-            className="flex items-center gap-2 px-5 lg:px-6 py-2.5 bg-white text-red-600 font-bold text-sm lg:text-base rounded-xl shadow-lg hover:shadow-xl hover:scale-[1.02] transition-all"
+            className="min-h-[44px] flex items-center gap-2 px-5 lg:px-6 py-2.5 bg-white text-red-600 font-bold text-sm lg:text-base rounded-xl shadow-lg hover:shadow-xl hover:scale-[1.02] transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-orange-500"
+            aria-label="Akciók megtekintése"
           >
-            <Zap className="w-4 h-4 lg:w-5 lg:h-5" />
+            <Zap className="w-4 h-4 lg:w-5 lg:h-5" aria-hidden />
             Megnézem
-            <ArrowRight className="w-4 h-4 lg:w-5 lg:h-5" />
+            <ArrowRight className="w-4 h-4 lg:w-5 lg:h-5" aria-hidden />
           </button>
           <button
+            type="button"
             onClick={handleDismiss}
-            className="p-2 text-white/60 hover:text-white rounded-full hover:bg-white/10 transition-colors"
+            className="min-w-[44px] min-h-[44px] flex items-center justify-center p-2 text-white/60 hover:text-white rounded-full hover:bg-white/10 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-white/50"
+            aria-label="Banner elrejtése ma"
           >
             <X className="w-5 h-5" />
           </button>

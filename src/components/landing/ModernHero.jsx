@@ -9,9 +9,19 @@ import {
  */
 export const ModernHero = ({ onExplore, onTryAI }) => {
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
+  const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
   const heroRef = useRef(null);
 
   useEffect(() => {
+    const mq = window.matchMedia('(prefers-reduced-motion: reduce)');
+    setPrefersReducedMotion(mq.matches);
+    const handler = () => setPrefersReducedMotion(mq.matches);
+    mq.addEventListener('change', handler);
+    return () => mq.removeEventListener('change', handler);
+  }, []);
+
+  useEffect(() => {
+    if (prefersReducedMotion) return;
     const handleMouseMove = (e) => {
       if (heroRef.current) {
         const rect = heroRef.current.getBoundingClientRect();
@@ -24,32 +34,32 @@ export const ModernHero = ({ onExplore, onTryAI }) => {
 
     window.addEventListener('mousemove', handleMouseMove);
     return () => window.removeEventListener('mousemove', handleMouseMove);
-  }, []);
+  }, [prefersReducedMotion]);
 
   return (
     <div 
       ref={heroRef}
       className="relative min-h-screen flex items-center justify-center overflow-hidden bg-gradient-to-br from-primary-50 via-white to-secondary-50"
     >
-      {/* Animated Background */}
-      <div className="absolute inset-0 overflow-hidden">
+      {/* Animated Background – respect prefers-reduced-motion */}
+      <div className="absolute inset-0 overflow-hidden" aria-hidden="true">
         {/* Gradient Orbs */}
         <div 
-          className="absolute top-1/4 left-1/4 w-96 h-96 bg-gradient-to-br from-primary-400 to-primary-600 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob"
+          className="absolute top-1/4 left-1/4 w-96 h-96 bg-gradient-to-br from-primary-400 to-primary-600 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob motion-reduce:animate-none"
           style={{
-            transform: `translate(${mousePosition.x * 30}px, ${mousePosition.y * 30}px)`
+            transform: prefersReducedMotion ? 'none' : `translate(${mousePosition.x * 30}px, ${mousePosition.y * 30}px)`
           }}
         />
         <div 
-          className="absolute top-1/3 right-1/4 w-96 h-96 bg-gradient-to-br from-secondary-400 to-secondary-600 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-2000"
+          className="absolute top-1/3 right-1/4 w-96 h-96 bg-gradient-to-br from-secondary-400 to-secondary-600 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-2000 motion-reduce:animate-none"
           style={{
-            transform: `translate(${mousePosition.x * -20}px, ${mousePosition.y * -20}px)`
+            transform: prefersReducedMotion ? 'none' : `translate(${mousePosition.x * -20}px, ${mousePosition.y * -20}px)`
           }}
         />
         <div 
-          className="absolute bottom-1/4 left-1/2 w-96 h-96 bg-gradient-to-br from-primary-300 to-secondary-600 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-4000"
+          className="absolute bottom-1/4 left-1/2 w-96 h-96 bg-gradient-to-br from-primary-300 to-secondary-600 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-4000 motion-reduce:animate-none"
           style={{
-            transform: `translate(${mousePosition.x * 15}px, ${mousePosition.y * 15}px)`
+            transform: prefersReducedMotion ? 'none' : `translate(${mousePosition.x * 15}px, ${mousePosition.y * 15}px)`
           }}
         />
 
@@ -80,7 +90,7 @@ export const ModernHero = ({ onExplore, onTryAI }) => {
           {/* Main Heading - LARGE and impactful */}
           <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl 2xl:text-9xl font-extrabold mb-6 sm:mb-8 lg:mb-12 leading-[1.1]">
             <span className="block text-gray-900 mb-2">Találd meg az</span>
-            <span className="block bg-gradient-to-r from-primary-500 via-secondary-700 to-pink-600 bg-clip-text text-transparent animate-gradient">
+            <span className="block bg-gradient-to-r from-primary-500 via-secondary-700 to-pink-600 bg-clip-text text-transparent animate-gradient motion-reduce:animate-none">
               ideális bútort
             </span>
             <span className="block text-gray-900 mt-2">AI segítséggel</span>
@@ -92,26 +102,30 @@ export const ModernHero = ({ onExplore, onTryAI }) => {
             <span className="font-semibold text-primary-500"> Fotózz, tervezz, vásárolj</span> - minden egy helyen.
           </p>
 
-          {/* CTA Buttons */}
+          {/* CTA Buttons – 44px touch, focus ring, a11y */}
           <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center items-stretch sm:items-center mb-12 sm:mb-14 lg:mb-16 px-3">
             <button
+              type="button"
               onClick={onTryAI}
-              className="group relative w-full sm:w-auto px-6 py-3.5 sm:px-8 sm:py-4 lg:px-10 lg:py-4 bg-gradient-to-r from-primary-500 to-secondary-700 text-white rounded-xl font-bold text-base sm:text-lg lg:text-xl shadow-xl hover:shadow-primary-500/50 transition-all transform hover:-translate-y-1 overflow-hidden flex items-center justify-center"
+              className="group relative w-full sm:w-auto min-h-[44px] px-6 py-3.5 sm:px-8 sm:py-4 lg:px-10 lg:py-4 bg-gradient-to-r from-primary-500 to-secondary-700 text-white rounded-xl font-bold text-base sm:text-lg lg:text-xl shadow-xl hover:shadow-primary-500/50 transition-all transform hover:-translate-y-1 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-400 focus-visible:ring-offset-2 overflow-hidden flex items-center justify-center"
+              aria-label="Próbáld ki az AI funkciókat"
             >
               <span className="relative z-10 flex items-center">
-                <Sparkles className="w-5 h-5 sm:w-5 sm:h-5 lg:w-6 lg:h-6 mr-2" />
+                <Sparkles className="w-5 h-5 sm:w-5 sm:h-5 lg:w-6 lg:h-6 mr-2" aria-hidden />
                 Próbáld ki az AI-t
-                <ArrowRight className="w-5 h-5 sm:w-5 sm:h-5 lg:w-6 lg:h-6 ml-2 group-hover:translate-x-1 transition-transform" />
+                <ArrowRight className="w-5 h-5 sm:w-5 sm:h-5 lg:w-6 lg:h-6 ml-2 group-hover:translate-x-1 transition-transform" aria-hidden />
               </span>
-              <div className="absolute inset-0 bg-gradient-to-r from-secondary-700 to-pink-600 opacity-0 group-hover:opacity-100 transition-opacity" />
+              <div className="absolute inset-0 bg-gradient-to-r from-secondary-700 to-pink-600 opacity-0 group-hover:opacity-100 transition-opacity" aria-hidden />
             </button>
 
             <button
+              type="button"
               onClick={onExplore}
-              className="w-full sm:w-auto px-6 py-3.5 sm:px-8 sm:py-4 lg:px-10 lg:py-4 bg-white text-gray-900 rounded-xl font-bold text-base sm:text-lg lg:text-xl shadow-lg hover:shadow-xl transition-all transform hover:-translate-y-1 border-2 border-gray-200 hover:border-primary-300 flex items-center justify-center"
+              className="w-full sm:w-auto min-h-[44px] px-6 py-3.5 sm:px-8 sm:py-4 lg:px-10 lg:py-4 bg-white text-gray-900 rounded-xl font-bold text-base sm:text-lg lg:text-xl shadow-lg hover:shadow-xl transition-all transform hover:-translate-y-1 border-2 border-gray-200 hover:border-primary-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-400 focus-visible:ring-offset-2 flex items-center justify-center"
+              aria-label="Kollekció megtekintése – termékek böngészése"
             >
               Kollekció megtekintése
-              <ChevronRight className="w-5 h-5 lg:w-6 lg:h-6 ml-2" />
+              <ChevronRight className="w-5 h-5 lg:w-6 lg:h-6 ml-2" aria-hidden />
             </button>
           </div>
 
@@ -136,10 +150,10 @@ export const ModernHero = ({ onExplore, onTryAI }) => {
         </div>
       </div>
 
-      {/* Scroll Indicator */}
-      <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 animate-bounce">
+      {/* Scroll Indicator – decorative, no a11y need */}
+      <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 animate-bounce motion-reduce:animate-none" aria-hidden="true">
         <div className="w-6 h-10 border-2 border-primary-500 rounded-full flex justify-center p-1">
-          <div className="w-1.5 h-3 bg-primary-500 rounded-full animate-scroll" />
+          <div className="w-1.5 h-3 bg-primary-500 rounded-full animate-scroll motion-reduce:animate-none" />
         </div>
       </div>
     </div>

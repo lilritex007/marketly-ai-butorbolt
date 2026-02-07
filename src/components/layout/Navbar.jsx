@@ -10,11 +10,11 @@ const RECENT_CATEGORIES_MAX = 3;
 import { getCategoryIcon } from '../ui/Icons';
 
 const ANNOUNCEMENT_MESSAGES = [
-  { icon: Truck, text: 'Ingyenes szállítás 50.000 Ft felett', highlight: 'Ingyenes' },
-  { icon: Gift, text: 'Első rendelésre 10% kedvezmény: ELSO10', highlight: 'ELSO10' },
-  { icon: Zap, text: 'AI-alapú bútorajánlatok - Csak Neked!', highlight: 'AI' },
-  { icon: TrendingUp, text: 'Több mint 90.000 termék egy helyen', highlight: '90.000' },
-  { icon: Star, text: '4.9★ értékelés 10.000+ vásárlótól', highlight: '4.9★' },
+  { icon: Truck, text: 'Ingyenes szállítás 50e Ft felett', highlight: 'Ingyenes' },
+  { icon: Gift, text: '10% kód: ELSO10', highlight: 'ELSO10' },
+  { icon: Zap, text: 'AI ajánlatok – csak neked', highlight: 'AI' },
+  { icon: TrendingUp, text: '90.000+ termék', highlight: '90.000+' },
+  { icon: Star, text: '4.9★ – 10.000+ vásárló', highlight: '4.9★' },
 ];
 
 const POPULAR_CATEGORIES = [
@@ -122,7 +122,7 @@ export default function Navbar({
   useEffect(() => {
     const interval = setInterval(() => {
       setAnnouncementIndex(prev => (prev + 1) % ANNOUNCEMENT_MESSAGES.length);
-    }, 4000);
+    }, 5500);
     return () => clearInterval(interval);
   }, []);
 
@@ -452,11 +452,11 @@ export default function Navbar({
       </nav>
 
       <div className="bg-gradient-to-r from-primary-500 via-secondary-700 to-secondary-600 text-white py-2 sm:py-2.5 lg:py-3 px-3 sm:px-4 lg:px-6 text-center relative overflow-hidden">
-        <div className="absolute inset-0 opacity-20" style={{ backgroundImage: 'radial-gradient(circle, rgba(255,255,255,0.3) 1px, transparent 1px)', backgroundSize: '16px 16px' }} />
-        <div className="relative flex items-center justify-center gap-2 sm:gap-3">
-          <div key={announcementIndex} className="flex items-center gap-2 sm:gap-3 animate-fade-in">
-            <currentAnnouncement.icon className="w-4 h-4 sm:w-5 sm:h-5 shrink-0" />
-            <span className="text-sm sm:text-base lg:text-lg font-medium">
+        <div className="absolute inset-0 opacity-20" style={{ backgroundImage: 'radial-gradient(circle, rgba(255,255,255,0.3) 1px, transparent 1px)', backgroundSize: '16px 16px' }} aria-hidden="true" />
+        <div className="relative flex items-center justify-center gap-2 sm:gap-3 min-h-[44px]">
+          <div key={announcementIndex} className="flex items-center gap-2 sm:gap-3 animate-fade-in max-w-full" role="marquee" aria-live="polite">
+            <currentAnnouncement.icon className="w-4 h-4 sm:w-5 sm:h-5 shrink-0 text-white/90" aria-hidden />
+            <span className="text-sm sm:text-base lg:text-lg font-medium truncate">
               {currentAnnouncement.text.split(currentAnnouncement.highlight).map((part, i, arr) => (
                 <React.Fragment key={i}>
                   {part}
