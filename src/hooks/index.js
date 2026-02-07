@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 
 /**
  * Custom hook for detecting mobile viewport
@@ -67,25 +67,28 @@ export const useDebounce = (value, delay = 500) => {
 };
 
 /**
- * Custom hook for intersection observer (lazy loading)
+ * Custom hook for intersection observer (lazy loading).
+ * options is read from ref to avoid re-creating observer on every render.
  */
 export const useIntersectionObserver = (options = {}) => {
   const [ref, setRef] = useState(null);
   const [isIntersecting, setIsIntersecting] = useState(false);
+  const optionsRef = useRef(options);
+  optionsRef.current = options;
 
   useEffect(() => {
     if (!ref) return;
 
     const observer = new IntersectionObserver(([entry]) => {
       setIsIntersecting(entry.isIntersecting);
-    }, options);
+    }, optionsRef.current);
 
     observer.observe(ref);
 
     return () => {
       observer.disconnect();
     };
-  }, [ref, options]);
+  }, [ref]);
 
   return [setRef, isIntersecting];
 };

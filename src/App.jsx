@@ -96,16 +96,12 @@ import { useLocalStorage } from './hooks/index';
 
 // Utils
 import { getOptimizedImageProps } from './utils/imageOptimizer';
-import { PLACEHOLDER_IMAGE } from './utils/helpers';
+import { PLACEHOLDER_IMAGE, formatPrice } from './utils/helpers';
 import { WEBSHOP_DOMAIN, SHOP_ID, DISPLAY_BATCH, TAB_HASH, HASH_TO_TAB } from './config';
 
 /* --- 1. KONFIGURÁCIÓ & ADATOK (config.js) --- */
 
 /* --- 2. SEGÉDFÜGGVÉNYEK --- */
-
-const formatPrice = (price) => {
-  return new Intl.NumberFormat('hu-HU', { style: 'currency', currency: 'HUF', maximumFractionDigits: 0 }).format(price);
-};
 
 const fixUrl = (url, type = 'main') => {
     if (!url) return PLACEHOLDER_IMAGE;
@@ -292,40 +288,6 @@ const FileLoaderBar = ({ onFileLoad, onUnasRefresh, isLoadingUnas, lastUpdated, 
         </div>
     );
 };
-
-const Hero = ({ onExplore }) => (
-    <div className="relative bg-gray-50 overflow-hidden mb-12">
-        <div className="absolute inset-0 bg-gradient-to-br from-primary-50 to-white z-0"></div>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-            <div className="py-20 lg:py-28 flex flex-col lg:flex-row items-center justify-between">
-                <div className="lg:w-1/2 mb-12 lg:mb-0">
-                    <div className="inline-flex items-center px-4 py-2 bg-white rounded-full shadow-sm text-primary-500 text-sm font-bold mb-6 border border-primary-50">
-                        <Star className="w-4 h-4 mr-2 fill-current" /> Prémium Minőség 2025
-                    </div>
-                    <h1 className="text-5xl lg:text-7xl font-extrabold text-gray-900 leading-tight mb-6 tracking-tight">
-                        Otthonod, <br/>
-                        <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary-500 to-secondary-700">a te stílusod.</span>
-                    </h1>
-                    <p className="text-xl text-gray-500 mb-10 max-w-lg leading-relaxed">
-                        Találd meg a tökéletes bútort az AI segítségével. Tölts fel egy fotót álmaid szobájáról, és mi megmutatjuk hozzá a termékeket.
-                    </p>
-                    <div className="flex flex-col sm:flex-row gap-4">
-                        <button onClick={onExplore} className="bg-gray-900 text-white px-8 py-4 rounded-xl font-bold text-lg hover:bg-gray-800 transition-all shadow-xl hover:shadow-2xl flex items-center justify-center transform hover:-translate-y-1">
-                            Kollekció megtekintése <ArrowRight className="ml-2 w-5 h-5" />
-                        </button>
-                    </div>
-                </div>
-                <div className="lg:w-1/2 relative h-[500px] w-full">
-                    <img 
-                        src="https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?auto=format&fit=crop&q=80&w=1000" 
-                        alt="Bútor enteriőr" 
-                        className="absolute inset-0 w-full h-full object-cover rounded-3xl shadow-2xl transform lg:rotate-1 hover:rotate-0 transition-transform duration-700"
-                    />
-                </div>
-            </div>
-        </div>
-    </div>
-);
 
 const Features = () => (
     <div className="bg-white py-10 sm:py-12 lg:py-14 border-b border-gray-100">

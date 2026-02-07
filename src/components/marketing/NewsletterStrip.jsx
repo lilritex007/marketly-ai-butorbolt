@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Mail, ArrowRight, Sparkles } from 'lucide-react';
+import { isValidEmail } from '../../utils/helpers';
 
 export default function NewsletterStrip() {
   const [email, setEmail] = useState('');
@@ -7,9 +8,9 @@ export default function NewsletterStrip() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (!email.trim()) return;
     const trimmed = email.trim();
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmed)) {
+    if (!trimmed) return;
+    if (!isValidEmail(trimmed)) {
       setStatus('error');
       return;
     }
