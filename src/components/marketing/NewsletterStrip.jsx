@@ -8,6 +8,11 @@ export default function NewsletterStrip() {
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!email.trim()) return;
+    const trimmed = email.trim();
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmed)) {
+      setStatus('error');
+      return;
+    }
     setStatus('loading');
     setTimeout(() => {
       setStatus('success');
@@ -37,13 +42,16 @@ export default function NewsletterStrip() {
               id="newsletter-email"
               type="email"
               value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              onChange={(e) => { setEmail(e.target.value); if (status === 'error') setStatus('idle'); }}
               placeholder="email@pelda.hu"
               className="flex-1 min-h-[44px] px-4 py-3 rounded-xl border-2 border-white/30 bg-white/10 placeholder:text-white/60 text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:border-white"
               required
               disabled={status === 'loading' || status === 'success'}
               aria-invalid={status === 'error'}
             />
+            {status === 'error' && (
+              <p className="text-white/90 text-sm -mt-1 w-full" role="alert">Kérjük, érvényes e-mail címet adj meg.</p>
+            )}
             <button
               type="submit"
               disabled={status === 'loading' || status === 'success'}

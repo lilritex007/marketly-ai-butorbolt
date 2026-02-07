@@ -12,7 +12,16 @@ export const FadeInOnScroll = ({
   className = ''
 }) => {
   const [isVisible, setIsVisible] = useState(false);
+  const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
   const ref = useRef(null);
+
+  useEffect(() => {
+    const mq = window.matchMedia('(prefers-reduced-motion: reduce)');
+    setPrefersReducedMotion(mq.matches);
+    const handler = () => setPrefersReducedMotion(mq.matches);
+    mq.addEventListener('change', handler);
+    return () => mq.removeEventListener('change', handler);
+  }, []);
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -33,7 +42,7 @@ export const FadeInOnScroll = ({
   }, [threshold]);
 
   const getTransform = () => {
-    if (isVisible) return 'translate3d(0, 0, 0)';
+    if (isVisible || prefersReducedMotion) return 'translate3d(0, 0, 0)';
     switch (direction) {
       case 'up': return 'translate3d(0, 30px, 0)';
       case 'down': return 'translate3d(0, -30px, 0)';
@@ -43,15 +52,18 @@ export const FadeInOnScroll = ({
     }
   };
 
+  const visible = isVisible || prefersReducedMotion;
+  const transition = prefersReducedMotion ? 'none' : `transform ${duration}ms ease-out ${delay}ms, opacity ${duration}ms ease-out ${delay}ms`;
+
   return (
     <div
       ref={ref}
       className={className}
       style={{
         transform: getTransform(),
-        opacity: isVisible ? 1 : 0,
-        transition: `transform ${duration}ms ease-out ${delay}ms, opacity ${duration}ms ease-out ${delay}ms`,
-        willChange: 'transform, opacity'
+        opacity: visible ? 1 : 0,
+        transition,
+        willChange: prefersReducedMotion ? 'auto' : 'transform, opacity'
       }}
     >
       {children}

@@ -39,10 +39,11 @@ const BackToTop = () => {
 
   return (
     <button
+      type="button"
       onClick={scrollToTop}
       className="
         fixed bottom-[calc(5rem+44px)] md:bottom-24 right-4 md:right-6 z-40
-        w-11 h-11 md:w-12 md:h-12 rounded-full
+        w-11 h-11 md:w-12 md:h-12 rounded-full min-w-[44px] min-h-[44px]
         bg-gradient-to-br from-primary-500 to-secondary-700
         text-white shadow-lg
         flex items-center justify-center
@@ -50,6 +51,7 @@ const BackToTop = () => {
         hover:scale-110 hover:shadow-xl
         active:scale-95
         animate-fade-in-up
+        focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-400 focus-visible:ring-offset-2
       "
       aria-label="Vissza a tetejére"
       title="Vissza a tetejére"

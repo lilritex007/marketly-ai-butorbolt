@@ -166,13 +166,18 @@ export const ModernHero = ({ onExplore, onTryAI }) => {
         </div>
       </div>
 
-      {/* Scroll Indicator – "Görgess le" label + mouse */}
-      <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 flex flex-col items-center gap-2 animate-bounce motion-reduce:animate-none" aria-hidden="true">
+      {/* Scroll Indicator – clickable to scroll to products */}
+      <button
+        type="button"
+        onClick={onExplore}
+        className="absolute bottom-8 left-1/2 transform -translate-x-1/2 flex flex-col items-center gap-2 animate-bounce motion-reduce:animate-none min-h-[44px] min-w-[44px] justify-center focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-400 focus-visible:ring-offset-2 rounded-lg"
+        aria-label="Görgess a termékekhez"
+      >
         <span className="text-xs sm:text-sm font-medium text-gray-500 uppercase tracking-wider">Görgess le</span>
-        <div className="w-6 h-10 border-2 border-primary-500 rounded-full flex justify-center p-1">
+        <div className="w-6 h-10 border-2 border-primary-500 rounded-full flex justify-center p-1 pointer-events-none">
           <div className="w-1.5 h-3 bg-primary-500 rounded-full animate-scroll motion-reduce:animate-none" />
         </div>
-      </div>
+      </button>
     </div>
   );
 };
