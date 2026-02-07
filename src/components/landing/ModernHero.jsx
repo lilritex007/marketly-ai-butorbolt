@@ -7,10 +7,18 @@ import {
 /**
  * Modern Hero Section with 3D effect and animations
  */
+const HERO_REVEAL_DELAY = { badge: 0, line1: 80, line2: 200, line3: 320, sub: 440, cta: 560, stats: [680, 780, 880, 980] };
+
 export const ModernHero = ({ onExplore, onTryAI }) => {
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
+  const [mounted, setMounted] = useState(false);
   const heroRef = useRef(null);
+
+  useEffect(() => {
+    const t = requestAnimationFrame(() => setMounted(true));
+    return () => cancelAnimationFrame(t);
+  }, []);
 
   useEffect(() => {
     const mq = window.matchMedia('(prefers-reduced-motion: reduce)');
@@ -71,13 +79,18 @@ export const ModernHero = ({ onExplore, onTryAI }) => {
             backgroundSize: '50px 50px'
           }}
         />
+        {/* Subtle noise overlay – disabled when reduced motion */}
+        <div className="hero-noise-overlay" aria-hidden="true" />
       </div>
 
       {/* FULLSCREEN: Edge-to-edge, LARGE elements for enjoyable browsing */}
       <div className="relative z-10 w-full max-w-[2000px] mx-auto px-4 sm:px-6 lg:px-10 xl:px-16 py-10 sm:py-14 lg:py-20 xl:py-24">
         <div className="text-center">
-          {/* Floating Badge - VISIBLE and prominent */}
-          <div className="inline-flex items-center px-5 sm:px-6 lg:px-8 py-2.5 sm:py-3 lg:py-4 bg-white/80 backdrop-blur-sm rounded-full shadow-lg border border-primary-100 mb-6 sm:mb-8 lg:mb-10 animate-float">
+          {/* Floating Badge – staggered reveal, soft ring */}
+          <div
+            className={`inline-flex items-center px-5 sm:px-6 lg:px-8 py-2.5 sm:py-3 lg:py-4 bg-white/80 backdrop-blur-sm rounded-full shadow-lg border border-primary-100 ring-2 ring-primary-200/50 mb-6 sm:mb-8 lg:mb-10 animate-float ${mounted ? 'hero-reveal' : 'opacity-0'}`}
+            style={mounted ? { animationDelay: `${HERO_REVEAL_DELAY.badge}ms` } : undefined}
+          >
             <Sparkles className="w-5 h-5 sm:w-6 sm:h-6 lg:w-7 lg:h-7 text-primary-500 mr-2.5 animate-pulse" />
             <span className="text-sm sm:text-base lg:text-xl xl:text-2xl font-bold bg-gradient-to-r from-primary-500 to-secondary-600 bg-clip-text text-transparent">
               AI-Powered Furniture Shopping
@@ -87,27 +100,33 @@ export const ModernHero = ({ onExplore, onTryAI }) => {
             </span>
           </div>
 
-          {/* Main Heading - LARGE and impactful */}
+          {/* Main Heading – staggered lines, gradient line with depth */}
           <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl 2xl:text-9xl font-extrabold mb-6 sm:mb-8 lg:mb-12 leading-[1.1]">
-            <span className="block text-gray-900 mb-2">Találd meg az</span>
-            <span className="block bg-gradient-to-r from-primary-500 via-secondary-700 to-pink-600 bg-clip-text text-transparent animate-gradient motion-reduce:animate-none">
+            <span className={`block text-gray-900 mb-2 ${mounted ? 'hero-reveal' : 'opacity-0'}`} style={mounted ? { animationDelay: `${HERO_REVEAL_DELAY.line1}ms` } : undefined}>Találd meg az</span>
+            <span
+              className={`block bg-gradient-to-r from-primary-500 via-secondary-700 to-pink-600 bg-clip-text text-transparent animate-gradient motion-reduce:animate-none ${mounted ? 'hero-reveal' : 'opacity-0'}`}
+              style={{
+                ...(mounted ? { animationDelay: `${HERO_REVEAL_DELAY.line2}ms` } : {}),
+                textShadow: '0 2px 24px rgba(255, 138, 0, 0.18)'
+              }}
+            >
               ideális bútort
             </span>
-            <span className="block text-gray-900 mt-2">AI segítséggel</span>
+            <span className={`block text-gray-900 mt-2 ${mounted ? 'hero-reveal' : 'opacity-0'}`} style={mounted ? { animationDelay: `${HERO_REVEAL_DELAY.line3}ms` } : undefined}>AI segítséggel</span>
           </h1>
 
-          {/* Subheading - READABLE */}
-          <p className="text-lg sm:text-xl md:text-2xl lg:text-3xl xl:text-4xl text-gray-600 max-w-6xl mx-auto mb-10 sm:mb-12 lg:mb-16 leading-relaxed px-2">
+          {/* Subheading */}
+          <p className={`text-lg sm:text-xl md:text-2xl lg:text-3xl xl:text-4xl text-gray-600 max-w-6xl mx-auto mb-10 sm:mb-12 lg:mb-16 leading-relaxed px-2 ${mounted ? 'hero-reveal' : 'opacity-0'}`} style={mounted ? { animationDelay: `${HERO_REVEAL_DELAY.sub}ms` } : undefined}>
             Forradalmi AI technológia találkozik a bútorvásárlással. 
             <span className="font-semibold text-primary-500"> Fotózz, tervezz, vásárolj</span> - minden egy helyen.
           </p>
 
-          {/* CTA Buttons – 44px touch, focus ring, a11y */}
-          <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center items-stretch sm:items-center mb-12 sm:mb-14 lg:mb-16 px-3">
+          {/* CTA Buttons – 44px touch, primary with hover glow */}
+          <div className={`flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center items-stretch sm:items-center mb-12 sm:mb-14 lg:mb-16 px-3 ${mounted ? 'hero-reveal' : 'opacity-0'}`} style={mounted ? { animationDelay: `${HERO_REVEAL_DELAY.cta}ms` } : undefined}>
             <button
               type="button"
               onClick={onTryAI}
-              className="group relative w-full sm:w-auto min-h-[44px] px-6 py-3.5 sm:px-8 sm:py-4 lg:px-10 lg:py-4 bg-gradient-to-r from-primary-500 to-secondary-700 text-white rounded-xl font-bold text-base sm:text-lg lg:text-xl shadow-xl hover:shadow-primary-500/50 transition-all transform hover:-translate-y-1 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-400 focus-visible:ring-offset-2 overflow-hidden flex items-center justify-center"
+              className="hero-cta-glow group relative w-full sm:w-auto min-h-[44px] px-6 py-3.5 sm:px-8 sm:py-4 lg:px-10 lg:py-4 bg-gradient-to-r from-primary-500 to-secondary-700 text-white rounded-xl font-bold text-base sm:text-lg lg:text-xl shadow-xl hover:shadow-primary-500/50 transition-all transform hover:-translate-y-1 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-400 focus-visible:ring-offset-2 overflow-hidden flex items-center justify-center"
               aria-label="Próbáld ki az AI funkciókat"
             >
               <span className="relative z-10 flex items-center">
@@ -129,7 +148,7 @@ export const ModernHero = ({ onExplore, onTryAI }) => {
             </button>
           </div>
 
-          {/* Stats */}
+          {/* Stats – staggered reveal */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 lg:gap-5 max-w-5xl mx-auto px-2">
             {[
               { icon: Package, value: '170K+', label: 'Termék' },
@@ -137,9 +156,10 @@ export const ModernHero = ({ onExplore, onTryAI }) => {
               { icon: Star, value: '4.9/5', label: 'Értékelés' },
               { icon: Zap, value: '24/7', label: 'AI Support' }
             ].map((stat, idx) => (
-              <div 
-                key={idx} 
-                className="bg-white/60 backdrop-blur-sm rounded-xl lg:rounded-2xl p-4 sm:p-5 lg:p-6 border border-white/20 shadow-lg hover:shadow-xl transition-all transform hover:-translate-y-1"
+              <div
+                key={idx}
+                className={`bg-white/60 backdrop-blur-sm rounded-xl lg:rounded-2xl p-4 sm:p-5 lg:p-6 border border-white/20 shadow-lg hover:shadow-xl transition-all transform hover:-translate-y-1 hover:border-primary-100 ${mounted ? 'hero-reveal' : 'opacity-0'}`}
+                style={mounted ? { animationDelay: `${HERO_REVEAL_DELAY.stats[idx]}ms` } : undefined}
               >
                 <stat.icon className="w-8 h-8 sm:w-9 sm:h-9 lg:w-10 lg:h-10 text-primary-500 mx-auto mb-2 lg:mb-3" />
                 <div className="text-2xl sm:text-2xl lg:text-3xl font-extrabold text-gray-900 mb-1">{stat.value}</div>
@@ -150,8 +170,9 @@ export const ModernHero = ({ onExplore, onTryAI }) => {
         </div>
       </div>
 
-      {/* Scroll Indicator – decorative, no a11y need */}
-      <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 animate-bounce motion-reduce:animate-none" aria-hidden="true">
+      {/* Scroll Indicator – "Görgess le" label + mouse */}
+      <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 flex flex-col items-center gap-2 animate-bounce motion-reduce:animate-none" aria-hidden="true">
+        <span className="text-xs sm:text-sm font-medium text-gray-500 uppercase tracking-wider">Görgess le</span>
         <div className="w-6 h-10 border-2 border-primary-500 rounded-full flex justify-center p-1">
           <div className="w-1.5 h-3 bg-primary-500 rounded-full animate-scroll motion-reduce:animate-none" />
         </div>

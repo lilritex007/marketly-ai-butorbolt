@@ -52,6 +52,8 @@ export default function Navbar({
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [announcementIndex, setAnnouncementIndex] = useState(0);
+  const [announcementProgress, setAnnouncementProgress] = useState(0);
+  const announcementStartRef = useRef(Date.now());
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [showMegaMenu, setShowMegaMenu] = useState(false);
   const [isReturningUser, setIsReturningUser] = useState(false);
@@ -119,12 +121,31 @@ export default function Navbar({
     });
   };
 
+  const ANNOUNCEMENT_DURATION_MS = 5500;
+
   useEffect(() => {
     const interval = setInterval(() => {
       setAnnouncementIndex(prev => (prev + 1) % ANNOUNCEMENT_MESSAGES.length);
-    }, 5500);
+      announcementStartRef.current = Date.now();
+      setAnnouncementProgress(0);
+    }, ANNOUNCEMENT_DURATION_MS);
     return () => clearInterval(interval);
   }, []);
+
+  const announcementRafRef = useRef(null);
+  useEffect(() => {
+    const start = announcementStartRef.current;
+    const tick = () => {
+      const elapsed = Date.now() - start;
+      const p = Math.min(100, (elapsed / ANNOUNCEMENT_DURATION_MS) * 100);
+      setAnnouncementProgress(p);
+      if (p < 100) announcementRafRef.current = requestAnimationFrame(tick);
+    };
+    announcementRafRef.current = requestAnimationFrame(tick);
+    return () => {
+      if (announcementRafRef.current) cancelAnimationFrame(announcementRafRef.current);
+    };
+  }, [announcementIndex]);
 
   useEffect(() => {
     const handleScroll = () => setIsScrolled(window.scrollY > 20);
@@ -460,7 +481,7 @@ export default function Navbar({
               {currentAnnouncement.text.split(currentAnnouncement.highlight).map((part, i, arr) => (
                 <React.Fragment key={i}>
                   {part}
-                  {i < arr.length - 1 && <span className="font-bold bg-white/20 px-1.5 py-0.5 rounded mx-1">{currentAnnouncement.highlight}</span>}
+                  {i < arr.length - 1 && <span className="font-bold bg-white/25 px-1.5 py-0.5 rounded-md mx-1 shadow-sm">{currentAnnouncement.highlight}</span>}
                 </React.Fragment>
               ))}
             </span>
@@ -470,6 +491,10 @@ export default function Navbar({
               <div key={i} className={`w-1.5 h-1.5 rounded-full transition-all duration-300 ${i === announcementIndex ? 'bg-white w-4' : 'bg-white/40'}`} />
             ))}
           </div>
+        </div>
+        {/* Progress bar: time until next message */}
+        <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-white/20" aria-hidden="true">
+          <div className="h-full bg-white/70 transition-[width] duration-150 ease-linear" style={{ width: `${announcementProgress}%` }} />
         </div>
       </div>
 

@@ -62,6 +62,11 @@ const FlashSaleBanner = ({
 
   const pad = (n) => String(n).padStart(2, '0');
 
+  /* Time-left progress: assume 24h sale duration so bar shrinks as time runs out */
+  const TOTAL_SALE_MS = 24 * 60 * 60 * 1000;
+  const remainingMs = timeLeft.hours * 3600000 + timeLeft.minutes * 60000 + timeLeft.seconds * 1000;
+  const timeLeftProgress = Math.min(100, (remainingMs / TOTAL_SALE_MS) * 100);
+
   return (
     <div className="relative bg-gradient-to-r from-red-600 via-orange-500 to-amber-500 overflow-hidden">
       {/* Animated shine effect */}
@@ -108,7 +113,7 @@ const FlashSaleBanner = ({
           ].map((unit, idx) => (
             <React.Fragment key={idx}>
               <div className="bg-black/30 backdrop-blur-sm rounded px-2 py-1">
-                <span className="text-white font-black text-lg tabular-nums">{pad(unit.value)}</span>
+                <span className="flash-countdown-digit text-white font-black text-lg tabular-nums inline-block">{pad(unit.value)}</span>
                 <span className="text-white/70 text-[10px] ml-0.5">{unit.label}</span>
               </div>
               {idx < 2 && <span className="text-white/40 font-bold">:</span>}
@@ -159,7 +164,7 @@ const FlashSaleBanner = ({
             ].map((unit, idx) => (
               <React.Fragment key={idx}>
                 <div className="bg-black/30 backdrop-blur-sm rounded-lg px-2.5 lg:px-3 py-1.5">
-                  <span className="text-white font-black text-xl lg:text-2xl tabular-nums">{pad(unit.value)}</span>
+                  <span className="flash-countdown-digit text-white font-black text-xl lg:text-2xl tabular-nums inline-block">{pad(unit.value)}</span>
                   <span className="text-white/70 text-[10px] lg:text-xs ml-1">{unit.label}</span>
                 </div>
                 {idx < 2 && <span className="text-white/40 font-bold text-xl mx-0.5">:</span>}
@@ -189,6 +194,11 @@ const FlashSaleBanner = ({
             <X className="w-5 h-5" />
           </button>
         </div>
+      </div>
+
+      {/* Time-left progress bar – shrinks as countdown runs out */}
+      <div className="absolute bottom-0 left-0 right-0 h-1 bg-black/20" aria-hidden="true">
+        <div className="h-full bg-white/60 transition-[width] duration-1000 ease-linear" style={{ width: `${timeLeftProgress}%` }} />
       </div>
 
       <style>{`
