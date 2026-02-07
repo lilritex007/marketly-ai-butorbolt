@@ -904,14 +904,21 @@ const App = () => {
     // NO API call - we use local AI search in filteredAndSortedProducts
   }, []);
 
-  // Központi görgetés a termékek szekcióhoz – minden kattintásnál ugyanez fut (navbar, swipe, mobil, stb.)
+  // Központi görgetés a termékek szekcióhoz – minden kattintásnál (2. klikk is működjön: kényszerített újragörgetés)
   const scrollToProductsSection = useCallback(() => {
     const run = () => {
       const el = document.getElementById('products-section');
       if (!el) return;
-      const top = el.getBoundingClientRect().top + (window.scrollY || window.pageYOffset);
-      const offset = 100; // navbar alá
-      window.scrollTo({ top: Math.max(0, top - offset), behavior: 'smooth' });
+      const targetTop = Math.max(0, el.getBoundingClientRect().top + (window.scrollY || window.pageYOffset) - 100);
+      // Ha már itt vagyunk, a böngésző nem animálja a 2. scrollTo-t – előbb 1px-t lépünk, aztán smooth a célra
+      if (Math.abs((window.scrollY || window.pageYOffset) - targetTop) < 10) {
+        window.scrollTo({ top: window.scrollY - 1, behavior: 'auto' });
+        requestAnimationFrame(() => requestAnimationFrame(() => {
+          window.scrollTo({ top: targetTop, behavior: 'smooth' });
+        }));
+      } else {
+        window.scrollTo({ top: targetTop, behavior: 'smooth' });
+      }
     };
     requestAnimationFrame(() => requestAnimationFrame(run));
   }, []);
