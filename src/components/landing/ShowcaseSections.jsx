@@ -47,7 +47,7 @@ export const SocialProof = () => {
   };
 
   return (
-    <div className="py-8 sm:py-10 lg:py-14 xl:py-16 bg-white">
+    <div className="py-8 sm:py-10 lg:py-14 xl:py-16 bg-white border-t border-gray-100">
       <div className="w-full max-w-[2000px] mx-auto px-4 sm:px-6 lg:px-10 xl:px-16">
         {/* Happy Customers Counter */}
         <div className="text-center mb-10 sm:mb-12 lg:mb-16 xl:mb-20">
@@ -172,7 +172,7 @@ export const LiveShowcase = ({ products = [], onProductClick }) => {
   const goPrev = () => setCurrentIndex((prev) => (prev - 1 + showcaseProducts.length) % showcaseProducts.length);
 
   return (
-    <div className="py-8 sm:py-10 lg:py-14 xl:py-16 bg-gradient-to-b from-gray-50 to-white overflow-hidden">
+    <div className="py-8 sm:py-10 lg:py-14 xl:py-16 bg-gradient-to-b from-gray-50 to-white overflow-hidden border-t border-gray-100">
       <div className="w-full max-w-[2000px] mx-auto px-4 sm:px-6 lg:px-10 xl:px-16">
         <div className="text-center mb-8 sm:mb-10 lg:mb-14">
           <div className="inline-flex items-center px-4 py-2 sm:px-5 sm:py-2.5 lg:px-6 lg:py-3 bg-green-100 rounded-full mb-4 sm:mb-5 lg:mb-6">

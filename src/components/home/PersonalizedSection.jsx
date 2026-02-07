@@ -61,7 +61,7 @@ const PersonalizedSection = ({
   }
 
   return (
-    <section className="py-8 sm:py-12 lg:py-16 bg-gradient-to-b from-white to-gray-50">
+    <section className="py-8 sm:py-12 lg:py-16 bg-gradient-to-b from-white to-gray-50 border-t border-gray-100">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header with Style DNA */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">

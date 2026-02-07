@@ -12,13 +12,9 @@ const HERO_REVEAL_DELAY = { badge: 0, line1: 80, line2: 200, line3: 320, sub: 44
 export const ModernHero = ({ onExplore, onTryAI }) => {
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
-  const [mounted, setMounted] = useState(false);
   const heroRef = useRef(null);
-
-  useEffect(() => {
-    const t = requestAnimationFrame(() => setMounted(true));
-    return () => cancelAnimationFrame(t);
-  }, []);
+  // Egyszeri megjelenés: animáció az első paint-től indul (nincs opacity-0 → mounted váltás = nem tűnik "kétszer tölteni")
+  const mounted = true;
 
   useEffect(() => {
     const mq = window.matchMedia('(prefers-reduced-motion: reduce)');

@@ -30,10 +30,16 @@ import Navbar from './components/layout/Navbar';
 import ScrollProgress from './components/ux/ScrollProgress';
 import BackToTop from './components/ux/BackToTop';
 import LiveSocialProof from './components/ux/LiveSocialProof';
+import LiveActivityStrip from './components/ux/LiveActivityStrip';
 
 // Landing Components
 import { ModernHero, AIFeaturesShowcase } from './components/landing/ModernHero';
 import { SocialProof, LiveShowcase, InteractiveCTA } from './components/landing/ShowcaseSections';
+import TrustStrip from './components/landing/TrustStrip';
+import InspirationSection from './components/landing/InspirationSection';
+import TestimonialsSection from './components/landing/TestimonialsSection';
+import NewArrivalsSection from './components/landing/NewArrivalsSection';
+import MostPopularSection from './components/landing/MostPopularSection';
 // Footer eltávolítva - a fő UNAS shopnak már van saját láblécce
 
 // Product Components
@@ -51,6 +57,7 @@ import AIPricePredictor from './components/ai/AIPricePredictor';
 // Marketing Components
 import SmartNewsletterPopup from './components/marketing/SmartNewsletterPopup';
 import ExitIntentPopup from './components/marketing/ExitIntentPopup';
+import NewsletterStrip from './components/marketing/NewsletterStrip';
 
 // AR Components
 import ARProductPreview from './components/ar/ARProductPreview';
@@ -1189,6 +1196,7 @@ const App = () => {
               onExplore={scrollToProductsSection}
               onTryAI={() => setActiveTab('visual-search')}
             />
+            <TrustStrip />
             <AIFeaturesShowcase 
               onFeatureClick={(feature) => {
                 if (feature.title.includes('Képfelismerés')) setActiveTab('visual-search');
@@ -1200,8 +1208,8 @@ const App = () => {
               }}
             />
             
-            {/* AI Super Features Row */}
-            <div data-ai-features className="w-full max-w-[2000px] mx-auto px-4 sm:px-6 lg:px-10 xl:px-16 py-6 sm:py-8 lg:py-12">
+            {/* AI Super Features Row – elválasztva a felső szekcióktól */}
+            <div data-ai-features className="w-full max-w-[2000px] mx-auto px-4 sm:px-6 lg:px-10 xl:px-16 py-6 sm:py-8 lg:py-12 border-t border-gray-100 bg-white">
               <div className="text-center mb-6 lg:mb-8">
                 <div className="inline-flex items-center gap-2.5 px-5 py-2.5 bg-primary-100 rounded-full mb-5">
                   <Bot className="w-5 h-5 lg:w-6 lg:h-6 text-primary-500" />
@@ -1276,12 +1284,57 @@ const App = () => {
                 </button>
               </div>
             </div>
+
+            <FadeInOnScroll direction="up">
+              <InspirationSection
+                onExplore={scrollToProductsSection}
+                onCategorySelect={(name) => {
+                  setActiveTab('shop');
+                  handleCategoryChange(name);
+                  setTimeout(() => scrollToProductsSectionRef.current?.(), 400);
+                }}
+              />
+            </FadeInOnScroll>
             
-            <SocialProof />
+            <FadeInOnScroll direction="up">
+              <SocialProof />
+            </FadeInOnScroll>
+            <FadeInOnScroll direction="up">
             <LiveShowcase 
               products={products.slice(0, 6)} 
               onProductClick={handleProductView}
             />
+            </FadeInOnScroll>
+
+            <FadeInOnScroll direction="up">
+              <TestimonialsSection />
+            </FadeInOnScroll>
+
+            {products.length > 0 && (
+              <FadeInOnScroll direction="up">
+                <NewArrivalsSection
+                  products={products}
+                  onProductClick={handleProductView}
+                  onToggleWishlist={toggleWishlist}
+                  wishlist={wishlist}
+                  onViewAll={scrollToProductsSection}
+                  onAddToCart={handleAddToCart}
+                />
+              </FadeInOnScroll>
+            )}
+
+            {products.length > 0 && (
+              <FadeInOnScroll direction="up">
+                <MostPopularSection
+                  products={products}
+                  onProductClick={handleProductView}
+                  onToggleWishlist={toggleWishlist}
+                  wishlist={wishlist}
+                  onViewAll={scrollToProductsSection}
+                  onAddToCart={handleAddToCart}
+                />
+              </FadeInOnScroll>
+            )}
             
             {/* Personalized Section - For You + Recently Viewed + Trending */}
             {products.length > 0 && (
@@ -1302,6 +1355,8 @@ const App = () => {
                 onRedeemPoints={(reward) => console.log('Redeem:', reward)}
               />
             </div>
+
+            <NewsletterStrip />
 
             <FadeInOnScroll direction="up">
               <Features />
@@ -1326,24 +1381,27 @@ const App = () => {
             <section id="products-section" className="container-app section-padding">
                 {/* Sticky products header - solid, breadcrumb when category selected */}
                 <div className="sticky top-16 sm:top-20 z-40 mx-0 sm:-mx-4 lg:-mx-8 xl:-mx-10 px-3 sm:px-4 lg:px-8 xl:px-10 py-3 sm:py-4 lg:py-5 xl:py-6 mb-3 sm:mb-4 lg:mb-8 bg-white border-b border-gray-200 shadow-sm">
-                  <nav className="flex items-center gap-2 mb-2 sm:mb-3 text-sm text-gray-500" aria-label="Breadcrumb">
-                    <button type="button" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} className="hover:text-primary-600 font-medium transition-colors" aria-label="Főoldal teteje">Főoldal</button>
-                    <span aria-hidden="true">/</span>
-                    <button type="button" onClick={() => handleCategoryChange('Összes')} className="hover:text-primary-600 font-medium transition-colors" aria-label="Összes kategória">Termékek</button>
-                    {categoryFilter && categoryFilter !== 'Összes' && (
-                      <>
-                        <span aria-hidden="true">/</span>
-                        <span className="font-semibold text-gray-700">{categoryFilter}</span>
-                      </>
-                    )}
-                    {searchQuery && (
-                      <>
-                        <span aria-hidden="true">/</span>
-                        <span className="text-gray-600">Keresés: &quot;{searchQuery}&quot;</span>
-                      </>
-                    )}
-                    <span className="text-gray-400">({filteredAndSortedProducts.length.toLocaleString('hu-HU')} termék)</span>
-                  </nav>
+                  <div className="flex flex-wrap items-center justify-between gap-2 mb-2 sm:mb-3">
+                    <nav className="flex items-center gap-2 text-sm text-gray-500" aria-label="Breadcrumb">
+                      <button type="button" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} className="hover:text-primary-600 font-medium transition-colors" aria-label="Főoldal teteje">Főoldal</button>
+                      <span aria-hidden="true">/</span>
+                      <button type="button" onClick={() => handleCategoryChange('Összes')} className="hover:text-primary-600 font-medium transition-colors" aria-label="Összes kategória">Termékek</button>
+                      {categoryFilter && categoryFilter !== 'Összes' && (
+                        <>
+                          <span aria-hidden="true">/</span>
+                          <span className="font-semibold text-gray-700">{categoryFilter}</span>
+                        </>
+                      )}
+                      {searchQuery && (
+                        <>
+                          <span aria-hidden="true">/</span>
+                          <span className="text-gray-600">Keresés: &quot;{searchQuery}&quot;</span>
+                        </>
+                      )}
+                      <span className="text-gray-400">({filteredAndSortedProducts.length.toLocaleString('hu-HU')} termék)</span>
+                    </nav>
+                    <LiveActivityStrip className="hidden sm:flex shrink-0" />
+                  </div>
                   <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-4 lg:gap-6">
                     {/* Title & Count */}
                     <div className="flex items-baseline gap-2 sm:gap-3 lg:gap-4 flex-wrap">
