@@ -2,14 +2,15 @@
 export const PLACEHOLDER_IMAGE = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='400'%3E%3Crect fill='%23e5e7eb' width='400' height='400'/%3E%3Ctext fill='%239ca3af' x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='sans-serif' font-size='16'%3ENincs kép%3C/text%3E%3C/svg%3E";
 
 /**
- * Format price to Hungarian currency
+ * Format price to Hungarian currency (safe for null/undefined)
  */
 export const formatPrice = (price) => {
-  return new Intl.NumberFormat('hu-HU', { 
-    style: 'currency', 
-    currency: 'HUF', 
-    maximumFractionDigits: 0 
-  }).format(price);
+  const value = price != null && !Number.isNaN(Number(price)) ? Number(price) : 0;
+  return new Intl.NumberFormat('hu-HU', {
+    style: 'currency',
+    currency: 'HUF',
+    maximumFractionDigits: 0
+  }).format(value);
 };
 
 /**

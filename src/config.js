@@ -8,6 +8,8 @@ export const SHOP_ID = '81697';
 
 /** Kezdeti és "load more" batch méret a termék listánál */
 export const DISPLAY_BATCH = 48;
+/** Első lap mérete (API) – gyors first paint, alacsony memória */
+export const INITIAL_PAGE = 200;
 
 /** Tab értékek és hash (#shop, #visual-search, #room-planner) */
 export const TAB_HASH = {

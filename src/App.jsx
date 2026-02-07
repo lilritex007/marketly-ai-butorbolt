@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useRef, useMemo, useCallback, Suspense, lazy } from 'react';
 import { ShoppingCart, Camera, MessageCircle, X, Send, Plus, Move, Trash2, Home, ZoomIn, ZoomOut, Upload, Settings, Link as LinkIcon, FileText, RefreshCw, AlertCircle, Database, Lock, Search, ChevronLeft, ChevronRight, Filter, Heart, ArrowDownUp, Info, Check, Star, Truck, ShieldCheck, Phone, ArrowRight, Mail, Eye, Sparkles, Lightbulb, Image as ImageIcon, MousePointer2, Menu, Bot, Moon, Sun, Clock, Gift, Zap, TrendingUp, Instagram, Facebook, MapPin, Sofa, Lamp, BedDouble, Armchair, Grid3X3, ExternalLink, Timer, ChevronDown } from 'lucide-react';
 // framer-motion removed due to Vite production build TDZ issues
-import { fetchUnasProducts, refreshUnasProducts, fetchCategories, fetchCategoryHierarchy } from './services/unasApi';
-import { trackProductView as trackProductViewPref, getPersonalizedRecommendations, getSimilarProducts } from './services/userPreferencesService';
+import { fetchUnasProducts, refreshUnasProducts, fetchCategories, fetchCategoryHierarchy, fetchSearchIndex } from './services/unasApi';
 import { smartSearch } from './services/aiSearchService';
+import { trackProductView as trackProductViewPref, getPersonalizedRecommendations, getSimilarProducts } from './services/userPreferencesService';
 import { generateText, analyzeImage as analyzeImageAI } from './services/geminiService';
 
 // New UI Components
@@ -91,13 +91,13 @@ import StickyAddToCartMobile from './components/mobile/StickyAddToCartMobile';
 import TrustBadges from './components/trust/TrustBadges';
 
 // Hooks
-import { useLocalStorage } from './hooks/index';
+import { useLocalStorage, useDebounce } from './hooks/index';
 // useInfiniteScroll removed - using manual "Load More" button instead
 
 // Utils
 import { getOptimizedImageProps } from './utils/imageOptimizer';
 import { PLACEHOLDER_IMAGE, formatPrice } from './utils/helpers';
-import { WEBSHOP_DOMAIN, SHOP_ID, DISPLAY_BATCH, TAB_HASH, HASH_TO_TAB } from './config';
+import { WEBSHOP_DOMAIN, SHOP_ID, DISPLAY_BATCH, INITIAL_PAGE, TAB_HASH, HASH_TO_TAB } from './config';
 
 /* --- 1. KONFIGURÁCIÓ & ADATOK (config.js) --- */
 
@@ -617,17 +617,18 @@ const App = () => {
   const [totalProductsCount, setTotalProductsCount] = useState(0);
   const [hasMoreProducts, setHasMoreProducts] = useState(true);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
-  const [visibleCount, setVisibleCount] = useState(DISPLAY_BATCH);
-  const visibleCountRef = useRef(visibleCount);
   const filteredLengthRef = useRef(0);
   const hasMoreProductsRef = useRef(hasMoreProducts);
   const isLoadingMoreRef = useRef(isLoadingMore);
-  visibleCountRef.current = visibleCount;
-  // filteredLengthRef.current updated below after filteredAndSortedProducts is defined
   hasMoreProductsRef.current = hasMoreProducts;
   isLoadingMoreRef.current = isLoadingMore;
   const [wishlist, setWishlist] = useLocalStorage('mkt_wishlist', []);
   const [searchQuery, setSearchQuery] = useState("");
+  const searchQueryRef = useRef(searchQuery);
+  searchQueryRef.current = searchQuery;
+  const searchIndexRef = useRef([]);
+  const [searchIndexReady, setSearchIndexReady] = useState(false);
+  const [searchResults, setSearchResults] = useState([]);
   const [categoryFilter, setCategoryFilter] = useState("Összes");
   const [sortOption, setSortOption] = useState("default");
   const [isDemoMode, setIsDemoMode] = useState(false);
@@ -827,53 +828,49 @@ const App = () => {
   const [serverCategory, setServerCategory] = useState('');
   const searchTimeoutRef = useRef(null);
 
-  // FAST LOADING: Load ALL products at once (slim mode + GZIP compression)
-  // This ensures all categories are available immediately
+  // API-first: kis lap, gyors first paint; soha nem töltünk 200k-t
   const loadUnasData = useCallback(async (options = {}) => {
-    const { silent = false, search = '', category = '' } = options;
+    const { silent = false, search = '', category = '', append = false, limit = INITIAL_PAGE, offset = 0 } = options;
     
-    if (!silent) {
+    if (!silent && !append) {
       setIsLoadingUnas(true);
       setUnasError(null);
     }
+    if (append) setIsLoadingMore(true);
     
     try {
-      // Load ALL products with FULL data (descriptions + params for search)
-      // GZIP compression keeps it fast (~3-5 sec)
-      const params = { 
-        // NO slim mode - we need description + params for intelligent search!
-        ...(search && { search }),
+      const params = {
+        limit,
+        offset,
+        ...(search && search.trim() && { search: search.trim() }),
         ...(category && category !== 'Összes' && { category })
       };
-      
       const data = await fetchUnasProducts(params);
       const newProducts = (data.products || []).map(p => ({
         ...p,
-        // Ensure images array exists
         images: p.images || (p.image ? [p.image] : []),
         image: p.images?.[0] || p.image,
-        inStock: p.inStock ?? p.in_stock ?? true,
-        // Keep description and params for search
-        description: p.description || '',
-        params: p.params || ''
+        inStock: p.inStock ?? p.in_stock ?? true
       }));
+      const totalCount = data.total ?? 0;
       
-      const totalCount = data.total ?? newProducts.length;
-      
-      setProducts(newProducts);
-      setVisibleCount(DISPLAY_BATCH);
-      setTotalProductsCount(totalCount);
-      setHasMoreProducts(false); // All products loaded
+      if (append) {
+        setProducts(prev => [...prev, ...newProducts]);
+        setHasMoreProducts(newProducts.length > 0 && (data.count + offset) < totalCount);
+      } else {
+        setProducts(newProducts);
+        setTotalProductsCount(totalCount);
+        setHasMoreProducts(newProducts.length > 0 && newProducts.length < totalCount);
+      }
+      if (!append) setTotalProductsCount(totalCount);
       setLastUpdated(data.lastSync || data.lastUpdated);
       setDataSource('unas');
       setUnasError(null);
-      
     } catch (err) {
-      console.error('Load error:', err);
-      if (!silent) setUnasError('Termékek betöltése sikertelen');
+      if (!append) setUnasError('Termékek betöltése sikertelen');
     } finally {
-      if (!silent) setIsLoadingUnas(false);
-      setIsLoadingMore(false);
+      if (!silent && !append) setIsLoadingUnas(false);
+      if (append) setIsLoadingMore(false);
     }
   }, []);
 
@@ -940,26 +937,26 @@ const App = () => {
   const scrollToProductsSectionRef = useRef(scrollToProductsSection);
   scrollToProductsSectionRef.current = scrollToProductsSection;
 
-  // LOCAL category filter - no server call needed; kategória választásakor shop tabra váltunk + görgetés
   const handleCategoryChange = useCallback((category) => {
     setCategoryFilter(category);
-    setVisibleCount(DISPLAY_BATCH); // Reset visible count
     if (category && category !== 'Összes') setActiveTab('shop');
-    setTimeout(scrollToProductsSection, 500); // DOM frissülés után (shop tab + section)
+    setTimeout(scrollToProductsSection, 500);
   }, [scrollToProductsSection]);
-
-  // Load more is now just showing more from already-loaded products
-  // All products are loaded at once, so no server fetch needed
-  const loadMoreProducts = useCallback(() => {
-    // This is handled by handleLoadMore - just show more from filteredAndSortedProducts
-  }, []);
 
   const loadUnasDataRef = useRef(loadUnasData);
   loadUnasDataRef.current = loadUnasData;
 
+  const debouncedSearch = useDebounce(searchQuery, 400);
   useEffect(() => {
-    loadUnasDataRef.current({}); // Initial load with no filters
-  }, []);
+    // Ha a keresőindex kész, a keresés lokálisan fut – ne írjuk felül a listát API kereséssel
+    const useApiSearch = !searchIndexReady || !debouncedSearch.trim();
+    loadUnasDataRef.current({
+      search: useApiSearch ? (debouncedSearch.trim() || undefined) : undefined,
+      category: categoryFilter !== 'Összes' ? categoryFilter : '',
+      limit: INITIAL_PAGE,
+      offset: 0
+    });
+  }, [categoryFilter, debouncedSearch, searchIndexReady]);
 
   useEffect(() => {
     const onHashChange = () => {
@@ -978,6 +975,38 @@ const App = () => {
     });
     return () => { cancelled = true; };
   }, []);
+
+  // Keresőindex háttérben (800ms késleltetés, ne blokkolja az első paint-et); 5 percenként frissítés = készlet naprakész
+  useEffect(() => {
+    let cancelled = false;
+    const load = () => {
+      fetchSearchIndex().then((data) => {
+        if (!cancelled && Array.isArray(data)) {
+          searchIndexRef.current = data;
+          setSearchIndexReady(true);
+          const q = searchQueryRef.current.trim();
+          if (q) {
+            const { results = [] } = smartSearch(data, q, { limit: 500 });
+            setSearchResults(results);
+          }
+        }
+      });
+    };
+    const t0 = setTimeout(load, 800);
+    const t1 = setInterval(load, 5 * 60 * 1000);
+    return () => { cancelled = true; clearTimeout(t0); clearInterval(t1); };
+  }, []);
+
+  // Keresés a teljes indexen (ha már betöltött); üres keresés = üres találat
+  useEffect(() => {
+    if (!searchQuery.trim()) {
+      setSearchResults([]);
+      return;
+    }
+    if (!searchIndexReady || searchIndexRef.current.length === 0) return;
+    const { results = [] } = smartSearch(searchIndexRef.current, searchQuery.trim(), { limit: 500 });
+    setSearchResults(results);
+  }, [searchQuery, searchIndexReady]);
 
   useEffect(() => {
     const t = setInterval(() => loadUnasDataRef.current?.({ silent: true }), 300000);
@@ -998,77 +1027,37 @@ const App = () => {
     normalizedAdvancedFilters.priceMax < 1000000
   ].filter(Boolean).length, [normalizedAdvancedFilters]);
   
-  // LOCAL AI SEARCH + client-side filtering
+  // Szerver már szűr (kategória, keresés); itt csak rendezés + advanced filter a kis listán
   const filteredAndSortedProducts = useMemo(() => {
-      let result = products;
-      
-      // 🔍 AI SEARCH - use local smartSearch for instant results!
-      if (searchQuery && searchQuery.trim().length >= 2) {
-        console.log(`🔍 Searching for: "${searchQuery}" in ${products.length} products`);
-        const searchResult = smartSearch(products, searchQuery, { limit: 5000 });
-        result = searchResult.results || [];
-        console.log(`🔍 Search result: ${result.length} products found`);
-        
-        // If no results from smartSearch but we have products, something's wrong
-        if (result.length === 0 && products.length > 0) {
-          console.warn('⚠️ No search results - falling back to basic filter');
-          // Basic fallback filter
-          const queryLower = searchQuery.toLowerCase();
-          result = products.filter(p => 
-            (p.name && p.name.toLowerCase().includes(queryLower)) ||
-            (p.category && p.category.toLowerCase().includes(queryLower))
-          );
-          console.log(`🔍 Fallback filter found: ${result.length} products`);
-        }
-      }
-      
-      // Category filter (client-side): main = összes alatta lévő (path first segment VAGY leaf a children közül)
-      if (categoryFilter && categoryFilter !== 'Összes') {
-        const mainGroup = categoryHierarchy?.mainCategories?.find((m) => m.name === categoryFilter);
-        const rawSegments = mainGroup?.rawSegments;
-        const childNames = mainGroup?.children?.map((c) => c.name) ?? [];
-        result = result.filter((p) => {
-          if (p.category_path && typeof p.category_path === 'string') {
-            const main = p.category_path.split('|')[0].trim();
-            if (rawSegments?.length && rawSegments.includes(main)) return true;
-            if (!rawSegments?.length && main === categoryFilter) return true;
-          }
-          if (p.category && childNames.length > 0 && childNames.includes(p.category)) return true;
-          return p.category && (p.category === categoryFilter || p.category.includes(categoryFilter));
-        });
-      }
-      
-      // Advanced filters (price range, etc.)
-      if (Object.keys(advancedFilters).length > 0) {
-        result = applyFilters(result, normalizedAdvancedFilters);
-      }
-      
-      // Sorting
-      if (sortOption === 'price-asc') result = [...result].sort((a, b) => (a.price || 0) - (b.price || 0));
-      if (sortOption === 'price-desc') result = [...result].sort((a, b) => (b.price || 0) - (a.price || 0));
-      
-      return result;
-  }, [products, searchQuery, categoryFilter, sortOption, advancedFilters, normalizedAdvancedFilters, categoryHierarchy?.mainCategories]);
+    let result = [...products];
+    if (Object.keys(advancedFilters).length > 0) {
+      result = applyFilters(result, normalizedAdvancedFilters);
+    }
+    if (sortOption === 'price-asc') result = result.sort((a, b) => (a.price || 0) - (b.price || 0));
+    if (sortOption === 'price-desc') result = result.sort((a, b) => (b.price || 0) - (a.price || 0));
+    return result;
+  }, [products, sortOption, advancedFilters, normalizedAdvancedFilters]);
 
-  // Update ref after filteredAndSortedProducts is defined
   filteredLengthRef.current = filteredAndSortedProducts.length;
 
-  // Show first visibleCount items from filtered products
-  // If AI recommendations are active, show those instead
-  const displayedProducts = aiRecommendedProducts.length > 0 
-    ? aiRecommendedProducts 
-    : filteredAndSortedProducts.slice(0, visibleCount);
-  const hasMoreToShow = aiRecommendedProducts.length === 0 && visibleCount < filteredAndSortedProducts.length;
+  const isSearchMode = searchQuery.trim().length >= 2 && searchIndexReady;
+  const displayedProducts = aiRecommendedProducts.length > 0
+    ? aiRecommendedProducts
+    : isSearchMode
+      ? searchResults
+      : filteredAndSortedProducts;
+  const hasMoreToShow = aiRecommendedProducts.length === 0 && !isSearchMode && products.length < totalProductsCount;
 
-  // When sort/advanced filters change, reset visible window
-  useEffect(() => {
-    setVisibleCount(DISPLAY_BATCH);
-  }, [sortOption, advancedFilters]);
-
-  // Manual "Load More" button handler - shows more from already-loaded products
   const handleLoadMore = useCallback(() => {
-    setVisibleCount(prev => Math.min(prev + DISPLAY_BATCH, filteredAndSortedProducts.length));
-  }, [filteredAndSortedProducts.length]);
+    if (isLoadingMore || !hasMoreProducts) return;
+    loadUnasDataRef.current({
+      append: true,
+      limit: DISPLAY_BATCH,
+      offset: products.length,
+      search: searchQuery.trim() || undefined,
+      category: categoryFilter !== 'Összes' ? categoryFilter : ''
+    });
+  }, [isLoadingMore, hasMoreProducts, products.length, searchQuery, categoryFilter]);
 
   // Compute categories from products (already filtered by EXCLUDED_MAIN_CATEGORIES)
   // This ensures only valid categories with actual products are shown
@@ -1336,7 +1325,7 @@ const App = () => {
                 onCategoryChange={handleCategoryChange}
                 wishlist={wishlist}
                 onAskAI={() => setShowStyleQuiz(true)}
-                visibleCount={visibleCount}
+                visibleCount={displayedProducts.length}
                 onLoadMore={handleLoadMore}
               />
             ) : (
@@ -1536,7 +1525,7 @@ const App = () => {
                   })()}
                   activeCategory={categoryFilter}
                   onCategoryChange={handleCategoryChange}
-                  displayedCount={Math.min(visibleCount, filteredAndSortedProducts.length)}
+                  displayedCount={displayedProducts.length}
                 />
 
                 {/* Loading State */}
@@ -1640,7 +1629,7 @@ const App = () => {
                       >
                         <span>Több termék</span>
                         <span className="px-3 sm:px-3.5 py-1 sm:py-1.5 bg-white/20 rounded-lg text-sm sm:text-base">
-                          {displayedProducts.length.toLocaleString('hu-HU')} / {filteredAndSortedProducts.length.toLocaleString('hu-HU')}
+                          {displayedProducts.length.toLocaleString('hu-HU')} / {totalProductsCount.toLocaleString('hu-HU')}
                         </span>
                       </button>
                     ) : (

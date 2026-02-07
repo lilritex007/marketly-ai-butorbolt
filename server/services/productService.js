@@ -105,6 +105,58 @@ export function getProducts(filters = {}) {
 }
 
 /**
+ * Get minimal product list for client-side search index.
+ * Same filters as getProducts(showInAI: true), only essential fields.
+ * Frissítéskor a kliens ezt újratölti – készlet (inStock) mindig naprakész.
+ */
+export function getProductsSearchIndex() {
+  try {
+    let query = `
+      SELECT id, name, category, price, images, in_stock,
+             COALESCE(description,'') AS description,
+             COALESCE(params,'') AS params
+      FROM products WHERE 1=1
+    `;
+    const params = [];
+    query += ' AND show_in_ai = ? AND price > 0';
+    params.push(1);
+    if (EXCLUDED_MAIN_CATEGORIES.length > 0) {
+      query += ` AND (CASE WHEN category_path IS NOT NULL AND category_path != '' AND instr(category_path, '|') > 0 THEN trim(substr(category_path, 1, instr(category_path, '|') - 1)) ELSE category END) NOT IN (${EXCLUDED_MAIN_CATEGORIES.map(() => '?').join(',')})`;
+      params.push(...EXCLUDED_MAIN_CATEGORIES);
+    }
+    query += ' ORDER BY priority DESC, name ASC';
+
+    const stmt = db.prepare(query);
+    const rows = stmt.all(...params);
+
+    const safeFirstImage = (raw) => {
+      if (!raw) return null;
+      try {
+        const parsed = JSON.parse(raw);
+        const arr = Array.isArray(parsed) ? parsed : [];
+        return arr[0] || null;
+      } catch { return null; }
+    };
+
+    return rows.map((row) => ({
+      id: row.id,
+      name: row.name || '',
+      category: row.category || '',
+      price: row.price || 0,
+      image: safeFirstImage(row.images),
+      images: safeFirstImage(row.images) ? [safeFirstImage(row.images)] : [],
+      inStock: Boolean(row.in_stock),
+      in_stock: Boolean(row.in_stock),
+      description: (row.description || '').substring(0, 500),
+      params: (row.params || '').substring(0, 300)
+    }));
+  } catch (error) {
+    console.error('getProductsSearchIndex error:', error);
+    return [];
+  }
+}
+
+/**
  * Get product by ID. Never throws: returns null on error.
  */
 export function getProductById(id) {
@@ -225,7 +277,7 @@ export function deleteProduct(id) {
  */
 export function getProductCount(filters = {}) {
   try {
-    const { category, showInAI, inStock } = filters;
+    const { category, showInAI, inStock, search } = filters;
 
     let query = 'SELECT COUNT(*) as count FROM products WHERE 1=1';
     const params = [];
@@ -240,7 +292,6 @@ export function getProductCount(filters = {}) {
       params.push(showInAI ? 1 : 0);
     }
 
-    // Exclude 0 Ft products from AI shop count
     if (showInAI) {
       query += ' AND price > 0';
     }
@@ -250,7 +301,12 @@ export function getProductCount(filters = {}) {
       params.push(...EXCLUDED_MAIN_CATEGORIES);
     }
 
-    // Note: inStock filter is optional - out of stock products ARE counted by default
+    if (search) {
+      query += ' AND (name LIKE ? OR description LIKE ? OR params LIKE ?)';
+      const searchPattern = `%${search}%`;
+      params.push(searchPattern, searchPattern, searchPattern);
+    }
+
     if (inStock !== undefined) {
       query += ' AND in_stock = ?';
       params.push(inStock ? 1 : 0);

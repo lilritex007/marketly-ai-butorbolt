@@ -1,9 +1,9 @@
 /**
  * UNAS API Service
- * Termékek kizárólag a backend API-ból (DB) – egyetlen igazságforrás.
+ * API-first, kis lapméret: soha ne töltsünk 200k terméket memóriába.
+ * Cél: 3 mp alatt interaktív, alacsony memória.
  */
 
-// Backend origin (apiBase lehet /api-ra végződő vagy sima URL)
 const getApiBase = () => {
   let base = '';
   if (typeof window !== 'undefined' && window.MARKETLY_CONFIG?.apiBase) {
@@ -16,161 +16,56 @@ const getApiBase = () => {
   return base;
 };
 
-/** Backend gyökér URL (health, stb. – nem /api alatt van) */
 const getBackendOrigin = () => {
   const api = getApiBase();
   return api ? api.replace(/\/api\/?$/, '') : '';
 };
 
-// Static products cache (loaded once)
-let staticProductsCache = null;
+/** Első lap mérete (gyors first paint) */
+const DEFAULT_LIMIT = 200;
 
 /**
- * Load products from static JSON file (fallback)
- * Tries multiple paths to find the products.json
- */
-const loadStaticProducts = async () => {
-  if (staticProductsCache) return staticProductsCache;
-  
-  // Possible paths where products.json might be
-  const possiblePaths = [
-    '/dist/products.json',    // Railway server serves /dist/*
-    '/public/products.json',  // Railway server serves /public/*
-    '/products.json',         // Direct path (dev server)
-    './products.json',        // Relative path
-  ];
-  
-  for (const path of possiblePaths) {
-    try {
-      console.log(`📦 Trying to load products from: ${path}`);
-      const res = await fetch(path);
-      if (!res.ok) continue;
-      
-      const data = await res.json();
-      const products = Array.isArray(data) ? data : (data.products || []);
-      
-      if (products.length > 1000) {
-        staticProductsCache = products.map(p => ({
-          ...p,
-          inStock: p.inStock !== undefined ? p.inStock : Boolean(p.in_stock)
-        }));
-        console.log(`✅ Loaded ${staticProductsCache.length.toLocaleString()} products from ${path}`);
-        return staticProductsCache;
-      }
-    } catch (err) {
-      // Try next path
-      continue;
-    }
-  }
-  
-  console.error('❌ Failed to load static products from any path');
-  return [];
-};
-
-/**
- * Termékek betöltése – MINDIG STATIC JSON FIRST (gyors, megbízható)
- * A statikus fájl 200k terméket tartalmaz, azonnal betölt.
- * Backend API csak frissítéskor/szűréskor kell.
+ * Termékek betöltése – MINDIG API, limit/offset.
+ * Nincs teljes katalógus a kliensen; lapozás és keresés szerveren.
  */
 export const fetchUnasProducts = async (filters = {}) => {
   if (typeof window === 'undefined') return { products: [], total: 0, count: 0, lastSync: null, source: 'api' };
 
-  // STRATEGY: Always load from static JSON first (fast, reliable, 200k products)
-  // This ensures search/chat ALWAYS has products to work with
+  const limit = filters.limit != null ? Number(filters.limit) : DEFAULT_LIMIT;
+  const offset = filters.offset != null ? Number(filters.offset) : 0;
+
   try {
-    console.log('🚀 Loading products...');
-    
-    // If no filters, load from static JSON (fastest path)
-    const hasFilters = filters.category || filters.search;
-    
-    if (!hasFilters) {
-      // Try static JSON first (200k products, ~65MB, cached by browser)
-      const staticProducts = await loadStaticProducts();
-      if (staticProducts.length > 10000) {
-        console.log(`✅ Loaded ${staticProducts.length.toLocaleString()} products from static cache`);
-        return {
-          products: staticProducts,
-          total: staticProducts.length,
-          count: staticProducts.length,
-          lastSync: null,
-          source: 'static'
-        };
-      }
-    }
-    
-    // Filtered request or static failed → try API
     const API_BASE = getApiBase();
     const params = new URLSearchParams();
-    if (filters.category) params.append('category', filters.category);
-    if (filters.search) params.append('search', filters.search);
-    if (filters.limit) params.append('limit', filters.limit);
-    if (filters.offset) params.append('offset', filters.offset);
-    // Always use slim mode for API (full data is too large)
-    params.append('slim', 'true');
-    const url = `${API_BASE}/products${params.toString() ? '?' + params.toString() : ''}`;
+    params.set('limit', String(limit));
+    params.set('offset', String(offset));
+    params.set('slim', 'true');
+    if (filters.category && filters.category !== 'Összes') params.set('category', filters.category);
+    if (filters.search && String(filters.search).trim()) params.set('search', String(filters.search).trim());
 
-    console.log('📡 Fetching from API:', url);
+    const url = `${API_BASE}/products?${params.toString()}`;
     const res = await fetch(url, { method: 'GET' });
-    
+
     if (!res.ok) {
-      console.warn('⚠️ API failed, using static fallback');
-      const staticProducts = await loadStaticProducts();
-      return { 
-        products: staticProducts, 
-        total: staticProducts.length, 
-        count: staticProducts.length, 
-        lastSync: null, 
-        source: 'static',
-        fallback: true 
-      };
+      return { products: [], total: 0, count: 0, lastSync: null, source: 'api', error: res.status };
     }
-    
+
     const data = await res.json();
-    let products = (data.products || []).map(p => ({
+    const products = (data.products || []).map(p => ({
       ...p,
+      images: p.images || (p.image ? [p.image] : []),
+      image: p.images?.[0] || p.image,
       inStock: p.inStock !== undefined ? p.inStock : Boolean(p.in_stock)
     }));
-    
-    console.log(`✅ API returned ${products.length.toLocaleString()} products`);
-    
-    // If API returned few products but we have more in static, use static
-    if (products.length < 1000 && !hasFilters) {
-      const staticProducts = await loadStaticProducts();
-      if (staticProducts.length > products.length) {
-        console.log(`📦 Using static (${staticProducts.length.toLocaleString()}) instead of API (${products.length})`);
-        return {
-          products: staticProducts,
-          total: staticProducts.length,
-          count: staticProducts.length,
-          lastSync: data.lastSync ?? null,
-          source: 'static',
-          fallback: true
-        };
-      }
-    }
-    
+
     return {
       products,
       total: data.total ?? products.length,
-      count: data.count ?? products.length,
+      count: products.length,
       lastSync: data.lastSync ?? null,
       source: 'api'
     };
   } catch (error) {
-    console.error('❌ Fetch error:', error.message);
-    // Always fallback to static
-    const staticProducts = await loadStaticProducts();
-    if (staticProducts.length > 0) {
-      console.log(`🔄 Fallback: ${staticProducts.length.toLocaleString()} products from static`);
-      return { 
-        products: staticProducts, 
-        total: staticProducts.length, 
-        count: staticProducts.length, 
-        lastSync: null, 
-        source: 'static',
-        fallback: true 
-      };
-    }
     return { products: [], total: 0, count: 0, lastSync: null, source: 'api', error: error.message };
   }
 };
@@ -193,6 +88,22 @@ export const fetchCategories = async () => {
   } catch (error) {
     console.error('Error fetching categories:', error);
     return ['Összes'];
+  }
+};
+
+/**
+ * Keresőindex: minden termék minimális adattal (gyors, gzip-pel kisebb).
+ * A kereső ezen fut; frissítés = újra letölti (készlet naprakész).
+ */
+export const fetchSearchIndex = async () => {
+  try {
+    const API_BASE = getApiBase();
+    const res = await fetch(`${API_BASE}/products/search-index`);
+    if (!res.ok) return [];
+    const data = await res.json();
+    return Array.isArray(data) ? data : [];
+  } catch (error) {
+    return [];
   }
 };
 

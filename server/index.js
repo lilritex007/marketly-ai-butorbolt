@@ -13,6 +13,7 @@ const __dirname = path.dirname(__filename);
 import {
   getProducts,
   getProductById,
+  getProductsSearchIndex,
   updateProductAISettings,
   deleteProduct,
   getProductCount,
@@ -164,6 +165,7 @@ app.get('/api/products', async (req, res) => {
 
     const total = getProductCount({
       category,
+      search,
       showInAI: true
     });
 
@@ -181,6 +183,21 @@ app.get('/api/products', async (req, res) => {
       error: 'Failed to fetch products',
       message: error.message
     });
+  }
+});
+
+/**
+ * Keresőindex: minden termék minimális adattal (id, name, category, price, image, inStock, description, params).
+ * A kliens háttérben letölti, a keresés ezen fut. Frissítés = újra letölti (készlet naprakész).
+ */
+app.get('/api/products/search-index', (req, res) => {
+  try {
+    const products = getProductsSearchIndex();
+    res.setHeader('Cache-Control', 'private, max-age=300'); // 5 perc, majd frissíthető
+    res.json(products);
+  } catch (error) {
+    console.error('Error fetching search index:', error);
+    res.status(500).json({ error: 'Failed to fetch search index' });
   }
 });
 
