@@ -29,6 +29,16 @@ A Railway Git auth hibája miatt a frontend fejlesztés lokálisan és build/CDN
 - Placeholder képek: PLACEHOLDER_IMAGE, nincs via.placeholder
 - Termék kártya: stopPropagation, kosár/összehasonlítás/wishlist
 
+### Megvalósított 2025 (fejlesztési terv alapján)
+- **Scroll a termék szekcióhoz (UNAS):** getScrollParent + scrollIntoView fallback 400 ms után; TERV.md frissítve.
+- **Mobil szűrő:** FilterBottomSheet helyett BottomSheet + AdvancedFiltersPanel (ugyanaz a state mint desktop); aktív szűrő badge a mobil gombon.
+- **Breadcrumb:** Sticky fejlécben „Főoldal / Termékek / [Kategória]” és „Keresés: ’xyz’”; nav + count.
+- **Szűrő és rendezés chip-ek:** Aktív szűrők eltávolítható chip-ekkel; rendezés: Alap / Ár ↑ / Ár ↓ chip-ek.
+- **StickyAddToCart:** Csak akkor jelenik meg, ha a termék modál (mkt-product-modal-root) nincs a viewportban (IntersectionObserver).
+- **Konfiguráció:** [src/config.js](src/config.js) – WEBSHOP_DOMAIN, SHOP_ID, DISPLAY_BATCH, TAB_HASH, HASH_TO_TAB.
+- **Hash URL:** Tab szinkron a hash-sel (#shop, #visual-search, #room-planner); megosztás, vissza gomb.
+- **Code splitting:** AIChatAssistant, AIRoomDesigner, AIStyleQuiz React.lazy + Suspense; kisebb kezdeti bundle.
+
 ---
 
 ## 2. Célok és korlátozások

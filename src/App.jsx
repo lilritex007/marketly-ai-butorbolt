@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useMemo, useCallback, Suspense, lazy } from 'react';
 import { ShoppingCart, Camera, MessageCircle, X, Send, Plus, Move, Trash2, Home, ZoomIn, ZoomOut, Upload, Settings, Link as LinkIcon, FileText, RefreshCw, AlertCircle, Database, Lock, Search, ChevronLeft, ChevronRight, Filter, Heart, ArrowDownUp, Info, Check, Star, Truck, ShieldCheck, Phone, ArrowRight, Mail, Eye, Sparkles, Lightbulb, Image as ImageIcon, MousePointer2, Menu, Bot, Moon, Sun, Clock, Gift, Zap, TrendingUp, Instagram, Facebook, MapPin, Sofa, Lamp, BedDouble, Armchair, Grid3X3, ExternalLink, Timer, ChevronDown } from 'lucide-react';
 // framer-motion removed due to Vite production build TDZ issues
 import { fetchUnasProducts, refreshUnasProducts, fetchCategories, fetchCategoryHierarchy } from './services/unasApi';
@@ -14,10 +14,11 @@ import { SmartBadges } from './components/ui/Badge';
 
 // AI Components
 import { AIShowcase, AIOnboarding } from './components/ai/AIShowcase';
-import AIChatAssistant from './components/ai/AIChatAssistant';
-import AIRoomDesigner from './components/ai/AIRoomDesigner';
-import AIStyleQuiz from './components/ai/AIStyleQuiz';
 import AIDebugPanel from './components/debug/AIDebugPanel';
+// Lazy load heavier AI features for smaller initial bundle
+const AIChatAssistant = lazy(() => import('./components/ai/AIChatAssistant'));
+const AIRoomDesigner = lazy(() => import('./components/ai/AIRoomDesigner'));
+const AIStyleQuiz = lazy(() => import('./components/ai/AIStyleQuiz'));
 
 // Category Components
 import CategorySwipe from './components/category/CategorySwipe';
@@ -40,7 +41,7 @@ import { EnhancedProductCard } from './components/product/EnhancedProductCard';
 import { SimilarProducts } from './components/product/SimilarProducts';
 import { RecentlyViewed, trackProductView } from './components/product/RecentlyViewed';
 import { ProductComparison, useComparison } from './components/product/ProductComparison';
-import { AdvancedFilters, applyFilters } from './components/product/AdvancedFilters';
+import { AdvancedFilters, AdvancedFiltersPanel, applyFilters } from './components/product/AdvancedFilters';
 import QuickAddToCart from './components/product/QuickAddToCart';
 import ProductQuickPeek from './components/product/ProductQuickPeek';
 import AIPricePredictor from './components/ai/AIPricePredictor';
@@ -61,7 +62,7 @@ import ImageGallery from './components/product/ImageGallery';
 import StickyAddToCart from './components/product/StickyAddToCart';
 import PriceAlert from './components/product/PriceAlert';
 import { FadeInOnScroll, Confetti, CountUp } from './components/ui/Animations';
-import BottomSheet, { FilterBottomSheet } from './components/mobile/BottomSheet';
+import BottomSheet from './components/mobile/BottomSheet';
 
 // New UX Components - Phase 2
 import WishlistDrawer from './components/wishlist/WishlistDrawer';
@@ -89,16 +90,9 @@ import { useLocalStorage } from './hooks/index';
 // Utils
 import { getOptimizedImageProps } from './utils/imageOptimizer';
 import { PLACEHOLDER_IMAGE } from './utils/helpers';
+import { WEBSHOP_DOMAIN, SHOP_ID, DISPLAY_BATCH, TAB_HASH, HASH_TO_TAB } from './config';
 
-/* --- 1. KONFIGURÁCIÓ & ADATOK --- */
-
-const WEBSHOP_DOMAIN = "https://www.marketly.hu";
-const SHOP_ID = "81697"; 
-
-// PERFORMANCE CONFIG - Don't load all 170k products!
-// Server-side filtering + pagination for instant UX
-// No page size limit - load ALL products at once (slim mode + GZIP = fast)
-const DISPLAY_BATCH = 48;  // Products shown initially, more on scroll
+/* --- 1. KONFIGURÁCIÓ & ADATOK (config.js) --- */
 
 /* --- 2. SEGÉDFÜGGVÉNYEK --- */
 
@@ -395,7 +389,7 @@ const ProductModal = ({ product, isOpen, onClose, allProducts = [], onAddToCart 
 
     return (
         <div className="fixed inset-0 lg:top-[60px] z-[9999] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-fade-in" onClick={onClose}>
-            <div className="bg-white rounded-3xl w-full max-w-6xl max-h-[90vh] overflow-hidden shadow-2xl flex flex-col relative" onClick={e => e.stopPropagation()}>
+            <div id="mkt-product-modal-root" className="bg-white rounded-3xl w-full max-w-6xl max-h-[90vh] overflow-hidden shadow-2xl flex flex-col relative" onClick={e => e.stopPropagation()}>
                 <button onClick={onClose} className="absolute top-4 right-4 z-10 bg-white/80 p-2 rounded-full hover:bg-gray-100 transition-colors"><X className="w-6 h-6 text-gray-600" /></button>
                 
                 <div className="flex flex-col md:flex-row overflow-y-auto">
@@ -625,7 +619,20 @@ const RoomPlanner = ({ products }) => {
 };
 
 const App = () => {
-  const [activeTab, setActiveTab] = useState('shop');
+  const [activeTab, setActiveTabState] = useState(() => {
+    const hash = (typeof window !== 'undefined' && window.location.hash.slice(1)) || '';
+    return HASH_TO_TAB[hash] || 'shop';
+  });
+  const setActiveTab = useCallback((tab) => {
+    setActiveTabState(tab);
+    const hash = TAB_HASH[tab] ?? tab;
+    if (typeof window !== 'undefined') {
+      const newHash = hash ? `#${hash}` : '';
+      if (window.location.hash !== newHash) {
+        window.history.replaceState(null, '', window.location.pathname + window.location.search + newHash);
+      }
+    }
+  }, []);
   const [products, setProducts] = useState([]);
   const [totalProductsCount, setTotalProductsCount] = useState(0);
   const [hasMoreProducts, setHasMoreProducts] = useState(true);
@@ -898,7 +905,7 @@ const App = () => {
   }, []);
 
   // Scroll container: ne használjunk olyan containert, ami a mi appunk belsejében van (#mkt-butorbolt-app).
-  // Így standalone-ban window görget, embedben pedig a mi appot tartalmazó wrapper.
+  // UNAS embed: gyakran a page_content article szülője a scroll container; standalone = window.
   const getScrollParent = useCallback((element) => {
     const appRoot = document.getElementById('mkt-butorbolt-app');
     const isScrollable = (el) => {
@@ -920,12 +927,12 @@ const App = () => {
   }, []);
 
   const scrollToProductsSection = useCallback(() => {
-    const run = () => {
-      const el = document.getElementById('products-section');
-      if (!el) return;
-      const offset = 100;
-      const scrollParent = getScrollParent(el);
+    const el = document.getElementById('products-section');
+    if (!el) return;
+    const offset = 100;
 
+    const run = () => {
+      const scrollParent = getScrollParent(el);
       if (scrollParent) {
         const elRect = el.getBoundingClientRect();
         const parentRect = scrollParent.getBoundingClientRect();
@@ -939,6 +946,13 @@ const App = () => {
           window.scrollTo({ top: targetTop, behavior: 'smooth' });
         });
       }
+      // Fallback: ha 400 ms után még nincs a szekció a viewportban, scrollIntoView (pl. UNAS embed)
+      setTimeout(() => {
+        const rect = el.getBoundingClientRect();
+        if (rect.top > 150) {
+          el.scrollIntoView({ behavior: 'smooth', block: 'start', inline: 'nearest' });
+        }
+      }, 400);
     };
     requestAnimationFrame(() => requestAnimationFrame(run));
   }, [getScrollParent]);
@@ -968,6 +982,16 @@ const App = () => {
   }, []);
 
   useEffect(() => {
+    const onHashChange = () => {
+      const hash = window.location.hash.slice(1);
+      const tab = HASH_TO_TAB[hash] || 'shop';
+      setActiveTabState(tab);
+    };
+    window.addEventListener('hashchange', onHashChange);
+    return () => window.removeEventListener('hashchange', onHashChange);
+  }, []);
+
+  useEffect(() => {
     let cancelled = false;
     fetchCategoryHierarchy().then((data) => {
       if (!cancelled && data?.mainCategories) setCategoryHierarchy(data);
@@ -979,6 +1003,20 @@ const App = () => {
     const t = setInterval(() => loadUnasDataRef.current?.({ silent: true }), 300000);
     return () => clearInterval(t);
   }, []);
+
+  const normalizedAdvancedFilters = useMemo(() => ({
+    priceMin: advancedFilters.priceMin ?? 0,
+    priceMax: advancedFilters.priceMax ?? 1000000,
+    inStockOnly: advancedFilters.inStockOnly ?? false,
+    categories: Array.isArray(advancedFilters.categories) ? advancedFilters.categories : []
+  }), [advancedFilters]);
+
+  const mobileActiveFilterCount = useMemo(() => [
+    normalizedAdvancedFilters.inStockOnly,
+    normalizedAdvancedFilters.categories.length > 0,
+    normalizedAdvancedFilters.priceMin > 0,
+    normalizedAdvancedFilters.priceMax < 1000000
+  ].filter(Boolean).length, [normalizedAdvancedFilters]);
   
   // LOCAL AI SEARCH + client-side filtering
   const filteredAndSortedProducts = useMemo(() => {
@@ -1022,7 +1060,7 @@ const App = () => {
       
       // Advanced filters (price range, etc.)
       if (Object.keys(advancedFilters).length > 0) {
-        result = applyFilters(result, advancedFilters);
+        result = applyFilters(result, normalizedAdvancedFilters);
       }
       
       // Sorting
@@ -1030,7 +1068,7 @@ const App = () => {
       if (sortOption === 'price-desc') result = [...result].sort((a, b) => (b.price || 0) - (a.price || 0));
       
       return result;
-  }, [products, searchQuery, categoryFilter, sortOption, advancedFilters, categoryHierarchy?.mainCategories]);
+  }, [products, searchQuery, categoryFilter, sortOption, advancedFilters, normalizedAdvancedFilters, categoryHierarchy?.mainCategories]);
 
   // Update ref after filteredAndSortedProducts is defined
   filteredLengthRef.current = filteredAndSortedProducts.length;
@@ -1111,7 +1149,9 @@ const App = () => {
       <BackToTop />
       
       {/* AI Chat Assistant */}
-      <AIChatAssistant products={products} onShowProducts={handleShowAIProducts} />
+      <Suspense fallback={null}>
+        <AIChatAssistant products={products} onShowProducts={handleShowAIProducts} />
+      </Suspense>
 
       <main id="mkt-butorbolt-main">
         {activeTab === 'shop' && (
@@ -1275,14 +1315,24 @@ const App = () => {
             <section id="products-section" className="container-app section-padding">
                 {/* Sticky products header - solid, breadcrumb when category selected */}
                 <div className="sticky top-16 sm:top-20 z-40 mx-0 sm:-mx-4 lg:-mx-8 xl:-mx-10 px-3 sm:px-4 lg:px-8 xl:px-10 py-3 sm:py-4 lg:py-5 xl:py-6 mb-3 sm:mb-4 lg:mb-8 bg-white border-b border-gray-200 shadow-sm">
-                  {categoryFilter && categoryFilter !== 'Összes' && (
-                    <div className="flex items-center gap-2 mb-2 sm:mb-3 text-sm text-gray-500">
-                      <button type="button" onClick={() => handleCategoryChange('Összes')} className="hover:text-primary-600 font-medium transition-colors" aria-label="Összes kategória">Termékek</button>
-                      <span aria-hidden="true">/</span>
-                      <span className="font-semibold text-gray-700">{categoryFilter}</span>
-                      <span className="text-gray-400">({filteredAndSortedProducts.length.toLocaleString('hu-HU')} termék)</span>
-                    </div>
-                  )}
+                  <nav className="flex items-center gap-2 mb-2 sm:mb-3 text-sm text-gray-500" aria-label="Breadcrumb">
+                    <button type="button" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} className="hover:text-primary-600 font-medium transition-colors" aria-label="Főoldal teteje">Főoldal</button>
+                    <span aria-hidden="true">/</span>
+                    <button type="button" onClick={() => handleCategoryChange('Összes')} className="hover:text-primary-600 font-medium transition-colors" aria-label="Összes kategória">Termékek</button>
+                    {categoryFilter && categoryFilter !== 'Összes' && (
+                      <>
+                        <span aria-hidden="true">/</span>
+                        <span className="font-semibold text-gray-700">{categoryFilter}</span>
+                      </>
+                    )}
+                    {searchQuery && (
+                      <>
+                        <span aria-hidden="true">/</span>
+                        <span className="text-gray-600">Keresés: &quot;{searchQuery}&quot;</span>
+                      </>
+                    )}
+                    <span className="text-gray-400">({filteredAndSortedProducts.length.toLocaleString('hu-HU')} termék)</span>
+                  </nav>
                   <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-4 lg:gap-6">
                     {/* Title & Count */}
                     <div className="flex items-baseline gap-2 sm:gap-3 lg:gap-4 flex-wrap">
@@ -1339,13 +1389,18 @@ const App = () => {
                           initialFilters={advancedFilters}
                         />
                       </div>
-                      {/* Mobile filter button */}
+                      {/* Mobile filter button – same state as desktop AdvancedFilters */}
                       <button
                         onClick={() => setShowFilterSheet(true)}
-                        className="sm:hidden p-3 min-h-[48px] min-w-[48px] border-2 border-gray-200 rounded-xl bg-white hover:bg-gray-50 transition-colors flex items-center justify-center"
+                        className="sm:hidden relative p-3 min-h-[48px] min-w-[48px] border-2 border-gray-200 rounded-xl bg-white hover:bg-gray-50 transition-colors flex items-center justify-center"
                         aria-label="Szűrők"
                       >
                         <Filter className="w-5 h-5 text-gray-700" />
+                        {mobileActiveFilterCount > 0 && (
+                          <span className="absolute -top-1 -right-1 bg-primary-500 text-white text-xs font-bold rounded-full min-w-[20px] h-5 px-1.5 flex items-center justify-center">
+                            {mobileActiveFilterCount}
+                          </span>
+                        )}
                       </button>
                       <select 
                         onChange={(e) => setSortOption(e.target.value)} 
@@ -1356,6 +1411,65 @@ const App = () => {
                         <option value="price-asc">Ár: alacsony → magas</option>
                         <option value="price-desc">Ár: magas → alacsony</option>
                       </select>
+                    </div>
+                  </div>
+                  {/* Active filter chips + sort chips */}
+                  <div className="flex flex-wrap items-center gap-2 mt-3 pt-3 border-t border-gray-100">
+                    {mobileActiveFilterCount > 0 && (
+                      <div className="flex flex-wrap items-center gap-2">
+                        {normalizedAdvancedFilters.inStockOnly && (
+                          <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-primary-50 text-primary-700 rounded-full text-sm font-medium">
+                            Raktáron
+                            <button type="button" onClick={() => setAdvancedFilters(prev => ({ ...prev, inStockOnly: false }))} className="p-0.5 hover:bg-primary-100 rounded-full" aria-label="Eltávolítás">
+                              <X className="w-3.5 h-3.5" />
+                            </button>
+                          </span>
+                        )}
+                        {normalizedAdvancedFilters.priceMin > 0 && (
+                          <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-primary-50 text-primary-700 rounded-full text-sm font-medium">
+                            Min. {new Intl.NumberFormat('hu-HU', { maximumFractionDigits: 0 }).format(normalizedAdvancedFilters.priceMin)} Ft
+                            <button type="button" onClick={() => setAdvancedFilters(prev => ({ ...prev, priceMin: 0 }))} className="p-0.5 hover:bg-primary-100 rounded-full" aria-label="Eltávolítás">
+                              <X className="w-3.5 h-3.5" />
+                            </button>
+                          </span>
+                        )}
+                        {normalizedAdvancedFilters.priceMax < 1000000 && (
+                          <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-primary-50 text-primary-700 rounded-full text-sm font-medium">
+                            Max. {new Intl.NumberFormat('hu-HU', { maximumFractionDigits: 0 }).format(normalizedAdvancedFilters.priceMax)} Ft
+                            <button type="button" onClick={() => setAdvancedFilters(prev => ({ ...prev, priceMax: 1000000 }))} className="p-0.5 hover:bg-primary-100 rounded-full" aria-label="Eltávolítás">
+                              <X className="w-3.5 h-3.5" />
+                            </button>
+                          </span>
+                        )}
+                        {(normalizedAdvancedFilters.categories || []).map(cat => (
+                          <span key={cat} className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-primary-50 text-primary-700 rounded-full text-sm font-medium">
+                            {cat}
+                            <button type="button" onClick={() => setAdvancedFilters(prev => ({ ...prev, categories: (prev.categories || []).filter(c => c !== cat) }))} className="p-0.5 hover:bg-primary-100 rounded-full" aria-label={`${cat} eltávolítása`}>
+                              <X className="w-3.5 h-3.5" />
+                            </button>
+                          </span>
+                        ))}
+                        <button type="button" onClick={() => setAdvancedFilters({})} className="text-sm font-medium text-gray-500 hover:text-primary-600 transition-colors">
+                          Összes törlése
+                        </button>
+                      </div>
+                    )}
+                    <div className="flex items-center gap-1.5 ml-auto">
+                      <span className="text-xs sm:text-sm text-gray-500 mr-1 hidden sm:inline">Rendezés:</span>
+                      {['default', 'price-asc', 'price-desc'].map((value) => (
+                        <button
+                          key={value}
+                          type="button"
+                          onClick={() => setSortOption(value)}
+                          className={`px-3 py-1.5 rounded-full text-sm font-medium transition-colors ${
+                            sortOption === value
+                              ? 'bg-primary-500 text-white'
+                              : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                          }`}
+                        >
+                          {value === 'default' ? 'Alap' : value === 'price-asc' ? 'Ár ↑' : 'Ár ↓'}
+                        </button>
+                      ))}
                     </div>
                   </div>
                 </div>
@@ -1557,24 +1671,28 @@ const App = () => {
       
       {/* AI Style Quiz Modal */}
       {showStyleQuiz && (
-        <AIStyleQuiz
-          products={products}
-          onRecommendations={(recs) => {
-            toast.success(`${recs.length} termék a Style DNA-d alapján!`);
-          }}
-          onClose={() => setShowStyleQuiz(false)}
-        />
+        <Suspense fallback={<div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30"><div className="w-10 h-10 border-2 border-primary-500 border-t-transparent rounded-full animate-spin" /></div>}>
+          <AIStyleQuiz
+            products={products}
+            onRecommendations={(recs) => {
+              toast.success(`${recs.length} termék a Style DNA-d alapján!`);
+            }}
+            onClose={() => setShowStyleQuiz(false)}
+          />
+        </Suspense>
       )}
       
       {/* AI Room Designer Modal */}
       {showRoomDesigner && (
-        <AIRoomDesigner
-          products={products}
-          onProductRecommendations={(recs) => {
-            toast.success(`${recs.length} termék ajánlat!`);
-          }}
-          onClose={() => setShowRoomDesigner(false)}
-        />
+        <Suspense fallback={<div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30"><div className="w-10 h-10 border-2 border-primary-500 border-t-transparent rounded-full animate-spin" /></div>}>
+          <AIRoomDesigner
+            products={products}
+            onProductRecommendations={(recs) => {
+              toast.success(`${recs.length} termék ajánlat!`);
+            }}
+            onClose={() => setShowRoomDesigner(false)}
+          />
+        </Suspense>
       )}
 
       {/* Product Quick Peek Modal */}
@@ -1677,6 +1795,7 @@ const App = () => {
           onAddToCart={handleAddToCart}
           onToggleWishlist={toggleWishlist}
           isWishlisted={wishlist.includes(selectedProduct.id)}
+          observedElementId="mkt-product-modal-root"
         />
       )}
 
@@ -1688,34 +1807,21 @@ const App = () => {
         />
       )}
 
-      {/* Mobile Filter Bottom Sheet */}
-      <FilterBottomSheet
+      {/* Mobile Filter Bottom Sheet – same state as desktop AdvancedFilters */}
+      <BottomSheet
         isOpen={showFilterSheet}
         onClose={() => setShowFilterSheet(false)}
-        filters={[
-          {
-            id: 'price',
-            label: 'Ár',
-            type: 'range',
-            min: 0,
-            max: 1000000
-          },
-          {
-            id: 'inStock',
-            label: 'Raktáron',
-            type: 'checkbox',
-            options: [
-              { value: 'yes', label: 'Csak raktáron lévő', count: products.filter(p => p.inStock).length }
-            ]
-          }
-        ]}
-        activeFilters={advancedFilters}
-        onFilterChange={(filterId, value) => {
-          setAdvancedFilters(prev => ({ ...prev, [filterId]: value }));
-        }}
-        onClearAll={() => setAdvancedFilters({})}
-        onApply={() => setShowFilterSheet(false)}
-      />
+        title="Szűrők"
+        snapPoints={[0.7, 0.9]}
+      >
+        <AdvancedFiltersPanel
+          products={products}
+          filters={advancedFilters}
+          onFilterChange={setAdvancedFilters}
+          onApply={() => setShowFilterSheet(false)}
+          showHeader={false}
+        />
+      </BottomSheet>
 
       {/* Wishlist Drawer */}
       <WishlistDrawer

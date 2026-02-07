@@ -3,29 +3,41 @@ import { ShoppingCart, Heart, Check, AlertTriangle, Truck, Clock, Shield, Chevro
 
 /**
  * StickyAddToCart - Sticky bottom bar for product pages
- * Shows when scrolling down, with stock status and quick actions
+ * Shows when the product view (modal) is not in viewport, or after scrolling past threshold
  */
 const StickyAddToCart = ({ 
   product, 
   onAddToCart, 
   onToggleWishlist, 
   isWishlisted = false,
-  isVisible = true 
+  isVisible = true,
+  /** When set, bar is shown only when this element is NOT in viewport (e.g. product modal root) */
+  observedElementId = null
 }) => {
   const [isShown, setIsShown] = useState(false);
   const [addedToCart, setAddedToCart] = useState(false);
   const [quantity, setQuantity] = useState(1);
 
-  // Show after scrolling
   useEffect(() => {
-    const handleScroll = () => {
-      const scrollY = window.scrollY;
-      setIsShown(scrollY > 400);
-    };
-
+    if (observedElementId) {
+      const el = document.getElementById(observedElementId);
+      if (!el) {
+        setIsShown(window.scrollY > 400);
+        return;
+      }
+      const observer = new IntersectionObserver(
+        ([entry]) => {
+          setIsShown(!entry.isIntersecting);
+        },
+        { threshold: 0.1, root: null }
+      );
+      observer.observe(el);
+      return () => observer.disconnect();
+    }
+    const handleScroll = () => setIsShown(window.scrollY > 400);
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
+  }, [observedElementId]);
 
   if (!product || !isVisible) return null;
 
