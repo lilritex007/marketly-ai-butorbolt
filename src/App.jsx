@@ -499,10 +499,21 @@ const ProductModal = ({ product, isOpen, onClose, allProducts = [], onAddToCart 
                         <ProductTabs product={product} />
                       </div>
 
-                      <div className="sticky bottom-0 bg-white pt-4 border-t border-gray-100 mt-auto">
-                          <a href={product.link} target="_blank" rel="noopener noreferrer" className="w-full bg-gray-900 text-white py-4 rounded-xl font-bold text-lg text-center hover:bg-gray-800 transition-all shadow-lg flex items-center justify-center hover:shadow-xl transform hover:-translate-y-1">
-                              Megveszem a webshopban <ArrowRight className="ml-2 w-5 h-5" />
-                          </a>
+                      <div className="sticky bottom-0 bg-white pt-4 pb-4 border-t border-gray-200 mt-auto shadow-[0_-4px_12px_rgba(0,0,0,0.06)]">
+                          <div className="flex flex-col xs:flex-row gap-3">
+                              <button
+                                  type="button"
+                                  onClick={() => onAddToCart(product, 1)}
+                                  disabled={!(product.inStock ?? product.in_stock)}
+                                  className="min-h-[44px] flex-1 bg-primary-500 hover:bg-primary-600 disabled:bg-gray-300 disabled:cursor-not-allowed text-white py-3 px-4 rounded-xl font-bold text-base text-center transition-all shadow-lg flex items-center justify-center gap-2"
+                              >
+                                  <ShoppingCart className="w-5 h-5" />
+                                  Kosárba
+                              </button>
+                              <a href={product.link} target="_blank" rel="noopener noreferrer" className="min-h-[44px] flex-1 bg-gray-900 text-white py-3 px-4 rounded-xl font-bold text-base text-center hover:bg-gray-800 transition-all shadow-lg flex items-center justify-center gap-2 border-2 border-gray-900 hover:border-gray-700">
+                                  Megveszem a webshopban <ArrowRight className="w-5 h-5" />
+                              </a>
+                          </div>
                       </div>
                   </div>
                 </div>
@@ -1413,55 +1424,55 @@ const App = () => {
                       </select>
                     </div>
                   </div>
-                  {/* Active filter chips + sort chips */}
-                  <div className="flex flex-wrap items-center gap-2 mt-3 pt-3 border-t border-gray-100">
+                  {/* Active filter chips + sort chips – wrap mobil/tablet, 44px touch */}
+                  <div className="flex flex-wrap items-center gap-x-2 gap-y-3 mt-3 pt-3 border-t border-gray-100">
                     {mobileActiveFilterCount > 0 && (
-                      <div className="flex flex-wrap items-center gap-2">
+                      <div className="flex flex-wrap items-center gap-2 min-w-0">
                         {normalizedAdvancedFilters.inStockOnly && (
-                          <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-primary-50 text-primary-700 rounded-full text-sm font-medium">
+                          <span className="inline-flex items-center gap-1.5 px-3 py-2 bg-primary-50 text-primary-700 rounded-full text-sm font-medium min-h-[44px] sm:min-h-0 sm:py-1.5">
                             Raktáron
-                            <button type="button" onClick={() => setAdvancedFilters(prev => ({ ...prev, inStockOnly: false }))} className="p-0.5 hover:bg-primary-100 rounded-full" aria-label="Eltávolítás">
+                            <button type="button" onClick={() => setAdvancedFilters(prev => ({ ...prev, inStockOnly: false }))} className="p-1.5 sm:p-0.5 hover:bg-primary-100 rounded-full min-w-[44px] min-h-[44px] sm:min-w-0 sm:min-h-0 flex items-center justify-center" aria-label="Eltávolítás">
                               <X className="w-3.5 h-3.5" />
                             </button>
                           </span>
                         )}
                         {normalizedAdvancedFilters.priceMin > 0 && (
-                          <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-primary-50 text-primary-700 rounded-full text-sm font-medium">
+                          <span className="inline-flex items-center gap-1.5 px-3 py-2 bg-primary-50 text-primary-700 rounded-full text-sm font-medium min-h-[44px] sm:min-h-0 sm:py-1.5">
                             Min. {new Intl.NumberFormat('hu-HU', { maximumFractionDigits: 0 }).format(normalizedAdvancedFilters.priceMin)} Ft
-                            <button type="button" onClick={() => setAdvancedFilters(prev => ({ ...prev, priceMin: 0 }))} className="p-0.5 hover:bg-primary-100 rounded-full" aria-label="Eltávolítás">
+                            <button type="button" onClick={() => setAdvancedFilters(prev => ({ ...prev, priceMin: 0 }))} className="p-1.5 sm:p-0.5 hover:bg-primary-100 rounded-full min-w-[44px] min-h-[44px] sm:min-w-0 sm:min-h-0 flex items-center justify-center" aria-label="Eltávolítás">
                               <X className="w-3.5 h-3.5" />
                             </button>
                           </span>
                         )}
                         {normalizedAdvancedFilters.priceMax < 1000000 && (
-                          <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-primary-50 text-primary-700 rounded-full text-sm font-medium">
+                          <span className="inline-flex items-center gap-1.5 px-3 py-2 bg-primary-50 text-primary-700 rounded-full text-sm font-medium min-h-[44px] sm:min-h-0 sm:py-1.5">
                             Max. {new Intl.NumberFormat('hu-HU', { maximumFractionDigits: 0 }).format(normalizedAdvancedFilters.priceMax)} Ft
-                            <button type="button" onClick={() => setAdvancedFilters(prev => ({ ...prev, priceMax: 1000000 }))} className="p-0.5 hover:bg-primary-100 rounded-full" aria-label="Eltávolítás">
+                            <button type="button" onClick={() => setAdvancedFilters(prev => ({ ...prev, priceMax: 1000000 }))} className="p-1.5 sm:p-0.5 hover:bg-primary-100 rounded-full min-w-[44px] min-h-[44px] sm:min-w-0 sm:min-h-0 flex items-center justify-center" aria-label="Eltávolítás">
                               <X className="w-3.5 h-3.5" />
                             </button>
                           </span>
                         )}
                         {(normalizedAdvancedFilters.categories || []).map(cat => (
-                          <span key={cat} className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-primary-50 text-primary-700 rounded-full text-sm font-medium">
+                          <span key={cat} className="inline-flex items-center gap-1.5 px-3 py-2 bg-primary-50 text-primary-700 rounded-full text-sm font-medium min-h-[44px] sm:min-h-0 sm:py-1.5">
                             {cat}
-                            <button type="button" onClick={() => setAdvancedFilters(prev => ({ ...prev, categories: (prev.categories || []).filter(c => c !== cat) }))} className="p-0.5 hover:bg-primary-100 rounded-full" aria-label={`${cat} eltávolítása`}>
+                            <button type="button" onClick={() => setAdvancedFilters(prev => ({ ...prev, categories: (prev.categories || []).filter(c => c !== cat) }))} className="p-1.5 sm:p-0.5 hover:bg-primary-100 rounded-full min-w-[44px] min-h-[44px] sm:min-w-0 sm:min-h-0 flex items-center justify-center" aria-label={`${cat} eltávolítása`}>
                               <X className="w-3.5 h-3.5" />
                             </button>
                           </span>
                         ))}
-                        <button type="button" onClick={() => setAdvancedFilters({})} className="text-sm font-medium text-gray-500 hover:text-primary-600 transition-colors">
+                        <button type="button" onClick={() => setAdvancedFilters({})} className="text-sm font-medium text-gray-500 hover:text-primary-600 transition-colors min-h-[44px] px-2 flex items-center sm:min-h-0">
                           Összes törlése
                         </button>
                       </div>
                     )}
-                    <div className="flex items-center gap-1.5 ml-auto">
+                    <div className="flex items-center gap-1.5 w-full sm:w-auto sm:ml-auto flex-shrink-0">
                       <span className="text-xs sm:text-sm text-gray-500 mr-1 hidden sm:inline">Rendezés:</span>
                       {['default', 'price-asc', 'price-desc'].map((value) => (
                         <button
                           key={value}
                           type="button"
                           onClick={() => setSortOption(value)}
-                          className={`px-3 py-1.5 rounded-full text-sm font-medium transition-colors ${
+                          className={`min-h-[44px] sm:min-h-0 px-3 py-2 sm:py-1.5 rounded-full text-sm font-medium transition-colors flex items-center justify-center ${
                             sortOption === value
                               ? 'bg-primary-500 text-white'
                               : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
