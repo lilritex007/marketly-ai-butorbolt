@@ -897,24 +897,23 @@ const App = () => {
     // NO API call - we use local AI search in filteredAndSortedProducts
   }, []);
 
-  // UNAS embed: tartalom article#page_content_* belül; a görgetés lehet az article-on, szülőjén vagy magasabb wrappereken.
+  // Scroll container: ne használjunk olyan containert, ami a mi appunk belsejében van (#mkt-butorbolt-app).
+  // Így standalone-ban window görget, embedben pedig a mi appot tartalmazó wrapper.
   const getScrollParent = useCallback((element) => {
+    const appRoot = document.getElementById('mkt-butorbolt-app');
     const isScrollable = (el) => {
       if (!el || el === document.body) return false;
       const style = getComputedStyle(el);
       const oy = style.overflowY;
-      const overflow = style.overflow;
-      const canScroll = (oy === 'auto' || oy === 'scroll' || oy === 'overlay' || overflow === 'auto' || overflow === 'scroll');
-      return canScroll && el.scrollHeight > el.clientHeight;
+      return (oy === 'auto' || oy === 'scroll' || oy === 'overlay') && el.scrollHeight > el.clientHeight;
     };
     let parent = element.parentElement;
     while (parent && parent !== document.body) {
-      if (parent.id && String(parent.id).startsWith('page_content_')) {
-        for (const candidate of [parent, parent.parentElement, parent.parentElement?.parentElement]) {
-          if (candidate && isScrollable(candidate)) return candidate;
-        }
+      if (isScrollable(parent)) {
+        const insideApp = appRoot && parent.closest('#mkt-butorbolt-app');
+        const wrapsApp = appRoot && parent.contains(appRoot);
+        if (wrapsApp || !insideApp) return parent;
       }
-      if (isScrollable(parent)) return parent;
       parent = parent.parentElement;
     }
     return null;
@@ -924,7 +923,7 @@ const App = () => {
     const run = () => {
       const el = document.getElementById('products-section');
       if (!el) return;
-      const offset = 80;
+      const offset = 100;
       const scrollParent = getScrollParent(el);
 
       if (scrollParent) {
@@ -932,9 +931,6 @@ const App = () => {
         const parentRect = scrollParent.getBoundingClientRect();
         const targetScrollTop = scrollParent.scrollTop + (elRect.top - parentRect.top) - offset;
         scrollParent.scrollTo({ top: Math.max(0, targetScrollTop), behavior: 'smooth' });
-      } else if (el.closest('[id^="page_content_"]')) {
-        // UNAS embed, de nincs talált scroll container → scrollIntoView (a böngésző a megfelelő szülőt görgetheti)
-        el.scrollIntoView({ behavior: 'smooth', block: 'start', inline: 'nearest' });
       } else {
         const scrollY = window.scrollY ?? window.pageYOffset;
         const targetTop = Math.max(0, el.getBoundingClientRect().top + scrollY - offset);
