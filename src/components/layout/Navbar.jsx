@@ -219,7 +219,7 @@ export default function Navbar({
     setActiveTab('shop');
     closeMobileMenu();
     setTimeout(() => {
-      document.getElementById('products-section')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      onScrollToShop?.();
       window.dispatchEvent(new CustomEvent('mkt-focus-search'));
     }, 400);
   };
@@ -253,10 +253,10 @@ export default function Navbar({
           <div className={`flex justify-between items-center transition-all duration-300 ${isScrolled ? 'h-16 sm:h-18 lg:h-20 xl:h-24' : 'h-18 sm:h-20 lg:h-24 xl:h-28'}`}>
             <div
               className="flex items-center cursor-pointer group"
-              onClick={() => setActiveTab('shop')}
+              onClick={() => { setActiveTab('shop'); setTimeout(() => onScrollToShop?.(), 350); }}
               role="button"
               tabIndex={0}
-              onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setActiveTab('shop'); } }}
+              onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setActiveTab('shop'); setTimeout(() => onScrollToShop?.(), 350); } }}
               aria-label="Marketly.AI – Főoldal"
             >
               <div className={`relative bg-gradient-to-br from-primary-500 via-secondary-600 to-secondary-500 rounded-xl sm:rounded-2xl flex items-center justify-center text-white mr-3 sm:mr-4 lg:mr-5 transform group-hover:scale-105 group-hover:rotate-3 transition-all duration-300 shadow-lg shadow-primary-300/50 group-hover:shadow-xl ${isScrolled ? 'w-11 h-11 sm:w-12 sm:h-12 lg:w-14 lg:h-14 xl:w-16 xl:h-16' : 'w-12 h-12 sm:w-14 sm:h-14 lg:w-16 lg:h-16 xl:w-20 xl:h-20'}`}>
@@ -331,7 +331,7 @@ export default function Navbar({
                                   onMouseLeave={() => setMegaMenuHoverMain(null)}
                                 >
                                   <button
-                                    onClick={() => { pushRecentCategory(main.name); onCategorySelect?.(main.name); setActiveTab('shop'); setShowMegaMenu(false); setTimeout(() => onScrollToShop?.(), 80); }}
+                                    onClick={() => { pushRecentCategory(main.name); onCategorySelect?.(main.name); setActiveTab('shop'); setShowMegaMenu(false); }}
                                     className={`w-full flex items-center gap-3 p-3 xl:p-4 rounded-t-xl xl:rounded-t-2xl text-left min-h-[44px] transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-400 focus-visible:ring-offset-2 ${isHover || isActiveMain ? 'bg-primary-50' : 'hover:bg-white'}`}
                                     data-nav-action="category"
                                     data-nav-target={main.name}
@@ -354,7 +354,7 @@ export default function Navbar({
                                         return (
                                           <button
                                             key={child.name}
-                                            onClick={() => { pushRecentCategory(child.name); onCategorySelect?.(child.name); setActiveTab('shop'); setShowMegaMenu(false); setTimeout(() => onScrollToShop?.(), 80); }}
+                                            onClick={() => { pushRecentCategory(child.name); onCategorySelect?.(child.name); setActiveTab('shop'); setShowMegaMenu(false); }}
                                             className={`px-2.5 py-1.5 text-xs xl:text-sm font-medium rounded-lg transition-colors min-h-[32px] focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-400 focus-visible:ring-offset-1 ${isActiveChild ? 'bg-primary-500 text-white' : 'text-gray-600 hover:text-primary-600 hover:bg-primary-100'}`}
                                             data-nav-action="category"
                                             data-nav-target={child.name}
@@ -374,7 +374,7 @@ export default function Navbar({
                           </div>
                         </div>
                         <div className="px-4 lg:px-5 xl:px-6 2xl:px-7 pb-4 lg:pb-5 xl:pb-6 2xl:pb-7 pt-0 border-t border-gray-200 bg-gray-50">
-                          <button onClick={() => { onCategorySelect?.('Összes'); setActiveTab('shop'); setShowMegaMenu(false); setTimeout(() => onScrollToShop?.(), 80); }} className="w-full flex items-center justify-center gap-2 lg:gap-3 py-3 lg:py-3.5 text-sm lg:text-base xl:text-lg text-primary-600 hover:bg-primary-100 rounded-xl lg:rounded-2xl font-bold transition-all border-2 border-primary-200 hover:border-primary-300 min-h-[44px] focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-400 focus-visible:ring-offset-2" data-nav-action="category" data-nav-target="Összes" aria-label="Összes kategória megtekintése">
+                          <button onClick={() => { onCategorySelect?.('Összes'); setActiveTab('shop'); setShowMegaMenu(false); }} className="w-full flex items-center justify-center gap-2 lg:gap-3 py-3 lg:py-3.5 text-sm lg:text-base xl:text-lg text-primary-600 hover:bg-primary-100 rounded-xl lg:rounded-2xl font-bold transition-all border-2 border-primary-200 hover:border-primary-300 min-h-[44px] focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-400 focus-visible:ring-offset-2" data-nav-action="category" data-nav-target="Összes" aria-label="Összes kategória megtekintése">
                             Összes kategória megtekintése
                             <ArrowRight className="w-4 h-4 lg:w-5 xl:w-5" />
                           </button>
@@ -399,7 +399,7 @@ export default function Navbar({
                             const Icon = isRealCategories ? getCategoryIcon(name) : cat?.icon ?? Grid3X3;
                             const color = isRealCategories ? MEGA_MENU_COLORS[idx % MEGA_MENU_COLORS.length] : (cat?.color ?? 'from-primary-500 to-secondary-700');
                             return (
-                              <button key={isRealCategories ? name : (cat?.id ?? `cat-${idx}`)} onClick={() => { pushRecentCategory(name); onCategorySelect?.(name); setActiveTab('shop'); setShowMegaMenu(false); setTimeout(() => onScrollToShop?.(), 80); }} className="flex flex-col items-center gap-2 xl:gap-2.5 p-3 xl:p-4 rounded-xl xl:rounded-2xl hover:bg-gray-50 hover:scale-[1.02] active:scale-[0.98] active:bg-gray-100 transition-all duration-200 group min-h-[44px]" data-nav-action="category" data-nav-target={name} aria-label={`Kategória: ${name}`}>
+                              <button key={isRealCategories ? name : (cat?.id ?? `cat-${idx}`)} onClick={() => { pushRecentCategory(name); onCategorySelect?.(name); setActiveTab('shop'); setShowMegaMenu(false); }} className="flex flex-col items-center gap-2 xl:gap-2.5 p-3 xl:p-4 rounded-xl xl:rounded-2xl hover:bg-gray-50 hover:scale-[1.02] active:scale-[0.98] active:bg-gray-100 transition-all duration-200 group min-h-[44px]" data-nav-action="category" data-nav-target={name} aria-label={`Kategória: ${name}`}>
                                 <div className={`w-11 h-11 xl:w-14 xl:h-14 2xl:w-16 2xl:h-16 rounded-xl xl:rounded-2xl bg-gradient-to-br ${color} flex items-center justify-center text-white group-hover:scale-110 shadow-md group-hover:shadow-lg transition-all duration-200`}>
                                   <Icon className="w-5 h-5 xl:w-7 xl:h-7 2xl:w-8 2xl:h-8" />
                                 </div>
@@ -411,7 +411,7 @@ export default function Navbar({
                         </div>
                       </div>
                       <div className="px-5 xl:px-6 2xl:px-7 pb-5 xl:pb-6 2xl:pb-7 pt-0 border-t border-gray-200 bg-gray-50">
-                        <button onClick={() => { onCategorySelect?.('Összes'); setActiveTab('shop'); setShowMegaMenu(false); setTimeout(() => onScrollToShop?.(), 80); }} className="w-full flex items-center justify-center gap-2 xl:gap-3 py-3 xl:py-3.5 text-sm xl:text-base 2xl:text-lg text-primary-600 hover:bg-primary-100 rounded-xl xl:rounded-2xl font-bold transition-all border-2 border-primary-200 hover:border-primary-300 min-h-[44px] focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-400 focus-visible:ring-offset-2" data-nav-action="category" data-nav-target="Összes" aria-label="Összes kategória megtekintése">
+                        <button onClick={() => { onCategorySelect?.('Összes'); setActiveTab('shop'); setShowMegaMenu(false); }} className="w-full flex items-center justify-center gap-2 xl:gap-3 py-3 xl:py-3.5 text-sm xl:text-base 2xl:text-lg text-primary-600 hover:bg-primary-100 rounded-xl xl:rounded-2xl font-bold transition-all border-2 border-primary-200 hover:border-primary-300 min-h-[44px] focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-400 focus-visible:ring-offset-2" data-nav-action="category" data-nav-target="Összes" aria-label="Összes kategória megtekintése">
                           Összes kategória megtekintése
                           <ArrowRight className="w-4 h-4 xl:w-5 xl:h-5" />
                         </button>
@@ -432,7 +432,7 @@ export default function Navbar({
             </div>
 
             <div className="flex items-center gap-2 sm:gap-3 lg:gap-4">
-              <button onClick={() => { setActiveTab('shop'); setTimeout(() => { document.getElementById('products-section')?.scrollIntoView({ behavior: 'smooth', block: 'start' }); window.dispatchEvent(new CustomEvent('mkt-focus-search')); }, 150); }} className="hidden md:flex items-center gap-2 lg:gap-3 xl:gap-3 px-3 lg:px-4 xl:px-5 py-2.5 lg:py-3 min-h-[44px] bg-gray-100 hover:bg-gray-200 rounded-xl lg:rounded-2xl text-gray-600 hover:text-gray-900 hover:scale-[1.02] active:scale-[0.98] transition-all" aria-label="Keresés" data-nav-action="search">
+              <button onClick={() => { setActiveTab('shop'); setTimeout(() => { onScrollToShop?.(); window.dispatchEvent(new CustomEvent('mkt-focus-search')); }, 200); }} className="hidden md:flex items-center gap-2 lg:gap-3 xl:gap-3 px-3 lg:px-4 xl:px-5 py-2.5 lg:py-3 min-h-[44px] bg-gray-100 hover:bg-gray-200 rounded-xl lg:rounded-2xl text-gray-600 hover:text-gray-900 hover:scale-[1.02] active:scale-[0.98] transition-all" aria-label="Keresés" data-nav-action="search">
                 <Search className="w-5 h-5 lg:w-5 xl:w-6 xl:h-6" />
                 <span className="text-sm lg:text-base font-bold">Keresés</span>
               </button>

@@ -751,13 +751,15 @@ const App = () => {
     setCategoryFilter('Összes'); // Reset category
     setSearchQuery(''); // Reset search
     
-    // Scroll to products section
+    setActiveTab('shop');
     setTimeout(() => {
-      const productsSection = document.getElementById('products-section');
-      if (productsSection) {
-        productsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      }
-    }, 100);
+      requestAnimationFrame(() => requestAnimationFrame(() => {
+        const el = document.getElementById('products-section');
+        if (!el) return;
+        const top = el.getBoundingClientRect().top + (window.scrollY || window.pageYOffset);
+        window.scrollTo({ top: Math.max(0, top - 100), behavior: 'smooth' });
+      }));
+    }, 300);
   }, [products]);
   
   // Clear AI recommendations
@@ -902,25 +904,25 @@ const App = () => {
     // NO API call - we use local AI search in filteredAndSortedProducts
   }, []);
 
-  // LOCAL category filter - no server call needed; kategória választásakor shop tabra váltunk
+  // Központi görgetés a termékek szekcióhoz – minden kattintásnál ugyanez fut (navbar, swipe, mobil, stb.)
+  const scrollToProductsSection = useCallback(() => {
+    const run = () => {
+      const el = document.getElementById('products-section');
+      if (!el) return;
+      const top = el.getBoundingClientRect().top + (window.scrollY || window.pageYOffset);
+      const offset = 100; // navbar alá
+      window.scrollTo({ top: Math.max(0, top - offset), behavior: 'smooth' });
+    };
+    requestAnimationFrame(() => requestAnimationFrame(run));
+  }, []);
+
+  // LOCAL category filter - no server call needed; kategória választásakor shop tabra váltunk + görgetés
   const handleCategoryChange = useCallback((category) => {
     setCategoryFilter(category);
     setVisibleCount(DISPLAY_BATCH); // Reset visible count
     if (category && category !== 'Összes') setActiveTab('shop');
-  }, []);
-
-  // Görgetés a termékekhez minden kategóriaváltás után – effect a commit UTÁN fut, így a products-section már a DOM-ban van
-  const scrollToProductsRunRef = useRef(0);
-  useEffect(() => {
-    if (activeTab !== 'shop') return;
-    scrollToProductsRunRef.current += 1;
-    if (scrollToProductsRunRef.current === 1) return; // mount: ne görgessünk
-    const t = setTimeout(() => {
-      const el = document.getElementById('products-section');
-      if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start', inline: 'nearest' });
-    }, 350);
-    return () => clearTimeout(t);
-  }, [categoryFilter, activeTab]);
+    setTimeout(scrollToProductsSection, 500); // DOM frissülés után (shop tab + section)
+  }, [scrollToProductsSection]);
 
   // Load more is now just showing more from already-loaded products
   // All products are loaded at once, so no server fetch needed
@@ -1057,7 +1059,7 @@ const App = () => {
         activeCategory={categoryFilter}
         onOpenWishlist={() => setShowWishlistDrawer(true)}
         onCategorySelect={handleCategoryChange}
-        onScrollToShop={() => document.getElementById('products-section')?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
+        onScrollToShop={scrollToProductsSection}
         fixUrl={fixUrl}
         onRecentProductClick={handleProductView}
       />
@@ -1089,10 +1091,7 @@ const App = () => {
               endTime={flashSaleEndTime}
               title="🔥 Flash Sale!"
               subtitle="Csak ma! Akár 50% kedvezmény kiválasztott bútorokra"
-              onViewSale={() => {
-                const productsSection = document.getElementById('products-section');
-                productsSection?.scrollIntoView({ behavior: 'smooth' });
-              }}
+              onViewSale={scrollToProductsSection}
               variant="banner"
             />
 
@@ -1106,10 +1105,7 @@ const App = () => {
             )}
             
             <ModernHero 
-              onExplore={() => {
-                const productsSection = document.getElementById('products-section');
-                productsSection?.scrollIntoView({ behavior: 'smooth' });
-              }}
+              onExplore={scrollToProductsSection}
               onTryAI={() => setActiveTab('visual-search')}
             />
             <AIFeaturesShowcase 
@@ -1494,10 +1490,7 @@ const App = () => {
             
             {/* Final CTA */}
             <InteractiveCTA 
-              onGetStarted={() => {
-                const productsSection = document.getElementById('products-section');
-                productsSection?.scrollIntoView({ behavior: 'smooth' });
-              }}
+              onGetStarted={scrollToProductsSection}
             />
           </>
         )}
