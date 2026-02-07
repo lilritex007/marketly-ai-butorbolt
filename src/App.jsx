@@ -897,16 +897,21 @@ const App = () => {
     // NO API call - we use local AI search in filteredAndSortedProducts
   }, []);
 
-  // UNAS embed: a görgetés gyakran nem a window-on van, hanem egy belső containeren (main / #content).
-  // Megkeressük a tényleges scroll szülőt és azt görgetjük; ha nincs ilyen, window.
+  // UNAS embed: a tartalom article#page_content_* (pl. page_content_3359761) belül van; a görgetés gyakran a szülőn van.
   const getScrollParent = useCallback((element) => {
+    const isScrollable = (el) => {
+      if (!el || el === document.body) return false;
+      const style = getComputedStyle(el);
+      const oy = style.overflowY;
+      return (oy === 'auto' || oy === 'scroll' || oy === 'overlay') && el.scrollHeight > el.clientHeight;
+    };
     let parent = element.parentElement;
     while (parent && parent !== document.body) {
-      const style = getComputedStyle(parent);
-      const oy = style.overflowY;
-      if ((oy === 'auto' || oy === 'scroll' || oy === 'overlay') && parent.scrollHeight > parent.clientHeight) {
-        return parent;
+      if (parent.id && parent.id.startsWith('page_content_')) {
+        const wrapper = parent.parentElement;
+        if (wrapper && isScrollable(wrapper)) return wrapper;
       }
+      if (isScrollable(parent)) return parent;
       parent = parent.parentElement;
     }
     return null;
