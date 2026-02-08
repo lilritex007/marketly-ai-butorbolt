@@ -960,6 +960,11 @@ const App = () => {
   const loadUnasDataRef = useRef(loadUnasData);
   loadUnasDataRef.current = loadUnasData;
 
+  const canUseLocalSearch = useMemo(() => {
+    if (SERVER_SEARCH_ONLY) return false;
+    return searchIndexReady && searchIndexRef.current.length > 0 && searchIndexRef.current.length <= MAX_LOCAL_INDEX;
+  }, [SERVER_SEARCH_ONLY, searchIndexReady, searchIndexVersion]);
+
   const debouncedSearch = useDebounce(searchQuery, 400);
   useEffect(() => {
     // Ha a keresőindex kész, a keresés lokálisan fut – ne írjuk felül a listát API kereséssel
@@ -995,11 +1000,6 @@ const App = () => {
     const t = setTimeout(() => setShowDeferredAI(true), 1500);
     return () => clearTimeout(t);
   }, []);
-
-  const canUseLocalSearch = useMemo(() => {
-    if (SERVER_SEARCH_ONLY) return false;
-    return searchIndexReady && searchIndexRef.current.length > 0 && searchIndexRef.current.length <= MAX_LOCAL_INDEX;
-  }, [SERVER_SEARCH_ONLY, searchIndexReady, searchIndexVersion]);
 
   // Keresőindex háttérben (800ms késleltetés, ne blokkolja az első paint-et); 5 percenként frissítés = készlet naprakész
   useEffect(() => {

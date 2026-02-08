@@ -42,7 +42,7 @@ export const EnhancedProductCard = ({
   // Intersection Observer for scroll animation - optimized
   useEffect(() => {
     const element = cardRef.current;
-    if (!element) return;
+    if (!element || !(element instanceof Element)) return;
 
     // Use requestIdleCallback for non-critical animation
     const observer = new IntersectionObserver(
