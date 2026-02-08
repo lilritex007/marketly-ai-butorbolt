@@ -83,7 +83,11 @@ export const useIntersectionObserver = (options = {}) => {
       setIsIntersecting(entry.isIntersecting);
     }, optionsRef.current);
 
-    observer.observe(ref);
+    try {
+      observer.observe(ref);
+    } catch (err) {
+      return;
+    }
 
     return () => {
       observer.disconnect();
