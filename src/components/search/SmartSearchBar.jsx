@@ -13,7 +13,7 @@ import {
   isIndexReady,
   getIndexStats
 } from '../../services/aiSearchService';
-import { fetchUnasProducts } from '../../services/unasApi';
+import { fetchUnasProducts, fetchUnasProductById } from '../../services/unasApi';
 import { trackSearch, getSearchHistory, getViewedProducts } from '../../services/userPreferencesService';
 
 // Keresett szó kiemelése a szövegben (case-insensitive, split tartalmazza a találatokat)
@@ -281,11 +281,16 @@ const SmartSearchBar = ({
     setQuery(value);
   }, []);
 
-  const handleProductClickFn = useCallback((product) => {
-    onProductClick?.(product);
+  const handleProductClickFn = useCallback(async (product) => {
+    if (serverSearchMode && product?.id) {
+      const full = await fetchUnasProductById(product.id);
+      onProductClick?.(full || product);
+    } else {
+      onProductClick?.(product);
+    }
     setQuery('');
     setIsOpen(false);
-  }, [onProductClick]);
+  }, [onProductClick, serverSearchMode]);
 
   const handleSuggestionClick = useCallback((suggestion) => {
     const text = typeof suggestion === 'string' ? suggestion : suggestion.text || suggestion.query;

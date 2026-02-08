@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef, useMemo, useCallback, Suspense, lazy } from 'react';
 import { ShoppingCart, Camera, MessageCircle, X, Send, Plus, Move, Trash2, Home, ZoomIn, ZoomOut, Upload, Settings, Link as LinkIcon, FileText, RefreshCw, AlertCircle, Database, Lock, Search, ChevronLeft, ChevronRight, Filter, Heart, ArrowDownUp, Info, Check, Star, Truck, ShieldCheck, Phone, ArrowRight, Mail, Eye, Sparkles, Lightbulb, Image as ImageIcon, MousePointer2, Menu, Bot, Moon, Sun, Clock, Gift, Zap, TrendingUp, Instagram, Facebook, MapPin, Sofa, Lamp, BedDouble, Armchair, Grid3X3, ExternalLink, Timer, ChevronDown } from 'lucide-react';
 // framer-motion removed due to Vite production build TDZ issues
-import { fetchUnasProducts, refreshUnasProducts, fetchCategories, fetchCategoryHierarchy, fetchSearchIndex } from './services/unasApi';
+import { fetchUnasProducts, refreshUnasProducts, fetchCategories, fetchCategoryHierarchy, fetchSearchIndex, fetchProductStats } from './services/unasApi';
 import { smartSearch } from './services/aiSearchService';
 import { trackProductView as trackProductViewPref, getPersonalizedRecommendations, getSimilarProducts } from './services/userPreferencesService';
 import { generateText, analyzeImage as analyzeImageAI } from './services/geminiService';
@@ -642,6 +642,7 @@ const App = () => {
   const [onboardingFeature, setOnboardingFeature] = useState('chat');
   const [advancedFilters, setAdvancedFilters] = useState({});
   const [categoryHierarchy, setCategoryHierarchy] = useState({ mainCategories: [] });
+  const [categoryStats, setCategoryStats] = useState(null);
   
   // AI Feature states
   const [showStyleQuiz, setShowStyleQuiz] = useState(false);
@@ -994,6 +995,18 @@ const App = () => {
     });
     return () => { cancelled = true; };
   }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+    if (!categoryFilter || categoryFilter === 'Összes') {
+      setCategoryStats(null);
+      return () => { cancelled = true; };
+    }
+    fetchProductStats({ category: categoryFilter }).then((stats) => {
+      if (!cancelled) setCategoryStats(stats);
+    });
+    return () => { cancelled = true; };
+  }, [categoryFilter]);
 
   // Defer heavy AI widgets to keep TTI under 3s
   useEffect(() => {
@@ -1378,7 +1391,9 @@ const App = () => {
                 onCategoryChange={handleCategoryChange}
                 wishlist={wishlist}
                 onAskAI={() => setShowStyleQuiz(true)}
-                visibleCount={displayedProducts.length}
+                totalCount={totalProductsCount}
+                loadedCount={products.length}
+                stats={categoryStats}
                 onLoadMore={handleLoadMore}
               />
             ) : (

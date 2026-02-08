@@ -309,8 +309,16 @@ const RelatedCategories = ({ currentCategory, allCategories, onCategoryChange })
 /**
  * Price Statistics Card
  */
-const PriceStats = ({ products }) => {
-  const stats = useMemo(() => {
+const PriceStats = ({ products, stats }) => {
+  const computedStats = useMemo(() => {
+    if (stats && typeof stats.total === 'number') {
+      return {
+        min: stats.minPrice || 0,
+        max: stats.maxPrice || 0,
+        avg: stats.avgPrice || 0,
+        inStock: stats.inStockCount || 0
+      };
+    }
     if (!products || products.length === 0) return null;
     const prices = products.map(p => p.salePrice || p.price).filter(p => p > 0);
     if (prices.length === 0) return null;
@@ -320,9 +328,9 @@ const PriceStats = ({ products }) => {
       avg: prices.reduce((a, b) => a + b, 0) / prices.length,
       inStock: products.filter(p => p.inStock !== false).length
     };
-  }, [products]);
+  }, [products, stats]);
   
-  if (!stats) return null;
+  if (!computedStats) return null;
   
   const formatPrice = (price) => new Intl.NumberFormat('hu-HU', { 
     style: 'currency', currency: 'HUF', maximumFractionDigits: 0 
@@ -331,10 +339,10 @@ const PriceStats = ({ products }) => {
   return (
     <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
       {[
-        { label: 'Legolcsóbb', value: formatPrice(stats.min), color: 'text-green-600' },
-        { label: 'Átlagár', value: formatPrice(stats.avg), color: 'text-gray-900' },
-        { label: 'Legdrágább', value: formatPrice(stats.max), color: 'text-gray-900' },
-        { label: 'Készleten', value: `${stats.inStock} db`, color: 'text-primary-500' }
+        { label: 'Legolcsóbb', value: formatPrice(computedStats.min), color: 'text-green-600' },
+        { label: 'Átlagár', value: formatPrice(computedStats.avg), color: 'text-gray-900' },
+        { label: 'Legdrágább', value: formatPrice(computedStats.max), color: 'text-gray-900' },
+        { label: 'Készleten', value: `${computedStats.inStock} db`, color: 'text-primary-500' }
       ].map((stat, i) => (
         <div key={i} className="bg-white rounded-xl p-3 sm:p-4 border border-gray-100">
           <p className="text-xs text-gray-500 mb-1">{stat.label}</p>
@@ -464,7 +472,8 @@ const AIBanner = ({ category, onAskAI }) => (
 const ViewControls = ({ 
   sortOption, onSortChange, 
   viewMode, onViewModeChange, 
-  productCount,
+  loadedCount,
+  totalCount,
   onOpenFilters,
   compareCount
 }) => (
@@ -478,7 +487,11 @@ const ViewControls = ({
         Szűrők
       </button>
       <p className="text-sm text-gray-500">
-        <span className="font-semibold text-gray-900">{productCount}</span> termék
+        <span className="font-semibold text-gray-900">{loadedCount.toLocaleString('hu-HU')}</span>
+        {totalCount > 0 && (
+          <span className="text-gray-400 ml-1">/ {totalCount.toLocaleString('hu-HU')}</span>
+        )}
+        <span className="ml-1">termék</span>
       </p>
       {compareCount > 0 && (
         <span className="px-2 py-1 bg-primary-100 text-primary-600 text-xs font-medium rounded-full">
@@ -531,7 +544,9 @@ const CategoryPage = ({
   onCategoryChange,
   wishlist,
   onAskAI,
-  visibleCount,
+  totalCount = 0,
+  loadedCount = 0,
+  stats,
   onLoadMore
 }) => {
   const [sortOption, setSortOption] = useState('default');
@@ -602,8 +617,8 @@ const CategoryPage = ({
     return filtered;
   }, [products, sortOption, filters, priceRange]);
   
-  const visibleProducts = displayedProducts.slice(0, visibleCount);
-  const hasMoreToShow = visibleCount < displayedProducts.length;
+  const visibleProducts = displayedProducts;
+  const hasMoreToShow = totalCount > 0 && loadedCount < totalCount;
   
   // Infinite scroll observer
   useEffect(() => {
@@ -633,11 +648,11 @@ const CategoryPage = ({
   
   return (
     <div className="min-h-screen bg-gray-50">
-      <CategoryHero category={category} productCount={products.length} theme={theme} onBack={onBack} />
+      <CategoryHero category={category} productCount={totalCount || products.length} theme={theme} onBack={onBack} />
       
       <div className="w-full max-w-[2000px] mx-auto px-4 sm:px-6 lg:px-10 xl:px-16 py-8 sm:py-12 lg:py-16">
         <AIBanner category={category} onAskAI={onAskAI} />
-        <PriceStats products={products} />
+        <PriceStats products={products} stats={stats} />
         <FeaturedProducts products={products} onProductClick={onProductClick} onWishlistToggle={onWishlistToggle} wishlist={wishlist} />
         <RelatedCategories currentCategory={category} allCategories={allCategories} onCategoryChange={onCategoryChange} />
         
@@ -658,7 +673,8 @@ const CategoryPage = ({
               onSortChange={setSortOption}
               viewMode={viewMode}
               onViewModeChange={setViewMode}
-              productCount={displayedProducts.length}
+              loadedCount={loadedCount}
+              totalCount={totalCount}
               onOpenFilters={() => setShowFilters(true)}
               compareCount={compareList.length}
             />

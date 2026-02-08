@@ -338,6 +338,69 @@ export function getProductCount(filters = {}) {
 }
 
 /**
+ * Get product stats (count, price range, in stock). Never throws: returns zeros on error.
+ */
+export function getProductStats(filters = {}) {
+  try {
+    const { category, showInAI, inStock, search } = filters;
+
+    let query = `
+      SELECT
+        COUNT(*) as total,
+        MIN(price) as minPrice,
+        MAX(price) as maxPrice,
+        AVG(price) as avgPrice,
+        SUM(CASE WHEN in_stock = 1 THEN 1 ELSE 0 END) as inStockCount
+      FROM products WHERE 1=1
+    `;
+    const params = [];
+
+    if (category) {
+      query += ' AND category = ?';
+      params.push(category);
+    }
+
+    if (showInAI !== undefined) {
+      query += ' AND show_in_ai = ?';
+      params.push(showInAI ? 1 : 0);
+    }
+
+    if (showInAI) {
+      query += ' AND price > 0';
+    }
+
+    if (showInAI && EXCLUDED_MAIN_CATEGORIES.length > 0) {
+      query += ` AND (CASE WHEN category_path IS NOT NULL AND category_path != '' AND instr(category_path, '|') > 0 THEN trim(substr(category_path, 1, instr(category_path, '|') - 1)) ELSE category END) NOT IN (${EXCLUDED_MAIN_CATEGORIES.map(() => '?').join(',')})`;
+      params.push(...EXCLUDED_MAIN_CATEGORIES);
+    }
+
+    if (search) {
+      const applied = applySearchTerms(query, params, search);
+      query = applied.query;
+      params.splice(0, params.length, ...applied.params);
+    }
+
+    if (inStock !== undefined) {
+      query += ' AND in_stock = ?';
+      params.push(inStock ? 1 : 0);
+    }
+
+    const stmt = db.prepare(query);
+    const result = stmt.get(...params) || {};
+    return {
+      total: result.total ?? 0,
+      minPrice: result.minPrice ?? 0,
+      maxPrice: result.maxPrice ?? 0,
+      avgPrice: result.avgPrice ?? 0,
+      inStockCount: result.inStockCount ?? 0
+    };
+  } catch (error) {
+    console.error('getProductStats error:', error);
+    return { total: 0, minPrice: 0, maxPrice: 0, avgPrice: 0, inStockCount: 0 };
+  }
+}
+
+/**
  * Get all categories (config table) - returns just category names for frontend
  */
 export function getCategories() {

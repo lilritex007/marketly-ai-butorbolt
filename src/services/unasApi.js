@@ -39,7 +39,9 @@ export const fetchUnasProducts = async (filters = {}) => {
     const params = new URLSearchParams();
     params.set('limit', String(limit));
     params.set('offset', String(offset));
-    params.set('slim', 'true');
+    if (filters.slim !== undefined) {
+      params.set('slim', filters.slim ? 'true' : 'false');
+    }
     if (filters.category && filters.category !== 'Összes') params.set('category', filters.category);
     if (filters.search && String(filters.search).trim()) params.set('search', String(filters.search).trim());
 
@@ -125,6 +127,43 @@ export const fetchCategoryHierarchy = async () => {
   } catch (error) {
     console.error('Error fetching category hierarchy:', error);
     return { mainCategories: [] };
+  }
+};
+
+/**
+ * Fetch single product by ID (full detail)
+ */
+export const fetchUnasProductById = async (id) => {
+  try {
+    const API_BASE = getApiBase();
+    const res = await fetch(`${API_BASE}/products/${id}`);
+    if (!res.ok) return null;
+    const data = await res.json();
+    return {
+      ...data,
+      images: data.images || (data.image ? [data.image] : []),
+      image: data.images?.[0] || data.image,
+      inStock: data.inStock !== undefined ? data.inStock : Boolean(data.in_stock)
+    };
+  } catch (error) {
+    return null;
+  }
+};
+
+/**
+ * Product stats (counts + price range + in stock)
+ */
+export const fetchProductStats = async (filters = {}) => {
+  try {
+    const API_BASE = getApiBase();
+    const params = new URLSearchParams();
+    if (filters.category && filters.category !== 'Összes') params.set('category', filters.category);
+    if (filters.search && String(filters.search).trim()) params.set('search', String(filters.search).trim());
+    const res = await fetch(`${API_BASE}/products/stats?${params.toString()}`);
+    if (!res.ok) return null;
+    return await res.json();
+  } catch (error) {
+    return null;
   }
 };
 

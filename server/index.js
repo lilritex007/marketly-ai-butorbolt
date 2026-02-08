@@ -17,6 +17,7 @@ import {
   updateProductAISettings,
   deleteProduct,
   getProductCount,
+  getProductStats,
   getCategories,
   getCategoriesAdmin,
   getMainCategories,
@@ -180,6 +181,28 @@ app.get('/api/products', async (req, res) => {
     console.error('Error fetching products:', error);
     res.status(500).json({
       error: 'Failed to fetch products',
+      message: error.message
+    });
+  }
+});
+
+/**
+ * Product stats (count, price range, in stock)
+ * Query params: category, search
+ */
+app.get('/api/products/stats', async (req, res) => {
+  try {
+    const { category, search } = req.query;
+    const stats = getProductStats({
+      category,
+      search,
+      showInAI: true
+    });
+    res.json(stats);
+  } catch (error) {
+    console.error('Error fetching product stats:', error);
+    res.status(500).json({
+      error: 'Failed to fetch product stats',
       message: error.message
     });
   }
