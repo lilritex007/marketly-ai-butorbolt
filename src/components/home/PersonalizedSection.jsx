@@ -10,7 +10,8 @@ const PersonalizedSection = ({
   products, 
   onProductClick, 
   onToggleWishlist, 
-  wishlist = [] 
+  wishlist = [],
+  contextLabel = ''
 }) => {
   const [activeTab, setActiveTab] = useState('foryou');
   const scrollRef = useRef(null);
@@ -61,7 +62,7 @@ const PersonalizedSection = ({
   }
 
   return (
-    <section className="py-8 sm:py-12 lg:py-16 bg-gradient-to-b from-white to-gray-50 border-t border-gray-100">
+    <section className="py-8 sm:py-12 lg:py-16 bg-gradient-to-b from-white via-white to-primary-50/40 border-t border-gray-100">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header with Style DNA */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
@@ -74,6 +75,14 @@ const PersonalizedSection = ({
               <p className="text-gray-600 text-sm mt-1 max-w-md line-clamp-1">
                 {styleDNA.styleDNA.split('.')[0]}
               </p>
+            )}
+            {contextLabel && (
+              <div className="mt-2">
+                <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white border border-primary-100 text-primary-700 text-xs font-semibold shadow-sm">
+                  <span className="w-1.5 h-1.5 rounded-full bg-primary-500" />
+                  {contextLabel}
+                </span>
+              </div>
             )}
           </div>
 
@@ -108,10 +117,10 @@ const PersonalizedSection = ({
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
                 className={`
-                  flex items-center gap-2 px-4 py-2.5 rounded-full whitespace-nowrap transition-all
+                  flex items-center gap-2 px-4 py-2.5 rounded-full whitespace-nowrap transition-all border
                   ${isActive 
-                    ? 'bg-primary-500 text-white shadow-lg' 
-                    : 'bg-white text-gray-700 hover:bg-gray-100 shadow'
+                    ? 'bg-primary-500 text-white shadow-lg border-primary-500' 
+                    : 'bg-white text-gray-700 hover:bg-gray-100 shadow border-gray-100'
                   }
                 `}
               >

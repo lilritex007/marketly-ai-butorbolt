@@ -2,7 +2,7 @@ import React, { useMemo } from 'react';
 import { Package, ArrowRight } from 'lucide-react';
 import { EnhancedProductCard } from '../product/EnhancedProductCard';
 
-export default function NewArrivalsSection({ products = [], onProductClick, onToggleWishlist, wishlist = [], onViewAll, onAddToCart }) {
+export default function NewArrivalsSection({ products = [], onProductClick, onToggleWishlist, wishlist = [], onViewAll, onAddToCart, contextLabel = '' }) {
   const newArrivals = useMemo(() => {
     if (!products.length) return [];
     const sorted = [...products].sort((a, b) => {
@@ -16,11 +16,11 @@ export default function NewArrivalsSection({ products = [], onProductClick, onTo
   if (newArrivals.length === 0) return null;
 
   return (
-    <section className="py-10 sm:py-12 lg:py-16 bg-gray-50 border-t border-gray-200" aria-labelledby="new-arrivals-heading">
+    <section className="py-10 sm:py-12 lg:py-16 bg-gradient-to-b from-gray-50 to-white border-t border-gray-200" aria-labelledby="new-arrivals-heading">
       <div className="w-full max-w-[2000px] mx-auto px-4 sm:px-6 lg:px-10 xl:px-16">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6 lg:mb-8">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 sm:w-12 sm:h-12 bg-primary-100 rounded-xl flex items-center justify-center">
+            <div className="w-10 h-10 sm:w-12 sm:h-12 bg-primary-100 rounded-xl flex items-center justify-center shadow-sm">
               <Package className="w-5 h-5 sm:w-6 sm:h-6 text-primary-600" aria-hidden />
             </div>
             <div>
@@ -34,6 +34,14 @@ export default function NewArrivalsSection({ products = [], onProductClick, onTo
             </button>
           )}
         </div>
+        {contextLabel && (
+          <div className="mb-4">
+            <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white border border-primary-100 text-primary-700 text-xs font-semibold">
+              <span className="w-1.5 h-1.5 rounded-full bg-primary-500" />
+              {contextLabel}
+            </span>
+          </div>
+        )}
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-6">
           {newArrivals.map((product, index) => (
             <EnhancedProductCard key={product.id} product={product} onToggleWishlist={onToggleWishlist} isWishlisted={wishlist.includes(product.id)} onQuickView={onProductClick} onAddToCart={onAddToCart || (() => {})} index={index} />

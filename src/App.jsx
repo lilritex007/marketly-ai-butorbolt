@@ -864,7 +864,7 @@ const App = () => {
 
   // API-first: kis lap, gyors first paint; soha nem töltünk 200k-t
   const loadUnasData = useCallback(async (options = {}) => {
-    const { silent = false, search = '', category = '', append = false, limit = INITIAL_PAGE, offset = 0 } = options;
+    const { silent = false, search = '', category = '', categoryMain, append = false, limit = INITIAL_PAGE, offset = 0 } = options;
     
     if (!silent && !append) {
       setIsLoadingUnas(true);
@@ -876,7 +876,11 @@ const App = () => {
       // #region agent log
       fetch('http://localhost:7244/ingest/4b0575bc-02d3-43f2-bc91-db7897d5cbba',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({runId:'pre',hypothesisId:'H1',location:'App.jsx:loadUnasData',message:'loadUnasData start',data:{silent,append,limit,offset,search:search?.length||0,category},timestamp:Date.now()})}).catch(()=>{});
       // #endregion
-      const categoryMainList = getCategoryMainList(category);
+      const categoryMainList = Array.isArray(categoryMain)
+        ? categoryMain.filter(Boolean)
+        : (typeof categoryMain === 'string' && categoryMain.trim()
+          ? [categoryMain.trim()]
+          : getCategoryMainList(category));
       const params = {
         limit,
         offset,
@@ -1002,6 +1006,11 @@ const App = () => {
   const handleCategoryChange = useCallback((category) => {
     setCategoryFilter(category);
     setCategoryStats(null);
+    setSearchQuery('');
+    hasUserSearchedRef.current = false;
+    setAdvancedFilters({});
+    setSortOption('default');
+    clearAIRecommendations();
     setProducts([]);
     setTotalProductsCount(0);
     setHasMoreProducts(true);
@@ -1009,7 +1018,7 @@ const App = () => {
     setUnasError(null);
     if (category && category !== 'Összes') setActiveTab('shop');
     setTimeout(scrollToProductsSection, 500);
-  }, [scrollToProductsSection]);
+  }, [scrollToProductsSection, clearAIRecommendations]);
 
   const loadUnasDataRef = useRef(loadUnasData);
   loadUnasDataRef.current = loadUnasData;
@@ -1156,6 +1165,11 @@ const App = () => {
   filteredLengthRef.current = filteredAndSortedProducts.length;
 
   const isSearchMode = searchQuery.trim().length >= 2 && canUseLocalSearch;
+  const isSearchActive = searchQuery.trim().length > 0;
+  const sectionProducts = isSearchActive ? [] : filteredAndSortedProducts;
+  const sectionContextLabel = categoryFilter && categoryFilter !== 'Összes'
+    ? categoryFilter
+    : (mobileActiveFilterCount > 0 ? 'Szűrt ajánlások' : '');
   const displayedProducts = aiRecommendedProducts.length > 0
     ? aiRecommendedProducts
     : isSearchMode
@@ -1393,39 +1407,42 @@ const App = () => {
               <TestimonialsSection />
             </FadeInOnScroll>
 
-            {products.length > 0 && (
+            {sectionProducts.length > 0 && (
               <FadeInOnScroll direction="up" className="section-perf">
                 <NewArrivalsSection
-                  products={products}
+                  products={sectionProducts}
                   onProductClick={handleProductView}
                   onToggleWishlist={toggleWishlist}
                   wishlist={wishlist}
                   onViewAll={scrollToProductsSection}
                   onAddToCart={handleAddToCart}
+                  contextLabel={sectionContextLabel}
                 />
               </FadeInOnScroll>
             )}
 
-            {products.length > 0 && (
+            {sectionProducts.length > 0 && (
               <FadeInOnScroll direction="up" className="section-perf">
                 <MostPopularSection
-                  products={products}
+                  products={sectionProducts}
                   onProductClick={handleProductView}
                   onToggleWishlist={toggleWishlist}
                   wishlist={wishlist}
                   onViewAll={scrollToProductsSection}
                   onAddToCart={handleAddToCart}
+                  contextLabel={sectionContextLabel}
                 />
               </FadeInOnScroll>
             )}
             
             {/* Personalized Section - For You + Recently Viewed + Trending */}
-            {products.length > 0 && (
+            {sectionProducts.length > 0 && (
               <PersonalizedSection
-                products={products}
+                products={sectionProducts}
                 onProductClick={handleProductView}
                 onToggleWishlist={toggleWishlist}
                 wishlist={wishlist}
+                contextLabel={sectionContextLabel}
               />
             )}
 
