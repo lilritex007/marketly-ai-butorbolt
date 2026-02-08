@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef, useMemo, useCallback, Suspense, lazy } from 'react';
 import { ShoppingCart, Camera, MessageCircle, X, Send, Plus, Move, Trash2, Home, ZoomIn, ZoomOut, Upload, Settings, Link as LinkIcon, FileText, RefreshCw, AlertCircle, Database, Lock, Search, ChevronLeft, ChevronRight, Filter, Heart, ArrowDownUp, Info, Check, Star, Truck, ShieldCheck, Phone, ArrowRight, Mail, Eye, Sparkles, Lightbulb, Image as ImageIcon, MousePointer2, Menu, Bot, Moon, Sun, Clock, Gift, Zap, TrendingUp, Instagram, Facebook, MapPin, Sofa, Lamp, BedDouble, Armchair, Grid3X3, ExternalLink, Timer, ChevronDown } from 'lucide-react';
 // framer-motion removed due to Vite production build TDZ issues
-import { fetchUnasProducts, refreshUnasProducts, fetchCategories, fetchCategoryHierarchy, fetchSearchIndex, fetchProductStats } from './services/unasApi';
+import { fetchUnasProducts, refreshUnasProducts, fetchCategories, fetchCategoryHierarchy, fetchSearchIndex, fetchProductStats, fetchUnasProductById } from './services/unasApi';
 import { smartSearch } from './services/aiSearchService';
 import { trackProductView as trackProductViewPref, getPersonalizedRecommendations, getSimilarProducts } from './services/userPreferencesService';
 import { generateText, analyzeImage as analyzeImageAI } from './services/geminiService';
@@ -181,7 +181,7 @@ const parseCSV = (csvText) => {
           acc.push({ index, name: cleanName });
       }
       return acc;
-  }, []);
+  }, [mainCategorySet]);
 
   for (let i = 1; i < lines.length; i++) {
       if (!lines[i].trim()) continue;
@@ -623,6 +623,7 @@ const App = () => {
   hasMoreProductsRef.current = hasMoreProducts;
   isLoadingMoreRef.current = isLoadingMore;
   const [wishlist, setWishlist] = useLocalStorage('mkt_wishlist', []);
+  const [wishlistItems, setWishlistItems] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
   const searchQueryRef = useRef(searchQuery);
   searchQueryRef.current = searchQuery;
@@ -643,6 +644,9 @@ const App = () => {
   const [advancedFilters, setAdvancedFilters] = useState({});
   const [categoryHierarchy, setCategoryHierarchy] = useState({ mainCategories: [] });
   const [categoryStats, setCategoryStats] = useState(null);
+  const mainCategorySet = useMemo(() => {
+    return new Set((categoryHierarchy?.mainCategories || []).map((c) => c.name));
+  }, [categoryHierarchy]);
   
   // AI Feature states
   const [showStyleQuiz, setShowStyleQuiz] = useState(false);
@@ -769,6 +773,20 @@ const App = () => {
       toast.info('Eltávolítva a kívánságlistáról');
     }
   };
+
+  useEffect(() => {
+    let cancelled = false;
+    if (!showWishlistDrawer) return () => { cancelled = true; };
+    if (!wishlist || wishlist.length === 0) {
+      setWishlistItems([]);
+      return () => { cancelled = true; };
+    }
+    Promise.all(wishlist.map((id) => fetchUnasProductById(id)))
+      .then((items) => {
+        if (!cancelled) setWishlistItems(items.filter(Boolean));
+      });
+    return () => { cancelled = true; };
+  }, [wishlist, showWishlistDrawer]);
   
   const handleToggleComparison = (product) => {
     const result = comparison.toggleComparison(product);
@@ -848,12 +866,14 @@ const App = () => {
       // #region agent log
       fetch('http://localhost:7244/ingest/4b0575bc-02d3-43f2-bc91-db7897d5cbba',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({runId:'pre',hypothesisId:'H1',location:'App.jsx:loadUnasData',message:'loadUnasData start',data:{silent,append,limit,offset,search:search?.length||0,category},timestamp:Date.now()})}).catch(()=>{});
       // #endregion
+      const categoryMain = category && mainCategorySet.has(category) ? category : '';
       const params = {
         limit,
         offset,
         slim: false,
         ...(search && search.trim() && { search: search.trim() }),
-        ...(category && category !== 'Összes' && { category })
+        ...(categoryMain && { categoryMain }),
+        ...(!categoryMain && category && category !== 'Összes' && { category })
       };
       const data = await fetchUnasProducts(params);
       const newProducts = (data.products || []).map(p => ({
@@ -922,6 +942,8 @@ const App = () => {
     const el = document.getElementById('products-section');
     if (!el) return;
     const offset = 100;
+    const initialRect = el.getBoundingClientRect();
+    if (initialRect.top >= 0 && initialRect.top <= offset + 20) return;
 
     const run = () => {
       const scrollParent = getScrollParent(el);
@@ -941,7 +963,8 @@ const App = () => {
       // Fallback: ha 400 ms után még nincs a szekció a viewportban, scrollIntoView (pl. UNAS embed)
       setTimeout(() => {
         const rect = el.getBoundingClientRect();
-        if (rect.top > 150) {
+        const inView = rect.top <= 150 && rect.bottom >= 0;
+        if (!inView) {
           el.scrollIntoView({ behavior: 'smooth', block: 'start', inline: 'nearest' });
         }
       }, 400);
@@ -970,13 +993,15 @@ const App = () => {
   useEffect(() => {
     // Ha a keresőindex kész, a keresés lokálisan fut – ne írjuk felül a listát API kereséssel
     const useApiSearch = !canUseLocalSearch || !debouncedSearch.trim();
+    const categoryMain = categoryFilter && mainCategorySet.has(categoryFilter) ? categoryFilter : '';
     loadUnasDataRef.current({
       search: useApiSearch ? (debouncedSearch.trim() || undefined) : undefined,
-      category: categoryFilter !== 'Összes' ? categoryFilter : '',
+      category: !categoryMain && categoryFilter !== 'Összes' ? categoryFilter : '',
+      categoryMain: categoryMain || undefined,
       limit: INITIAL_PAGE,
       offset: 0
     });
-  }, [categoryFilter, debouncedSearch, canUseLocalSearch]);
+  }, [categoryFilter, debouncedSearch, canUseLocalSearch, mainCategorySet]);
 
   useEffect(() => {
     const onHashChange = () => {
@@ -1002,11 +1027,13 @@ const App = () => {
       setCategoryStats(null);
       return () => { cancelled = true; };
     }
-    fetchProductStats({ category: categoryFilter }).then((stats) => {
+    const categoryMain = mainCategorySet.has(categoryFilter) ? categoryFilter : '';
+    const category = !categoryMain ? categoryFilter : '';
+    fetchProductStats({ category, categoryMain }).then((stats) => {
       if (!cancelled) setCategoryStats(stats);
     });
     return () => { cancelled = true; };
-  }, [categoryFilter]);
+  }, [categoryFilter, mainCategorySet]);
 
   // Defer heavy AI widgets to keep TTI under 3s
   useEffect(() => {
@@ -1104,14 +1131,16 @@ const App = () => {
 
   const handleLoadMore = useCallback(() => {
     if (isLoadingMore || !hasMoreProducts) return;
+    const categoryMain = categoryFilter && mainCategorySet.has(categoryFilter) ? categoryFilter : '';
     loadUnasDataRef.current({
       append: true,
       limit: DISPLAY_BATCH,
       offset: products.length,
       search: searchQuery.trim() || undefined,
-      category: categoryFilter !== 'Összes' ? categoryFilter : ''
+      category: !categoryMain && categoryFilter !== 'Összes' ? categoryFilter : '',
+      categoryMain: categoryMain || undefined
     });
-  }, [isLoadingMore, hasMoreProducts, products.length, searchQuery, categoryFilter]);
+  }, [isLoadingMore, hasMoreProducts, products.length, searchQuery, categoryFilter, mainCategorySet]);
 
   // Categories with TOTAL counts (from hierarchy if available, fallback to loaded products)
   const categories = useMemo(() => {
@@ -1435,6 +1464,11 @@ const App = () => {
                           {!searchQuery && totalProductsCount > 0 && (
                             <span className="text-gray-400 text-xs sm:text-sm ml-1">
                               / {totalProductsCount.toLocaleString('hu-HU')}
+                            </span>
+                          )}
+                          {!searchQuery && totalProductsCount > 0 && (
+                            <span className="block text-[11px] sm:text-xs text-gray-400 mt-0.5">
+                              Betöltve: {products.length.toLocaleString('hu-HU')} / {totalProductsCount.toLocaleString('hu-HU')}
                             </span>
                           )}
                         </span>
@@ -1925,7 +1959,7 @@ const App = () => {
       <WishlistDrawer
         isOpen={showWishlistDrawer}
         onClose={() => setShowWishlistDrawer(false)}
-        wishlistItems={products.filter(p => wishlist.includes(p.id))}
+        wishlistItems={wishlistItems}
         onRemove={(id) => toggleWishlist(id)}
         onAddToCart={handleAddToCart}
         onProductClick={(product) => {

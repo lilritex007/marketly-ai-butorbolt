@@ -131,6 +131,7 @@ app.get('/api/products', async (req, res) => {
   try {
     const {
       category,
+      categoryMain,
       search,
       limit,
       offset = 0,
@@ -144,6 +145,7 @@ app.get('/api/products', async (req, res) => {
 
     let products = getProducts({
       category,
+      categoryMain,
       search,
       showInAI: true, // Only show products enabled for AI
       limit: limitNum,
@@ -165,6 +167,7 @@ app.get('/api/products', async (req, res) => {
 
     const total = getProductCount({
       category,
+      categoryMain,
       search,
       showInAI: true
     });
@@ -192,9 +195,10 @@ app.get('/api/products', async (req, res) => {
  */
 app.get('/api/products/stats', async (req, res) => {
   try {
-    const { category, search } = req.query;
+    const { category, categoryMain, search } = req.query;
     const stats = getProductStats({
       category,
+      categoryMain,
       search,
       showInAI: true
     });

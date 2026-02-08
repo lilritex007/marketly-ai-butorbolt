@@ -43,6 +43,7 @@ export const fetchUnasProducts = async (filters = {}) => {
       params.set('slim', filters.slim ? 'true' : 'false');
     }
     if (filters.category && filters.category !== 'Összes') params.set('category', filters.category);
+    if (filters.categoryMain) params.set('categoryMain', filters.categoryMain);
     if (filters.search && String(filters.search).trim()) params.set('search', String(filters.search).trim());
 
     const url = `${API_BASE}/products?${params.toString()}`;
@@ -158,6 +159,7 @@ export const fetchProductStats = async (filters = {}) => {
     const API_BASE = getApiBase();
     const params = new URLSearchParams();
     if (filters.category && filters.category !== 'Összes') params.set('category', filters.category);
+    if (filters.categoryMain) params.set('categoryMain', filters.categoryMain);
     if (filters.search && String(filters.search).trim()) params.set('search', String(filters.search).trim());
     const res = await fetch(`${API_BASE}/products/stats?${params.toString()}`);
     if (!res.ok) return null;

@@ -270,11 +270,13 @@ const AIChatAssistant = ({ products, catalogProducts, onShowProducts, serverSear
 
     setIsLoading(true);
 
+    let relevantProducts = [];
+    let searchIntent = null;
     try {
       // Szuperokos keresés az aiSearchService-ből
       const searchResult = await performSmartSearch(userMessage, { limit: 12 });
-      const relevantProducts = searchResult.results || [];
-      const searchIntent = searchResult.intent;
+      relevantProducts = searchResult.results || [];
+      searchIntent = searchResult.intent;
       
       // Személyre szabott kontextus
       const personalContext = getPersonalizedContext();
@@ -359,7 +361,12 @@ ${productList}
 
 VÁLASZOLJ MOST a fenti szabályok szerint:`;
 
-      const result = await generateText(prompt, { temperature: 0.7, maxTokens: 500 });
+      let result = { success: false, text: '' };
+      try {
+        result = await generateText(prompt, { temperature: 0.7, maxTokens: 500 });
+      } catch (err) {
+        console.error('AI generateText error:', err);
+      }
 
       const assistantMsgId = generateMessageId();
 
@@ -379,13 +386,14 @@ VÁLASZOLJ MOST a fenti szabályok szerint:`;
         const fallbackProducts = relevantProducts.length > 0 
           ? relevantProducts 
           : getCategoryProducts('kanapé', 4);
+        const fallbackText = relevantProducts.length > 0
+          ? `Találtam ${relevantProducts.length} terméket! 👇 Nézd meg őket lent, és kattints a részletekért!`
+          : 'Jelenleg nem tudok konkrét terméket ajánlani, de böngészd a kategóriákat a menüben!';
           
         setMessages(prev => [...prev, {
           id: assistantMsgId,
           role: 'assistant',
-          content: relevantProducts.length > 0 
-            ? `Találtam ${relevantProducts.length} terméket! 👇 Nézd meg őket lent, és kattints a részletekért!`
-            : 'Jelenleg nem tudok konkrét terméket ajánlani, de böngészd a kategóriákat a menüben!',
+          content: fallbackText,
           timestamp: new Date(),
           products: fallbackProducts,
           userQuery: userMessage,
@@ -395,12 +403,20 @@ VÁLASZOLJ MOST a fenti szabályok szerint:`;
 
     } catch (error) {
       console.error('Chat hiba:', error);
+      const fallbackProducts = relevantProducts.length > 0 
+        ? relevantProducts 
+        : getCategoryProducts('kanapé', 4);
+      const fallbackText = relevantProducts.length > 0
+        ? `Találtam ${relevantProducts.length} terméket! 👇 Nézd meg őket lent, és kattints a részletekért!`
+        : 'Jelenleg nem tudok konkrét terméket ajánlani, de böngészd a kategóriákat a menüben!';
       setMessages(prev => [...prev, {
         id: generateMessageId(),
         role: 'assistant',
-        content: 'Elnézést, technikai hiba történt. Próbáld újra!',
+        content: fallbackText,
         timestamp: new Date(),
-        isError: true
+        products: fallbackProducts,
+        userQuery: userMessage,
+        isError: !relevantProducts.length
       }]);
     } finally {
       setIsLoading(false);

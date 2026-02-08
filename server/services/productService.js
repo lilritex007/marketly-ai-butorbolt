@@ -18,6 +18,12 @@ const applySearchTerms = (query, params, search) => {
   return { query: nextQuery, params: nextParams };
 };
 
+const applyMainCategoryFilter = (query, params, categoryMain) => {
+  if (!categoryMain) return { query, params };
+  const nextQuery = `${query} AND (CASE WHEN category_path IS NOT NULL AND category_path != '' AND instr(category_path, '|') > 0 THEN trim(substr(category_path, 1, instr(category_path, '|') - 1)) ELSE category END) = ?`;
+  return { query: nextQuery, params: [...params, categoryMain] };
+};
+
 /**
  * Get all products (with optional filtering)
  * When showInAI is true:
@@ -30,6 +36,7 @@ export function getProducts(filters = {}) {
   try {
     const {
       category,
+      categoryMain,
       showInAI,
       inStock,
       minPrice,
@@ -42,7 +49,11 @@ export function getProducts(filters = {}) {
     let query = 'SELECT * FROM products WHERE 1=1';
     const params = [];
 
-    if (category) {
+    if (categoryMain) {
+      const appliedMain = applyMainCategoryFilter(query, params, categoryMain);
+      query = appliedMain.query;
+      params.splice(0, params.length, ...appliedMain.params);
+    } else if (category) {
       query += ' AND category = ?';
       params.push(category);
     }
@@ -293,12 +304,16 @@ export function deleteProduct(id) {
  */
 export function getProductCount(filters = {}) {
   try {
-    const { category, showInAI, inStock, search } = filters;
+    const { category, categoryMain, showInAI, inStock, search } = filters;
 
     let query = 'SELECT COUNT(*) as count FROM products WHERE 1=1';
     const params = [];
 
-    if (category) {
+    if (categoryMain) {
+      const appliedMain = applyMainCategoryFilter(query, params, categoryMain);
+      query = appliedMain.query;
+      params.splice(0, params.length, ...appliedMain.params);
+    } else if (category) {
       query += ' AND category = ?';
       params.push(category);
     }
@@ -342,7 +357,7 @@ export function getProductCount(filters = {}) {
  */
 export function getProductStats(filters = {}) {
   try {
-    const { category, showInAI, inStock, search } = filters;
+    const { category, categoryMain, showInAI, inStock, search } = filters;
 
     let query = `
       SELECT
@@ -355,7 +370,11 @@ export function getProductStats(filters = {}) {
     `;
     const params = [];
 
-    if (category) {
+    if (categoryMain) {
+      const appliedMain = applyMainCategoryFilter(query, params, categoryMain);
+      query = appliedMain.query;
+      params.splice(0, params.length, ...appliedMain.params);
+    } else if (category) {
       query += ' AND category = ?';
       params.push(category);
     }

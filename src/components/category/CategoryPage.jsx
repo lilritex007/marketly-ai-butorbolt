@@ -486,13 +486,23 @@ const ViewControls = ({
         <Filter className="w-4 h-4" />
         Szűrők
       </button>
-      <p className="text-sm text-gray-500">
-        <span className="font-semibold text-gray-900">{loadedCount.toLocaleString('hu-HU')}</span>
+      <div className="text-sm text-gray-500">
+        <p>
+          <span className="font-semibold text-gray-900">{loadedCount.toLocaleString('hu-HU')}</span>
+          {totalCount > 0 && (
+            <span className="text-gray-400 ml-1">/ {totalCount.toLocaleString('hu-HU')}</span>
+          )}
+          <span className="ml-1">termék</span>
+        </p>
         {totalCount > 0 && (
-          <span className="text-gray-400 ml-1">/ {totalCount.toLocaleString('hu-HU')}</span>
+          <div className="mt-1 h-1.5 w-32 bg-gray-100 rounded-full overflow-hidden">
+            <div
+              className="h-full bg-primary-500 rounded-full transition-all"
+              style={{ width: `${Math.min(100, Math.round((loadedCount / totalCount) * 100))}%` }}
+            />
+          </div>
         )}
-        <span className="ml-1">termék</span>
-      </p>
+      </div>
       {compareCount > 0 && (
         <span className="px-2 py-1 bg-primary-100 text-primary-600 text-xs font-medium rounded-full">
           {compareCount} összehasonlításra
