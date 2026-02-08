@@ -22,7 +22,7 @@ const StickyAddToCart = ({
   useEffect(() => {
     if (observedElementId) {
       const el = document.getElementById(observedElementId);
-      if (!el) {
+      if (!el || !(el instanceof Element)) {
         setIsShown(window.scrollY > 400);
         return;
       }

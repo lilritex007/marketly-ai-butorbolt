@@ -891,7 +891,6 @@ const App = () => {
   // Server-side search (marketplace-style)
   const handleServerSearch = useCallback((query) => {
     setSearchQuery(query);
-    setVisibleCount(DISPLAY_BATCH); // Reset visible count on new search
     // API hívás a debouncedSearch useEffect-ben
   }, []);
 
