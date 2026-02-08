@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
-import { Sparkles, ChevronLeft, ChevronRight, Clock, Heart, TrendingUp, Eye, Star } from 'lucide-react';
+import { Sparkles, ChevronLeft, ChevronRight, Clock, Heart, TrendingUp, Eye, Star, RefreshCw } from 'lucide-react';
 import { getViewedProducts, getPersonalizedRecommendations, getLikedProducts, getStyleDNA } from '../../services/userPreferencesService';
+import SectionHeader from '../landing/SectionHeader';
 
 /**
  * PersonalizedSection - Személyre szabott főoldal szekciók
@@ -14,6 +15,7 @@ const PersonalizedSection = ({
   contextLabel = ''
 }) => {
   const [activeTab, setActiveTab] = useState('foryou');
+  const [refreshKey, setRefreshKey] = useState(0);
   const scrollRef = useRef(null);
   
   // User adatok
@@ -24,8 +26,9 @@ const PersonalizedSection = ({
   // Személyre szabott ajánlások
   const forYouProducts = useMemo(() => {
     if (!products?.length) return [];
-    return getPersonalizedRecommendations(products, 12);
-  }, [products]);
+    const base = getPersonalizedRecommendations(products, 12);
+    return [...base].sort(() => (refreshKey % 2 === 0 ? 1 : -1) * (Math.random() - 0.5));
+  }, [products, refreshKey]);
   
   // Trending - top árkategória, random mix
   const trendingProducts = useMemo(() => {
@@ -34,7 +37,7 @@ const PersonalizedSection = ({
       .filter(p => (p.salePrice || p.price) > 50000)
       .sort(() => Math.random() - 0.5)
       .slice(0, 12);
-  }, [products]);
+  }, [products, refreshKey]);
 
   const tabs = [
     { id: 'foryou', label: 'Neked ajánljuk', icon: Sparkles, products: forYouProducts },
@@ -64,44 +67,41 @@ const PersonalizedSection = ({
   return (
     <section className="py-8 sm:py-12 lg:py-16 bg-gradient-to-b from-white via-white to-primary-50/40 border-t border-gray-100">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Header with Style DNA */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
-          <div>
-            <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 flex items-center gap-2">
-              <Sparkles className="w-7 h-7 text-primary-500" />
-              Személyre szabva neked
-            </h2>
-            {styleDNA?.styleDNA && (
-              <p className="text-gray-600 text-sm mt-1 max-w-md line-clamp-1">
-                {styleDNA.styleDNA.split('.')[0]}
-              </p>
-            )}
-            {contextLabel && (
-              <div className="mt-2">
-                <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white border border-primary-100 text-primary-700 text-xs font-semibold shadow-sm">
-                  <span className="w-1.5 h-1.5 rounded-full bg-primary-500" />
-                  {contextLabel}
-                </span>
-              </div>
-            )}
-          </div>
-
-          {/* Navigation Arrows */}
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => scroll('left')}
-              className="p-2 rounded-full bg-white shadow-md hover:shadow-lg hover:bg-gray-50 transition-all"
-            >
-              <ChevronLeft className="w-5 h-5 text-gray-700" />
-            </button>
-            <button
-              onClick={() => scroll('right')}
-              className="p-2 rounded-full bg-white shadow-md hover:shadow-lg hover:bg-gray-50 transition-all"
-            >
-              <ChevronRight className="w-5 h-5 text-gray-700" />
-            </button>
-          </div>
-        </div>
+        <SectionHeader
+          id="personalized-heading"
+          title="Személyre szabva neked"
+          subtitle={styleDNA?.styleDNA ? styleDNA.styleDNA.split('.')[0] : 'AI ajánlások a böngészésed alapján'}
+          Icon={Sparkles}
+          accentClass="from-primary-500 to-secondary-700"
+          badge="AI ajánlás"
+          contextLabel={contextLabel}
+          meta={`Megjelenítve: ${currentProducts.length} termék`}
+          actions={
+            <>
+              <button
+                onClick={() => setRefreshKey((v) => v + 1)}
+                className="inline-flex items-center gap-2 px-3 py-2 rounded-lg text-primary-700 bg-primary-50 border border-primary-100 hover:bg-primary-100 transition-colors text-sm font-semibold min-h-[44px]"
+              >
+                <RefreshCw className="w-4 h-4" />
+                Frissítem
+              </button>
+              <button
+                onClick={() => scroll('left')}
+                className="p-2 rounded-full bg-white shadow-md hover:shadow-lg hover:bg-gray-50 transition-all min-h-[44px] min-w-[44px]"
+                aria-label="Balra görgetés"
+              >
+                <ChevronLeft className="w-5 h-5 text-gray-700" />
+              </button>
+              <button
+                onClick={() => scroll('right')}
+                className="p-2 rounded-full bg-white shadow-md hover:shadow-lg hover:bg-gray-50 transition-all min-h-[44px] min-w-[44px]"
+                aria-label="Jobbra görgetés"
+              >
+                <ChevronRight className="w-5 h-5 text-gray-700" />
+              </button>
+            </>
+          }
+        />
 
         {/* Tabs */}
         <div className="flex gap-2 mb-6 overflow-x-auto pb-2 scrollbar-hide">

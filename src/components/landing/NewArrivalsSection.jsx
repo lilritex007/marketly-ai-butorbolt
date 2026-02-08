@@ -1,51 +1,88 @@
-import React, { useMemo } from 'react';
-import { Package, ArrowRight } from 'lucide-react';
+import React, { useMemo, useState } from 'react';
+import { Package, ArrowRight, RefreshCw, Sparkles } from 'lucide-react';
 import { EnhancedProductCard } from '../product/EnhancedProductCard';
+import SectionHeader from './SectionHeader';
+
+const PAGE_SIZE = 8;
+
+const toTimestamp = (value) => {
+  if (!value) return 0;
+  const t = Date.parse(value);
+  return Number.isFinite(t) ? t : 0;
+};
+
+const sliceWrap = (items, start, size) => {
+  if (items.length <= size) return items;
+  const end = start + size;
+  if (end <= items.length) return items.slice(start, end);
+  const first = items.slice(start);
+  const rest = items.slice(0, end - items.length);
+  return [...first, ...rest];
+};
 
 export default function NewArrivalsSection({ products = [], onProductClick, onToggleWishlist, wishlist = [], onViewAll, onAddToCart, contextLabel = '' }) {
+  const [page, setPage] = useState(0);
   const newArrivals = useMemo(() => {
     if (!products.length) return [];
     const sorted = [...products].sort((a, b) => {
+      const timeA = toTimestamp(a.updated_at || a.updatedAt || a.created_at || a.createdAt || a.last_synced_at);
+      const timeB = toTimestamp(b.updated_at || b.updatedAt || b.created_at || b.createdAt || b.last_synced_at);
+      if (timeA !== timeB) return timeB - timeA;
       const idA = typeof a.id === 'number' ? a.id : parseInt(String(a.id).replace(/\D/g, ''), 10) || 0;
       const idB = typeof b.id === 'number' ? b.id : parseInt(String(b.id).replace(/\D/g, ''), 10) || 0;
       return idB - idA;
     });
-    return sorted.slice(0, 8);
+    return sorted;
   }, [products]);
+  const visibleProducts = useMemo(() => {
+    const start = (page * PAGE_SIZE) % Math.max(1, newArrivals.length);
+    return sliceWrap(newArrivals, start, PAGE_SIZE);
+  }, [newArrivals, page]);
 
-  if (newArrivals.length === 0) return null;
+  if (visibleProducts.length === 0) return null;
 
   return (
     <section className="py-10 sm:py-12 lg:py-16 bg-gradient-to-b from-gray-50 to-white border-t border-gray-200" aria-labelledby="new-arrivals-heading">
       <div className="w-full max-w-[2000px] mx-auto px-4 sm:px-6 lg:px-10 xl:px-16">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6 lg:mb-8">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 sm:w-12 sm:h-12 bg-primary-100 rounded-xl flex items-center justify-center shadow-sm">
-              <Package className="w-5 h-5 sm:w-6 sm:h-6 text-primary-600" aria-hidden />
-            </div>
-            <div>
-              <h2 id="new-arrivals-heading" className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900">Friss beérkezés</h2>
-              <p className="text-sm text-gray-600">A legújabb termékeink</p>
-            </div>
-          </div>
-          {onViewAll && (
-            <button type="button" onClick={onViewAll} className="inline-flex items-center gap-2 text-primary-600 font-semibold hover:text-primary-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-400 rounded-lg px-3 py-2 min-h-[44px]">
-              Összes megtekintése <ArrowRight className="w-4 h-4" />
-            </button>
-          )}
-        </div>
-        {contextLabel && (
-          <div className="mb-4">
-            <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white border border-primary-100 text-primary-700 text-xs font-semibold">
-              <span className="w-1.5 h-1.5 rounded-full bg-primary-500" />
-              {contextLabel}
-            </span>
-          </div>
-        )}
+        <SectionHeader
+          id="new-arrivals-heading"
+          title="Friss beérkezés"
+          subtitle="A legújabb termékeink, folyamatosan frissítve"
+          Icon={Package}
+          accentClass="from-primary-500 to-secondary-600"
+          badge="Újdonságok"
+          contextLabel={contextLabel}
+          meta={`Összesen: ${newArrivals.length.toLocaleString('hu-HU')} termék`}
+          actions={
+            <>
+              <button
+                type="button"
+                onClick={() => setPage((p) => p + 1)}
+                className="inline-flex items-center gap-2 px-3 py-2 rounded-lg text-primary-700 bg-primary-50 border border-primary-100 hover:bg-primary-100 transition-colors text-sm font-semibold min-h-[44px]"
+                aria-label="További újdonságok"
+              >
+                <RefreshCw className="w-4 h-4" />
+                Következő
+              </button>
+              {onViewAll && (
+                <button type="button" onClick={onViewAll} className="inline-flex items-center gap-2 text-primary-600 font-semibold hover:text-primary-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-400 rounded-lg px-3 py-2 min-h-[44px]">
+                  Összes megtekintése <ArrowRight className="w-4 h-4" />
+                </button>
+              )}
+            </>
+          }
+        />
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-6">
-          {newArrivals.map((product, index) => (
+          {visibleProducts.map((product, index) => (
             <EnhancedProductCard key={product.id} product={product} onToggleWishlist={onToggleWishlist} isWishlisted={wishlist.includes(product.id)} onQuickView={onProductClick} onAddToCart={onAddToCart || (() => {})} index={index} />
           ))}
+        </div>
+        <div className="mt-5 flex flex-wrap items-center gap-2 text-xs text-gray-500">
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white border border-primary-100 text-primary-700 font-semibold">
+            <Sparkles className="w-3.5 h-3.5" />
+            Frissítve
+          </span>
+          <span>Az újdonságok automatikusan a legfrissebb termékekből válogatnak.</span>
         </div>
       </div>
     </section>
