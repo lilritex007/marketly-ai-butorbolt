@@ -136,6 +136,13 @@ const SmartSearchBar = ({
     };
   }, [query]);
 
+  // Server-side search: trigger on debounced input
+  useEffect(() => {
+    if (!serverSearchMode) return;
+    const q = debouncedQuery.trim();
+    onSearch?.(q);
+  }, [debouncedQuery, onSearch, serverSearchMode]);
+
   // Autocomplete javaslatok - TELJES katalógusból keres
   const autocompleteSuggestions = useMemo(() => {
     if (!canUseLocalIndex) return [];
@@ -537,7 +544,7 @@ const SmartSearchBar = ({
           )}
 
           {/* Keresési találatok - termékek */}
-          {debouncedQuery.length >= 2 && searchResults.results && searchResults.results.length > 0 && (
+          {!serverSearchMode && debouncedQuery.length >= 2 && searchResults.results && searchResults.results.length > 0 && (
             <div className="p-3">
               <div className="flex items-center justify-between px-2 py-2 mb-2 gap-2">
                 <div className="flex items-center gap-2 flex-wrap">
@@ -636,7 +643,7 @@ const SmartSearchBar = ({
           )}
 
           {/* "Erre gondoltál?" javaslat */}
-          {debouncedQuery.length >= 2 && searchResults.didYouMean && (
+          {!serverSearchMode && debouncedQuery.length >= 2 && searchResults.didYouMean && (
             <div className="px-4 py-3 bg-gradient-to-r from-amber-50 to-orange-50 border-b border-amber-100">
               <button
                 onClick={() => handleSuggestionClick(searchResults.didYouMean.query)}
@@ -653,7 +660,7 @@ const SmartSearchBar = ({
           )}
 
           {/* Nincs találat - finomított empty state */}
-          {debouncedQuery.length >= 2 && (!searchResults.results || searchResults.results.length === 0) && autocompleteSuggestions.length === 0 && (
+          {!serverSearchMode && debouncedQuery.length >= 2 && (!searchResults.results || searchResults.results.length === 0) && autocompleteSuggestions.length === 0 && (
             <div className="p-8 text-center">
               <div className="w-20 h-20 bg-gradient-to-br from-gray-50 to-gray-100 rounded-2xl flex items-center justify-center mx-auto mb-5 shadow-sm border border-gray-100 ring-4 ring-gray-50/80">
                 <Search className="w-10 h-10 text-gray-300" strokeWidth={1.5} />
