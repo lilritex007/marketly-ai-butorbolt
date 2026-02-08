@@ -898,6 +898,9 @@ const App = () => {
         setTotalProductsCount(totalCount);
         setHasMoreProducts(newProducts.length > 0 && newProducts.length < totalCount);
       }
+      if (!append && search && String(search).trim()) {
+        setTimeout(() => scrollToProductsSectionRef.current?.(), 120);
+      }
       // #region agent log
       fetch('http://localhost:7244/ingest/4b0575bc-02d3-43f2-bc91-db7897d5cbba',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({runId:'pre',hypothesisId:'H1',location:'App.jsx:loadUnasData',message:'loadUnasData success',data:{newCount:newProducts.length,totalCount,append},timestamp:Date.now()})}).catch(()=>{});
       // #endregion
@@ -914,7 +917,7 @@ const App = () => {
       if (!silent && !append) setIsLoadingUnas(false);
       if (append) setIsLoadingMore(false);
     }
-  }, []);
+  }, [getCategoryMainList]);
 
   // Server-side search (marketplace-style)
   const handleServerSearch = useCallback((query) => {
@@ -1654,7 +1657,8 @@ const App = () => {
                   })()}
                   activeCategory={categoryFilter}
                   onCategoryChange={handleCategoryChange}
-                  displayedCount={categoryFilter === 'Összes' ? (totalProductsCount || products.length) : products.length}
+                  displayedCount={products.length}
+                  activeTotalOverride={categoryFilter === 'Összes' ? (totalProductsCount || products.length) : (categoryStats?.total ?? 0)}
                 />
 
                 {/* Loading State */}

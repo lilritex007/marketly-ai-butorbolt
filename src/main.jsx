@@ -4,6 +4,16 @@ import App from './App.jsx'
 import { ErrorBoundary } from './components/ui/ErrorBoundary'
 import './index.css'
 
+if (typeof window !== 'undefined' && !window.__MKT_SCROLL_INIT) {
+  window.__MKT_SCROLL_INIT = true
+  window.history.scrollRestoration = 'manual'
+  const scrollTopNow = () => {
+    window.scrollTo({ top: 0, left: 0, behavior: 'auto' })
+  }
+  window.addEventListener('load', scrollTopNow)
+  window.addEventListener('pageshow', scrollTopNow)
+}
+
 const rootEl = document.getElementById('root')
 if (rootEl) {
   if (!window.__MKT_BUTORBOLT_APP_MOUNTED) {

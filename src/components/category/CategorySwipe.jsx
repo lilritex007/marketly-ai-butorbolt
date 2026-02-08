@@ -7,14 +7,14 @@ import { CategoryIcon } from '../ui/Icons';
  * Typography: Mobile 13-14px, Tablet 14px, Desktop 14-15px
  * Touch targets: 44px minimum
  */
-const CategorySwipe = ({ categories, activeCategory, onCategoryChange, displayedCount }) => {
+const CategorySwipe = ({ categories, activeCategory, onCategoryChange, displayedCount, activeTotalOverride }) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(true);
   const scrollRef = useRef(null);
   
   const activeData = categories.find(c => c.id === activeCategory);
-  const activeTotalCount = activeData?.totalCount || 0;
+  const activeTotalCount = typeof activeTotalOverride === 'number' ? activeTotalOverride : (activeData?.totalCount || 0);
   
   const VISIBLE_MOBILE = 15;
   const VISIBLE_DESKTOP = 18;
