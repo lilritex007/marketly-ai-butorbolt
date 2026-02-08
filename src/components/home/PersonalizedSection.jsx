@@ -17,6 +17,7 @@ const PersonalizedSection = ({
 }) => {
   const [activeTab, setActiveTab] = useState('foryou');
   const [refreshKey, setRefreshKey] = useState(0);
+  const [viewSize, setViewSize] = useState(12);
   // User adatok
   const recentlyViewed = useMemo(() => getViewedProducts(12), []);
   const styleDNA = useMemo(() => getStyleDNA(), []);
@@ -44,7 +45,11 @@ const PersonalizedSection = ({
   ];
 
   const currentProducts = tabs.find(t => t.id === activeTab)?.products || [];
-  const visibleProducts = currentProducts.slice(0, 12);
+  const visibleProducts = currentProducts.slice(0, Math.max(12, viewSize));
+  const inStockCount = useMemo(
+    () => currentProducts.filter((p) => (p.inStock ?? p.in_stock ?? true)).length,
+    [currentProducts]
+  );
 
   // Ha nincs elég adat, ne jelenjen meg
   if (currentProducts.length < 2 && forYouProducts.length < 2) {
@@ -52,8 +57,10 @@ const PersonalizedSection = ({
   }
 
   return (
-    <section className="py-8 sm:py-12 lg:py-16 bg-gradient-to-b from-white via-white to-primary-50/40 border-t border-gray-100">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <section className="relative py-10 sm:py-14 lg:py-20 bg-gradient-to-b from-white via-white to-primary-50/40 border-t border-gray-100 overflow-hidden">
+      <div className="absolute -top-20 -right-16 w-72 h-72 bg-primary-200/30 blur-3xl rounded-full" aria-hidden />
+      <div className="absolute -bottom-24 -left-16 w-80 h-80 bg-secondary-200/30 blur-3xl rounded-full" aria-hidden />
+      <div className="w-full max-w-[2000px] mx-auto px-4 sm:px-6 lg:px-10 xl:px-16">
         <SectionHeader
           id="personalized-heading"
           title="Személyre szabva neked"
@@ -62,17 +69,49 @@ const PersonalizedSection = ({
           accentClass="from-primary-500 to-secondary-700"
           badge="AI ajánlás"
           contextLabel={contextLabel}
-          meta={`Megjelenítve: ${currentProducts.length} termék`}
+          meta={`Megjelenítve: ${Math.min(visibleProducts.length, currentProducts.length)} / ${currentProducts.length} termék`}
           actions={
-            <button
-              onClick={() => setRefreshKey((v) => v + 1)}
-              className="inline-flex items-center gap-2 px-3 py-2 rounded-lg text-primary-700 bg-primary-50 border border-primary-100 hover:bg-primary-100 transition-colors text-sm font-semibold min-h-[44px]"
-            >
-              <RefreshCw className="w-4 h-4" />
-              Frissítem
-            </button>
+            <div className="flex items-center gap-2 flex-wrap">
+              <div className="inline-flex items-center rounded-full bg-white border border-gray-100 shadow-sm p-1">
+                {[12, 24].map((size) => (
+                  <button
+                    key={size}
+                    onClick={() => setViewSize(size)}
+                    className={`px-3 py-1.5 rounded-full text-xs font-semibold transition-colors min-h-[36px] ${
+                      viewSize === size
+                        ? 'bg-primary-500 text-white'
+                        : 'text-gray-600 hover:bg-gray-100'
+                    }`}
+                  >
+                    {size} db
+                  </button>
+                ))}
+              </div>
+              <button
+                onClick={() => setRefreshKey((v) => v + 1)}
+                className="inline-flex items-center gap-2 px-3 py-2 rounded-lg text-primary-700 bg-primary-50 border border-primary-100 hover:bg-primary-100 transition-colors text-sm font-semibold min-h-[44px]"
+              >
+                <RefreshCw className="w-4 h-4" />
+                Frissítem
+              </button>
+            </div>
           }
         />
+
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 mb-6">
+          <div className="rounded-2xl bg-white/90 border border-gray-100 p-4 shadow-sm">
+            <p className="text-xs text-gray-500">Neked ajánlott</p>
+            <p className="text-lg font-bold text-gray-900">{forYouProducts.length.toLocaleString('hu-HU')} termék</p>
+          </div>
+          <div className="rounded-2xl bg-white/90 border border-gray-100 p-4 shadow-sm">
+            <p className="text-xs text-gray-500">Nemrég nézted</p>
+            <p className="text-lg font-bold text-gray-900">{recentlyViewed.length.toLocaleString('hu-HU')} termék</p>
+          </div>
+          <div className="rounded-2xl bg-white/90 border border-gray-100 p-4 shadow-sm">
+            <p className="text-xs text-gray-500">Készleten</p>
+            <p className="text-lg font-bold text-gray-900">{inStockCount.toLocaleString('hu-HU')} termék</p>
+          </div>
+        </div>
 
         {/* Tabs */}
         <div className="flex gap-2 mb-6 overflow-x-auto pb-2 scrollbar-hide">
@@ -122,6 +161,18 @@ const PersonalizedSection = ({
             />
           ))}
         </div>
+
+        {currentProducts.length > visibleProducts.length && (
+          <div className="mt-6 flex justify-center">
+            <button
+              type="button"
+              onClick={() => setViewSize((v) => Math.min(currentProducts.length, v + 12))}
+              className="px-5 py-3 rounded-xl bg-white border border-gray-200 text-gray-700 font-semibold hover:bg-gray-50 transition-colors min-h-[48px]"
+            >
+              Több ajánlás
+            </button>
+          </div>
+        )}
 
         {/* Empty state for recent */}
         {activeTab === 'recent' && currentProducts.length === 0 && (

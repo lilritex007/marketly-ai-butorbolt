@@ -3,7 +3,7 @@ import { Package, ArrowRight, RefreshCw, Sparkles } from 'lucide-react';
 import { EnhancedProductCard } from '../product/EnhancedProductCard';
 import SectionHeader from './SectionHeader';
 
-const PAGE_SIZE = 8;
+const PAGE_SIZE = 12;
 
 const toTimestamp = (value) => {
   if (!value) return 0;

@@ -6,7 +6,7 @@ import SectionHeader from './SectionHeader';
 /**
  * Legnépszerűbb – valós adat: akciós termékek (nagy kedvezmény) + többi ár szerint, max 8.
  */
-const PAGE_SIZE = 8;
+const PAGE_SIZE = 12;
 
 const sliceWrap = (items, start, size) => {
   if (items.length <= size) return items;

@@ -686,6 +686,8 @@ const App = () => {
   const [showWishlistDrawer, setShowWishlistDrawer] = useState(false);
   const [cartItems, setCartItems] = useState([]);
   const [recentlyAddedToCart, setRecentlyAddedToCart] = useState(null);
+  const [featuredPool, setFeaturedPool] = useState([]);
+  const featuredPoolKeyRef = useRef('');
   
   // Flash sale end time (set to 12 hours from now for demo)
   const flashSaleEndTime = useMemo(() => {
@@ -1137,6 +1139,40 @@ const App = () => {
     return () => clearInterval(t);
   }, []);
 
+  // Featured pool for homepage modules (more variety than the first page)
+  useEffect(() => {
+    if (!totalProductsCount || totalProductsCount <= 0) return;
+    const key = `${totalProductsCount}-${lastUpdated || ''}`;
+    if (featuredPoolKeyRef.current === key) return;
+    featuredPoolKeyRef.current = key;
+    let cancelled = false;
+    const limit = 120;
+    const baseOffsets = [0];
+    if (totalProductsCount > limit * 2) {
+      baseOffsets.push(
+        Math.max(0, Math.floor(totalProductsCount / 3) - Math.floor(limit / 2)),
+        Math.max(0, Math.floor((totalProductsCount * 2) / 3) - Math.floor(limit / 2))
+      );
+    }
+    Promise.all(
+      baseOffsets.map((offset) => fetchUnasProducts({ limit, offset, slim: true }))
+    )
+      .then((batches) => {
+        if (cancelled) return;
+        const merged = new Map();
+        batches.forEach((data) => {
+          (data?.products || []).forEach((p) => {
+            if (p && p.id) merged.set(p.id, p);
+          });
+        });
+        setFeaturedPool(Array.from(merged.values()));
+      })
+      .catch(() => {
+        if (!cancelled) setFeaturedPool([]);
+      });
+    return () => { cancelled = true; };
+  }, [totalProductsCount, lastUpdated]);
+
   const normalizedAdvancedFilters = useMemo(() => ({
     priceMin: advancedFilters.priceMin ?? 0,
     priceMax: advancedFilters.priceMax ?? 1000000,
@@ -1170,6 +1206,8 @@ const App = () => {
   const sectionContextLabel = categoryFilter && categoryFilter !== 'Összes'
     ? categoryFilter
     : (mobileActiveFilterCount > 0 ? 'Szűrt ajánlások' : '');
+  const useContextSections = isSearchActive || (categoryFilter && categoryFilter !== 'Összes') || mobileActiveFilterCount > 0;
+  const featuredBase = useContextSections ? sectionProducts : (featuredPool.length > 0 ? featuredPool : sectionProducts);
   const displayedProducts = aiRecommendedProducts.length > 0
     ? aiRecommendedProducts
     : isSearchMode
@@ -1398,7 +1436,7 @@ const App = () => {
             </FadeInOnScroll>
             <FadeInOnScroll direction="up" className="section-perf">
             <LiveShowcase 
-              products={products.slice(0, 6)} 
+              products={featuredBase} 
               onProductClick={handleProductView}
             />
             </FadeInOnScroll>
@@ -1407,10 +1445,10 @@ const App = () => {
               <TestimonialsSection />
             </FadeInOnScroll>
 
-            {sectionProducts.length > 0 && (
+            {featuredBase.length > 0 && (
               <FadeInOnScroll direction="up" className="section-perf">
                 <NewArrivalsSection
-                  products={sectionProducts}
+                  products={featuredBase}
                   onProductClick={handleProductView}
                   onToggleWishlist={toggleWishlist}
                   wishlist={wishlist}
@@ -1421,10 +1459,10 @@ const App = () => {
               </FadeInOnScroll>
             )}
 
-            {sectionProducts.length > 0 && (
+            {featuredBase.length > 0 && (
               <FadeInOnScroll direction="up" className="section-perf">
                 <MostPopularSection
-                  products={sectionProducts}
+                  products={featuredBase}
                   onProductClick={handleProductView}
                   onToggleWishlist={toggleWishlist}
                   wishlist={wishlist}
@@ -1436,9 +1474,9 @@ const App = () => {
             )}
             
             {/* Personalized Section - For You + Recently Viewed + Trending */}
-            {sectionProducts.length > 0 && (
+            {featuredBase.length > 0 && (
               <PersonalizedSection
-                products={sectionProducts}
+                products={featuredBase}
                 onProductClick={handleProductView}
                 onToggleWishlist={toggleWishlist}
                 wishlist={wishlist}
