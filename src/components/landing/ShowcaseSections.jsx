@@ -6,6 +6,7 @@ import {
 } from 'lucide-react';
 import SectionHeader from './SectionHeader';
 import { EnhancedProductCard } from '../product/EnhancedProductCard';
+import { getStockLevel } from '../../utils/helpers';
 
 /**
  * Social Proof & Trust Signals
@@ -146,14 +147,19 @@ export const LiveShowcase = ({ products = [], onProductClick }) => {
         />
         {showcaseProducts.length > 0 ? (
           <div className="product-grid">
-            {showcaseProducts.map((product, index) => (
-              <EnhancedProductCard
-                key={product.id || index}
-                product={product}
-                onQuickView={onProductClick}
-                index={index}
-              />
-            ))}
+            {showcaseProducts.map((product, index) => {
+              const stockLevel = getStockLevel(product);
+              const highlightBadge = stockLevel !== null && stockLevel <= 3 ? `Utolsó ${stockLevel} db` : '';
+              return (
+                <EnhancedProductCard
+                  key={product.id || index}
+                  product={product}
+                  onQuickView={onProductClick}
+                  index={index}
+                  highlightBadge={highlightBadge}
+                />
+              );
+            })}
           </div>
         ) : (
           <div className="text-center py-12 bg-white rounded-2xl shadow-inner">

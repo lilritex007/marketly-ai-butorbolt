@@ -1,6 +1,7 @@
 import React, { useMemo, useState } from 'react';
 import { Package, ArrowRight, RefreshCw, Sparkles } from 'lucide-react';
 import { EnhancedProductCard } from '../product/EnhancedProductCard';
+import { getStockLevel } from '../../utils/helpers';
 import SectionHeader from './SectionHeader';
 
 const PAGE_SIZE = 12;
@@ -76,9 +77,22 @@ export default function NewArrivalsSection({ products = [], onProductClick, onTo
           }
         />
         <div className="product-grid">
-          {visibleProducts.map((product, index) => (
-            <EnhancedProductCard key={product.id} product={product} onToggleWishlist={onToggleWishlist} isWishlisted={wishlist.includes(product.id)} onQuickView={onProductClick} onAddToCart={onAddToCart || (() => {})} index={index} />
-          ))}
+          {visibleProducts.map((product, index) => {
+            const stockLevel = getStockLevel(product);
+            const highlightBadge = stockLevel !== null && stockLevel <= 3 ? `Utolsó ${stockLevel} db` : '';
+            return (
+              <EnhancedProductCard
+                key={product.id}
+                product={product}
+                onToggleWishlist={onToggleWishlist}
+                isWishlisted={wishlist.includes(product.id)}
+                onQuickView={onProductClick}
+                onAddToCart={onAddToCart || (() => {})}
+                index={index}
+                highlightBadge={highlightBadge}
+              />
+            );
+          })}
         </div>
         <div className="mt-5 flex flex-wrap items-center gap-2 text-xs text-gray-500">
           <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white border border-primary-100 text-primary-700 font-semibold">

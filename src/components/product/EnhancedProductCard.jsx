@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Heart, Eye, ShoppingBag } from 'lucide-react';
+import { Heart, Eye, ShoppingBag, Info } from 'lucide-react';
 import { formatPrice } from '../../utils/helpers';
 import { SmartBadges, StockBadge } from '../ui/Badge';
 
@@ -21,7 +21,9 @@ export const EnhancedProductCard = ({
   isWishlisted, 
   onQuickView,
   onAddToCart,
-  index = 0
+  index = 0,
+  highlightBadge,
+  recommendationReasons = []
 }) => {
   const [isHovered, setIsHovered] = useState(false);
   const [imageLoaded, setImageLoaded] = useState(false);
@@ -38,6 +40,9 @@ export const EnhancedProductCard = ({
 
   const displayPrice = product.salePrice || product.price;
   const inStock = product.inStock ?? product.in_stock ?? true;
+  const reasonsText = recommendationReasons && recommendationReasons.length > 0
+    ? recommendationReasons.slice(0, 2).join(' • ')
+    : '';
 
   // Intersection Observer for scroll animation - optimized
   useEffect(() => {
@@ -84,6 +89,11 @@ export const EnhancedProductCard = ({
       {/* Smart Badges */}
       <div className="absolute top-2.5 sm:top-3 left-2.5 sm:left-3 z-20">
         <SmartBadges product={product} maxBadges={2} />
+        {highlightBadge && (
+          <span className="mt-1.5 inline-flex items-center px-2 py-1 rounded-full text-[10px] font-bold bg-red-100 text-red-700">
+            {highlightBadge}
+          </span>
+        )}
       </div>
 
       {/* Wishlist Button */}
@@ -107,6 +117,22 @@ export const EnhancedProductCard = ({
       >
         <Heart className={`w-5 h-5 sm:w-5 sm:h-5 lg:w-6 lg:h-6 ${isWishlisted ? 'fill-current' : ''}`} />
       </button>
+
+      {reasonsText && (
+        <div className="absolute top-14 sm:top-16 right-3 sm:right-4 z-20 group">
+          <button
+            type="button"
+            className="w-9 h-9 sm:w-10 sm:h-10 flex items-center justify-center rounded-full bg-white/95 text-gray-500 shadow-md hover:text-primary-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-400 focus-visible:ring-offset-2"
+            aria-label="Miért ezt ajánljuk?"
+            title={reasonsText}
+          >
+            <Info className="w-4 h-4" />
+          </button>
+          <div className="absolute right-0 mt-2 w-56 p-2 rounded-lg bg-gray-900 text-white text-xs opacity-0 pointer-events-none group-hover:opacity-100 transition-opacity shadow-xl">
+            {reasonsText}
+          </div>
+        </div>
+      )}
 
       {/* Image Section - FILL the space */}
       <div 

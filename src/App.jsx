@@ -1481,6 +1481,7 @@ const App = () => {
                 onToggleWishlist={toggleWishlist}
                 wishlist={wishlist}
                 contextLabel={sectionContextLabel}
+                cartItems={cartItems}
               />
             )}
 

@@ -1,6 +1,7 @@
 import React, { useMemo, useState } from 'react';
 import { TrendingUp, ArrowRight, RefreshCw, Flame } from 'lucide-react';
 import { EnhancedProductCard } from '../product/EnhancedProductCard';
+import { getStockLevel } from '../../utils/helpers';
 import SectionHeader from './SectionHeader';
 
 /**
@@ -19,6 +20,8 @@ const sliceWrap = (items, start, size) => {
 
 export default function MostPopularSection({ products = [], onProductClick, onToggleWishlist, wishlist = [], onViewAll, onAddToCart, contextLabel = '' }) {
   const [page, setPage] = useState(0);
+  const [period, setPeriod] = useState('weekly');
+  const [autoRotate, setAutoRotate] = useState(true);
   const mostPopular = useMemo(() => {
     if (!products.length) return [];
     const inStock = products.filter((p) => (p.inStock ?? p.in_stock ?? true));
@@ -31,12 +34,27 @@ export default function MostPopularSection({ products = [], onProductClick, onTo
       .sort((a, b) => (b.price || 0) - (a.price || 0));
     return [...withDiscount, ...rest];
   }, [products]);
+  const weeklySet = useMemo(() => mostPopular.slice(0, PAGE_SIZE * 2), [mostPopular]);
+  const monthlySet = useMemo(() => {
+    const start = PAGE_SIZE * 2;
+    const end = PAGE_SIZE * 4;
+    return mostPopular.slice(start, end).length > 0 ? mostPopular.slice(start, end) : mostPopular;
+  }, [mostPopular]);
+  const activeSet = period === 'weekly' ? weeklySet : monthlySet;
   const visibleProducts = useMemo(() => {
-    const start = (page * PAGE_SIZE) % Math.max(1, mostPopular.length);
-    return sliceWrap(mostPopular, start, PAGE_SIZE);
-  }, [mostPopular, page]);
+    const start = (page * PAGE_SIZE) % Math.max(1, activeSet.length);
+    return sliceWrap(activeSet, start, PAGE_SIZE);
+  }, [activeSet, page]);
   const saleCount = useMemo(() => mostPopular.filter((p) => p.salePrice && p.price > p.salePrice).length, [mostPopular]);
   const inStockCount = useMemo(() => mostPopular.length, [mostPopular]);
+
+  useEffect(() => {
+    if (!autoRotate) return undefined;
+    const t = setInterval(() => {
+      setPeriod((prev) => (prev === 'weekly' ? 'monthly' : 'weekly'));
+    }, 8000);
+    return () => clearInterval(t);
+  }, [autoRotate]);
 
   if (visibleProducts.length === 0) return null;
 
@@ -56,6 +74,28 @@ export default function MostPopularSection({ products = [], onProductClick, onTo
           helpText="Csak készleten lévő termékek"
           actions={
             <>
+              <div className="inline-flex items-center rounded-full bg-white border border-gray-100 shadow-sm p-1">
+                {[
+                  { id: 'weekly', label: 'Heti kedvencek' },
+                  { id: 'monthly', label: 'Havi toplista' }
+                ].map((item) => (
+                  <button
+                    key={item.id}
+                    type="button"
+                    onClick={() => {
+                      setAutoRotate(false);
+                      setPeriod(item.id);
+                    }}
+                    className={`px-3 py-1.5 rounded-full text-xs font-semibold transition-colors min-h-[36px] ${
+                      period === item.id
+                        ? 'bg-amber-500 text-white'
+                        : 'text-gray-600 hover:bg-gray-100'
+                    }`}
+                  >
+                    {item.label}
+                  </button>
+                ))}
+              </div>
               <button
                 type="button"
                 onClick={() => setPage((p) => p + 1)}
@@ -78,7 +118,10 @@ export default function MostPopularSection({ products = [], onProductClick, onTo
           }
         />
         <div className="product-grid">
-          {visibleProducts.map((product, index) => (
+          {visibleProducts.map((product, index) => {
+            const stockLevel = getStockLevel(product);
+            const highlightBadge = stockLevel !== null && stockLevel <= 3 ? `Utolsó ${stockLevel} db` : '';
+            return (
             <EnhancedProductCard
               key={product.id}
               product={product}
@@ -87,8 +130,9 @@ export default function MostPopularSection({ products = [], onProductClick, onTo
               onQuickView={onProductClick}
               onAddToCart={onAddToCart || (() => {})}
               index={index}
+              highlightBadge={highlightBadge}
             />
-          ))}
+          )})}
         </div>
         <div className="mt-5 flex flex-wrap items-center gap-2 text-xs text-gray-500">
           <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white border border-amber-100 text-amber-700 font-semibold">

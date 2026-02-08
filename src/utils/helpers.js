@@ -121,6 +121,23 @@ export const shuffleArray = (array) => {
 };
 
 /**
+ * Try to extract stock level from product data
+ */
+export const getStockLevel = (product) => {
+  if (!product) return null;
+  const direct = product.stockLevel ?? product.stock_level ?? product.stock ?? null;
+  if (typeof direct === 'number' && Number.isFinite(direct)) return direct;
+  const params = product.params || '';
+  if (typeof params !== 'string' || params.length === 0) return null;
+  const match = params.match(/(rakt[aá]r|k[eé]szlet)[^0-9]{0,8}(\d{1,3})/i);
+  if (match && match[2]) {
+    const val = parseInt(match[2], 10);
+    return Number.isFinite(val) ? val : null;
+  }
+  return null;
+};
+
+/**
  * Group items by key
  */
 export const groupBy = (array, key) => {

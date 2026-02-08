@@ -1,8 +1,9 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Sparkles, Clock, TrendingUp, RefreshCw } from 'lucide-react';
-import { getViewedProducts, getPersonalizedRecommendations, getStyleDNA } from '../../services/userPreferencesService';
+import { Sparkles, Clock, TrendingUp, RefreshCw, ShoppingCart, Info } from 'lucide-react';
+import { getViewedProducts, getPersonalizedRecommendations, getStyleDNA, getTopCategories, getSearchHistory, getSimilarProducts } from '../../services/userPreferencesService';
 import SectionHeader from '../landing/SectionHeader';
 import { EnhancedProductCard } from '../product/EnhancedProductCard';
+import { getStockLevel } from '../../utils/helpers';
 
 /**
  * PersonalizedSection - Személyre szabott főoldal szekciók
@@ -13,14 +14,18 @@ const PersonalizedSection = ({
   onProductClick, 
   onToggleWishlist, 
   wishlist = [],
-  contextLabel = ''
+  contextLabel = '',
+  cartItems = []
 }) => {
   const [activeTab, setActiveTab] = useState('foryou');
   const [refreshKey, setRefreshKey] = useState(0);
   const [viewSize, setViewSize] = useState(12);
+  const [focusCategory, setFocusCategory] = useState('');
   // User adatok
   const recentlyViewed = useMemo(() => getViewedProducts(12).filter((p) => (p.inStock ?? p.in_stock ?? true)), []);
   const styleDNA = useMemo(() => getStyleDNA(), []);
+  const topCategories = useMemo(() => getTopCategories(6), []);
+  const searchHistory = useMemo(() => getSearchHistory(6), []);
   
   // Személyre szabott ajánlások
   const forYouProducts = useMemo(() => {
@@ -39,18 +44,100 @@ const PersonalizedSection = ({
       .slice(0, 12);
   }, [products, refreshKey]);
 
+  const cartBasedProducts = useMemo(() => {
+    if (!products?.length) return [];
+    const base = Array.isArray(cartItems) && cartItems.length > 0 ? cartItems : recentlyViewed;
+    if (!base || base.length === 0) return [];
+    const merged = new Map();
+    base.forEach((p) => {
+      const similar = getSimilarProducts(p, products, 8);
+      similar.forEach((item) => {
+        if (item && item.id && (item.inStock ?? item.in_stock ?? true)) merged.set(item.id, item);
+      });
+    });
+    return Array.from(merged.values()).slice(0, 24);
+  }, [products, cartItems, recentlyViewed]);
+
   const tabs = [
     { id: 'foryou', label: 'Neked ajánljuk', icon: Sparkles, products: forYouProducts },
     { id: 'recent', label: 'Nemrég nézted', icon: Clock, products: recentlyViewed },
     { id: 'trending', label: 'Trendi most', icon: TrendingUp, products: trendingProducts },
+    { id: 'cart', label: 'Hasonló a kosaradhoz', icon: ShoppingCart, products: cartBasedProducts },
   ];
 
-  const currentProducts = tabs.find(t => t.id === activeTab)?.products || [];
+  const currentProductsRaw = tabs.find(t => t.id === activeTab)?.products || [];
+  const currentProducts = focusCategory
+    ? currentProductsRaw.filter((p) => (p.category || '').toLowerCase().includes(focusCategory.toLowerCase()))
+    : currentProductsRaw;
   const visibleProducts = currentProducts.slice(0, Math.max(12, viewSize));
   const inStockCount = useMemo(
     () => currentProducts.filter((p) => (p.inStock ?? p.in_stock ?? true)).length,
     [currentProducts]
   );
+
+  const fallbackCategories = useMemo(() => {
+    if (topCategories.length > 0) return topCategories;
+    const counts = new Map();
+    products.forEach((p) => {
+      if (p?.category) counts.set(p.category, (counts.get(p.category) || 0) + 1);
+    });
+    return Array.from(counts.entries())
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 6)
+      .map(([name]) => name);
+  }, [topCategories, products]);
+
+  const buildRecommendationReasons = (product) => {
+    if (!product) return [];
+    const reasons = [];
+    const category = product.category || '';
+    if (Array.isArray(cartItems) && cartItems.length > 0) {
+      const cartCategories = cartItems.map((p) => p.category || '').filter(Boolean);
+      if (cartCategories.some((c) => category.toLowerCase().includes(c.toLowerCase()))) {
+        reasons.push('Hasonló a kosaradhoz');
+      }
+    } else if (recentlyViewed.length > 0) {
+      const viewedCats = recentlyViewed.map((p) => p.category || '').filter(Boolean);
+      if (viewedCats.some((c) => category.toLowerCase().includes(c.toLowerCase()))) {
+        reasons.push('Hasonló a korábban nézett termékeidhez');
+      }
+    }
+    if (topCategories.some((c) => category.toLowerCase().includes(c.toLowerCase()))) {
+      reasons.push(`Kedvelt kategória: ${category}`);
+    }
+    if (searchHistory.length > 0) {
+      const term = searchHistory.find((s) => {
+        const q = (s.query || '').toLowerCase();
+        const text = `${product.name || ''} ${product.category || ''} ${product.description || ''}`.toLowerCase();
+        return q && text.includes(q);
+      });
+      if (term?.query) reasons.push(`Korábbi keresés: “${term.query}”`);
+    }
+    if (styleDNA?.answers) {
+      const { space, room } = styleDNA.answers;
+      const text = `${product.name || ''} ${product.category || ''} ${product.description || ''}`.toLowerCase();
+      const styleKeywords = {
+        modern: ['modern', 'minimalista', 'letisztult'],
+        scandinavian: ['skandináv', 'natúr', 'világos', 'fehér'],
+        industrial: ['indusztriális', 'loft', 'fém', 'ipari'],
+        vintage: ['vintage', 'retro', 'antik'],
+        bohemian: ['bohém', 'színes', 'mintás'],
+      };
+      if (space && styleKeywords[space] && styleKeywords[space].some((kw) => text.includes(kw))) {
+        reasons.push(`Stílus illeszkedés: ${space}`);
+      }
+      const roomKeywords = {
+        living: ['kanapé', 'fotel', 'dohányzó', 'tv', 'nappali'],
+        bedroom: ['ágy', 'matrac', 'éjjeli', 'hálószoba'],
+        dining: ['étkező', 'asztal', 'szék'],
+        office: ['íróasztal', 'iroda', 'forgószék'],
+      };
+      if (room && roomKeywords[room] && roomKeywords[room].some((kw) => text.includes(kw))) {
+        reasons.push(`Szoba típusa: ${room}`);
+      }
+    }
+    return reasons.slice(0, 2);
+  };
 
   // Ha nincs elég adat, ne jelenjen meg
   if (currentProducts.length < 2 && forYouProducts.length < 2) {
@@ -69,7 +156,7 @@ const PersonalizedSection = ({
           Icon={Sparkles}
           accentClass="from-primary-500 to-secondary-700"
           eyebrow="Neked szól"
-          badge="AI ajánlás"
+          badge={styleDNA?.styleDNA ? 'Style DNA aktív' : 'AI ajánlás'}
           contextLabel={contextLabel}
           meta={`Megjelenítve: ${Math.min(visibleProducts.length, currentProducts.length)} / ${currentProducts.length} termék`}
           helpText="Csak készleten lévő termékek"
@@ -95,7 +182,7 @@ const PersonalizedSection = ({
                 className="inline-flex items-center gap-2 px-3 py-2 rounded-lg text-primary-700 bg-primary-50 border border-primary-100 hover:bg-primary-100 transition-colors text-sm font-semibold min-h-[44px]"
               >
                 <RefreshCw className="w-4 h-4" />
-                Frissítem
+                {refreshKey % 2 === 0 ? 'Hasonlókat kérek' : 'Frissítem'}
               </button>
             </div>
           }
@@ -115,6 +202,13 @@ const PersonalizedSection = ({
             <p className="text-lg font-bold text-gray-900">{inStockCount.toLocaleString('hu-HU')} termék</p>
           </div>
         </div>
+
+        {styleDNA?.styleDNA && (
+          <div className="mb-4 inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white border border-primary-100 text-primary-700 text-xs font-semibold shadow-sm">
+            <Info className="w-3.5 h-3.5" />
+            Style DNA aktív – személyre szabott ajánlások
+          </div>
+        )}
 
         {/* Tabs */}
         <div className="flex gap-2 mb-6 overflow-x-auto pb-2 scrollbar-hide">
@@ -152,17 +246,50 @@ const PersonalizedSection = ({
           })}
         </div>
 
+        {fallbackCategories.length > 0 && (
+          <div className="flex flex-wrap items-center gap-2 mb-6">
+            <span className="text-xs text-gray-500 mr-1">Fókusz:</span>
+            <button
+              type="button"
+              onClick={() => setFocusCategory('')}
+              className={`px-3 py-1.5 rounded-full text-xs font-semibold border transition-colors ${
+                focusCategory === '' ? 'bg-gray-900 text-white border-gray-900' : 'bg-white text-gray-600 border-gray-100 hover:bg-gray-50'
+              }`}
+            >
+              Összes
+            </button>
+            {fallbackCategories.map((cat) => (
+              <button
+                key={cat}
+                type="button"
+                onClick={() => setFocusCategory(cat)}
+                className={`px-3 py-1.5 rounded-full text-xs font-semibold border transition-colors ${
+                  focusCategory === cat ? 'bg-primary-500 text-white border-primary-500' : 'bg-white text-gray-600 border-gray-100 hover:bg-gray-50'
+                }`}
+              >
+                {cat}
+              </button>
+            ))}
+          </div>
+        )}
+
         <div className="product-grid">
-          {visibleProducts.map((product, index) => (
-            <EnhancedProductCard
-              key={product.id}
-              product={product}
-              onToggleWishlist={onToggleWishlist}
-              isWishlisted={wishlist.includes(product.id)}
-              onQuickView={onProductClick}
-              index={index}
-            />
-          ))}
+          {visibleProducts.map((product, index) => {
+            const stockLevel = getStockLevel(product);
+            const highlightBadge = stockLevel !== null && stockLevel <= 3 ? `Utolsó ${stockLevel} db` : '';
+            return (
+              <EnhancedProductCard
+                key={product.id}
+                product={product}
+                onToggleWishlist={onToggleWishlist}
+                isWishlisted={wishlist.includes(product.id)}
+                onQuickView={onProductClick}
+                index={index}
+                highlightBadge={highlightBadge}
+                recommendationReasons={buildRecommendationReasons(product)}
+              />
+            );
+          })}
         </div>
 
         {currentProducts.length > visibleProducts.length && (
