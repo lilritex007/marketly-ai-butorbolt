@@ -914,6 +914,7 @@ const App = () => {
   const handleServerSearch = useCallback((query) => {
     setSearchQuery(query);
     // API hívás a debouncedSearch useEffect-ben
+    setTimeout(() => scrollToProductsSectionRef.current?.(), 120);
   }, []);
 
   // Scroll container: ne használjunk olyan containert, ami a mi appunk belsejében van (#mkt-butorbolt-app).
@@ -1011,6 +1012,10 @@ const App = () => {
     };
     window.addEventListener('hashchange', onHashChange);
     return () => window.removeEventListener('hashchange', onHashChange);
+  }, []);
+
+  useEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
   }, []);
 
   useEffect(() => {
@@ -1603,14 +1608,14 @@ const App = () => {
                     mainCategories={categoryHierarchy.mainCategories}
                     activeCategory={categoryFilter}
                     onCategorySelect={handleCategoryChange}
-                    totalProductCount={products.length}
+                    totalProductCount={totalProductsCount || products.length}
                   />
                 )}
                 <CategorySwipe
                   categories={(() => {
                     if (categoryHierarchy?.mainCategories?.length > 0) {
                       return [
-                        { id: 'Összes', name: 'Összes', totalCount: products.length },
+                        { id: 'Összes', name: 'Összes', totalCount: totalProductsCount || products.length },
                         ...categoryHierarchy.mainCategories.map((m) => ({
                           id: m.name,
                           name: m.name,
@@ -1628,7 +1633,7 @@ const App = () => {
                   })()}
                   activeCategory={categoryFilter}
                   onCategoryChange={handleCategoryChange}
-                  displayedCount={displayedProducts.length}
+                  displayedCount={products.length}
                 />
 
                 {/* Loading State */}
@@ -1656,7 +1661,8 @@ const App = () => {
                       type="button"
                       onClick={() => loadUnasDataRef.current({
                         search: searchIndexReady ? undefined : (searchQuery.trim() || undefined),
-                        category: categoryFilter !== 'Összes' ? categoryFilter : '',
+                        category: !mainCategorySet.has(categoryFilter) && categoryFilter !== 'Összes' ? categoryFilter : '',
+                        categoryMain: mainCategorySet.has(categoryFilter) ? categoryFilter : undefined,
                         limit: INITIAL_PAGE,
                         offset: 0
                       })}
