@@ -1163,11 +1163,14 @@ const App = () => {
       {/* AI Chat Assistant (deferred for faster first paint) */}
       {showDeferredAI && (
         <Suspense fallback={null}>
-          <AIChatAssistant
-            products={products}
-            catalogProducts={searchIndexReady ? searchIndexRef.current : products}
-            onShowProducts={handleShowAIProducts}
-          />
+            <AIChatAssistant
+              products={products}
+              catalogProducts={searchIndexReady ? searchIndexRef.current : products}
+              onShowProducts={handleShowAIProducts}
+              serverSearchMode={SERVER_SEARCH_ONLY}
+              totalProductsCount={totalProductsCount}
+              categoryHierarchy={categoryHierarchy}
+            />
         </Suspense>
       )}
 

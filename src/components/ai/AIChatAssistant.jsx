@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect, useMemo, useCallback } from 'react'
 import { MessageCircle, X, Send, Loader2, Sparkles, User, Bot, AlertCircle, ThumbsUp, ThumbsDown, Search, Package, Tag, TrendingUp, Filter, Zap, Star, ShoppingBag } from 'lucide-react';
 import { generateText } from '../../services/geminiService';
 import { smartSearch, parseSearchIntent, getProactiveSuggestions } from '../../services/aiSearchService';
+import { fetchUnasProducts } from '../../services/unasApi';
 import { 
   getPersonalizedContext, 
   trackAIFeedback, 
@@ -22,7 +23,7 @@ import {
  * - Személyre szabott válaszok
  * - Proaktív ajánlások
  */
-const AIChatAssistant = ({ products, catalogProducts, onShowProducts }) => {
+const AIChatAssistant = ({ products, catalogProducts, onShowProducts, serverSearchMode = false, totalProductsCount = 0, categoryHierarchy }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState([]);
   const [inputValue, setInputValue] = useState('');
@@ -34,7 +35,25 @@ const AIChatAssistant = ({ products, catalogProducts, onShowProducts }) => {
   // Teljes katalógus elemzés - részletes statisztikák
   const catalogSource = catalogProducts && catalogProducts.length > 0 ? catalogProducts : products;
   const catalogStats = useMemo(() => {
-    if (!catalogSource || catalogSource.length === 0) return null;
+    if (!catalogSource || catalogSource.length === 0) {
+      const fallbackCategories = (categoryHierarchy?.mainCategories || [])
+        .slice(0, 15)
+        .map((c) => ({
+          name: c.name,
+          count: Number(c.productCount || 0),
+          subcategories: Array.isArray(c.children) ? c.children.slice(0, 5).map(ch => ch.name) : [],
+          priceRange: { min: 0, max: 0 }
+        }));
+      return {
+        total: totalProductsCount || 0,
+        categories: fallbackCategories,
+        priceRange: { min: 0, max: 0 },
+        priceDistribution: { under50k: 0, under100k: 0, under200k: 0, over200k: 0 },
+        onSaleCount: 0,
+        availableStyles: [],
+        availableColors: []
+      };
+    }
 
     const categories = {};
     const mainCategories = {};
@@ -98,7 +117,7 @@ const AIChatAssistant = ({ products, catalogProducts, onShowProducts }) => {
       }));
 
     return {
-      total: products.length,
+      total: catalogSource.length,
       categories: topCategories,
       priceRange: { min: minPrice, max: maxPrice },
       priceDistribution: priceRanges,
@@ -106,15 +125,23 @@ const AIChatAssistant = ({ products, catalogProducts, onShowProducts }) => {
       availableStyles: Array.from(styles),
       availableColors: Array.from(colors)
     };
-  }, [catalogSource]);
+  }, [catalogSource, totalProductsCount, categoryHierarchy]);
 
   // Okos keresés a központi aiSearchService-ből
-  const performSmartSearch = useCallback((query, options = {}) => {
-    if (!catalogSource || catalogSource.length === 0) return { results: [], intent: null };
-    
+  const performSmartSearch = useCallback(async (query, options = {}) => {
     const { limit = 12 } = options;
+    const intent = parseSearchIntent(query);
+    if (serverSearchMode) {
+      try {
+        const data = await fetchUnasProducts({ search: query, limit, offset: 0, slim: false });
+        return { results: data.products || [], intent };
+      } catch {
+        return { results: [], intent };
+      }
+    }
+    if (!catalogSource || catalogSource.length === 0) return { results: [], intent };
     return smartSearch(catalogSource, query, { limit, includeDebugInfo: false });
-  }, [catalogSource]);
+  }, [catalogSource, serverSearchMode]);
 
   // Kategória alapú ajánlások
   const getCategoryProducts = useCallback((categoryName, limit = 6) => {
@@ -245,7 +272,7 @@ const AIChatAssistant = ({ products, catalogProducts, onShowProducts }) => {
 
     try {
       // Szuperokos keresés az aiSearchService-ből
-      const searchResult = performSmartSearch(userMessage, { limit: 12 });
+      const searchResult = await performSmartSearch(userMessage, { limit: 12 });
       const relevantProducts = searchResult.results || [];
       const searchIntent = searchResult.intent;
       

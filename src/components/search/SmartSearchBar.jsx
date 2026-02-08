@@ -131,7 +131,7 @@ const SmartSearchBar = ({
     }
     debounceTimerRef.current = setTimeout(() => {
       setDebouncedQuery(query);
-    }, 300);
+    }, 200);
     return () => {
       if (debounceTimerRef.current) {
         clearTimeout(debounceTimerRef.current);
