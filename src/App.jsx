@@ -850,6 +850,7 @@ const App = () => {
       const params = {
         limit,
         offset,
+        slim: false,
         ...(search && search.trim() && { search: search.trim() }),
         ...(category && category !== 'Összes' && { category })
       };
