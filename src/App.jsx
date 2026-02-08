@@ -1400,14 +1400,11 @@ const App = () => {
                       {!isLoadingUnas && (
                         <span className="text-sm sm:text-base lg:text-lg xl:text-xl 2xl:text-2xl text-gray-500">
                           <span className="font-semibold text-primary-500">
-                            {searchQuery 
-                              ? filteredAndSortedProducts.length.toLocaleString('hu-HU')
-                              : products.length.toLocaleString('hu-HU')
-                            }
+                            {(headerCount || 0).toLocaleString('hu-HU')}
                           </span> db
-                          {searchQuery && products.length > 0 && (
+                          {!searchQuery && totalProductsCount > 0 && (
                             <span className="text-gray-400 text-xs sm:text-sm ml-1">
-                              / {products.length.toLocaleString('hu-HU')}
+                              / {totalProductsCount.toLocaleString('hu-HU')}
                             </span>
                           )}
                         </span>
@@ -1435,7 +1432,7 @@ const App = () => {
                           products={searchIndexReady ? searchIndexRef.current : products}
                           indexVersion={searchIndexVersion}
                           shouldBuildIndex={searchIndexReady}
-                          categories={categories.map(c => typeof c === 'string' ? c : c.name)}
+                          categories={categories}
                           onSearch={handleServerSearch}
                           onProductClick={handleProductView}
                           placeholder="Keresés bútorok között..."

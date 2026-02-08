@@ -135,7 +135,12 @@ const CategorySwipe = ({ categories, activeCategory, onCategoryChange, displayed
               `}
             >
               <CategoryIcon name={category.name} className="w-4 h-4 shrink-0" />
-              {category.name}
+              <span>{category.name}</span>
+              {typeof category.totalCount === 'number' && (
+                <span className={`text-[11px] font-medium ${category.id === activeCategory ? 'text-white/80' : 'text-gray-500'}`}>
+                  {category.totalCount.toLocaleString('hu-HU')}
+                </span>
+              )}
             </button>
           ))}
           
@@ -167,7 +172,12 @@ const CategorySwipe = ({ categories, activeCategory, onCategoryChange, displayed
               `}
             >
               <CategoryIcon name={category.name} className="w-4 h-4 lg:w-5 lg:h-5 xl:w-6 xl:h-6 2xl:w-7 2xl:h-7 shrink-0" />
-              {category.name}
+              <span>{category.name}</span>
+              {typeof category.totalCount === 'number' && (
+                <span className={`text-xs lg:text-sm font-medium ${category.id === activeCategory ? 'text-white/85' : 'text-gray-500'}`}>
+                  {category.totalCount.toLocaleString('hu-HU')}
+                </span>
+              )}
             </button>
           ))}
         </div>

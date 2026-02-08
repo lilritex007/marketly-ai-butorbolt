@@ -812,15 +812,22 @@ const SmartSearchBar = ({
                     Kategóriák
                   </p>
                   <div className="mt-2 flex flex-wrap gap-2">
-                    {categories.slice(0, 6).map((cat, idx) => (
-                      <button
-                        key={idx}
-                        onClick={() => handleSuggestionClick(cat)}
-                        className="px-3 py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg text-sm transition-colors"
-                      >
-                        {cat}
-                      </button>
-                    ))}
+                    {categories.slice(0, 6).map((cat, idx) => {
+                      const name = typeof cat === 'string' ? cat : cat.name;
+                      const count = typeof cat === 'string' ? null : cat.totalCount;
+                      return (
+                        <button
+                          key={idx}
+                          onClick={() => handleSuggestionClick(name)}
+                          className="px-3 py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg text-sm transition-colors flex items-center gap-2"
+                        >
+                          <span>{name}</span>
+                          {typeof count === 'number' && (
+                            <span className="text-xs text-gray-500">({count.toLocaleString('hu-HU')})</span>
+                          )}
+                        </button>
+                      );
+                    })}
                   </div>
                 </div>
               )}
