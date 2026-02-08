@@ -46,7 +46,11 @@ export const useScrollAnimation = (options = {}) => {
       { threshold, rootMargin }
     );
 
-    observer.observe(element);
+    try {
+      observer.observe(element);
+    } catch (err) {
+      return;
+    }
 
     return () => {
       if (element) observer.unobserve(element);
@@ -90,7 +94,11 @@ export const useStaggerAnimation = (itemCount, options = {}) => {
       { threshold }
     );
 
-    observer.observe(container);
+    try {
+      observer.observe(container);
+    } catch (err) {
+      return;
+    }
 
     return () => {
       if (container) observer.unobserve(container);

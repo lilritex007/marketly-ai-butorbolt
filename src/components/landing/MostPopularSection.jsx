@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import { TrendingUp, ArrowRight, RefreshCw, Flame } from 'lucide-react';
 import { EnhancedProductCard } from '../product/EnhancedProductCard';
 import { getStockLevel } from '../../utils/helpers';

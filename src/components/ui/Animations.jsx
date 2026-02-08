@@ -40,7 +40,11 @@ export const FadeInOnScroll = ({
       { threshold }
     );
 
-    observer.observe(ref.current);
+    try {
+      observer.observe(ref.current);
+    } catch (err) {
+      return;
+    }
 
     return () => observer.disconnect();
   }, [threshold]);

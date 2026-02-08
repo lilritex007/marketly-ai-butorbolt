@@ -66,7 +66,12 @@ export const EnhancedProductCard = ({
       { threshold: 0.05, rootMargin: '100px 0px' }
     );
 
-    observer.observe(element);
+    try {
+      observer.observe(element);
+    } catch (err) {
+      // Silently ignore invalid targets to avoid breaking render
+      return;
+    }
     return () => observer.disconnect();
   }, [index]);
 
