@@ -9,9 +9,28 @@ if (typeof window !== 'undefined' && !window.__MKT_SCROLL_INIT) {
   window.history.scrollRestoration = 'manual'
   const scrollTopNow = () => {
     window.scrollTo({ top: 0, left: 0, behavior: 'auto' })
+    const appRoot = document.getElementById('mkt-butorbolt-app')
+    if (appRoot) {
+      let parent = appRoot.parentElement
+      while (parent && parent !== document.body) {
+        const style = getComputedStyle(parent)
+        const oy = style.overflowY
+        const isScrollable = (oy === 'auto' || oy === 'scroll' || oy === 'overlay') && parent.scrollHeight > parent.clientHeight
+        if (isScrollable) {
+          parent.scrollTo({ top: 0, left: 0, behavior: 'auto' })
+          break
+        }
+        parent = parent.parentElement
+      }
+    }
   }
-  window.addEventListener('load', scrollTopNow)
-  window.addEventListener('pageshow', scrollTopNow)
+  const scrollTopNowDelayed = () => {
+    scrollTopNow()
+    requestAnimationFrame(scrollTopNow)
+    setTimeout(scrollTopNow, 50)
+  }
+  window.addEventListener('load', scrollTopNowDelayed)
+  window.addEventListener('pageshow', scrollTopNowDelayed)
 }
 
 const rootEl = document.getElementById('root')

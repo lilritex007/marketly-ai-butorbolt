@@ -647,6 +647,10 @@ const App = () => {
   const mainCategorySet = useMemo(() => {
     return new Set((categoryHierarchy?.mainCategories || []).map((c) => c.name));
   }, [categoryHierarchy]);
+  const activeHierarchyCount = useMemo(() => {
+    const main = (categoryHierarchy?.mainCategories || []).find((m) => m.name === categoryFilter);
+    return typeof main?.productCount === 'number' ? main.productCount : null;
+  }, [categoryHierarchy, categoryFilter]);
   const getCategoryMainList = useCallback((category) => {
     if (!category) return [];
     const main = (categoryHierarchy?.mainCategories || []).find((m) => m.name === category);
@@ -899,7 +903,9 @@ const App = () => {
         setHasMoreProducts(newProducts.length > 0 && newProducts.length < totalCount);
       }
       if (!append && search && String(search).trim()) {
-        setTimeout(() => scrollToProductsSectionRef.current?.(), 120);
+        requestAnimationFrame(() => requestAnimationFrame(() => {
+          scrollToProductsSectionRef.current?.()
+        }));
       }
       // #region agent log
       fetch('http://localhost:7244/ingest/4b0575bc-02d3-43f2-bc91-db7897d5cbba',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({runId:'pre',hypothesisId:'H1',location:'App.jsx:loadUnasData',message:'loadUnasData success',data:{newCount:newProducts.length,totalCount,append},timestamp:Date.now()})}).catch(()=>{});
@@ -924,7 +930,6 @@ const App = () => {
     hasUserSearchedRef.current = true;
     setSearchQuery(query);
     // API hívás a debouncedSearch useEffect-ben
-    setTimeout(() => scrollToProductsSectionRef.current?.(), 120);
   }, []);
   const hasUserSearchedRef = useRef(false);
   useLayoutEffect(() => {
@@ -996,9 +1001,12 @@ const App = () => {
 
   const handleCategoryChange = useCallback((category) => {
     setCategoryFilter(category);
+    setCategoryStats(null);
     setProducts([]);
     setTotalProductsCount(0);
     setHasMoreProducts(true);
+    setIsLoadingUnas(true);
+    setUnasError(null);
     if (category && category !== 'Összes') setActiveTab('shop');
     setTimeout(scrollToProductsSection, 500);
   }, [scrollToProductsSection]);
@@ -1658,7 +1666,9 @@ const App = () => {
                   activeCategory={categoryFilter}
                   onCategoryChange={handleCategoryChange}
                   displayedCount={products.length}
-                  activeTotalOverride={categoryFilter === 'Összes' ? (totalProductsCount || products.length) : (categoryStats?.total ?? 0)}
+                  activeTotalOverride={categoryFilter === 'Összes'
+                    ? (totalProductsCount || products.length)
+                    : (categoryStats?.total ?? activeHierarchyCount ?? 0)}
                 />
 
                 {/* Loading State */}
