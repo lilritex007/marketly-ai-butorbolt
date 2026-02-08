@@ -7,9 +7,9 @@ export const WEBSHOP_DOMAIN = 'https://www.marketly.hu';
 export const SHOP_ID = '81697';
 
 /** Kezdeti és "load more" batch méret a termék listánál */
-export const DISPLAY_BATCH = 48;
+export const DISPLAY_BATCH = 36;
 /** Első lap mérete (API) – gyors first paint, alacsony memória */
-export const INITIAL_PAGE = 200;
+export const INITIAL_PAGE = 36;
 
 /** Tab értékek és hash (#shop, #visual-search, #room-planner) */
 export const TAB_HASH = {

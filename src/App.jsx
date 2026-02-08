@@ -1088,26 +1088,29 @@ const App = () => {
     });
   }, [isLoadingMore, hasMoreProducts, products.length, searchQuery, categoryFilter]);
 
-  // Compute categories from products (already filtered by EXCLUDED_MAIN_CATEGORIES)
-  // This ensures only valid categories with actual products are shown
+  // Categories with TOTAL counts (from hierarchy if available, fallback to loaded products)
   const categories = useMemo(() => {
-    if (!products || products.length === 0) return ['Összes'];
-    
-    // Count products per category
+    const total = totalProductsCount || products.length;
+    if (categoryHierarchy?.mainCategories?.length) {
+      const main = categoryHierarchy.mainCategories.map((m) => ({
+        id: m.name,
+        name: m.name,
+        totalCount: Number(m.productCount || 0)
+      }));
+      return [{ id: 'Összes', name: 'Összes', totalCount: total }, ...main];
+    }
+    if (!products || products.length === 0) return [{ id: 'Összes', name: 'Összes', totalCount: total }];
     const categoryCount = new Map();
     for (const p of products) {
       if (p.category) {
         categoryCount.set(p.category, (categoryCount.get(p.category) || 0) + 1);
       }
     }
-    
-    // Sort by count (most products first)
     const sorted = Array.from(categoryCount.entries())
       .sort((a, b) => b[1] - a[1])
-      .map(([name, count]) => ({ name, count }));
-    
-    return [{ name: 'Összes', count: products.length }, ...sorted];
-  }, [products]);
+      .map(([name, count]) => ({ id: name, name, totalCount: count }));
+    return [{ id: 'Összes', name: 'Összes', totalCount: total }, ...sorted];
+  }, [categoryHierarchy?.mainCategories, products, totalProductsCount]);
 
   return (
     <ToastProvider>
