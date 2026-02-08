@@ -317,6 +317,12 @@
     padding-left: 0.5rem;   /* 8px - just enough for rounded corners */
     padding-right: 0.5rem;
   }
+
+  /* Performance: allow browsers to skip offscreen sections */
+  #mkt-butorbolt-app .section-perf {
+    content-visibility: auto;
+    contain-intrinsic-size: 800px 600px;
+  }
   
   @media (min-width: 640px) {
     .container-app {

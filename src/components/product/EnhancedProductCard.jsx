@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Heart, Eye, ShoppingBag } from 'lucide-react';
+import { formatPrice } from '../../utils/helpers';
 import { SmartBadges, StockBadge } from '../ui/Badge';
 
 // Tiny placeholder for blur-up effect (1x1 transparent pixel)
@@ -37,14 +38,6 @@ export const EnhancedProductCard = ({
 
   const displayPrice = product.salePrice || product.price;
   const inStock = product.inStock ?? product.in_stock ?? true;
-
-  const formatPrice = (price) => {
-    return new Intl.NumberFormat('hu-HU', { 
-      style: 'currency', 
-      currency: 'HUF', 
-      maximumFractionDigits: 0 
-    }).format(price);
-  };
 
   // Intersection Observer for scroll animation - optimized
   useEffect(() => {
@@ -107,6 +100,7 @@ export const EnhancedProductCard = ({
             ? 'bg-red-500 text-white' 
             : 'bg-white/95 text-gray-500 hover:text-red-500'
           }
+          focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-400 focus-visible:ring-offset-2
         `}
         style={{ transition: 'background-color 0.15s, color 0.15s' }}
         aria-label={isWishlisted ? 'Eltávolítás' : 'Kedvencekhez'}
@@ -139,6 +133,14 @@ export const EnhancedProductCard = ({
           onLoad={() => setImageLoaded(true)}
           onError={() => { setImageError(true); setImageLoaded(true); }}
         />
+
+        {!inStock && (
+          <div className="absolute inset-0 bg-white/70 backdrop-blur-[1px] flex items-center justify-center">
+            <span className="px-3 py-1.5 rounded-full bg-gray-900 text-white text-xs font-bold tracking-wide">
+              Elfogyott
+            </span>
+          </div>
+        )}
         
         {/* Stock badge */}
         <div className="absolute bottom-2 sm:bottom-2.5 left-2 sm:left-2.5">
@@ -155,7 +157,7 @@ export const EnhancedProductCard = ({
               e.stopPropagation();
               onQuickView?.(product);
             }}
-            className="bg-white text-gray-900 px-6 py-3 lg:px-8 lg:py-3.5 rounded-full text-base lg:text-lg font-bold shadow-lg flex items-center gap-2 hover:bg-gray-50 tap-scale"
+            className="bg-white text-gray-900 px-6 py-3 lg:px-8 lg:py-3.5 rounded-full text-base lg:text-lg font-bold shadow-lg flex items-center gap-2 hover:bg-gray-50 tap-scale focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-400 focus-visible:ring-offset-2"
           >
             <Eye className="w-5 h-5 lg:w-6 lg:h-6" /> 
             Megnézem
@@ -199,7 +201,7 @@ export const EnhancedProductCard = ({
                 e.stopPropagation(); 
                 onQuickView?.(product); 
               }} 
-              className="shrink-0 w-11 h-11 sm:w-12 sm:h-12 lg:w-14 lg:h-14 flex items-center justify-center bg-primary-500 text-white rounded-xl hover:bg-primary-600 transition-all tap-scale"
+              className="shrink-0 w-11 h-11 sm:w-12 sm:h-12 lg:w-14 lg:h-14 flex items-center justify-center bg-primary-500 text-white rounded-xl hover:bg-primary-600 transition-all tap-scale focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-400 focus-visible:ring-offset-2"
               aria-label="Részletek"
             >
               <Eye className="w-5 h-5 sm:w-6 sm:h-6" />

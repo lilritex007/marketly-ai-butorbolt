@@ -48,6 +48,7 @@ const highlightMatch = (text, query) => {
 const SmartSearchBar = ({ 
   products = [], 
   categories = [],
+  indexVersion = 0,
   onSearch, 
   onProductClick,
   placeholder = "Mit keresel? pl. 'modern kanapé 200 ezer alatt'" 
@@ -62,10 +63,11 @@ const SmartSearchBar = ({
   const debounceTimerRef = useRef(null);
   const resultsRef = useRef(null);
   const indexedCountRef = useRef(0);
+  const indexedVersionRef = useRef(0);
 
   // 🧠 BUILD SEARCH INDEX when products are loaded (async, non-blocking)
   useEffect(() => {
-    if (products.length > 0 && products.length !== indexedCountRef.current) {
+    if (products.length > 0 && (products.length !== indexedCountRef.current || indexVersion !== indexedVersionRef.current)) {
       console.log(`📊 Products: ${products.length}, starting async index build...`);
       setIndexStatus({ ready: false, building: true, count: 0 });
       
@@ -76,6 +78,7 @@ const SmartSearchBar = ({
           if (success) {
             const stats = getIndexStats();
             indexedCountRef.current = products.length;
+            indexedVersionRef.current = indexVersion;
             setIndexStatus({ 
               ready: true, 
               building: false, 
@@ -91,7 +94,7 @@ const SmartSearchBar = ({
       // Start after small delay to let UI render
       setTimeout(doBuild, 50);
     }
-  }, [products.length]);
+  }, [products.length, indexVersion]);
 
   // Debounce query - csak 300ms után kezdjen keresni
   useEffect(() => {

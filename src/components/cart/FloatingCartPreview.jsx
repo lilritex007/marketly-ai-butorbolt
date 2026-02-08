@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { ShoppingCart, X, Trash2, Plus, Minus, ArrowRight, Package, Sparkles } from 'lucide-react';
+import { formatPrice } from '../../utils/helpers';
 
 /**
  * FloatingCartPreview - Shows cart preview when items are added
@@ -34,8 +35,6 @@ const FloatingCartPreview = ({
   const totalItems = cartItems.reduce((sum, item) => sum + (item.quantity || 1), 0);
   const totalPrice = cartItems.reduce((sum, item) => sum + (item.salePrice || item.price || 0) * (item.quantity || 1), 0);
 
-  const formatPrice = (price) => (price || 0).toLocaleString('hu-HU') + ' Ft';
-
   if (cartItems.length === 0) return null;
 
   return (
@@ -44,7 +43,7 @@ const FloatingCartPreview = ({
       <div className="fixed bottom-24 right-4 z-50 flex flex-col items-end gap-3">
         {/* Added notification - UNIFIED TYPOGRAPHY */}
         {showAddedNotification && recentlyAdded && (
-          <div className="bg-green-500 text-white px-4 py-3 rounded-xl shadow-lg animate-bounce-in max-w-xs">
+          <div className="bg-green-500 text-white px-4 py-3 rounded-xl shadow-lg animate-bounce-in max-w-xs" role="status" aria-live="polite">
             <div className="flex items-center gap-3">
               <div className="w-12 h-12 bg-white/20 rounded-lg overflow-hidden shrink-0">
                 <img 

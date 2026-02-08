@@ -628,7 +628,9 @@ const App = () => {
   searchQueryRef.current = searchQuery;
   const searchIndexRef = useRef([]);
   const [searchIndexReady, setSearchIndexReady] = useState(false);
+  const [searchIndexVersion, setSearchIndexVersion] = useState(0);
   const [searchResults, setSearchResults] = useState([]);
+  const [searchTotalMatches, setSearchTotalMatches] = useState(0);
   const [categoryFilter, setCategoryFilter] = useState("Összes");
   const [sortOption, setSortOption] = useState("default");
   const [isDemoMode, setIsDemoMode] = useState(false);
@@ -645,6 +647,7 @@ const App = () => {
   const [showAIDebug, setShowAIDebug] = useState(false);
   const [aiRecommendedProducts, setAiRecommendedProducts] = useState([]);
   const [aiRecommendationLabel, setAiRecommendationLabel] = useState('');
+  const [showDeferredAI, setShowDeferredAI] = useState(false);
   
   // Quick Peek & AR states
   const [quickPeekProduct, setQuickPeekProduct] = useState(null);
@@ -976,6 +979,12 @@ const App = () => {
     return () => { cancelled = true; };
   }, []);
 
+  // Defer heavy AI widgets to keep TTI under 3s
+  useEffect(() => {
+    const t = setTimeout(() => setShowDeferredAI(true), 1500);
+    return () => clearTimeout(t);
+  }, []);
+
   // Keresőindex háttérben (800ms késleltetés, ne blokkolja az első paint-et); 5 percenként frissítés = készlet naprakész
   useEffect(() => {
     let cancelled = false;
@@ -984,10 +993,12 @@ const App = () => {
         if (!cancelled && Array.isArray(data)) {
           searchIndexRef.current = data;
           setSearchIndexReady(true);
+          setSearchIndexVersion((v) => v + 1);
           const q = searchQueryRef.current.trim();
           if (q) {
-            const { results = [] } = smartSearch(data, q, { limit: 500 });
+            const { results = [], totalMatches = 0 } = smartSearch(data, q, { limit: 500 });
             setSearchResults(results);
+            setSearchTotalMatches(totalMatches || results.length);
           }
         }
       });
@@ -1001,11 +1012,13 @@ const App = () => {
   useEffect(() => {
     if (!searchQuery.trim()) {
       setSearchResults([]);
+      setSearchTotalMatches(0);
       return;
     }
     if (!searchIndexReady || searchIndexRef.current.length === 0) return;
-    const { results = [] } = smartSearch(searchIndexRef.current, searchQuery.trim(), { limit: 500 });
+    const { results = [], totalMatches = 0 } = smartSearch(searchIndexRef.current, searchQuery.trim(), { limit: 500 });
     setSearchResults(results);
+    setSearchTotalMatches(totalMatches || results.length);
   }, [searchQuery, searchIndexReady]);
 
   useEffect(() => {
@@ -1047,6 +1060,9 @@ const App = () => {
       ? searchResults
       : filteredAndSortedProducts;
   const hasMoreToShow = aiRecommendedProducts.length === 0 && !isSearchMode && products.length < totalProductsCount;
+  const headerCount = isSearchMode
+    ? (searchTotalMatches || searchResults.length)
+    : (totalProductsCount || filteredAndSortedProducts.length);
 
   const handleLoadMore = useCallback(() => {
     if (isLoadingMore || !hasMoreProducts) return;
@@ -1117,10 +1133,12 @@ const App = () => {
       {/* Back to Top Button */}
       <BackToTop />
       
-      {/* AI Chat Assistant */}
-      <Suspense fallback={null}>
-        <AIChatAssistant products={products} onShowProducts={handleShowAIProducts} />
-      </Suspense>
+      {/* AI Chat Assistant (deferred for faster first paint) */}
+      {showDeferredAI && (
+        <Suspense fallback={null}>
+          <AIChatAssistant products={products} onShowProducts={handleShowAIProducts} />
+        </Suspense>
+      )}
 
       <main id="mkt-butorbolt-main">
         {activeTab === 'shop' && (
@@ -1236,7 +1254,7 @@ const App = () => {
               </div>
             </div>
 
-            <FadeInOnScroll direction="up">
+            <FadeInOnScroll direction="up" className="section-perf">
               <InspirationSection
                 onExplore={scrollToProductsSection}
                 onCategorySelect={(name) => {
@@ -1247,22 +1265,22 @@ const App = () => {
               />
             </FadeInOnScroll>
             
-            <FadeInOnScroll direction="up">
+            <FadeInOnScroll direction="up" className="section-perf">
               <SocialProof />
             </FadeInOnScroll>
-            <FadeInOnScroll direction="up">
+            <FadeInOnScroll direction="up" className="section-perf">
             <LiveShowcase 
               products={products.slice(0, 6)} 
               onProductClick={handleProductView}
             />
             </FadeInOnScroll>
 
-            <FadeInOnScroll direction="up">
+            <FadeInOnScroll direction="up" className="section-perf">
               <TestimonialsSection />
             </FadeInOnScroll>
 
             {products.length > 0 && (
-              <FadeInOnScroll direction="up">
+              <FadeInOnScroll direction="up" className="section-perf">
                 <NewArrivalsSection
                   products={products}
                   onProductClick={handleProductView}
@@ -1275,7 +1293,7 @@ const App = () => {
             )}
 
             {products.length > 0 && (
-              <FadeInOnScroll direction="up">
+              <FadeInOnScroll direction="up" className="section-perf">
                 <MostPopularSection
                   products={products}
                   onProductClick={handleProductView}
@@ -1309,7 +1327,7 @@ const App = () => {
 
             <NewsletterStrip />
 
-            <FadeInOnScroll direction="up">
+            <FadeInOnScroll direction="up" className="section-perf">
               <Features />
             </FadeInOnScroll>
             
@@ -1329,7 +1347,7 @@ const App = () => {
                 onLoadMore={handleLoadMore}
               />
             ) : (
-            <section id="products-section" className="container-app section-padding">
+            <section id="products-section" className="container-app section-padding section-perf">
                 {/* Sticky products header - solid, breadcrumb when category selected */}
                 <div className="sticky top-16 sm:top-20 z-40 mx-0 sm:-mx-4 lg:-mx-8 xl:-mx-10 px-3 sm:px-4 lg:px-8 xl:px-10 py-3 sm:py-4 lg:py-5 xl:py-6 mb-3 sm:mb-4 lg:mb-8 bg-white border-b border-gray-200 shadow-sm">
                   <div className="flex flex-wrap items-center justify-between gap-2 mb-2 sm:mb-3">
@@ -1349,7 +1367,7 @@ const App = () => {
                           <span className="text-gray-600">Keresés: &quot;{searchQuery}&quot;</span>
                         </>
                       )}
-                      <span className="text-gray-400">({filteredAndSortedProducts.length.toLocaleString('hu-HU')} termék)</span>
+                      <span className="text-gray-400">({headerCount.toLocaleString('hu-HU')} termék)</span>
                     </nav>
                     <LiveActivityStrip className="hidden sm:flex shrink-0" />
                   </div>
@@ -1394,7 +1412,8 @@ const App = () => {
                     <div className="w-full sm:w-auto flex items-center gap-2 sm:gap-3 lg:gap-4">
                       <div className="flex-1 sm:flex-initial sm:w-64 lg:w-80 xl:w-[420px] 2xl:w-[500px]">
                         <SmartSearchBar 
-                          products={products}
+                          products={searchIndexReady ? searchIndexRef.current : products}
+                          indexVersion={searchIndexVersion}
                           categories={categories.map(c => typeof c === 'string' ? c : c.name)}
                           onSearch={handleServerSearch}
                           onProductClick={handleProductView}
@@ -1551,7 +1570,12 @@ const App = () => {
                     <p className="text-gray-600 mb-6 max-w-md">Próbáld később, vagy ellenőrizd a kapcsolatot.</p>
                     <button
                       type="button"
-                      onClick={() => loadUnasData(false)}
+                      onClick={() => loadUnasDataRef.current({
+                        search: searchIndexReady ? undefined : (searchQuery.trim() || undefined),
+                        category: categoryFilter !== 'Összes' ? categoryFilter : '',
+                        limit: INITIAL_PAGE,
+                        offset: 0
+                      })}
                       className="px-6 py-3 min-h-[44px] bg-primary-500 text-white rounded-xl font-bold hover:bg-primary-600 transition-colors"
                     >
                       Újrapróbálás
@@ -1622,12 +1646,16 @@ const App = () => {
                     {hasMoreToShow ? (
                       <button
                         onClick={handleLoadMore}
+                        disabled={isLoadingMore}
                         className="px-6 sm:px-8 lg:px-10 py-3.5 sm:py-4 lg:py-5 min-h-[48px] lg:min-h-[56px] bg-gradient-to-r from-primary-500 to-secondary-700 text-white font-semibold rounded-xl lg:rounded-2xl
                                    hover:from-primary-600 hover:to-secondary-700 transition-all duration-200
                                    shadow-lg hover:shadow-xl active:scale-[0.98]
-                                   flex items-center gap-3 sm:gap-4 text-base sm:text-lg lg:text-xl"
+                                   flex items-center gap-3 sm:gap-4 text-base sm:text-lg lg:text-xl disabled:opacity-70 disabled:cursor-not-allowed"
                       >
-                        <span>Több termék</span>
+                        {isLoadingMore && (
+                          <span className="w-4 h-4 sm:w-5 sm:h-5 border-2 border-white/70 border-t-transparent rounded-full animate-spin" aria-hidden />
+                        )}
+                        <span>{isLoadingMore ? 'Betöltés...' : 'Több termék'}</span>
                         <span className="px-3 sm:px-3.5 py-1 sm:py-1.5 bg-white/20 rounded-lg text-sm sm:text-base">
                           {displayedProducts.length.toLocaleString('hu-HU')} / {totalProductsCount.toLocaleString('hu-HU')}
                         </span>

@@ -13,6 +13,8 @@ export const ModernHero = ({ onExplore, onTryAI }) => {
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
   const heroRef = useRef(null);
+  const rafRef = useRef(null);
+  const lastEventRef = useRef(null);
   // Egyszeri megjelenés: animáció az első paint-től indul (nincs opacity-0 → mounted váltás = nem tűnik "kétszer tölteni")
   const mounted = true;
 
@@ -24,25 +26,31 @@ export const ModernHero = ({ onExplore, onTryAI }) => {
     return () => mq.removeEventListener('change', handler);
   }, []);
 
-  useEffect(() => {
+  const handlePointerMove = (e) => {
     if (prefersReducedMotion) return;
-    const handleMouseMove = (e) => {
-      if (heroRef.current) {
-        const rect = heroRef.current.getBoundingClientRect();
-        setMousePosition({
-          x: (e.clientX - rect.left) / rect.width,
-          y: (e.clientY - rect.top) / rect.height
-        });
-      }
-    };
+    lastEventRef.current = e;
+    if (rafRef.current) return;
+    rafRef.current = requestAnimationFrame(() => {
+      rafRef.current = null;
+      const ev = lastEventRef.current;
+      if (!ev || !heroRef.current) return;
+      const rect = heroRef.current.getBoundingClientRect();
+      const x = (ev.clientX - rect.left) / rect.width;
+      const y = (ev.clientY - rect.top) / rect.height;
+      setMousePosition({ x, y });
+    });
+  };
 
-    window.addEventListener('mousemove', handleMouseMove);
-    return () => window.removeEventListener('mousemove', handleMouseMove);
-  }, [prefersReducedMotion]);
+  useEffect(() => {
+    return () => {
+      if (rafRef.current) cancelAnimationFrame(rafRef.current);
+    };
+  }, []);
 
   return (
     <div 
       ref={heroRef}
+      onMouseMove={handlePointerMove}
       className="relative min-h-screen flex items-center justify-center overflow-hidden bg-gradient-to-br from-primary-50 via-white to-secondary-50"
     >
       {/* Animated Background – respect prefers-reduced-motion */}

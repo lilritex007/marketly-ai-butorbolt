@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { ShoppingCart, Heart, Check, AlertTriangle, Truck, Clock, Shield, ChevronUp } from 'lucide-react';
+import { formatPrice } from '../../utils/helpers';
 
 /**
  * StickyAddToCart - Sticky bottom bar for product pages
@@ -46,12 +47,9 @@ const StickyAddToCart = ({
   const hasDiscount = originalPrice && originalPrice > price;
   const discountPercent = hasDiscount ? Math.round((1 - price / originalPrice) * 100) : 0;
   
-  // Stock simulation (in real app this would come from API)
-  const stockLevel = Math.floor(Math.random() * 20) + 1;
-  const isLowStock = stockLevel <= 5;
-  const isInStock = stockLevel > 0;
-
-  const formatPrice = (p) => (p || 0).toLocaleString('hu-HU');
+  const stockLevel = typeof product.stockLevel === 'number' ? product.stockLevel : null;
+  const isInStock = product.inStock ?? product.in_stock ?? true;
+  const isLowStock = isInStock && stockLevel != null && stockLevel <= 5;
 
   const handleAddToCart = () => {
     if (onAddToCart) {
@@ -94,7 +92,7 @@ const StickyAddToCart = ({
           <div className="flex-1 min-w-0 sm:hidden">
             <p className="text-base font-medium text-gray-900 truncate">{product.name}</p>
             <div className="flex items-center gap-2">
-              <span className="text-xl font-bold text-primary-500">{formatPrice(price)} Ft</span>
+              <span className="text-xl font-bold text-primary-500">{formatPrice(price)}</span>
               {hasDiscount && (
                 <span className="text-sm line-through text-gray-400">{formatPrice(originalPrice)}</span>
               )}
@@ -111,7 +109,7 @@ const StickyAddToCart = ({
             <div>
               <p className="font-medium text-gray-900 text-base lg:text-lg line-clamp-1">{product.name}</p>
               <div className="flex items-center gap-2">
-                <span className="text-xl lg:text-2xl font-bold text-primary-500">{formatPrice(price)} Ft</span>
+                <span className="text-xl lg:text-2xl font-bold text-primary-500">{formatPrice(price)}</span>
                 {hasDiscount && (
                   <>
                     <span className="text-base line-through text-gray-400">{formatPrice(originalPrice)}</span>
