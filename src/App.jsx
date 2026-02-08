@@ -626,6 +626,8 @@ const App = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const searchQueryRef = useRef(searchQuery);
   searchQueryRef.current = searchQuery;
+  const SERVER_SEARCH_ONLY = true;
+  const MAX_LOCAL_INDEX = SERVER_SEARCH_ONLY ? 0 : 50000;
   const searchIndexRef = useRef([]);
   const [searchIndexReady, setSearchIndexReady] = useState(false);
   const [searchIndexVersion, setSearchIndexVersion] = useState(0);
@@ -886,11 +888,11 @@ const App = () => {
     }
   }, []);
 
-  // LOCAL AI search - no server call needed, instant results!
+  // Server-side search (marketplace-style)
   const handleServerSearch = useCallback((query) => {
     setSearchQuery(query);
     setVisibleCount(DISPLAY_BATCH); // Reset visible count on new search
-    // NO API call - we use local AI search in filteredAndSortedProducts
+    // API hívás a debouncedSearch useEffect-ben
   }, []);
 
   // Scroll container: ne használjunk olyan containert, ami a mi appunk belsejében van (#mkt-butorbolt-app).
@@ -961,14 +963,14 @@ const App = () => {
   const debouncedSearch = useDebounce(searchQuery, 400);
   useEffect(() => {
     // Ha a keresőindex kész, a keresés lokálisan fut – ne írjuk felül a listát API kereséssel
-    const useApiSearch = !searchIndexReady || !debouncedSearch.trim();
+    const useApiSearch = !canUseLocalSearch || !debouncedSearch.trim();
     loadUnasDataRef.current({
       search: useApiSearch ? (debouncedSearch.trim() || undefined) : undefined,
       category: categoryFilter !== 'Összes' ? categoryFilter : '',
       limit: INITIAL_PAGE,
       offset: 0
     });
-  }, [categoryFilter, debouncedSearch, searchIndexReady]);
+  }, [categoryFilter, debouncedSearch, canUseLocalSearch]);
 
   useEffect(() => {
     const onHashChange = () => {
@@ -994,8 +996,14 @@ const App = () => {
     return () => clearTimeout(t);
   }, []);
 
+  const canUseLocalSearch = useMemo(() => {
+    if (SERVER_SEARCH_ONLY) return false;
+    return searchIndexReady && searchIndexRef.current.length > 0 && searchIndexRef.current.length <= MAX_LOCAL_INDEX;
+  }, [SERVER_SEARCH_ONLY, searchIndexReady, searchIndexVersion]);
+
   // Keresőindex háttérben (800ms késleltetés, ne blokkolja az első paint-et); 5 percenként frissítés = készlet naprakész
   useEffect(() => {
+    if (SERVER_SEARCH_ONLY) return;
     let cancelled = false;
     const load = () => {
       fetchSearchIndex().then((data) => {
@@ -1008,7 +1016,7 @@ const App = () => {
           // #endregion
           if (data.lastSync) setLastUpdated(data.lastSync);
           const q = searchQueryRef.current.trim();
-          if (q) {
+          if (q && data.products.length <= MAX_LOCAL_INDEX) {
             const { results = [], totalMatches = 0 } = smartSearch(searchIndexRef.current, q, { limit: 500 });
             setSearchResults(results);
             setSearchTotalMatches(totalMatches || results.length);
@@ -1028,11 +1036,15 @@ const App = () => {
       setSearchTotalMatches(0);
       return;
     }
-    if (!searchIndexReady || searchIndexRef.current.length === 0) return;
+    if (!canUseLocalSearch) {
+      setSearchResults([]);
+      setSearchTotalMatches(0);
+      return;
+    }
     const { results = [], totalMatches = 0 } = smartSearch(searchIndexRef.current, searchQuery.trim(), { limit: 500 });
     setSearchResults(results);
     setSearchTotalMatches(totalMatches || results.length);
-  }, [searchQuery, searchIndexReady]);
+  }, [searchQuery, canUseLocalSearch]);
 
   useEffect(() => {
     const t = setInterval(() => loadUnasDataRef.current?.({ silent: true }), 300000);
@@ -1066,7 +1078,7 @@ const App = () => {
 
   filteredLengthRef.current = filteredAndSortedProducts.length;
 
-  const isSearchMode = searchQuery.trim().length >= 2 && searchIndexReady;
+  const isSearchMode = searchQuery.trim().length >= 2 && canUseLocalSearch;
   const displayedProducts = aiRecommendedProducts.length > 0
     ? aiRecommendedProducts
     : isSearchMode
@@ -1429,9 +1441,11 @@ const App = () => {
                     <div className="w-full sm:w-auto flex items-center gap-2 sm:gap-3 lg:gap-4">
                       <div className="flex-1 sm:flex-initial sm:w-64 lg:w-80 xl:w-[420px] 2xl:w-[500px]">
                         <SmartSearchBar 
-                          products={searchIndexReady ? searchIndexRef.current : products}
+                          products={SERVER_SEARCH_ONLY ? products : (searchIndexReady ? searchIndexRef.current : products)}
                           indexVersion={searchIndexVersion}
-                          shouldBuildIndex={searchIndexReady}
+                          shouldBuildIndex={!SERVER_SEARCH_ONLY && searchIndexReady}
+                          maxLocalIndex={MAX_LOCAL_INDEX}
+                          serverSearchMode={SERVER_SEARCH_ONLY}
                           categories={categories}
                           onSearch={handleServerSearch}
                           onProductClick={handleProductView}

@@ -17,7 +17,7 @@ let INDEX = {
   ready: false,
   building: false,
   products: [],           // Original products array reference
-  normalized: [],         // [{nameNorm, catNorm, words}]
+  normalized: [],         // [{nameNorm, catNorm, price}]
   wordToProducts: new Map(), // word → Set<index>
   cache: new Map(),       // query → results
   stats: { products: 0, words: 0, buildTime: 0 }
@@ -183,6 +183,8 @@ export async function buildSearchIndex(products) {
   INDEX.wordToProducts = new Map();
   INDEX.cache = new Map();
   
+  const includeDesc = products.length <= 50000;
+
   // Process in chunks to not block UI
   const CHUNK_SIZE = 5000;
   let processed = 0;
@@ -195,13 +197,13 @@ export async function buildSearchIndex(products) {
         const p = products[i];
         const nameNorm = normalize(p.name || '');
         const catNorm = normalize(p.category || '');
-        const descNorm = normalize((p.description || '').substring(0, 200)); // Limit desc
+        const descNorm = includeDesc ? normalize((p.description || '').substring(0, 200)) : '';
         
         // Get all words
         const allWords = new Set([
           ...getWords(nameNorm),
           ...getWords(catNorm),
-          ...getWords(descNorm)
+          ...(includeDesc ? getWords(descNorm) : [])
         ]);
         
         // Expand with synonyms
@@ -211,7 +213,6 @@ export async function buildSearchIndex(products) {
         INDEX.normalized[i] = {
           nameNorm,
           catNorm,
-          words: new Set(expanded),
           price: p.salePrice || p.price || 0
         };
         
@@ -429,15 +430,21 @@ function buildSearchIndexSync(products) {
   INDEX.normalized = [];
   INDEX.wordToProducts = new Map();
   
+  const includeDesc = products.length <= 50000;
   for (let i = 0; i < products.length; i++) {
     const p = products[i];
     const nameNorm = normalize(p.name || '');
     const catNorm = normalize(p.category || '');
+    const descNorm = includeDesc ? normalize((p.description || '').substring(0, 200)) : '';
     
-    const allWords = new Set([...getWords(nameNorm), ...getWords(catNorm)]);
+    const allWords = new Set([
+      ...getWords(nameNorm),
+      ...getWords(catNorm),
+      ...(includeDesc ? getWords(descNorm) : [])
+    ]);
     const expanded = expandWithSynonyms(Array.from(allWords));
     
-    INDEX.normalized[i] = { nameNorm, catNorm, words: new Set(expanded), price: p.salePrice || p.price || 0 };
+    INDEX.normalized[i] = { nameNorm, catNorm, price: p.salePrice || p.price || 0 };
     
     for (const word of expanded) {
       if (!INDEX.wordToProducts.has(word)) {

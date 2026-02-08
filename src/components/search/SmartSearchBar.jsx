@@ -50,6 +50,8 @@ const SmartSearchBar = ({
   categories = [],
   indexVersion = 0,
   shouldBuildIndex = true,
+  maxLocalIndex = 50000,
+  serverSearchMode = false,
   onSearch, 
   onProductClick,
   placeholder = "Mit keresel? pl. 'modern kanapé 200 ezer alatt'" 
@@ -66,9 +68,17 @@ const SmartSearchBar = ({
   const indexedCountRef = useRef(0);
   const indexedVersionRef = useRef(0);
 
+  const canUseLocalIndex = !serverSearchMode && shouldBuildIndex && products.length > 0 && products.length <= maxLocalIndex;
+  const localIndexDisabled = serverSearchMode || (shouldBuildIndex && products.length > maxLocalIndex);
+
   // 🧠 BUILD SEARCH INDEX when products are loaded (async, non-blocking)
   useEffect(() => {
-    if (!shouldBuildIndex) return;
+    if (!canUseLocalIndex) {
+      if (localIndexDisabled) {
+        setIndexStatus({ ready: false, building: false, count: 0 });
+      }
+      return;
+    }
     if (products.length > 0 && (products.length !== indexedCountRef.current || indexVersion !== indexedVersionRef.current)) {
       // #region agent log
       fetch('http://localhost:7244/ingest/4b0575bc-02d3-43f2-bc91-db7897d5cbba',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({runId:'pre',hypothesisId:'H3',location:'SmartSearchBar.jsx:useEffect',message:'index build start',data:{products:products.length,indexVersion},timestamp:Date.now()})}).catch(()=>{});
@@ -109,7 +119,7 @@ const SmartSearchBar = ({
         setTimeout(doBuild, 300);
       }
     }
-  }, [products.length, indexVersion]);
+  }, [products.length, indexVersion, canUseLocalIndex, localIndexDisabled]);
 
   // Debounce query - csak 300ms után kezdjen keresni
   useEffect(() => {
@@ -128,16 +138,18 @@ const SmartSearchBar = ({
 
   // Autocomplete javaslatok - TELJES katalógusból keres
   const autocompleteSuggestions = useMemo(() => {
+    if (!canUseLocalIndex) return [];
     if (!debouncedQuery.trim() || debouncedQuery.length < 2 || !products.length) return [];
     // TELJES katalógus használata - a getAutocompleteSuggestions már optimalizált
     return getAutocompleteSuggestions(products, debouncedQuery, 8);
-  }, [debouncedQuery, products]);
+  }, [debouncedQuery, products, canUseLocalIndex]);
 
   // Keresési eredmények - CSAK ha debounced query változik
   const searchResults = useMemo(() => {
+    if (!canUseLocalIndex) return { results: [], intent: null, totalMatches: 0 };
     if (!debouncedQuery.trim() || debouncedQuery.length < 2) return { results: [], intent: null, totalMatches: 0 };
     return smartSearch(products, debouncedQuery, { limit: 8, includeDebugInfo: false });
-  }, [debouncedQuery, products]);
+  }, [debouncedQuery, products, canUseLocalIndex]);
 
   // Felismert keresési szándék
   const searchIntent = useMemo(() => {
