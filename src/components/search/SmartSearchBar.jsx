@@ -13,6 +13,7 @@ import {
   isIndexReady,
   getIndexStats
 } from '../../services/aiSearchService';
+import { fetchUnasProducts } from '../../services/unasApi';
 import { trackSearch, getSearchHistory, getViewedProducts } from '../../services/userPreferencesService';
 
 // Keresett szó kiemelése a szövegben (case-insensitive, split tartalmazza a találatokat)
@@ -61,12 +62,14 @@ const SmartSearchBar = ({
   const [debouncedQuery, setDebouncedQuery] = useState('');
   const [selectedIndex, setSelectedIndex] = useState(-1); // Keyboard navigation
   const [indexStatus, setIndexStatus] = useState({ ready: false, building: false, count: 0 });
+  const [serverPreview, setServerPreview] = useState({ results: [], total: 0, loading: false });
   const inputRef = useRef(null);
   const containerRef = useRef(null);
   const debounceTimerRef = useRef(null);
   const resultsRef = useRef(null);
   const indexedCountRef = useRef(0);
   const indexedVersionRef = useRef(0);
+  const serverRequestIdRef = useRef(0);
 
   const canUseLocalIndex = !serverSearchMode && shouldBuildIndex && products.length > 0 && products.length <= maxLocalIndex;
   const localIndexDisabled = serverSearchMode || (shouldBuildIndex && products.length > maxLocalIndex);
@@ -142,6 +145,31 @@ const SmartSearchBar = ({
     const q = debouncedQuery.trim();
     onSearch?.(q);
   }, [debouncedQuery, onSearch, serverSearchMode]);
+
+  // Server-side preview results for typeahead
+  useEffect(() => {
+    if (!serverSearchMode) return;
+    const q = debouncedQuery.trim();
+    if (q.length < 2) {
+      setServerPreview({ results: [], total: 0, loading: false });
+      return;
+    }
+    const requestId = ++serverRequestIdRef.current;
+    setServerPreview((prev) => ({ ...prev, loading: true }));
+    fetchUnasProducts({ search: q, limit: 6, offset: 0, slim: true })
+      .then((data) => {
+        if (serverRequestIdRef.current !== requestId) return;
+        setServerPreview({
+          results: Array.isArray(data.products) ? data.products : [],
+          total: typeof data.total === 'number' ? data.total : 0,
+          loading: false
+        });
+      })
+      .catch(() => {
+        if (serverRequestIdRef.current !== requestId) return;
+        setServerPreview({ results: [], total: 0, loading: false });
+      });
+  }, [debouncedQuery, serverSearchMode]);
 
   // Autocomplete javaslatok - TELJES katalógusból keres
   const autocompleteSuggestions = useMemo(() => {
@@ -543,7 +571,88 @@ const SmartSearchBar = ({
             </div>
           )}
 
-          {/* Keresési találatok - termékek */}
+          {/* Keresési találatok - termékek (server-side preview) */}
+          {serverSearchMode && debouncedQuery.length >= 2 && serverPreview.results && serverPreview.results.length > 0 && (
+            <div className="p-3">
+              <div className="flex items-center justify-between px-2 py-2 mb-2 gap-2">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <p className="text-xs font-bold text-gray-600 uppercase tracking-wider flex items-center gap-2">
+                    <ShoppingBag className="w-4 h-4 text-primary-500" />
+                    <span>{(serverPreview.total || serverPreview.results.length).toLocaleString()} találat</span>
+                  </p>
+                </div>
+                {(serverPreview.total || 0) > 6 && (
+                  <button 
+                    onClick={handleSubmit}
+                    className="text-xs text-primary-600 hover:text-primary-700 font-semibold flex items-center gap-1 px-3 py-1.5 bg-primary-50 hover:bg-primary-100 rounded-lg transition-colors shrink-0"
+                  >
+                    Mind megtekintése
+                    <ArrowRight className="w-3.5 h-3.5" />
+                  </button>
+                )}
+              </div>
+              <div className="space-y-1.5" ref={resultsRef}>
+                {serverPreview.results.slice(0, 6).map((product, idx) => {
+                  const actualIndex = autocompleteSuggestions.length + idx;
+                  const isSelected = selectedIndex === actualIndex;
+                  return (
+                  <button
+                    key={product.id}
+                    onClick={() => handleProductClick(product)}
+                    style={{ animationDelay: `${idx * 35}ms` }}
+                    className={`search-item-enter w-full flex items-center gap-3 p-3 rounded-xl border transition-all duration-200 text-left group
+                      ${isSelected 
+                        ? 'bg-gradient-to-r from-primary-100 to-primary-50 border-primary-300 ring-2 ring-primary-400 ring-inset shadow-md scale-[1.01]' 
+                        : 'border-transparent hover:bg-gradient-to-r hover:from-primary-50/80 hover:to-white hover:border-primary-100 hover:shadow-md hover:scale-[1.01] active:scale-[0.99]'
+                      }`}
+                  >
+                    <div className="relative shrink-0">
+                      <div className="w-16 h-16 bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl overflow-hidden ring-1 ring-gray-200 group-hover:ring-primary-300 transition-all duration-200 shadow-sm group-hover:shadow-md group-hover:scale-105">
+                        {product.image ? (
+                          <img src={product.image} alt={product.name} className="w-full h-full object-cover transition-transform duration-300" />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center">
+                            <Package className="w-7 h-7 text-gray-300" />
+                          </div>
+                        )}
+                      </div>
+                      {idx < 3 && (
+                        <div className="absolute -top-1 -left-1 w-5 h-5 bg-primary-500 text-white text-xs font-bold rounded-full flex items-center justify-center shadow">
+                          {idx + 1}
+                        </div>
+                      )}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <h4 className="font-semibold text-gray-900 text-sm leading-tight line-clamp-2 group-hover:text-primary-700 transition-colors">
+                        {highlightMatch(product.name, debouncedQuery)}
+                      </h4>
+                      <p className="text-xs text-gray-500 mt-0.5 truncate flex items-center gap-1">
+                        <Tag className="w-3 h-3" />
+                        {product.category?.split(' > ').slice(-1)[0] || product.category}
+                      </p>
+                      <div className="flex items-center gap-2 mt-1.5">
+                        <span className="text-base font-bold text-primary-600">
+                          {(product.salePrice || product.price)?.toLocaleString()} Ft
+                        </span>
+                        {product.inStock === false && (
+                          <span className="text-xs bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full">
+                            Elfogyott
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                    <div className="flex flex-col items-center gap-1">
+                      <ChevronRight className={`w-5 h-5 transition-all shrink-0 ${isSelected ? 'text-primary-500 translate-x-1' : 'text-gray-300 group-hover:text-primary-500 group-hover:translate-x-1'}`} />
+                      <Eye className={`w-4 h-4 transition-colors ${isSelected ? 'text-primary-400' : 'text-gray-300 group-hover:text-primary-400'}`} />
+                    </div>
+                  </button>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          {/* Keresési találatok - termékek (local index) */}
           {!serverSearchMode && debouncedQuery.length >= 2 && searchResults.results && searchResults.results.length > 0 && (
             <div className="p-3">
               <div className="flex items-center justify-between px-2 py-2 mb-2 gap-2">
@@ -660,6 +769,29 @@ const SmartSearchBar = ({
           )}
 
           {/* Nincs találat - finomított empty state */}
+          {serverSearchMode && debouncedQuery.length >= 2 && !serverPreview.loading && serverPreview.results.length === 0 && (
+            <div className="p-8 text-center">
+              <div className="w-20 h-20 bg-gradient-to-br from-gray-50 to-gray-100 rounded-2xl flex items-center justify-center mx-auto mb-5 shadow-sm border border-gray-100 ring-4 ring-gray-50/80">
+                <Search className="w-10 h-10 text-gray-300" strokeWidth={1.5} />
+              </div>
+              <p className="text-gray-800 font-semibold mb-1 text-base">Nincs találat: &quot;{debouncedQuery}&quot;</p>
+              <p className="text-sm text-gray-500 mb-5 max-w-xs mx-auto">Próbálj más kulcsszavakat, szinonimákat vagy egyszerűsítsd a keresést.</p>
+              <div className="mt-6 pt-4 border-t border-gray-100">
+                <p className="text-xs text-gray-400 mb-3">Népszerű keresések:</p>
+                <div className="flex flex-wrap justify-center gap-2">
+                  {['kanapé', 'fotel', 'asztal', 'szekrény', 'ágy'].map(term => (
+                    <button
+                      key={term}
+                      onClick={() => handleSuggestionClick(term)}
+                      className="px-3 py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-600 rounded-lg text-sm transition-colors"
+                    >
+                      {term}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
           {!serverSearchMode && debouncedQuery.length >= 2 && (!searchResults.results || searchResults.results.length === 0) && autocompleteSuggestions.length === 0 && (
             <div className="p-8 text-center">
               <div className="w-20 h-20 bg-gradient-to-br from-gray-50 to-gray-100 rounded-2xl flex items-center justify-center mx-auto mb-5 shadow-sm border border-gray-100 ring-4 ring-gray-50/80">

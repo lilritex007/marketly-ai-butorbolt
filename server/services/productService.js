@@ -2,6 +2,22 @@ import db from '../database/db.js';
 import { EXCLUDED_MAIN_CATEGORIES } from '../config/excludedCategories.js';
 import { getDisplayMainName, MAIN_CATEGORY_DISPLAY_ORDER } from '../config/mainCategoryGroups.js';
 
+const applySearchTerms = (query, params, search) => {
+  const terms = String(search || '')
+    .split(/\s+/)
+    .map(t => t.trim())
+    .filter(Boolean);
+  if (terms.length === 0) return { query, params };
+  let nextQuery = query;
+  const nextParams = [...params];
+  for (const term of terms) {
+    nextQuery += ' AND (name LIKE ? OR description LIKE ? OR params LIKE ? OR category LIKE ?)';
+    const pattern = `%${term}%`;
+    nextParams.push(pattern, pattern, pattern, pattern);
+  }
+  return { query: nextQuery, params: nextParams };
+};
+
 /**
  * Get all products (with optional filtering)
  * When showInAI is true:
@@ -63,9 +79,9 @@ export function getProducts(filters = {}) {
     }
 
     if (search) {
-      query += ' AND (name LIKE ? OR description LIKE ? OR params LIKE ?)';
-      const searchPattern = `%${search}%`;
-      params.push(searchPattern, searchPattern, searchPattern);
+      const applied = applySearchTerms(query, params, search);
+      query = applied.query;
+      params.splice(0, params.length, ...applied.params);
     }
 
     query += ' ORDER BY priority DESC, name ASC';
@@ -302,9 +318,9 @@ export function getProductCount(filters = {}) {
     }
 
     if (search) {
-      query += ' AND (name LIKE ? OR description LIKE ? OR params LIKE ?)';
-      const searchPattern = `%${search}%`;
-      params.push(searchPattern, searchPattern, searchPattern);
+      const applied = applySearchTerms(query, params, search);
+      query = applied.query;
+      params.splice(0, params.length, ...applied.params);
     }
 
     if (inStock !== undefined) {
