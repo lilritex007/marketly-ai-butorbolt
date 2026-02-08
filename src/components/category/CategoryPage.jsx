@@ -642,7 +642,11 @@ const CategoryPage = ({
     );
     
     if (loadMoreRef.current instanceof Element) {
-      observer.observe(loadMoreRef.current);
+      try {
+        observer.observe(loadMoreRef.current);
+      } catch (err) {
+        return;
+      }
     }
     
     return () => observer.disconnect();

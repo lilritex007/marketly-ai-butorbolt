@@ -119,7 +119,11 @@ export const useLazyLoad = () => {
       }
     );
 
-    observer.observe(imageElement);
+    try {
+      observer.observe(imageElement);
+    } catch (err) {
+      return;
+    }
   };
 };
 

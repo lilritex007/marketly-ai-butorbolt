@@ -66,7 +66,11 @@ export const useInfiniteScroll = (allItems, itemsPerPage = 20) => {
       }
     }, options);
 
-    observerRef.current.observe(sentinelRef.current);
+    try {
+      observerRef.current.observe(sentinelRef.current);
+    } catch (err) {
+      return;
+    }
 
     return () => {
       if (observerRef.current) {

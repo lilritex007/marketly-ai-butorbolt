@@ -444,6 +444,7 @@ export function getPersonalizedRecommendations(allProducts, limit = 12) {
   // Pontozzuk a termékeket
   const scored = allProducts.map(product => {
     let score = 0;
+    const price = product.salePrice || product.price || 0;
     
     // Ne ajánljunk olyat, amit már nézett vagy nem kedvelt
     if (viewedIds.includes(product.id)) score -= weights.viewPenalty;
@@ -479,8 +480,7 @@ export function getPersonalizedRecommendations(allProducts, limit = 12) {
         if (tweaks.avoidStyles?.includes(space)) score -= weights.styleBoost * 2;
       }
       
-      // Budget
-      const price = product.salePrice || product.price || 0;
+    // Budget
       if (budget === 'budget' && price < 100000) score += weights.priceFit;
       if (budget === 'mid' && price >= 100000 && price <= 300000) score += weights.priceFit;
       if (budget === 'premium' && price > 300000) score += weights.priceFit;
