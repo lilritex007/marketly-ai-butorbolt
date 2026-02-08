@@ -19,13 +19,13 @@ const PersonalizedSection = ({
   const [refreshKey, setRefreshKey] = useState(0);
   const [viewSize, setViewSize] = useState(12);
   // User adatok
-  const recentlyViewed = useMemo(() => getViewedProducts(12), []);
+  const recentlyViewed = useMemo(() => getViewedProducts(12).filter((p) => (p.inStock ?? p.in_stock ?? true)), []);
   const styleDNA = useMemo(() => getStyleDNA(), []);
   
   // Személyre szabott ajánlások
   const forYouProducts = useMemo(() => {
     if (!products?.length) return [];
-    const base = getPersonalizedRecommendations(products, 12);
+    const base = getPersonalizedRecommendations(products, 12).filter((p) => (p.inStock ?? p.in_stock ?? true));
     return [...base].sort(() => (refreshKey % 2 === 0 ? 1 : -1) * (Math.random() - 0.5));
   }, [products, refreshKey]);
   
@@ -33,6 +33,7 @@ const PersonalizedSection = ({
   const trendingProducts = useMemo(() => {
     if (!products?.length) return [];
     return products
+      .filter(p => (p.inStock ?? p.in_stock ?? true))
       .filter(p => (p.salePrice || p.price) > 50000)
       .sort(() => Math.random() - 0.5)
       .slice(0, 12);
@@ -67,9 +68,11 @@ const PersonalizedSection = ({
           subtitle={styleDNA?.styleDNA ? styleDNA.styleDNA.split('.')[0] : 'AI ajánlások a böngészésed alapján'}
           Icon={Sparkles}
           accentClass="from-primary-500 to-secondary-700"
+          eyebrow="Neked szól"
           badge="AI ajánlás"
           contextLabel={contextLabel}
           meta={`Megjelenítve: ${Math.min(visibleProducts.length, currentProducts.length)} / ${currentProducts.length} termék`}
+          helpText="Csak készleten lévő termékek"
           actions={
             <div className="flex items-center gap-2 flex-wrap">
               <div className="inline-flex items-center rounded-full bg-white border border-gray-100 shadow-sm p-1">

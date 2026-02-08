@@ -113,7 +113,8 @@ export const LiveShowcase = ({ products = [], onProductClick }) => {
   // Randomize and select products on each render
   const showcaseProducts = React.useMemo(() => {
     if (products.length > 0) {
-      const shuffled = [...products].sort(() => (seed % 2 === 0 ? 1 : -1) * (Math.random() - 0.5));
+      const inStock = products.filter((p) => (p.inStock ?? p.in_stock ?? true));
+      const shuffled = [...inStock].sort(() => (seed % 2 === 0 ? 1 : -1) * (Math.random() - 0.5));
       return shuffled.slice(0, 12);
     }
     return [];
@@ -128,8 +129,10 @@ export const LiveShowcase = ({ products = [], onProductClick }) => {
           subtitle="A legjobbra értékelt és legtöbbet választott bútorok"
           Icon={Heart}
           accentClass="from-pink-500 to-rose-600"
+          eyebrow="Közösségi kedvencek"
           badge="Közönségkedvenc"
           meta={`Összesen: ${showcaseProducts.length.toLocaleString('hu-HU')} termék`}
+          helpText="Csak készleten lévő termékek"
           actions={
             <button
               type="button"

@@ -21,11 +21,12 @@ export default function MostPopularSection({ products = [], onProductClick, onTo
   const [page, setPage] = useState(0);
   const mostPopular = useMemo(() => {
     if (!products.length) return [];
-    const withDiscount = [...products]
+    const inStock = products.filter((p) => (p.inStock ?? p.in_stock ?? true));
+    const withDiscount = [...inStock]
       .filter((p) => p.salePrice && p.price > p.salePrice)
       .sort((a, b) => (b.price - (b.salePrice || 0)) - (a.price - (a.salePrice || 0)));
     const ids = new Set(withDiscount.map((p) => p.id));
-    const rest = [...products]
+    const rest = [...inStock]
       .filter((p) => !ids.has(p.id))
       .sort((a, b) => (b.price || 0) - (a.price || 0));
     return [...withDiscount, ...rest];
@@ -35,7 +36,7 @@ export default function MostPopularSection({ products = [], onProductClick, onTo
     return sliceWrap(mostPopular, start, PAGE_SIZE);
   }, [mostPopular, page]);
   const saleCount = useMemo(() => mostPopular.filter((p) => p.salePrice && p.price > p.salePrice).length, [mostPopular]);
-  const inStockCount = useMemo(() => mostPopular.filter((p) => p.inStock ?? p.in_stock ?? true).length, [mostPopular]);
+  const inStockCount = useMemo(() => mostPopular.length, [mostPopular]);
 
   if (visibleProducts.length === 0) return null;
 
@@ -48,9 +49,11 @@ export default function MostPopularSection({ products = [], onProductClick, onTo
           subtitle="A vásárlók kedvencei és a legjobb ajánlatok"
           Icon={TrendingUp}
           accentClass="from-amber-500 to-orange-600"
+          eyebrow="Felfedezés"
           badge={saleCount > 0 ? `${saleCount} akciós termék` : 'Prémium válogatás'}
           contextLabel={contextLabel}
           meta={`Raktáron: ${inStockCount.toLocaleString('hu-HU')} • Összesen: ${mostPopular.length.toLocaleString('hu-HU')}`}
+          helpText="Csak készleten lévő termékek"
           actions={
             <>
               <button

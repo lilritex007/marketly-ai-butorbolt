@@ -24,7 +24,8 @@ export default function NewArrivalsSection({ products = [], onProductClick, onTo
   const [page, setPage] = useState(0);
   const newArrivals = useMemo(() => {
     if (!products.length) return [];
-    const sorted = [...products].sort((a, b) => {
+    const inStock = products.filter((p) => (p.inStock ?? p.in_stock ?? true));
+    const sorted = [...inStock].sort((a, b) => {
       const timeA = toTimestamp(a.updated_at || a.updatedAt || a.created_at || a.createdAt || a.last_synced_at);
       const timeB = toTimestamp(b.updated_at || b.updatedAt || b.created_at || b.createdAt || b.last_synced_at);
       if (timeA !== timeB) return timeB - timeA;
@@ -50,9 +51,11 @@ export default function NewArrivalsSection({ products = [], onProductClick, onTo
           subtitle="A legújabb termékeink, folyamatosan frissítve"
           Icon={Package}
           accentClass="from-primary-500 to-secondary-600"
+          eyebrow="Újdonság"
           badge="Újdonságok"
           contextLabel={contextLabel}
           meta={`Összesen: ${newArrivals.length.toLocaleString('hu-HU')} termék`}
+          helpText="Csak készleten lévő termékek"
           actions={
             <>
               <button
