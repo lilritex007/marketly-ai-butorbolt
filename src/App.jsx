@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useMemo, useCallback, Suspense, lazy } from 'react';
+import React, { useState, useEffect, useLayoutEffect, useRef, useMemo, useCallback, Suspense, lazy } from 'react';
 import { ShoppingCart, Camera, MessageCircle, X, Send, Plus, Move, Trash2, Home, ZoomIn, ZoomOut, Upload, Settings, Link as LinkIcon, FileText, RefreshCw, AlertCircle, Database, Lock, Search, ChevronLeft, ChevronRight, Filter, Heart, ArrowDownUp, Info, Check, Star, Truck, ShieldCheck, Phone, ArrowRight, Mail, Eye, Sparkles, Lightbulb, Image as ImageIcon, MousePointer2, Menu, Bot, Moon, Sun, Clock, Gift, Zap, TrendingUp, Instagram, Facebook, MapPin, Sofa, Lamp, BedDouble, Armchair, Grid3X3, ExternalLink, Timer, ChevronDown } from 'lucide-react';
 // framer-motion removed due to Vite production build TDZ issues
 import { fetchUnasProducts, refreshUnasProducts, fetchCategories, fetchCategoryHierarchy, fetchSearchIndex, fetchProductStats, fetchUnasProductById } from './services/unasApi';
@@ -181,7 +181,7 @@ const parseCSV = (csvText) => {
           acc.push({ index, name: cleanName });
       }
       return acc;
-  }, [mainCategorySet]);
+  }, []);
 
   for (let i = 1; i < lines.length; i++) {
       if (!lines[i].trim()) continue;
@@ -647,6 +647,12 @@ const App = () => {
   const mainCategorySet = useMemo(() => {
     return new Set((categoryHierarchy?.mainCategories || []).map((c) => c.name));
   }, [categoryHierarchy]);
+  const getCategoryMainList = useCallback((category) => {
+    if (!category) return [];
+    const main = (categoryHierarchy?.mainCategories || []).find((m) => m.name === category);
+    if (!main) return [];
+    return Array.isArray(main.rawSegments) && main.rawSegments.length > 0 ? main.rawSegments : [category];
+  }, [categoryHierarchy]);
   
   // AI Feature states
   const [showStyleQuiz, setShowStyleQuiz] = useState(false);
@@ -866,14 +872,14 @@ const App = () => {
       // #region agent log
       fetch('http://localhost:7244/ingest/4b0575bc-02d3-43f2-bc91-db7897d5cbba',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({runId:'pre',hypothesisId:'H1',location:'App.jsx:loadUnasData',message:'loadUnasData start',data:{silent,append,limit,offset,search:search?.length||0,category},timestamp:Date.now()})}).catch(()=>{});
       // #endregion
-      const categoryMain = category && mainCategorySet.has(category) ? category : '';
+      const categoryMainList = getCategoryMainList(category);
       const params = {
         limit,
         offset,
         slim: false,
         ...(search && search.trim() && { search: search.trim() }),
-        ...(categoryMain && { categoryMain }),
-        ...(!categoryMain && category && category !== 'Összes' && { category })
+        ...(categoryMainList.length > 0 && { categoryMain: categoryMainList }),
+        ...(categoryMainList.length === 0 && category && category !== 'Összes' && { category })
       };
       const data = await fetchUnasProducts(params);
       const newProducts = (data.products || []).map(p => ({
@@ -912,10 +918,19 @@ const App = () => {
 
   // Server-side search (marketplace-style)
   const handleServerSearch = useCallback((query) => {
+    hasUserSearchedRef.current = true;
     setSearchQuery(query);
     // API hívás a debouncedSearch useEffect-ben
     setTimeout(() => scrollToProductsSectionRef.current?.(), 120);
   }, []);
+  const hasUserSearchedRef = useRef(false);
+  useLayoutEffect(() => {
+    if (typeof window !== 'undefined') {
+      window.history.scrollRestoration = 'manual';
+      window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
+    }
+  }, []);
+
 
   // Scroll container: ne használjunk olyan containert, ami a mi appunk belsejében van (#mkt-butorbolt-app).
   // UNAS embed: gyakran a page_content article szülője a scroll container; standalone = window.
@@ -978,6 +993,9 @@ const App = () => {
 
   const handleCategoryChange = useCallback((category) => {
     setCategoryFilter(category);
+    setProducts([]);
+    setTotalProductsCount(0);
+    setHasMoreProducts(true);
     if (category && category !== 'Összes') setActiveTab('shop');
     setTimeout(scrollToProductsSection, 500);
   }, [scrollToProductsSection]);
@@ -994,15 +1012,18 @@ const App = () => {
   useEffect(() => {
     // Ha a keresőindex kész, a keresés lokálisan fut – ne írjuk felül a listát API kereséssel
     const useApiSearch = !canUseLocalSearch || !debouncedSearch.trim();
-    const categoryMain = categoryFilter && mainCategorySet.has(categoryFilter) ? categoryFilter : '';
+    const categoryMainList = getCategoryMainList(categoryFilter);
     loadUnasDataRef.current({
       search: useApiSearch ? (debouncedSearch.trim() || undefined) : undefined,
-      category: !categoryMain && categoryFilter !== 'Összes' ? categoryFilter : '',
-      categoryMain: categoryMain || undefined,
+      category: categoryMainList.length === 0 && categoryFilter !== 'Összes' ? categoryFilter : '',
+      categoryMain: categoryMainList.length > 0 ? categoryMainList : undefined,
       limit: INITIAL_PAGE,
       offset: 0
     });
-  }, [categoryFilter, debouncedSearch, canUseLocalSearch, mainCategorySet]);
+    if (hasUserSearchedRef.current && debouncedSearch.trim()) {
+      setTimeout(() => scrollToProductsSectionRef.current?.(), 120);
+    }
+  }, [categoryFilter, debouncedSearch, canUseLocalSearch, getCategoryMainList]);
 
   useEffect(() => {
     const onHashChange = () => {
@@ -1032,13 +1053,13 @@ const App = () => {
       setCategoryStats(null);
       return () => { cancelled = true; };
     }
-    const categoryMain = mainCategorySet.has(categoryFilter) ? categoryFilter : '';
-    const category = !categoryMain ? categoryFilter : '';
-    fetchProductStats({ category, categoryMain }).then((stats) => {
+    const categoryMainList = getCategoryMainList(categoryFilter);
+    const category = categoryMainList.length === 0 ? categoryFilter : '';
+    fetchProductStats({ category, categoryMain: categoryMainList.length > 0 ? categoryMainList : undefined }).then((stats) => {
       if (!cancelled) setCategoryStats(stats);
     });
     return () => { cancelled = true; };
-  }, [categoryFilter, mainCategorySet]);
+  }, [categoryFilter, getCategoryMainList]);
 
   // Defer heavy AI widgets to keep TTI under 3s
   useEffect(() => {
@@ -1136,16 +1157,16 @@ const App = () => {
 
   const handleLoadMore = useCallback(() => {
     if (isLoadingMore || !hasMoreProducts) return;
-    const categoryMain = categoryFilter && mainCategorySet.has(categoryFilter) ? categoryFilter : '';
+    const categoryMainList = getCategoryMainList(categoryFilter);
     loadUnasDataRef.current({
       append: true,
       limit: DISPLAY_BATCH,
       offset: products.length,
       search: searchQuery.trim() || undefined,
-      category: !categoryMain && categoryFilter !== 'Összes' ? categoryFilter : '',
-      categoryMain: categoryMain || undefined
+      category: categoryMainList.length === 0 && categoryFilter !== 'Összes' ? categoryFilter : '',
+      categoryMain: categoryMainList.length > 0 ? categoryMainList : undefined
     });
-  }, [isLoadingMore, hasMoreProducts, products.length, searchQuery, categoryFilter, mainCategorySet]);
+  }, [isLoadingMore, hasMoreProducts, products.length, searchQuery, categoryFilter, getCategoryMainList]);
 
   // Categories with TOTAL counts (from hierarchy if available, fallback to loaded products)
   const categories = useMemo(() => {
@@ -1633,7 +1654,7 @@ const App = () => {
                   })()}
                   activeCategory={categoryFilter}
                   onCategoryChange={handleCategoryChange}
-                  displayedCount={products.length}
+                  displayedCount={categoryFilter === 'Összes' ? (totalProductsCount || products.length) : products.length}
                 />
 
                 {/* Loading State */}
@@ -1661,8 +1682,8 @@ const App = () => {
                       type="button"
                       onClick={() => loadUnasDataRef.current({
                         search: searchIndexReady ? undefined : (searchQuery.trim() || undefined),
-                        category: !mainCategorySet.has(categoryFilter) && categoryFilter !== 'Összes' ? categoryFilter : '',
-                        categoryMain: mainCategorySet.has(categoryFilter) ? categoryFilter : undefined,
+                        category: getCategoryMainList(categoryFilter).length === 0 && categoryFilter !== 'Összes' ? categoryFilter : '',
+                        categoryMain: getCategoryMainList(categoryFilter).length > 0 ? getCategoryMainList(categoryFilter) : undefined,
                         limit: INITIAL_PAGE,
                         offset: 0
                       })}

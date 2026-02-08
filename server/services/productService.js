@@ -19,9 +19,11 @@ const applySearchTerms = (query, params, search) => {
 };
 
 const applyMainCategoryFilter = (query, params, categoryMain) => {
-  if (!categoryMain) return { query, params };
-  const nextQuery = `${query} AND (CASE WHEN category_path IS NOT NULL AND category_path != '' AND instr(category_path, '|') > 0 THEN trim(substr(category_path, 1, instr(category_path, '|') - 1)) ELSE category END) = ?`;
-  return { query: nextQuery, params: [...params, categoryMain] };
+  if (!categoryMain || (Array.isArray(categoryMain) && categoryMain.length === 0)) return { query, params };
+  const list = Array.isArray(categoryMain) ? categoryMain : [categoryMain];
+  const placeholders = list.map(() => '?').join(', ');
+  const nextQuery = `${query} AND (CASE WHEN category_path IS NOT NULL AND category_path != '' AND instr(category_path, '|') > 0 THEN trim(substr(category_path, 1, instr(category_path, '|') - 1)) ELSE category END) IN (${placeholders})`;
+  return { query: nextQuery, params: [...params, ...list] };
 };
 
 /**
