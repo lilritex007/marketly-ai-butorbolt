@@ -9,7 +9,7 @@ import {
  */
 const HERO_REVEAL_DELAY = { badge: 0, line1: 80, line2: 200, line3: 320, sub: 440, cta: 560, stats: [680, 780, 880, 980] };
 
-export const ModernHero = ({ onExplore, onTryAI }) => {
+export const ModernHero = ({ onExplore, onTryAI, quickCategories = [], onQuickCategory }) => {
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
   const heroRef = useRef(null);
@@ -151,6 +151,22 @@ export const ModernHero = ({ onExplore, onTryAI }) => {
               <ChevronRight className="w-5 h-5 lg:w-6 lg:h-6 ml-2" aria-hidden />
             </button>
           </div>
+
+          {quickCategories.length > 0 && (
+            <div className={`flex flex-wrap items-center justify-center gap-2 sm:gap-3 mb-10 sm:mb-12 ${mounted ? 'hero-reveal' : 'opacity-0'}`} style={mounted ? { animationDelay: `${HERO_REVEAL_DELAY.cta + 120}ms` } : undefined}>
+              <span className="text-xs sm:text-sm font-semibold text-gray-500">Gyors kategóriák:</span>
+              {quickCategories.map((cat) => (
+                <button
+                  key={cat}
+                  type="button"
+                  onClick={() => onQuickCategory?.(cat)}
+                  className="px-4 py-2 rounded-full bg-white/90 border border-gray-200 text-gray-700 font-semibold text-xs sm:text-sm hover:bg-primary-50 hover:text-primary-700 transition-colors"
+                >
+                  {cat}
+                </button>
+              ))}
+            </div>
+          )}
 
           {/* Stats – staggered reveal */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 lg:gap-5 max-w-5xl mx-auto px-2">

@@ -7,6 +7,9 @@ import {
 } from 'lucide-react';
 import { getCategoryIcon } from '../ui/Icons';
 import { EnhancedProductCard } from '../product/EnhancedProductCard';
+import { getLikedProducts, getViewedProducts } from '../../services/userPreferencesService';
+
+const PRESET_STORAGE_KEY = 'mkt_category_presets';
 
 /**
  * Category Images - unsplash stock photos by category
@@ -517,6 +520,7 @@ const ViewControls = ({
         className="px-3 py-2 text-sm border border-gray-200 rounded-lg bg-white focus:border-primary-500 outline-none"
       >
         <option value="default">Relevancia</option>
+        <option value="smart">Okos (ajánlott)</option>
         <option value="price-asc">Ár ↑</option>
         <option value="price-desc">Ár ↓</option>
         <option value="name-asc">Név A-Z</option>
@@ -565,9 +569,69 @@ const CategoryPage = ({
   const [priceRange, setPriceRange] = useState([0, 10000000]);
   const [showFilters, setShowFilters] = useState(false);
   const [compareList, setCompareList] = useState([]);
+  const [presetName, setPresetName] = useState('');
+  const [savedPresets, setSavedPresets] = useState([]);
   const loadMoreRef = useRef(null);
   
   const theme = getCategoryTheme(category);
+  const likedIds = useMemo(() => getLikedProducts(), []);
+  const viewedIds = useMemo(() => getViewedProducts(30).map((p) => p.id), []);
+
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem(PRESET_STORAGE_KEY);
+      setSavedPresets(raw ? JSON.parse(raw) : []);
+    } catch {
+      setSavedPresets([]);
+    }
+  }, [category]);
+
+  const savePreset = () => {
+    const name = presetName.trim();
+    if (!name) return;
+    const next = [
+      {
+        id: `${Date.now()}`,
+        name,
+        filters,
+        priceRange,
+        sortOption,
+        viewMode
+      },
+      ...savedPresets.filter((p) => p.name !== name)
+    ].slice(0, 6);
+    setSavedPresets(next);
+    setPresetName('');
+    try {
+      localStorage.setItem(PRESET_STORAGE_KEY, JSON.stringify(next));
+    } catch {}
+  };
+
+  const applyPreset = (preset) => {
+    setFilters(preset.filters || {});
+    setPriceRange(preset.priceRange || [0, 10000000]);
+    setSortOption(preset.sortOption || 'default');
+    setViewMode(preset.viewMode || 'grid');
+  };
+
+  const quickApply = (type) => {
+    if (type === 'in-stock') {
+      setFilters((prev) => ({ ...prev, inStockOnly: true }));
+      return;
+    }
+    if (type === 'under-100') {
+      setPriceRange([0, 100000]);
+      return;
+    }
+    if (type === 'premium') {
+      setPriceRange([250000, priceRange[1]]);
+      return;
+    }
+    if (type === 'discount') {
+      setSortOption('discount');
+      return;
+    }
+  };
   
   // Initialize price range from products
   useEffect(() => {
@@ -620,6 +684,19 @@ const CategoryPage = ({
           const dA = a.salePrice ? (a.price - a.salePrice) / a.price : 0;
           const dB = b.salePrice ? (b.price - b.salePrice) / b.price : 0;
           return dB - dA;
+        });
+        break;
+      case 'smart':
+        filtered.sort((a, b) => {
+          const score = (p) => {
+            const stock = typeof p.stock_qty === 'number' ? p.stock_qty : 0;
+            const inStock = p.inStock ?? p.in_stock ?? true;
+            const liked = likedIds.includes(p.id) ? 6 : 0;
+            const viewed = viewedIds.includes(p.id) ? 3 : 0;
+            const discount = p.salePrice && p.price ? (p.price - p.salePrice) / p.price : 0;
+            return (inStock ? 5 : 0) + liked + viewed + Math.min(stock, 20) * 0.2 + discount * 10;
+          };
+          return score(b) - score(a);
         });
         break;
     }
@@ -682,6 +759,34 @@ const CategoryPage = ({
           />
           
           <div className="flex-1 min-w-0">
+            <div className="mb-4 rounded-2xl border border-gray-100 bg-white p-4 shadow-sm">
+              <div className="flex flex-wrap items-center gap-2 mb-3">
+                <span className="text-xs font-semibold text-gray-500">Gyors szűrők:</span>
+                <button onClick={() => quickApply('in-stock')} className="px-3 py-1.5 rounded-full text-xs font-semibold border border-gray-200 hover:bg-gray-50">Készleten</button>
+                <button onClick={() => quickApply('under-100')} className="px-3 py-1.5 rounded-full text-xs font-semibold border border-gray-200 hover:bg-gray-50">100k alatt</button>
+                <button onClick={() => quickApply('premium')} className="px-3 py-1.5 rounded-full text-xs font-semibold border border-gray-200 hover:bg-gray-50">Prémium</button>
+                <button onClick={() => quickApply('discount')} className="px-3 py-1.5 rounded-full text-xs font-semibold border border-gray-200 hover:bg-gray-50">Akciók</button>
+              </div>
+              <div className="flex flex-wrap items-center gap-2">
+                <input
+                  type="text"
+                  value={presetName}
+                  onChange={(e) => setPresetName(e.target.value)}
+                  placeholder="Preset neve…"
+                  className="px-3 py-2 border border-gray-200 rounded-lg text-sm"
+                />
+                <button onClick={savePreset} className="px-3 py-2 rounded-lg bg-primary-500 text-white text-sm font-semibold">Mentés</button>
+                {savedPresets.map((preset) => (
+                  <button
+                    key={preset.id}
+                    onClick={() => applyPreset(preset)}
+                    className="px-3 py-2 rounded-lg bg-gray-100 text-gray-700 text-sm font-semibold hover:bg-gray-200"
+                  >
+                    {preset.name}
+                  </button>
+                ))}
+              </div>
+            </div>
             <ViewControls
               sortOption={sortOption}
               onSortChange={setSortOption}
