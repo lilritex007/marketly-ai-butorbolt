@@ -37,6 +37,7 @@ export function initializeDatabase() {
       params TEXT,
       link TEXT,
       in_stock BOOLEAN DEFAULT 1,
+      stock_qty INTEGER,
       
       -- Control fields
       show_in_ai BOOLEAN DEFAULT 1,
@@ -49,6 +50,16 @@ export function initializeDatabase() {
       last_synced_at DATETIME
     )
   `);
+
+  // Add missing columns (lightweight migration)
+  try {
+    const columns = db.prepare('PRAGMA table_info(products)').all().map((c) => c.name);
+    if (!columns.includes('stock_qty')) {
+      db.exec('ALTER TABLE products ADD COLUMN stock_qty INTEGER');
+    }
+  } catch (err) {
+    console.warn('⚠️ Could not run products table migration:', err);
+  }
 
   // Categories table for configuration
   db.exec(`

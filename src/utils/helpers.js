@@ -125,7 +125,7 @@ export const shuffleArray = (array) => {
  */
 export const getStockLevel = (product) => {
   if (!product) return null;
-  const direct = product.stockLevel ?? product.stock_level ?? product.stock ?? null;
+  const direct = product.stockLevel ?? product.stock_level ?? product.stock ?? product.stock_qty ?? product.stockQty ?? null;
   if (typeof direct === 'number' && Number.isFinite(direct)) return direct;
   const params = product.params || '';
   if (typeof params !== 'string' || params.length === 0) return null;

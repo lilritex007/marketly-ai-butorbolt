@@ -1,6 +1,18 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Sparkles, Clock, TrendingUp, RefreshCw, ShoppingCart, Info } from 'lucide-react';
-import { getViewedProducts, getPersonalizedRecommendations, getStyleDNA, getTopCategories, getSearchHistory, getSimilarProducts } from '../../services/userPreferencesService';
+import { Sparkles, Clock, TrendingUp, RefreshCw, ShoppingCart, Info, SlidersHorizontal } from 'lucide-react';
+import {
+  getViewedProducts,
+  getPersonalizedRecommendations,
+  getStyleDNA,
+  getTopCategories,
+  getSearchHistory,
+  getSimilarProducts,
+  getRecommendationTweaks,
+  setRecommendationTweaks,
+  resetRecommendationTweaks,
+  getABVariant,
+  trackABEvent
+} from '../../services/userPreferencesService';
 import SectionHeader from '../landing/SectionHeader';
 import { EnhancedProductCard } from '../product/EnhancedProductCard';
 import { getStockLevel } from '../../utils/helpers';
@@ -20,7 +32,10 @@ const PersonalizedSection = ({
   const [activeTab, setActiveTab] = useState('foryou');
   const [refreshKey, setRefreshKey] = useState(0);
   const [viewSize, setViewSize] = useState(12);
-  const [focusCategory, setFocusCategory] = useState('');
+  const [focusFilters, setFocusFilters] = useState([]);
+  const [showWhyPanel, setShowWhyPanel] = useState(false);
+  const [recoTweaks, setRecoTweaks] = useState(getRecommendationTweaks());
+  const abVariant = useMemo(() => getABVariant('similar-cta'), []);
   // User adatok
   const recentlyViewed = useMemo(() => getViewedProducts(12).filter((p) => (p.inStock ?? p.in_stock ?? true)), []);
   const styleDNA = useMemo(() => getStyleDNA(), []);
@@ -66,8 +81,16 @@ const PersonalizedSection = ({
   ];
 
   const currentProductsRaw = tabs.find(t => t.id === activeTab)?.products || [];
-  const currentProducts = focusCategory
-    ? currentProductsRaw.filter((p) => (p.category || '').toLowerCase().includes(focusCategory.toLowerCase()))
+  const currentProducts = focusFilters.length > 0
+    ? currentProductsRaw.filter((p) => {
+        const text = `${p.name || ''} ${p.category || ''} ${p.description || ''}`.toLowerCase();
+        return focusFilters.some((f) => {
+          if (f.type === 'category') return (p.category || '').toLowerCase().includes(f.value.toLowerCase());
+          if (f.type === 'style') return f.keywords?.some((kw) => text.includes(kw));
+          if (f.type === 'room') return f.keywords?.some((kw) => text.includes(kw));
+          return false;
+        });
+      })
     : currentProductsRaw;
   const visibleProducts = currentProducts.slice(0, Math.max(12, viewSize));
   const inStockCount = useMemo(
@@ -124,7 +147,9 @@ const PersonalizedSection = ({
         bohemian: ['bohém', 'színes', 'mintás'],
       };
       if (space && styleKeywords[space] && styleKeywords[space].some((kw) => text.includes(kw))) {
-        reasons.push(`Stílus illeszkedés: ${space}`);
+        if (!recoTweaks.avoidStyles?.includes(space)) {
+          reasons.push(`Stílus illeszkedés: ${space}`);
+        }
       }
       const roomKeywords = {
         living: ['kanapé', 'fotel', 'dohányzó', 'tv', 'nappali'],
@@ -133,10 +158,40 @@ const PersonalizedSection = ({
         office: ['íróasztal', 'iroda', 'forgószék'],
       };
       if (room && roomKeywords[room] && roomKeywords[room].some((kw) => text.includes(kw))) {
-        reasons.push(`Szoba típusa: ${room}`);
+        if (!recoTweaks.avoidRooms?.includes(room)) {
+          reasons.push(`Szoba típusa: ${room}`);
+        }
       }
     }
     return reasons.slice(0, 2);
+  };
+
+  useEffect(() => {
+    trackABEvent('similar-cta', 'impression');
+  }, []);
+
+  const styleFilters = [
+    { id: 'modern', label: 'Modern', keywords: ['modern', 'minimalista', 'letisztult'] },
+    { id: 'scandinavian', label: 'Skandináv', keywords: ['skandináv', 'natúr', 'világos', 'fehér'] },
+    { id: 'industrial', label: 'Indusztriális', keywords: ['indusztriális', 'loft', 'fém', 'ipari'] },
+    { id: 'vintage', label: 'Vintage', keywords: ['vintage', 'retro', 'antik'] },
+    { id: 'bohemian', label: 'Bohém', keywords: ['bohém', 'színes', 'mintás'] },
+  ];
+
+  const roomFilters = [
+    { id: 'living', label: 'Nappali', keywords: ['kanapé', 'fotel', 'dohányzó', 'tv', 'nappali'] },
+    { id: 'bedroom', label: 'Hálószoba', keywords: ['ágy', 'matrac', 'éjjeli', 'hálószoba'] },
+    { id: 'dining', label: 'Étkező', keywords: ['étkező', 'asztal', 'szék'] },
+    { id: 'office', label: 'Iroda', keywords: ['íróasztal', 'iroda', 'forgószék'] },
+  ];
+
+  const toggleFilter = (filter) => {
+    setFocusFilters((prev) => {
+      const exists = prev.find((f) => f.type === filter.type && f.id === filter.id);
+      if (exists) return prev.filter((f) => !(f.type === filter.type && f.id === filter.id));
+      const next = [...prev, filter];
+      return next.length > 3 ? next.slice(next.length - 3) : next;
+    });
   };
 
   // Ha nincs elég adat, ne jelenjen meg
@@ -178,11 +233,25 @@ const PersonalizedSection = ({
                 ))}
               </div>
               <button
-                onClick={() => setRefreshKey((v) => v + 1)}
+                onClick={() => {
+                  trackABEvent('similar-cta', 'click');
+                  if (abVariant === 'A' && fallbackCategories.length > 0) {
+                    setFocusFilters(fallbackCategories.slice(0, 2).map((cat) => ({ id: cat, type: 'category', value: cat })));
+                  }
+                  setRefreshKey((v) => v + 1);
+                }}
                 className="inline-flex items-center gap-2 px-3 py-2 rounded-lg text-primary-700 bg-primary-50 border border-primary-100 hover:bg-primary-100 transition-colors text-sm font-semibold min-h-[44px]"
               >
                 <RefreshCw className="w-4 h-4" />
                 {refreshKey % 2 === 0 ? 'Hasonlókat kérek' : 'Frissítem'}
+              </button>
+              <button
+                type="button"
+                onClick={() => setShowWhyPanel((v) => !v)}
+                className="inline-flex items-center gap-2 px-3 py-2 rounded-lg text-gray-600 bg-white border border-gray-200 hover:bg-gray-50 transition-colors text-sm font-semibold min-h-[44px]"
+              >
+                <SlidersHorizontal className="w-4 h-4" />
+                Miért ezt?
               </button>
             </div>
           }
@@ -207,6 +276,86 @@ const PersonalizedSection = ({
           <div className="mb-4 inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white border border-primary-100 text-primary-700 text-xs font-semibold shadow-sm">
             <Info className="w-3.5 h-3.5" />
             Style DNA aktív – személyre szabott ajánlások
+          </div>
+        )}
+
+        {showWhyPanel && (
+          <div className="mb-6 rounded-2xl border border-gray-200 bg-white p-4 sm:p-5 shadow-sm">
+            <div className="flex flex-wrap items-center gap-3 mb-3">
+              <span className="text-sm font-bold text-gray-900">Miért ezeket látod?</span>
+              <span className="text-xs text-gray-500">Kattints a finomhangoláshoz</span>
+            </div>
+            <div className="flex flex-wrap gap-2 mb-3">
+              {searchHistory.slice(0, 4).map((s) => (
+                <span key={s.query} className="px-2.5 py-1 rounded-full bg-gray-100 text-xs text-gray-600">
+                  Keresés: “{s.query}”
+                </span>
+              ))}
+              {fallbackCategories.slice(0, 4).map((cat) => (
+                <span key={cat} className="px-2.5 py-1 rounded-full bg-gray-100 text-xs text-gray-600">
+                  Kedvelt: {cat}
+                </span>
+              ))}
+            </div>
+            <div className="flex flex-wrap items-center gap-2 mb-2">
+              <span className="text-xs text-gray-500 mr-1">Kevesebb stílus:</span>
+              {styleFilters.map((style) => (
+                <button
+                  key={style.id}
+                  type="button"
+                  onClick={() => {
+                    const next = recoTweaks.avoidStyles?.includes(style.id)
+                      ? recoTweaks.avoidStyles.filter((s) => s !== style.id)
+                      : [...(recoTweaks.avoidStyles || []), style.id];
+                    const updated = setRecommendationTweaks({ avoidStyles: next });
+                    setRecoTweaks(updated);
+                    setRefreshKey((v) => v + 1);
+                  }}
+                  className={`px-3 py-1.5 rounded-full text-xs font-semibold border transition-colors ${
+                    recoTweaks.avoidStyles?.includes(style.id)
+                      ? 'bg-gray-900 text-white border-gray-900'
+                      : 'bg-white text-gray-600 border-gray-200 hover:bg-gray-50'
+                  }`}
+                >
+                  {style.label}
+                </button>
+              ))}
+            </div>
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="text-xs text-gray-500 mr-1">Kevesebb szoba:</span>
+              {roomFilters.map((room) => (
+                <button
+                  key={room.id}
+                  type="button"
+                  onClick={() => {
+                    const next = recoTweaks.avoidRooms?.includes(room.id)
+                      ? recoTweaks.avoidRooms.filter((r) => r !== room.id)
+                      : [...(recoTweaks.avoidRooms || []), room.id];
+                    const updated = setRecommendationTweaks({ avoidRooms: next });
+                    setRecoTweaks(updated);
+                    setRefreshKey((v) => v + 1);
+                  }}
+                  className={`px-3 py-1.5 rounded-full text-xs font-semibold border transition-colors ${
+                    recoTweaks.avoidRooms?.includes(room.id)
+                      ? 'bg-gray-900 text-white border-gray-900'
+                      : 'bg-white text-gray-600 border-gray-200 hover:bg-gray-50'
+                  }`}
+                >
+                  {room.label}
+                </button>
+              ))}
+              <button
+                type="button"
+                onClick={() => {
+                  const updated = resetRecommendationTweaks();
+                  setRecoTweaks(updated);
+                  setRefreshKey((v) => v + 1);
+                }}
+                className="px-3 py-1.5 rounded-full text-xs font-semibold border border-gray-200 text-gray-600 hover:bg-gray-50"
+              >
+                Reset
+              </button>
+            </div>
           </div>
         )}
 
@@ -251,9 +400,9 @@ const PersonalizedSection = ({
             <span className="text-xs text-gray-500 mr-1">Fókusz:</span>
             <button
               type="button"
-              onClick={() => setFocusCategory('')}
+              onClick={() => setFocusFilters([])}
               className={`px-3 py-1.5 rounded-full text-xs font-semibold border transition-colors ${
-                focusCategory === '' ? 'bg-gray-900 text-white border-gray-900' : 'bg-white text-gray-600 border-gray-100 hover:bg-gray-50'
+                focusFilters.length === 0 ? 'bg-gray-900 text-white border-gray-900' : 'bg-white text-gray-600 border-gray-100 hover:bg-gray-50'
               }`}
             >
               Összes
@@ -262,12 +411,42 @@ const PersonalizedSection = ({
               <button
                 key={cat}
                 type="button"
-                onClick={() => setFocusCategory(cat)}
+                onClick={() => toggleFilter({ id: cat, type: 'category', value: cat })}
                 className={`px-3 py-1.5 rounded-full text-xs font-semibold border transition-colors ${
-                  focusCategory === cat ? 'bg-primary-500 text-white border-primary-500' : 'bg-white text-gray-600 border-gray-100 hover:bg-gray-50'
+                  focusFilters.some((f) => f.type === 'category' && f.id === cat)
+                    ? 'bg-primary-500 text-white border-primary-500'
+                    : 'bg-white text-gray-600 border-gray-100 hover:bg-gray-50'
                 }`}
               >
                 {cat}
+              </button>
+            ))}
+            {styleFilters.map((style) => (
+              <button
+                key={style.id}
+                type="button"
+                onClick={() => toggleFilter({ id: style.id, type: 'style', keywords: style.keywords })}
+                className={`px-3 py-1.5 rounded-full text-xs font-semibold border transition-colors ${
+                  focusFilters.some((f) => f.type === 'style' && f.id === style.id)
+                    ? 'bg-secondary-600 text-white border-secondary-600'
+                    : 'bg-white text-gray-600 border-gray-100 hover:bg-gray-50'
+                }`}
+              >
+                {style.label}
+              </button>
+            ))}
+            {roomFilters.map((room) => (
+              <button
+                key={room.id}
+                type="button"
+                onClick={() => toggleFilter({ id: room.id, type: 'room', keywords: room.keywords })}
+                className={`px-3 py-1.5 rounded-full text-xs font-semibold border transition-colors ${
+                  focusFilters.some((f) => f.type === 'room' && f.id === room.id)
+                    ? 'bg-emerald-600 text-white border-emerald-600'
+                    : 'bg-white text-gray-600 border-gray-100 hover:bg-gray-50'
+                }`}
+              >
+                {room.label}
               </button>
             ))}
           </div>

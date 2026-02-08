@@ -3,6 +3,7 @@ import { TrendingUp, ArrowRight, RefreshCw, Flame } from 'lucide-react';
 import { EnhancedProductCard } from '../product/EnhancedProductCard';
 import { getStockLevel } from '../../utils/helpers';
 import SectionHeader from './SectionHeader';
+import { getLikedProducts, getViewedProducts } from '../../services/userPreferencesService';
 
 /**
  * Legnépszerűbb – valós adat: akciós termékek (nagy kedvezmény) + többi ár szerint, max 8.
@@ -25,6 +26,9 @@ export default function MostPopularSection({ products = [], onProductClick, onTo
   const mostPopular = useMemo(() => {
     if (!products.length) return [];
     const inStock = products.filter((p) => (p.inStock ?? p.in_stock ?? true));
+    const likedIds = getLikedProducts();
+    const viewed = getViewedProducts(20);
+    const viewedIds = viewed.map((p) => p.id);
     const withDiscount = [...inStock]
       .filter((p) => p.salePrice && p.price > p.salePrice)
       .sort((a, b) => (b.price - (b.salePrice || 0)) - (a.price - (a.salePrice || 0)));
@@ -32,7 +36,14 @@ export default function MostPopularSection({ products = [], onProductClick, onTo
     const rest = [...inStock]
       .filter((p) => !ids.has(p.id))
       .sort((a, b) => (b.price || 0) - (a.price || 0));
-    return [...withDiscount, ...rest];
+    const combined = [...withDiscount, ...rest];
+    return combined.sort((a, b) => {
+      const stockA = getStockLevel(a) ?? 0;
+      const stockB = getStockLevel(b) ?? 0;
+      const scoreA = (likedIds.includes(a.id) ? 4 : 0) + (viewedIds.includes(a.id) ? 2 : 0) + Math.min(stockA, 20) * 0.1;
+      const scoreB = (likedIds.includes(b.id) ? 4 : 0) + (viewedIds.includes(b.id) ? 2 : 0) + Math.min(stockB, 20) * 0.1;
+      return scoreB - scoreA;
+    });
   }, [products]);
   const weeklySet = useMemo(() => mostPopular.slice(0, PAGE_SIZE * 2), [mostPopular]);
   const monthlySet = useMemo(() => {

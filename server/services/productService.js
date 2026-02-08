@@ -124,7 +124,8 @@ export function getProducts(filters = {}) {
         images: safeParseImages(product.images),
         in_stock: inStockVal,
         inStock: inStockVal,
-        show_in_ai: Boolean(product.show_in_ai)
+        show_in_ai: Boolean(product.show_in_ai),
+        stock_qty: product.stock_qty ?? null
       };
     });
   } catch (error) {
@@ -141,7 +142,7 @@ export function getProducts(filters = {}) {
 export function getProductsSearchIndex() {
   try {
     let query = `
-      SELECT id, name, category, price, images, in_stock,
+      SELECT id, name, category, price, images, in_stock, stock_qty,
              COALESCE(description,'') AS description,
              COALESCE(params,'') AS params
       FROM products WHERE 1=1
@@ -176,6 +177,7 @@ export function getProductsSearchIndex() {
       images: safeFirstImage(row.images) ? [safeFirstImage(row.images)] : [],
       inStock: Boolean(row.in_stock),
       in_stock: Boolean(row.in_stock),
+      stock_qty: row.stock_qty ?? null,
       description: (row.description || '').substring(0, 500),
       params: (row.params || '').substring(0, 300)
     }));
@@ -206,7 +208,8 @@ export function getProductById(id) {
       images,
       in_stock: inStockVal,
       inStock: inStockVal,
-      show_in_ai: Boolean(product.show_in_ai)
+      show_in_ai: Boolean(product.show_in_ai),
+      stock_qty: product.stock_qty ?? null
     };
   } catch (error) {
     console.error('getProductById error:', error);
@@ -221,9 +224,9 @@ export function upsertProduct(product) {
   const stmt = db.prepare(`
     INSERT INTO products (
       id, unas_id, name, price, category, category_path, images, 
-      description, params, link, in_stock, show_in_ai, updated_at, last_synced_at
+      description, params, link, in_stock, stock_qty, show_in_ai, updated_at, last_synced_at
     ) VALUES (
-      ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP
+      ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP
     )
     ON CONFLICT(id) DO UPDATE SET
       name = excluded.name,
@@ -235,6 +238,7 @@ export function upsertProduct(product) {
       params = excluded.params,
       link = excluded.link,
       in_stock = excluded.in_stock,
+      stock_qty = excluded.stock_qty,
       show_in_ai = COALESCE(excluded.show_in_ai, 1),
       updated_at = CURRENT_TIMESTAMP,
       last_synced_at = CURRENT_TIMESTAMP
@@ -243,6 +247,10 @@ export function upsertProduct(product) {
   const images = Array.isArray(product.images) 
     ? JSON.stringify(product.images) 
     : product.images;
+
+  const stockQty = typeof product.stock_qty === 'number'
+    ? product.stock_qty
+    : (typeof product.stockQty === 'number' ? product.stockQty : null);
 
   return stmt.run(
     product.id,
@@ -255,7 +263,8 @@ export function upsertProduct(product) {
     product.description || '',
     product.params || '',
     product.link || '#',
-    product.inStock || product.in_stock ? 1 : 0
+    product.inStock || product.in_stock ? 1 : 0,
+    stockQty
   );
 }
 

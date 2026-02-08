@@ -13,6 +13,9 @@ const STORAGE_KEYS = {
   AI_FEEDBACK: 'mkt_ai_feedback',
   CHAT_CONTEXT: 'mkt_chat_context',
   USER_PREFERENCES: 'mkt_user_preferences',
+  RECO_TWEAKS: 'mkt_reco_tweaks',
+  RECO_WEIGHTS: 'mkt_reco_weights',
+  AB_TESTS: 'mkt_ab_tests',
 };
 
 const MAX_ITEMS = {
@@ -20,6 +23,31 @@ const MAX_ITEMS = {
   LIKED: 100,
   SEARCHES: 20,
   FEEDBACK: 100,
+};
+
+const DEFAULT_RECO_TWEAKS = {
+  avoidStyles: [],
+  avoidRooms: [],
+};
+
+const DEFAULT_RECO_WEIGHTS = {
+  likeBoost: 20,
+  viewPenalty: 8,
+  dislikePenalty: 50,
+  categoryBoost: 20,
+  styleBoost: 12,
+  roomBoost: 10,
+  stockBoost: 6,
+  priceFit: 8,
+};
+
+const getJSONSafe = (key, fallback) => {
+  try {
+    const raw = localStorage.getItem(key);
+    return raw ? JSON.parse(raw) : fallback;
+  } catch {
+    return fallback;
+  }
 };
 
 // ==================== VIEWED PRODUCTS ====================
@@ -294,6 +322,55 @@ export function getUserPreferences() {
   }
 }
 
+export function getRecommendationTweaks() {
+  const data = getJSONSafe(STORAGE_KEYS.RECO_TWEAKS, DEFAULT_RECO_TWEAKS);
+  return { ...DEFAULT_RECO_TWEAKS, ...data };
+}
+
+export function setRecommendationTweaks(next) {
+  const current = getRecommendationTweaks();
+  const merged = { ...current, ...next };
+  localStorage.setItem(STORAGE_KEYS.RECO_TWEAKS, JSON.stringify(merged));
+  return merged;
+}
+
+export function resetRecommendationTweaks() {
+  localStorage.setItem(STORAGE_KEYS.RECO_TWEAKS, JSON.stringify(DEFAULT_RECO_TWEAKS));
+  return DEFAULT_RECO_TWEAKS;
+}
+
+export function getRecommendationWeights() {
+  const data = getJSONSafe(STORAGE_KEYS.RECO_WEIGHTS, DEFAULT_RECO_WEIGHTS);
+  return { ...DEFAULT_RECO_WEIGHTS, ...data };
+}
+
+export function setRecommendationWeights(next) {
+  const current = getRecommendationWeights();
+  const merged = { ...current, ...next };
+  localStorage.setItem(STORAGE_KEYS.RECO_WEIGHTS, JSON.stringify(merged));
+  return merged;
+}
+
+export function getABVariant(testId) {
+  const tests = getJSONSafe(STORAGE_KEYS.AB_TESTS, {});
+  if (tests[testId]?.variant) return tests[testId].variant;
+  const variant = Math.random() < 0.5 ? 'A' : 'B';
+  tests[testId] = { variant, impressions: 0, clicks: 0 };
+  localStorage.setItem(STORAGE_KEYS.AB_TESTS, JSON.stringify(tests));
+  return variant;
+}
+
+export function trackABEvent(testId, type = 'impression') {
+  const tests = getJSONSafe(STORAGE_KEYS.AB_TESTS, {});
+  if (!tests[testId]) {
+    tests[testId] = { variant: getABVariant(testId), impressions: 0, clicks: 0 };
+  }
+  if (type === 'click') tests[testId].clicks += 1;
+  else tests[testId].impressions += 1;
+  localStorage.setItem(STORAGE_KEYS.AB_TESTS, JSON.stringify(tests));
+  return tests[testId];
+}
+
 /**
  * Top kategóriák a felhasználói érdeklődés alapján
  */
@@ -356,21 +433,28 @@ export function getPersonalizedRecommendations(allProducts, limit = 12) {
   const dislikedIds = getDislikedProducts();
   const topCategories = getTopCategories(5);
   const styleDNA = getStyleDNA();
+  const tweaks = getRecommendationTweaks();
+  const weights = getRecommendationWeights();
+  const viewedProducts = getViewedProducts(20);
+  const avgPriceBase = viewedProducts.length > 0 ? viewedProducts : [];
+  const avgPrice = avgPriceBase.length > 0
+    ? avgPriceBase.reduce((sum, p) => sum + (p.price || 0), 0) / avgPriceBase.length
+    : null;
   
   // Pontozzuk a termékeket
   const scored = allProducts.map(product => {
     let score = 0;
     
     // Ne ajánljunk olyat, amit már nézett vagy nem kedvelt
-    if (viewedIds.includes(product.id)) score -= 10;
-    if (dislikedIds.includes(product.id)) score -= 50;
-    if (likedIds.includes(product.id)) score += 20;
+    if (viewedIds.includes(product.id)) score -= weights.viewPenalty;
+    if (dislikedIds.includes(product.id)) score -= weights.dislikePenalty;
+    if (likedIds.includes(product.id)) score += weights.likeBoost;
     
     // Kategória preferencia
     const productCategory = product.category || '';
     topCategories.forEach((cat, index) => {
       if (productCategory.toLowerCase().includes(cat.toLowerCase())) {
-        score += (5 - index) * 5; // Első kategória +25, második +20, stb.
+        score += (5 - index) * weights.categoryBoost * 0.2;
       }
     });
     
@@ -390,15 +474,16 @@ export function getPersonalizedRecommendations(allProducts, limit = 12) {
       
       if (space && styleKeywords[space]) {
         styleKeywords[space].forEach(kw => {
-          if (productText.includes(kw)) score += 10;
+          if (productText.includes(kw)) score += weights.styleBoost;
         });
+        if (tweaks.avoidStyles?.includes(space)) score -= weights.styleBoost * 2;
       }
       
       // Budget
       const price = product.salePrice || product.price || 0;
-      if (budget === 'budget' && price < 100000) score += 15;
-      if (budget === 'mid' && price >= 100000 && price <= 300000) score += 15;
-      if (budget === 'premium' && price > 300000) score += 15;
+      if (budget === 'budget' && price < 100000) score += weights.priceFit;
+      if (budget === 'mid' && price >= 100000 && price <= 300000) score += weights.priceFit;
+      if (budget === 'premium' && price > 300000) score += weights.priceFit;
       
       // Szoba típus
       const roomKeywords = {
@@ -410,9 +495,21 @@ export function getPersonalizedRecommendations(allProducts, limit = 12) {
       
       if (room && roomKeywords[room]) {
         roomKeywords[room].forEach(kw => {
-          if (productText.includes(kw)) score += 10;
+          if (productText.includes(kw)) score += weights.roomBoost;
         });
+        if (tweaks.avoidRooms?.includes(room)) score -= weights.roomBoost * 2;
       }
+    }
+
+    if (avgPrice && price > 0) {
+      const diff = Math.abs(price - avgPrice) / avgPrice;
+      score += Math.max(0, (1 - Math.min(diff, 1))) * weights.priceFit;
+    }
+
+    const stockQty = product.stock_qty ?? product.stockQty;
+    if (typeof stockQty === 'number') {
+      score += Math.min(20, stockQty) * (weights.stockBoost / 20);
+      if (stockQty === 0) score -= weights.stockBoost;
     }
     
     // Kis random faktor a változatosságért

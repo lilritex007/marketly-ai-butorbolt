@@ -183,6 +183,7 @@ function parseCSV(csvText) {
     const paramsString = aiContextParams.join(", ");
 
     const stock = getVal(stockCol);
+    const stockNum = stock && !isNaN(parseInt(stock, 10)) ? parseInt(stock, 10) : null;
 
     products.push({
       id: `unas-prod-${i}`,
@@ -193,7 +194,8 @@ function parseCSV(csvText) {
       description: getVal(descCol).replace(/<[^>]*>/g, ' ').substring(0, 500),
       params: paramsString,
       link: getVal(urlCol) || '#',
-      inStock: !(stock === '0' || stock.toLowerCase() === 'nincs' || stock.toLowerCase() === 'no')
+      inStock: stockNum != null ? stockNum > 0 : !(stock === '0' || stock.toLowerCase() === 'nincs' || stock.toLowerCase() === 'no'),
+      stock_qty: stockNum
     });
   }
   
@@ -391,7 +393,7 @@ function transformUnasProduct(unasProduct) {
            unasProduct.product_url || unasProduct.g_link || '#';
   };
 
-  const getStock = () => {
+  const getStockQty = () => {
     // UNAS API: Stocks.Stock.Qty (single or array of warehouses)
     if (unasProduct.Stocks && unasProduct.Stocks.Stock) {
       const stockEntries = Array.isArray(unasProduct.Stocks.Stock)
@@ -404,8 +406,7 @@ function transformUnasProduct(unasProduct) {
           if (!isNaN(qty)) totalQty += qty;
         }
       }
-      if (totalQty > 0) return true;
-      if (stockEntries.length > 0) return false; // explicit stock data, total 0
+      if (stockEntries.length > 0) return totalQty;
     }
     
     // Fallback
@@ -419,17 +420,23 @@ function transformUnasProduct(unasProduct) {
 
     for (const field of stockFields) {
       if (field !== undefined && field !== null) {
-        if (typeof field === 'boolean') return field;
-        if (typeof field === 'number') return field > 0;
+        if (typeof field === 'number') return field;
         if (typeof field === 'string') {
-          const lower = field.toLowerCase();
-          return !(lower === 'out of stock' || lower === 'nincs' || 
-                   lower === 'no' || lower === '0' || lower === 'false');
+          const trimmed = field.trim();
+          const asNum = parseInt(trimmed, 10);
+          if (!Number.isNaN(asNum)) return asNum;
         }
       }
     }
     
-    return true; // Default to in stock if not specified
+    return null;
+  };
+
+  const getStock = () => {
+    const qty = getStockQty();
+    if (typeof qty === 'number') return qty > 0;
+    if (typeof qty === 'boolean') return qty;
+    return true;
   };
 
   return {
@@ -442,6 +449,7 @@ function transformUnasProduct(unasProduct) {
     description: getDescription(),
     params: getParams(),
     link: getLink(),
-    inStock: getStock()
+    inStock: getStock(),
+    stock_qty: getStockQty()
   };
 }
