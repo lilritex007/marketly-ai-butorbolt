@@ -91,7 +91,7 @@ export const useLazyLoad = () => {
   }
 
   return (imageElement) => {
-    if (!imageElement) return;
+    if (!imageElement || !(imageElement instanceof Element)) return;
 
     const observer = new IntersectionObserver(
       (entries) => {

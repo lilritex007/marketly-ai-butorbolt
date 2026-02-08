@@ -169,8 +169,9 @@ export default function Navbar({
   }, [showMegaMenu]);
 
   useEffect(() => {
-    if (!showMegaMenu || !megaMenuPanelRef.current) return;
+    if (!showMegaMenu) return;
     const panel = megaMenuPanelRef.current;
+    if (!panel) return;
     const focusables = panel.querySelectorAll('button:not([disabled])');
     const first = focusables[0];
     if (first) {

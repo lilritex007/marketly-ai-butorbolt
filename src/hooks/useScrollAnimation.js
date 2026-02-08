@@ -18,7 +18,7 @@ export const useScrollAnimation = (options = {}) => {
 
   useEffect(() => {
     const element = ref.current;
-    if (!element) return;
+    if (!element || !(element instanceof Element)) return;
 
     // Skip if already animated and triggerOnce is true
     if (triggerOnce && hasAnimated) return;
@@ -72,7 +72,7 @@ export const useStaggerAnimation = (itemCount, options = {}) => {
 
   useEffect(() => {
     const container = containerRef.current;
-    if (!container) return;
+    if (!container || !(container instanceof Element)) return;
 
     const observer = new IntersectionObserver(
       ([entry]) => {

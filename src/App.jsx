@@ -1414,6 +1414,7 @@ const App = () => {
                         <SmartSearchBar 
                           products={searchIndexReady ? searchIndexRef.current : products}
                           indexVersion={searchIndexVersion}
+                          shouldBuildIndex={searchIndexReady}
                           categories={categories.map(c => typeof c === 'string' ? c : c.name)}
                           onSearch={handleServerSearch}
                           onProductClick={handleProductView}

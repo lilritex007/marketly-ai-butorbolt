@@ -77,7 +77,7 @@ export const useIntersectionObserver = (options = {}) => {
   optionsRef.current = options;
 
   useEffect(() => {
-    if (!ref) return;
+    if (!ref || !(ref instanceof Element)) return;
 
     const observer = new IntersectionObserver(([entry]) => {
       setIsIntersecting(entry.isIntersecting);

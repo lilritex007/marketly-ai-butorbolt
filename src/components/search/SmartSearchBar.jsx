@@ -49,6 +49,7 @@ const SmartSearchBar = ({
   products = [], 
   categories = [],
   indexVersion = 0,
+  shouldBuildIndex = true,
   onSearch, 
   onProductClick,
   placeholder = "Mit keresel? pl. 'modern kanapé 200 ezer alatt'" 
@@ -67,6 +68,7 @@ const SmartSearchBar = ({
 
   // 🧠 BUILD SEARCH INDEX when products are loaded (async, non-blocking)
   useEffect(() => {
+    if (!shouldBuildIndex) return;
     if (products.length > 0 && (products.length !== indexedCountRef.current || indexVersion !== indexedVersionRef.current)) {
       console.log(`📊 Products: ${products.length}, starting async index build...`);
       setIndexStatus({ ready: false, building: true, count: 0 });
@@ -91,8 +93,12 @@ const SmartSearchBar = ({
         }
       };
       
-      // Start after small delay to let UI render
-      setTimeout(doBuild, 50);
+      // Start when browser is idle to avoid jank
+      if (typeof window !== 'undefined' && 'requestIdleCallback' in window) {
+        window.requestIdleCallback(() => doBuild(), { timeout: 2000 });
+      } else {
+        setTimeout(doBuild, 300);
+      }
     }
   }, [products.length, indexVersion]);
 

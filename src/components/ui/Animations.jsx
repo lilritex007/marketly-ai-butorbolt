@@ -24,6 +24,7 @@ export const FadeInOnScroll = ({
   }, []);
 
   useEffect(() => {
+    if (!ref.current || !(ref.current instanceof Element)) return;
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {
@@ -34,9 +35,7 @@ export const FadeInOnScroll = ({
       { threshold }
     );
 
-    if (ref.current) {
-      observer.observe(ref.current);
-    }
+    observer.observe(ref.current);
 
     return () => observer.disconnect();
   }, [threshold]);
@@ -245,6 +244,7 @@ export const CountUp = ({ end, duration = 2000, prefix = '', suffix = '', classN
   const ref = useRef(null);
 
   useEffect(() => {
+    if (!ref.current || !(ref.current instanceof Element)) return;
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting && !hasStarted) {
@@ -254,7 +254,7 @@ export const CountUp = ({ end, duration = 2000, prefix = '', suffix = '', classN
       { threshold: 0.5 }
     );
 
-    if (ref.current) observer.observe(ref.current);
+    observer.observe(ref.current);
     return () => observer.disconnect();
   }, [hasStarted]);
 

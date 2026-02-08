@@ -616,7 +616,7 @@ const CategoryPage = ({
       { threshold: 0.1, rootMargin: '200px' }
     );
     
-    if (loadMoreRef.current) {
+    if (loadMoreRef.current instanceof Element) {
       observer.observe(loadMoreRef.current);
     }
     
