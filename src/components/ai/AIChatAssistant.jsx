@@ -22,7 +22,7 @@ import {
  * - Személyre szabott válaszok
  * - Proaktív ajánlások
  */
-const AIChatAssistant = ({ products, onShowProducts }) => {
+const AIChatAssistant = ({ products, catalogProducts, onShowProducts }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState([]);
   const [inputValue, setInputValue] = useState('');
@@ -32,8 +32,9 @@ const AIChatAssistant = ({ products, onShowProducts }) => {
   const messageIdRef = useRef(0);
 
   // Teljes katalógus elemzés - részletes statisztikák
+  const catalogSource = catalogProducts && catalogProducts.length > 0 ? catalogProducts : products;
   const catalogStats = useMemo(() => {
-    if (!products || products.length === 0) return null;
+    if (!catalogSource || catalogSource.length === 0) return null;
 
     const categories = {};
     const mainCategories = {};
@@ -44,7 +45,7 @@ const AIChatAssistant = ({ products, onShowProducts }) => {
     const colors = new Set();
     const styles = new Set();
 
-    products.forEach(p => {
+    catalogSource.forEach(p => {
       // Kategória feldolgozás
       const cat = p.category || 'Egyéb';
       categories[cat] = (categories[cat] || 0) + 1;
@@ -105,29 +106,29 @@ const AIChatAssistant = ({ products, onShowProducts }) => {
       availableStyles: Array.from(styles),
       availableColors: Array.from(colors)
     };
-  }, [products]);
+  }, [catalogSource]);
 
   // Okos keresés a központi aiSearchService-ből
   const performSmartSearch = useCallback((query, options = {}) => {
-    if (!products || products.length === 0) return { results: [], intent: null };
+    if (!catalogSource || catalogSource.length === 0) return { results: [], intent: null };
     
     const { limit = 12 } = options;
-    return smartSearch(products, query, { limit, includeDebugInfo: false });
-  }, [products]);
+    return smartSearch(catalogSource, query, { limit, includeDebugInfo: false });
+  }, [catalogSource]);
 
   // Kategória alapú ajánlások
   const getCategoryProducts = useCallback((categoryName, limit = 6) => {
-    if (!products) return [];
-    return products
+    if (!catalogSource) return [];
+    return catalogSource
       .filter(p => (p.category || '').toLowerCase().includes(categoryName.toLowerCase()))
       .sort((a, b) => (b.salePrice || b.price || 0) - (a.salePrice || a.price || 0))
       .slice(0, limit);
-  }, [products]);
+  }, [catalogSource]);
 
   // Proaktív javaslatok
   const proactiveSuggestions = useMemo(() => {
-    return getProactiveSuggestions(products);
-  }, [products]);
+    return getProactiveSuggestions(catalogSource || []);
+  }, [catalogSource]);
 
   const generateMessageId = () => {
     messageIdRef.current += 1;

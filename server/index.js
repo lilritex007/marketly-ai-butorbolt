@@ -136,8 +136,7 @@ app.get('/api/products', async (req, res) => {
       slim // If slim=true, return only essential fields (faster)
     } = req.query;
 
-    // Auto-sync if needed (async, don't wait)
-    autoSync(60).catch(err => console.error('Auto-sync error:', err));
+    // Auto-sync disabled for production cadence (nightly/manual sync only)
 
     // No limit = load ALL products; only apply limit when explicitly set
     const limitNum = limit !== undefined && limit !== '' ? parseInt(limit, 10) : undefined;
@@ -193,8 +192,12 @@ app.get('/api/products', async (req, res) => {
 app.get('/api/products/search-index', (req, res) => {
   try {
     const products = getProductsSearchIndex();
+    const lastSync = getLastSyncInfo();
     res.setHeader('Cache-Control', 'private, max-age=300'); // 5 perc, majd frissíthető
-    res.json(products);
+    res.json({
+      products,
+      lastSync: lastSync?.completed_at || null
+    });
   } catch (error) {
     console.error('Error fetching search index:', error);
     res.status(500).json({ error: 'Failed to fetch search index' });

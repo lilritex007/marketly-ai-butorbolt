@@ -99,11 +99,15 @@ export const fetchSearchIndex = async () => {
   try {
     const API_BASE = getApiBase();
     const res = await fetch(`${API_BASE}/products/search-index`);
-    if (!res.ok) return [];
+    if (!res.ok) return { products: [], lastSync: null };
     const data = await res.json();
-    return Array.isArray(data) ? data : [];
+    if (Array.isArray(data)) return { products: data, lastSync: null };
+    return {
+      products: Array.isArray(data.products) ? data.products : [],
+      lastSync: data.lastSync || null
+    };
   } catch (error) {
-    return [];
+    return { products: [], lastSync: null };
   }
 };
 

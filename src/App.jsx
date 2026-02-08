@@ -999,16 +999,17 @@ const App = () => {
     let cancelled = false;
     const load = () => {
       fetchSearchIndex().then((data) => {
-        if (!cancelled && Array.isArray(data)) {
-          searchIndexRef.current = data;
+        if (!cancelled && data && Array.isArray(data.products)) {
+          searchIndexRef.current = data.products;
           setSearchIndexReady(true);
           setSearchIndexVersion((v) => v + 1);
           // #region agent log
-          fetch('http://localhost:7244/ingest/4b0575bc-02d3-43f2-bc91-db7897d5cbba',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({runId:'pre',hypothesisId:'H2',location:'App.jsx:searchIndex',message:'search index loaded',data:{count:data.length},timestamp:Date.now()})}).catch(()=>{});
+          fetch('http://localhost:7244/ingest/4b0575bc-02d3-43f2-bc91-db7897d5cbba',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({runId:'pre',hypothesisId:'H2',location:'App.jsx:searchIndex',message:'search index loaded',data:{count:data.products.length,lastSync:data.lastSync||null},timestamp:Date.now()})}).catch(()=>{});
           // #endregion
+          if (data.lastSync) setLastUpdated(data.lastSync);
           const q = searchQueryRef.current.trim();
           if (q) {
-            const { results = [], totalMatches = 0 } = smartSearch(data, q, { limit: 500 });
+            const { results = [], totalMatches = 0 } = smartSearch(searchIndexRef.current, q, { limit: 500 });
             setSearchResults(results);
             setSearchTotalMatches(totalMatches || results.length);
           }
@@ -1148,7 +1149,11 @@ const App = () => {
       {/* AI Chat Assistant (deferred for faster first paint) */}
       {showDeferredAI && (
         <Suspense fallback={null}>
-          <AIChatAssistant products={products} onShowProducts={handleShowAIProducts} />
+          <AIChatAssistant
+            products={products}
+            catalogProducts={searchIndexReady ? searchIndexRef.current : products}
+            onShowProducts={handleShowAIProducts}
+          />
         </Suspense>
       )}
 
