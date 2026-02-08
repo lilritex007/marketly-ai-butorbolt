@@ -443,6 +443,41 @@
 }
 
 /* ========================================
+   FEATURED SECTION SHELLS
+   ======================================== */
+.section-shell {
+  position: relative;
+  border-top: 1px solid rgba(229, 231, 235, 0.9);
+  border-bottom: 1px solid rgba(229, 231, 235, 0.9);
+}
+
+.section-shell::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 6px;
+  background: linear-gradient(90deg, rgba(99, 102, 241, 0.7), rgba(168, 85, 247, 0.7));
+}
+
+.section-shell--popular {
+  background: linear-gradient(180deg, #fff, #fff7ed 65%, #fffbf5 100%);
+}
+
+.section-shell--new {
+  background: linear-gradient(180deg, #f8fafc 0%, #ffffff 70%, #f9fafb 100%);
+}
+
+.section-shell--personal {
+  background: linear-gradient(180deg, #ffffff 0%, #f5f3ff 55%, #eef2ff 100%);
+}
+
+.section-shell--favorites {
+  background: linear-gradient(180deg, #fff1f2 0%, #ffffff 55%, #fff7f7 100%);
+}
+
+/* ========================================
    SCROLLBAR (SCOPED)
    ======================================== */
 

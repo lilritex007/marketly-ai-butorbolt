@@ -70,7 +70,7 @@ export default function MostPopularSection({ products = [], onProductClick, onTo
   if (visibleProducts.length === 0) return null;
 
   return (
-    <section className="py-10 sm:py-12 lg:py-16 bg-gradient-to-b from-white to-amber-50/40 border-t border-gray-200" aria-labelledby="most-popular-heading">
+    <section className="section-shell section-shell--popular py-10 sm:py-12 lg:py-16" aria-labelledby="most-popular-heading">
       <div className="w-full max-w-[2000px] mx-auto px-4 sm:px-6 lg:px-10 xl:px-16">
         <SectionHeader
           id="most-popular-heading"

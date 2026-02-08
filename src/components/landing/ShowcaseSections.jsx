@@ -122,7 +122,7 @@ export const LiveShowcase = ({ products = [], onProductClick }) => {
   }, [products, seed]);
 
   return (
-    <div className="py-8 sm:py-10 lg:py-14 xl:py-16 bg-gradient-to-b from-gray-50 to-white overflow-hidden border-t border-gray-100">
+    <div className="section-shell section-shell--favorites py-8 sm:py-10 lg:py-14 xl:py-16 overflow-hidden">
       <div className="w-full max-w-[2000px] mx-auto px-4 sm:px-6 lg:px-10 xl:px-16">
         <SectionHeader
           id="customer-favorites-heading"

@@ -200,7 +200,7 @@ const PersonalizedSection = ({
   }
 
   return (
-    <section className="relative py-10 sm:py-14 lg:py-20 bg-gradient-to-b from-white via-white to-primary-50/40 border-t border-gray-100 overflow-hidden">
+    <section className="section-shell section-shell--personal relative py-10 sm:py-14 lg:py-20 overflow-hidden">
       <div className="absolute -top-20 -right-16 w-72 h-72 bg-primary-200/30 blur-3xl rounded-full" aria-hidden />
       <div className="absolute -bottom-24 -left-16 w-80 h-80 bg-secondary-200/30 blur-3xl rounded-full" aria-hidden />
       <div className="w-full max-w-[2000px] mx-auto px-4 sm:px-6 lg:px-10 xl:px-16">

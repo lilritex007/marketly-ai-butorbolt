@@ -44,7 +44,7 @@ export default function NewArrivalsSection({ products = [], onProductClick, onTo
   if (visibleProducts.length === 0) return null;
 
   return (
-    <section className="py-10 sm:py-12 lg:py-16 bg-gradient-to-b from-gray-50 to-white border-t border-gray-200" aria-labelledby="new-arrivals-heading">
+    <section className="section-shell section-shell--new py-10 sm:py-12 lg:py-16" aria-labelledby="new-arrivals-heading">
       <div className="w-full max-w-[2000px] mx-auto px-4 sm:px-6 lg:px-10 xl:px-16">
         <SectionHeader
           id="new-arrivals-heading"
