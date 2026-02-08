@@ -171,7 +171,12 @@ export default function Navbar({
   useEffect(() => {
     if (!showMegaMenu) return;
     const panel = megaMenuPanelRef.current;
-    if (!panel) return;
+    if (!panel) {
+      // #region agent log
+      fetch('http://localhost:7244/ingest/4b0575bc-02d3-43f2-bc91-db7897d5cbba',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({runId:'pre',hypothesisId:'H5',location:'Navbar.jsx:megaMenu',message:'panel null when showMegaMenu',data:{showMegaMenu},timestamp:Date.now()})}).catch(()=>{});
+      // #endregion
+      return;
+    }
     const focusables = panel.querySelectorAll('button:not([disabled])');
     const first = focusables[0];
     if (first) {

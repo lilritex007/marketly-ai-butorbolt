@@ -24,7 +24,12 @@ export const FadeInOnScroll = ({
   }, []);
 
   useEffect(() => {
-    if (!ref.current || !(ref.current instanceof Element)) return;
+    if (!ref.current || !(ref.current instanceof Element)) {
+      // #region agent log
+      fetch('http://localhost:7244/ingest/4b0575bc-02d3-43f2-bc91-db7897d5cbba',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({runId:'pre',hypothesisId:'H4',location:'Animations.jsx:FadeInOnScroll',message:'observer skipped (no element)',data:{hasRef:!!ref.current},timestamp:Date.now()})}).catch(()=>{});
+      // #endregion
+      return;
+    }
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {
