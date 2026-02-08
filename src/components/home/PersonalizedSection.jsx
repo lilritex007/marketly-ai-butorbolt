@@ -1,7 +1,8 @@
-import React, { useState, useEffect, useMemo, useRef } from 'react';
-import { Sparkles, ChevronLeft, ChevronRight, Clock, Heart, TrendingUp, Eye, Star, RefreshCw } from 'lucide-react';
-import { getViewedProducts, getPersonalizedRecommendations, getLikedProducts, getStyleDNA } from '../../services/userPreferencesService';
+import React, { useState, useEffect, useMemo } from 'react';
+import { Sparkles, Clock, TrendingUp, RefreshCw } from 'lucide-react';
+import { getViewedProducts, getPersonalizedRecommendations, getStyleDNA } from '../../services/userPreferencesService';
 import SectionHeader from '../landing/SectionHeader';
+import { EnhancedProductCard } from '../product/EnhancedProductCard';
 
 /**
  * PersonalizedSection - Személyre szabott főoldal szekciók
@@ -16,11 +17,8 @@ const PersonalizedSection = ({
 }) => {
   const [activeTab, setActiveTab] = useState('foryou');
   const [refreshKey, setRefreshKey] = useState(0);
-  const scrollRef = useRef(null);
-  
   // User adatok
   const recentlyViewed = useMemo(() => getViewedProducts(12), []);
-  const likedProducts = useMemo(() => getLikedProducts(), []);
   const styleDNA = useMemo(() => getStyleDNA(), []);
   
   // Személyre szabott ajánlások
@@ -46,18 +44,7 @@ const PersonalizedSection = ({
   ];
 
   const currentProducts = tabs.find(t => t.id === activeTab)?.products || [];
-
-  const scroll = (direction) => {
-    if (scrollRef.current) {
-      const scrollAmount = scrollRef.current.offsetWidth * 0.8;
-      scrollRef.current.scrollBy({
-        left: direction === 'left' ? -scrollAmount : scrollAmount,
-        behavior: 'smooth'
-      });
-    }
-  };
-
-  const formatPrice = (price) => (price || 0).toLocaleString('hu-HU') + ' Ft';
+  const visibleProducts = currentProducts.slice(0, 12);
 
   // Ha nincs elég adat, ne jelenjen meg
   if (currentProducts.length < 2 && forYouProducts.length < 2) {
@@ -77,29 +64,13 @@ const PersonalizedSection = ({
           contextLabel={contextLabel}
           meta={`Megjelenítve: ${currentProducts.length} termék`}
           actions={
-            <>
-              <button
-                onClick={() => setRefreshKey((v) => v + 1)}
-                className="inline-flex items-center gap-2 px-3 py-2 rounded-lg text-primary-700 bg-primary-50 border border-primary-100 hover:bg-primary-100 transition-colors text-sm font-semibold min-h-[44px]"
-              >
-                <RefreshCw className="w-4 h-4" />
-                Frissítem
-              </button>
-              <button
-                onClick={() => scroll('left')}
-                className="p-2 rounded-full bg-white shadow-md hover:shadow-lg hover:bg-gray-50 transition-all min-h-[44px] min-w-[44px]"
-                aria-label="Balra görgetés"
-              >
-                <ChevronLeft className="w-5 h-5 text-gray-700" />
-              </button>
-              <button
-                onClick={() => scroll('right')}
-                className="p-2 rounded-full bg-white shadow-md hover:shadow-lg hover:bg-gray-50 transition-all min-h-[44px] min-w-[44px]"
-                aria-label="Jobbra görgetés"
-              >
-                <ChevronRight className="w-5 h-5 text-gray-700" />
-              </button>
-            </>
+            <button
+              onClick={() => setRefreshKey((v) => v + 1)}
+              className="inline-flex items-center gap-2 px-3 py-2 rounded-lg text-primary-700 bg-primary-50 border border-primary-100 hover:bg-primary-100 transition-colors text-sm font-semibold min-h-[44px]"
+            >
+              <RefreshCw className="w-4 h-4" />
+              Frissítem
+            </button>
           }
         />
 
@@ -139,104 +110,17 @@ const PersonalizedSection = ({
           })}
         </div>
 
-        {/* Products Carousel */}
-        <div className="relative">
-          <div
-            ref={scrollRef}
-            className="flex gap-4 overflow-x-auto pb-4 scrollbar-hide scroll-smooth"
-            style={{ scrollSnapType: 'x mandatory' }}
-          >
-            {currentProducts.map((product, index) => {
-              const isWishlisted = wishlist.includes(product.id);
-              const isLiked = likedProducts.includes(product.id);
-              const price = product.salePrice || product.price || 0;
-              const viewedAt = product.viewedAt ? new Date(product.viewedAt) : null;
-              
-              return (
-                <div
-                  key={product.id}
-                  className="flex-shrink-0 w-[200px] sm:w-[220px] lg:w-[250px] scroll-snap-align-start"
-                  style={{ scrollSnapAlign: 'start' }}
-                >
-                  <div 
-                    onClick={() => onProductClick?.(product)}
-                    className="bg-white rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 cursor-pointer group h-full flex flex-col"
-                  >
-                    {/* Image */}
-                    <div className="relative aspect-square bg-gray-50 overflow-hidden">
-                      <img
-                        src={product.images?.[0] || product.image}
-                        alt={product.name}
-                        className="w-full h-full object-contain group-hover:scale-110 transition-transform duration-500"
-                        onError={(e) => { e.target.src = 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100"><rect fill="%23f3f4f6" width="100" height="100"/></svg>'; }}
-                      />
-                      
-                      {/* Badges */}
-                      <div className="absolute top-2 left-2 flex flex-col gap-1">
-                        {activeTab === 'foryou' && index < 3 && (
-                          <span className="px-2 py-1 bg-gradient-to-r from-primary-500 to-secondary-700 text-white text-[10px] font-bold rounded-full flex items-center gap-1">
-                            <Star className="w-3 h-3" fill="currentColor" />
-                            Top {index + 1}
-                          </span>
-                        )}
-                        {isLiked && (
-                          <span className="px-2 py-1 bg-pink-500 text-white text-[10px] font-bold rounded-full">
-                            ❤️ Kedveled
-                          </span>
-                        )}
-                      </div>
-
-                      {/* Wishlist button */}
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          onToggleWishlist?.(product.id);
-                        }}
-                        className={`
-                          absolute top-2 right-2 p-2 rounded-full transition-all
-                          ${isWishlisted 
-                            ? 'bg-red-500 text-white' 
-                            : 'bg-white/80 text-gray-600 hover:bg-white hover:text-red-500'
-                          }
-                        `}
-                      >
-                        <Heart className="w-4 h-4" fill={isWishlisted ? 'currentColor' : 'none'} />
-                      </button>
-
-                      {/* Quick view overlay */}
-                      <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors flex items-center justify-center opacity-0 group-hover:opacity-100">
-                        <span className="px-4 py-2 bg-white rounded-full text-sm font-medium shadow-lg flex items-center gap-2">
-                          <Eye className="w-4 h-4" />
-                          Megnézem
-                        </span>
-                      </div>
-                    </div>
-
-                    {/* Info */}
-                    <div className="p-4 flex-1 flex flex-col">
-                      <p className="text-sm font-medium text-gray-800 line-clamp-2 mb-2 flex-1">
-                        {product.name}
-                      </p>
-                      <div className="flex items-center justify-between">
-                        <span className="text-lg font-bold text-primary-500">
-                          {formatPrice(price)}
-                        </span>
-                        {viewedAt && activeTab === 'recent' && (
-                          <span className="text-[10px] text-gray-400">
-                            {formatTimeAgo(viewedAt)}
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-
-          {/* Gradient edges */}
-          <div className="absolute left-0 top-0 bottom-4 w-8 bg-gradient-to-r from-white to-transparent pointer-events-none" />
-          <div className="absolute right-0 top-0 bottom-4 w-8 bg-gradient-to-l from-white to-transparent pointer-events-none" />
+        <div className="product-grid">
+          {visibleProducts.map((product, index) => (
+            <EnhancedProductCard
+              key={product.id}
+              product={product}
+              onToggleWishlist={onToggleWishlist}
+              isWishlisted={wishlist.includes(product.id)}
+              onQuickView={onProductClick}
+              index={index}
+            />
+          ))}
         </div>
 
         {/* Empty state for recent */}
@@ -251,20 +135,5 @@ const PersonalizedSection = ({
     </section>
   );
 };
-
-// Helper: időformázás
-function formatTimeAgo(date) {
-  const now = new Date();
-  const diffMs = now - date;
-  const diffMins = Math.floor(diffMs / 60000);
-  const diffHours = Math.floor(diffMs / 3600000);
-  const diffDays = Math.floor(diffMs / 86400000);
-  
-  if (diffMins < 1) return 'most';
-  if (diffMins < 60) return `${diffMins} perce`;
-  if (diffHours < 24) return `${diffHours} órája`;
-  if (diffDays < 7) return `${diffDays} napja`;
-  return date.toLocaleDateString('hu-HU');
-}
 
 export default PersonalizedSection;
