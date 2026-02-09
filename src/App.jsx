@@ -37,7 +37,6 @@ import { ModernHero, AIFeaturesShowcase } from './components/landing/ModernHero'
 import { SocialProof, LiveShowcase, InteractiveCTA } from './components/landing/ShowcaseSections';
 import TrustStrip from './components/landing/TrustStrip';
 import InspirationSection from './components/landing/InspirationSection';
-import TestimonialsSection from './components/landing/TestimonialsSection';
 import NewArrivalsSection from './components/landing/NewArrivalsSection';
 import MostPopularSection from './components/landing/MostPopularSection';
 // Footer eltávolítva - a fő UNAS shopnak már van saját láblécce
@@ -1153,14 +1152,21 @@ const App = () => {
       );
     }
     Promise.all(
-      baseOffsets.map((offset) => fetchUnasProducts({ limit, offset, slim: true }))
+      baseOffsets.map((offset) => fetchUnasProducts({ limit, offset, slim: false }))
     )
       .then((batches) => {
         if (cancelled) return;
         const merged = new Map();
         batches.forEach((data) => {
           (data?.products || []).forEach((p) => {
-            if (p && p.id) merged.set(p.id, p);
+            if (!p || !p.id) return;
+            const normalized = {
+              ...p,
+              images: p.images || (p.image ? [p.image] : []),
+              image: p.images?.[0] || p.image,
+              inStock: p.inStock ?? p.in_stock ?? true
+            };
+            merged.set(p.id, normalized);
           });
         });
         setFeaturedPool(Array.from(merged.values()));
@@ -1445,9 +1451,6 @@ const App = () => {
             />
             </FadeInOnScroll>
 
-            <FadeInOnScroll direction="up" className="section-perf">
-              <TestimonialsSection />
-            </FadeInOnScroll>
 
             {featuredBase.length > 0 && (
               <FadeInOnScroll direction="up" className="section-perf">
@@ -1527,7 +1530,7 @@ const App = () => {
             ) : (
             <section id="products-section" className="container-app section-padding section-perf">
                 {/* Sticky products header - solid, breadcrumb when category selected */}
-                <div className="sticky top-16 sm:top-20 z-40 mx-0 sm:-mx-4 lg:-mx-8 xl:-mx-10 px-3 sm:px-4 lg:px-8 xl:px-10 py-3 sm:py-4 lg:py-5 xl:py-6 mb-3 sm:mb-4 lg:mb-8 bg-white border-b border-gray-200 shadow-sm">
+                <div className="sticky top-16 sm:top-20 z-40 mx-0 sm:-mx-4 lg:-mx-8 xl:-mx-10 px-3 sm:px-4 lg:px-8 xl:px-10 py-3 sm:py-4 lg:py-5 xl:py-6 mb-3 sm:mb-4 lg:mb-8 bg-white border-b border-gray-200 shadow-sm search-shell rounded-2xl">
                   <div className="flex flex-wrap items-center justify-between gap-2 mb-2 sm:mb-3">
                     <nav className="flex items-center gap-2 text-sm text-gray-500" aria-label="Breadcrumb">
                       <button type="button" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} className="hover:text-primary-600 font-medium transition-colors" aria-label="Főoldal teteje">Főoldal</button>
@@ -1560,16 +1563,6 @@ const App = () => {
                           <span className="font-semibold text-primary-500">
                             {(headerCount || 0).toLocaleString('hu-HU')}
                           </span> db
-                          {!searchQuery && totalProductsCount > 0 && (
-                            <span className="text-gray-400 text-xs sm:text-sm ml-1">
-                              / {totalProductsCount.toLocaleString('hu-HU')}
-                            </span>
-                          )}
-                          {!searchQuery && totalProductsCount > 0 && (
-                            <span className="block text-[11px] sm:text-xs text-gray-400 mt-0.5">
-                              Betöltve: {products.length.toLocaleString('hu-HU')} / {totalProductsCount.toLocaleString('hu-HU')}
-                            </span>
-                          )}
                         </span>
                       )}
                       {searchQuery && (
@@ -1589,50 +1582,52 @@ const App = () => {
                     </div>
                     
                     {/* Search & Filters */}
-                    <div className="w-full sm:w-auto flex items-center gap-2 sm:gap-3 lg:gap-4">
-                      <div className="flex-1 sm:flex-initial sm:w-64 lg:w-80 xl:w-[420px] 2xl:w-[500px]">
-                        <SmartSearchBar 
-                          products={SERVER_SEARCH_ONLY ? products : (searchIndexReady ? searchIndexRef.current : products)}
-                          indexVersion={searchIndexVersion}
-                          shouldBuildIndex={!SERVER_SEARCH_ONLY && searchIndexReady}
-                          maxLocalIndex={MAX_LOCAL_INDEX}
-                          serverSearchMode={SERVER_SEARCH_ONLY}
-                          categories={categories}
-                          onSearch={handleServerSearch}
-                          onProductClick={handleProductView}
-                          placeholder="Keresés bútorok között..."
-                        />
+                    <div className="w-full sm:w-auto">
+                      <div className="w-full flex items-center gap-2 sm:gap-3 lg:gap-4 rounded-2xl border-2 border-primary-100 bg-gradient-to-r from-primary-50 via-white to-secondary-50 shadow-md p-2 sm:p-3">
+                        <div className="flex-1 sm:flex-initial sm:w-64 lg:w-80 xl:w-[420px] 2xl:w-[520px]">
+                          <SmartSearchBar 
+                            products={SERVER_SEARCH_ONLY ? products : (searchIndexReady ? searchIndexRef.current : products)}
+                            indexVersion={searchIndexVersion}
+                            shouldBuildIndex={!SERVER_SEARCH_ONLY && searchIndexReady}
+                            maxLocalIndex={MAX_LOCAL_INDEX}
+                            serverSearchMode={SERVER_SEARCH_ONLY}
+                            categories={categories}
+                            onSearch={handleServerSearch}
+                            onProductClick={handleProductView}
+                            placeholder="Keresés bútorok között..."
+                          />
+                        </div>
+                        {/* Desktop filters */}
+                        <div className="hidden sm:block">
+                          <AdvancedFilters
+                            products={products}
+                            onFilterChange={setAdvancedFilters}
+                            initialFilters={advancedFilters}
+                          />
+                        </div>
+                        {/* Mobile filter button – same state as desktop AdvancedFilters */}
+                        <button
+                          onClick={() => setShowFilterSheet(true)}
+                          className="sm:hidden relative p-3 min-h-[48px] min-w-[48px] border-2 border-gray-200 rounded-xl bg-white hover:bg-gray-50 transition-colors flex items-center justify-center"
+                          aria-label="Szűrők"
+                        >
+                          <Filter className="w-5 h-5 text-gray-700" />
+                          {mobileActiveFilterCount > 0 && (
+                            <span className="absolute -top-1 -right-1 bg-primary-500 text-white text-xs font-bold rounded-full min-w-[20px] h-5 px-1.5 flex items-center justify-center">
+                              {mobileActiveFilterCount}
+                            </span>
+                          )}
+                        </button>
+                        <select 
+                          onChange={(e) => setSortOption(e.target.value)} 
+                          className="hidden sm:block px-4 lg:px-5 xl:px-6 py-3 lg:py-3.5 xl:py-4 min-h-[48px] lg:min-h-[52px] xl:min-h-[56px] text-sm sm:text-base lg:text-lg xl:text-xl border-2 border-gray-200 rounded-xl lg:rounded-2xl bg-white focus:border-primary-500 focus:ring-2 focus:ring-primary-100 outline-none transition-all cursor-pointer font-medium"
+                          aria-label="Rendezés"
+                        >
+                          <option value="default">Rendezés</option>
+                          <option value="price-asc">Ár: alacsony → magas</option>
+                          <option value="price-desc">Ár: magas → alacsony</option>
+                        </select>
                       </div>
-                      {/* Desktop filters */}
-                      <div className="hidden sm:block">
-                        <AdvancedFilters
-                          products={products}
-                          onFilterChange={setAdvancedFilters}
-                          initialFilters={advancedFilters}
-                        />
-                      </div>
-                      {/* Mobile filter button – same state as desktop AdvancedFilters */}
-                      <button
-                        onClick={() => setShowFilterSheet(true)}
-                        className="sm:hidden relative p-3 min-h-[48px] min-w-[48px] border-2 border-gray-200 rounded-xl bg-white hover:bg-gray-50 transition-colors flex items-center justify-center"
-                        aria-label="Szűrők"
-                      >
-                        <Filter className="w-5 h-5 text-gray-700" />
-                        {mobileActiveFilterCount > 0 && (
-                          <span className="absolute -top-1 -right-1 bg-primary-500 text-white text-xs font-bold rounded-full min-w-[20px] h-5 px-1.5 flex items-center justify-center">
-                            {mobileActiveFilterCount}
-                          </span>
-                        )}
-                      </button>
-                      <select 
-                        onChange={(e) => setSortOption(e.target.value)} 
-                        className="hidden sm:block px-4 lg:px-5 xl:px-6 py-3 lg:py-3.5 xl:py-4 min-h-[48px] lg:min-h-[52px] xl:min-h-[56px] text-sm sm:text-base lg:text-lg xl:text-xl border-2 border-gray-200 rounded-xl lg:rounded-2xl bg-white focus:border-primary-500 focus:ring-2 focus:ring-primary-100 outline-none transition-all cursor-pointer font-medium"
-                        aria-label="Rendezés"
-                      >
-                        <option value="default">Rendezés</option>
-                        <option value="price-asc">Ár: alacsony → magas</option>
-                        <option value="price-desc">Ár: magas → alacsony</option>
-                      </select>
                     </div>
                   </div>
                   {/* Active filter chips + sort chips – wrap mobil/tablet, 44px touch */}

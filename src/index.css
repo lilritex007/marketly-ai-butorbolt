@@ -186,6 +186,17 @@
   100% { background-position: -200% 0; }
 }
 
+/* Emphasized search section */
+#mkt-butorbolt-app .search-shell {
+  background: linear-gradient(135deg, rgba(255, 138, 0, 0.18), rgba(99, 102, 241, 0.16));
+  border: 2px solid rgba(255, 138, 0, 0.25);
+  box-shadow: 0 16px 40px rgba(15, 23, 42, 0.12);
+}
+
+#mkt-butorbolt-app .search-shell h2 {
+  text-shadow: 0 10px 24px rgba(15, 23, 42, 0.25);
+}
+
 /* Responsive text size overrides - sm: breakpoint (640px) */
 @media (min-width: 640px) {
   #mkt-butorbolt-app .sm\:text-xs { font-size: 12px !important; }

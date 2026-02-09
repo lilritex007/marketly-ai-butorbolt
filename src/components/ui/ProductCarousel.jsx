@@ -13,8 +13,8 @@ const getScrollStep = (container) => {
 const ProductCarousel = ({
   children,
   autoScroll = true,
-  intervalMs = 6500,
-  stepFraction = 0.9,
+  intervalMs = 5200,
+  stepFraction = 1,
   className = '',
   onInteractionChange
 }) => {

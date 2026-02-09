@@ -564,18 +564,6 @@ const PersonalizedSection = ({
           </ProductCarousel>
         )}
 
-        {currentProducts.length > visibleProducts.length && (
-          <div className="mt-6 flex justify-center">
-            <button
-              type="button"
-              onClick={() => setViewSize((v) => Math.min(currentProducts.length, v + 12))}
-              className="px-5 py-3 rounded-xl bg-white border border-gray-200 text-gray-700 font-semibold hover:bg-gray-50 transition-colors min-h-[48px]"
-            >
-              Több ajánlás
-            </button>
-          </div>
-        )}
-
         {/* Empty state for recent */}
         {activeTab === 'recent' && currentProducts.length === 0 && (
           <div className="text-center py-12 bg-white rounded-2xl shadow-inner">
