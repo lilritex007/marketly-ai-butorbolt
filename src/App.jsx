@@ -289,39 +289,40 @@ const FileLoaderBar = ({ onFileLoad, onUnasRefresh, isLoadingUnas, lastUpdated, 
 };
 
 const Features = () => (
-    <div className="bg-white py-10 sm:py-12 lg:py-14 border-b border-gray-100">
-        <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-10">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-5 lg:gap-6">
-                <div className="flex items-center p-4 sm:p-5 lg:p-6 bg-gray-50 rounded-xl lg:rounded-2xl">
-                    <div className="w-12 h-12 sm:w-14 sm:h-14 lg:w-16 lg:h-16 bg-blue-100 text-blue-600 rounded-xl flex items-center justify-center mr-4 shrink-0">
-                        <Truck className="w-6 h-6 sm:w-7 sm:h-7 lg:w-8 lg:h-8" />
+    <section className="bg-white py-14 sm:py-16 lg:py-20 border-t border-gray-100/80" aria-labelledby="features-heading">
+        <div className="w-full max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-10 xl:px-16">
+            <h2 id="features-heading" className="sr-only">Miért válassz minket</h2>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-5 sm:gap-6 lg:gap-8">
+                <div className="flex items-center gap-5 p-6 sm:p-8 rounded-2xl bg-gray-50/80 border border-gray-100 hover:border-primary-100 hover:shadow-[0_8px_30px_rgba(0,0,0,0.06)] transition-all duration-300">
+                    <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-primary-50 text-primary-600 flex items-center justify-center shrink-0">
+                        <Truck className="w-7 h-7 sm:w-8 sm:h-8" aria-hidden />
                     </div>
                     <div>
-                        <h3 className="font-bold text-gray-900 text-base sm:text-lg lg:text-xl">Ingyenes Szállítás</h3>
-                        <p className="text-sm sm:text-base text-gray-500 mt-1">Minden 50.000 Ft feletti rendelésnél.</p>
+                        <h3 className="font-bold text-gray-900 text-lg sm:text-xl mb-1">Ingyenes szállítás</h3>
+                        <p className="text-sm sm:text-base text-gray-500">Minden 50.000 Ft feletti rendelésnél.</p>
                     </div>
                 </div>
-                <div className="flex items-center p-4 sm:p-5 lg:p-6 bg-gray-50 rounded-xl lg:rounded-2xl">
-                    <div className="w-12 h-12 sm:w-14 sm:h-14 lg:w-16 lg:h-16 bg-green-100 text-green-600 rounded-xl flex items-center justify-center mr-4 shrink-0">
-                        <ShieldCheck className="w-6 h-6 sm:w-7 sm:h-7 lg:w-8 lg:h-8" />
+                <div className="flex items-center gap-5 p-6 sm:p-8 rounded-2xl bg-gray-50/80 border border-gray-100 hover:border-emerald-100 hover:shadow-[0_8px_30px_rgba(0,0,0,0.06)] transition-all duration-300">
+                    <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0">
+                        <ShieldCheck className="w-7 h-7 sm:w-8 sm:h-8" aria-hidden />
                     </div>
                     <div>
-                        <h3 className="font-bold text-gray-900 text-base sm:text-lg lg:text-xl">Garancia</h3>
-                        <p className="text-sm sm:text-base text-gray-500 mt-1">Minden bútorra teljes körű garancia.</p>
+                        <h3 className="font-bold text-gray-900 text-lg sm:text-xl mb-1">Garancia</h3>
+                        <p className="text-sm sm:text-base text-gray-500">Minden bútorra teljes körű garancia.</p>
                     </div>
                 </div>
-                <div className="flex items-center p-4 sm:p-5 lg:p-6 bg-gray-50 rounded-xl lg:rounded-2xl">
-                    <div className="w-12 h-12 sm:w-14 sm:h-14 lg:w-16 lg:h-16 bg-secondary-100 text-secondary-700 rounded-xl flex items-center justify-center mr-4 shrink-0">
-                        <Phone className="w-6 h-6 sm:w-7 sm:h-7 lg:w-8 lg:h-8" />
+                <div className="flex items-center gap-5 p-6 sm:p-8 rounded-2xl bg-gray-50/80 border border-gray-100 hover:border-secondary-100 hover:shadow-[0_8px_30px_rgba(0,0,0,0.06)] transition-all duration-300">
+                    <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-secondary-50 text-secondary-700 flex items-center justify-center shrink-0">
+                        <Phone className="w-7 h-7 sm:w-8 sm:h-8" aria-hidden />
                     </div>
                     <div>
-                        <h3 className="font-bold text-gray-900 text-base sm:text-lg lg:text-xl">Ügyfélszolgálat</h3>
-                        <p className="text-sm sm:text-base text-gray-500 mt-1">Szakértő segítség minden nap.</p>
+                        <h3 className="font-bold text-gray-900 text-lg sm:text-xl mb-1">Ügyfélszolgálat</h3>
+                        <p className="text-sm sm:text-base text-gray-500">Szakértő segítség minden nap.</p>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
+    </section>
 );
 
 const ProductModal = ({ product, isOpen, onClose, allProducts = [], onAddToCart }) => {
@@ -1344,7 +1345,7 @@ const App = () => {
             <AIFeaturesShowcase 
               onFeatureClick={(feature) => {
                 if (feature.title.includes('Képfelismerés')) setActiveTab('visual-search');
-                else if (feature.title.includes('Asszisztens')) {
+                else if (feature.title.includes('Chat') || feature.title.includes('Asszisztens')) {
                   const chat = document.getElementById('mkt-butorbolt-chat');
                   chat?.scrollIntoView({ behavior: 'smooth' });
                 }
@@ -1352,84 +1353,67 @@ const App = () => {
               }}
             />
             
-            {/* AI Super Features Row – elválasztva a felső szekcióktól */}
-            <div data-ai-features className="w-full max-w-[2000px] mx-auto px-4 sm:px-6 lg:px-10 xl:px-16 py-6 sm:py-8 lg:py-12 border-t border-gray-100 bg-white">
-              <div className="text-center mb-6 lg:mb-8">
-                <div className="inline-flex items-center gap-2.5 px-5 py-2.5 bg-primary-100 rounded-full mb-5">
-                  <Bot className="w-5 h-5 lg:w-6 lg:h-6 text-primary-500" />
-                  <span className="text-base lg:text-lg font-bold text-primary-500">AI Powered</span>
+            {/* AI Szuper Funkciók – premium kártyák */}
+            <section data-ai-features className="w-full border-t border-gray-100/80 bg-white py-12 sm:py-14 lg:py-16">
+              <div className="w-full max-w-[2000px] mx-auto px-4 sm:px-6 lg:px-10 xl:px-16">
+                <div className="text-center mb-10 sm:mb-12">
+                  <div className="inline-flex items-center gap-2.5 px-5 py-2.5 bg-primary-50 rounded-full mb-6">
+                    <Bot className="w-5 h-5 lg:w-6 lg:h-6 text-primary-500" aria-hidden />
+                    <span className="text-sm font-bold text-primary-600 uppercase tracking-wide">AI Powered</span>
+                  </div>
+                  <h2 className="text-2xl sm:text-3xl lg:text-4xl xl:text-5xl font-bold text-gray-900 tracking-tight mb-3">
+                    AI Szuper Funkciók
+                  </h2>
+                  <p className="text-base sm:text-lg lg:text-xl text-gray-500 max-w-xl mx-auto">
+                    Próbáld ki a legújabb AI technológiáinkat
+                  </p>
                 </div>
-                <h2 className="text-2xl sm:text-3xl lg:text-4xl xl:text-5xl font-bold text-gray-900 mb-4">
-                  AI Szuper Funkciók
-                </h2>
-                <p className="text-lg lg:text-xl text-gray-600">
-                  Próbáld ki a legújabb AI technológiáinkat!
-                </p>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-5 sm:gap-6 max-w-4xl mx-auto">
+                  <button
+                    type="button"
+                    onClick={() => setShowStyleQuiz(true)}
+                    className="group relative p-6 sm:p-8 rounded-2xl bg-white border-2 border-gray-100 hover:border-primary-200 shadow-[0_4px_20px_rgba(0,0,0,0.05)] hover:shadow-[0_12px_40px_rgba(255,138,0,0.12)] transition-all duration-300 hover:-translate-y-0.5 text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-400 focus-visible:ring-offset-2"
+                  >
+                    <div className="flex items-start gap-4">
+                      <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-primary-500 to-secondary-700 flex items-center justify-center shadow-[0_4px_16px_rgba(255,138,0,0.3)] group-hover:scale-105 transition-transform shrink-0">
+                        <Sparkles className="w-7 h-7 text-white" aria-hidden />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <h3 className="text-xl sm:text-2xl font-bold text-gray-900 mb-2">AI Stílus Quiz</h3>
+                        <p className="text-gray-600 text-sm sm:text-base mb-4">
+                          5 kérdés, és megismered a Style DNA-d! Személyre szabott ajánlatok.
+                        </p>
+                        <span className="inline-flex items-center gap-2 text-primary-600 font-semibold text-sm">
+                          Kipróbálom <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                        </span>
+                      </div>
+                    </div>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setShowRoomDesigner(true)}
+                    className="group relative p-6 sm:p-8 rounded-2xl bg-white border-2 border-gray-100 hover:border-secondary-200 shadow-[0_4px_20px_rgba(0,0,0,0.05)] hover:shadow-[0_12px_40px_rgba(0,107,111,0.12)] transition-all duration-300 hover:-translate-y-0.5 text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-secondary-400 focus-visible:ring-offset-2"
+                  >
+                    <div className="flex items-start gap-4">
+                      <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-secondary-600 to-secondary-700 flex items-center justify-center shadow-[0_4px_16px_rgba(0,107,111,0.3)] group-hover:scale-105 transition-transform shrink-0">
+                        <Camera className="w-7 h-7 text-white" aria-hidden />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <h3 className="text-xl sm:text-2xl font-bold text-gray-900 mb-2">AI Szoba Tervező</h3>
+                        <p className="text-gray-600 text-sm sm:text-base mb-4">
+                          Töltsd fel a szobád fotóját, és az AI megtervezi neked!
+                        </p>
+                        <span className="inline-flex items-center gap-2 text-secondary-700 font-semibold text-sm">
+                          Kipróbálom <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                        </span>
+                      </div>
+                    </div>
+                  </button>
+                </div>
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 max-w-4xl mx-auto">
-                <button
-                  onClick={() => setShowStyleQuiz(true)}
-                  className="
-                    group p-5 sm:p-8 rounded-2xl
-                    bg-gradient-to-br from-primary-50 to-secondary-50
-                    hover:from-primary-100 hover:to-secondary-100
-                    border-2 border-transparent hover:border-primary-300
-                    transition-all duration-300
-                    hover:shadow-xl hover:scale-[1.02]
-                    text-left
-                  "
-                >
-                  <div className="flex items-start gap-3 sm:gap-4">
-                    <div className="p-2.5 sm:p-3 bg-gradient-to-br from-primary-500 to-secondary-700 rounded-xl text-white group-hover:scale-110 transition-transform shrink-0">
-                      <Sparkles className="w-6 h-6 sm:w-8 sm:h-8" />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-1 sm:mb-2">
-                        AI Stílus Quiz
-                      </h3>
-                      <p className="text-gray-600 text-sm mb-2 sm:mb-3">
-                        5 kérdés, és megismered a Style DNA-d! Személyre szabott ajánlatok.
-                      </p>
-                      <span className="text-primary-500 font-semibold text-sm flex items-center gap-2">
-                        Kipróbálom <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                      </span>
-                    </div>
-                  </div>
-                </button>
+            </section>
 
-                <button
-                  onClick={() => setShowRoomDesigner(true)}
-                  className="
-                    group p-5 sm:p-8 rounded-2xl
-                    bg-gradient-to-br from-secondary-50 to-pink-50
-                    hover:from-secondary-100 hover:to-pink-100
-                    border-2 border-transparent hover:border-secondary-400
-                    transition-all duration-300
-                    hover:shadow-xl hover:scale-[1.02]
-                    text-left
-                  "
-                >
-                  <div className="flex items-start gap-3 sm:gap-4">
-                    <div className="p-2.5 sm:p-3 bg-gradient-to-br from-secondary-600 to-secondary-600 rounded-xl text-white group-hover:scale-110 transition-transform shrink-0">
-                      <Camera className="w-6 h-6 sm:w-8 sm:h-8" />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-1 sm:mb-2">
-                        AI Szoba Tervező
-                      </h3>
-                      <p className="text-gray-600 text-sm mb-2 sm:mb-3">
-                        Töltsd fel a szobád fotóját, és az AI megtervezi neked!
-                      </p>
-                      <span className="text-secondary-700 font-semibold text-sm flex items-center gap-2">
-                        Kipróbálom <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                      </span>
-                    </div>
-                  </div>
-                </button>
-              </div>
-            </div>
-
-            <FadeInOnScroll direction="up" className="section-perf">
+            <FadeInOnScroll direction="up" className="section-perf section-gap-lg">
               <InspirationSection
                 onExplore={scrollToProductsSection}
                 onCategorySelect={(name) => {

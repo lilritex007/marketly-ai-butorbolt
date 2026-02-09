@@ -1,21 +1,20 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { 
-  Sparkles, Camera, Move3d, MessageCircle, ArrowRight, Check, 
-  Users, Star, Zap, Package, ChevronRight, Bot
+import {
+  Sparkles, Camera, Move3d, MessageCircle, ArrowRight,
+  Package, Users, Star, Zap
 } from 'lucide-react';
 
-/**
- * Modern Hero Section with 3D effect and animations
- */
-const HERO_REVEAL_DELAY = { badge: 0, line1: 80, line2: 200, line3: 320, sub: 440, cta: 560, stats: [680, 780, 880, 980] };
+const HERO_REVEAL_DELAY = { badge: 0, line1: 100, line2: 220, line3: 340, sub: 460, cta: 600, stats: [720, 820, 920, 1020] };
 
+/**
+ * Premium Hero – egyetlen üzenet, erős vizuál, légzés
+ */
 export const ModernHero = ({ onExplore, onTryAI, quickCategories = [], onQuickCategory }) => {
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
   const heroRef = useRef(null);
   const rafRef = useRef(null);
   const lastEventRef = useRef(null);
-  // Egyszeri megjelenés: animáció az első paint-től indul (nincs opacity-0 → mounted váltás = nem tűnik "kétszer tölteni")
   const mounted = true;
 
   useEffect(() => {
@@ -55,120 +54,119 @@ export const ModernHero = ({ onExplore, onTryAI, quickCategories = [], onQuickCa
     };
   }, []);
 
+  const stats = [
+    { icon: Package, value: '170K+', label: 'Termék' },
+    { icon: Users, value: '50K+', label: 'Elégedett vásárló' },
+    { icon: Star, value: '4.9/5', label: 'Értékelés' },
+    { icon: Zap, value: '24/7', label: 'AI támogatás' }
+  ];
+
   return (
-    <div 
+    <div
       ref={heroRef}
       onMouseMove={handlePointerMove}
-      className="relative min-h-screen flex items-center justify-center overflow-hidden bg-gradient-to-br from-primary-50 via-white to-secondary-50"
+      className="relative min-h-[90vh] flex items-center justify-center overflow-hidden bg-[#fafaf9]"
+      aria-label="Főoldal – AI bútorbolt"
     >
-      {/* Animated Background – respect prefers-reduced-motion */}
+      {/* Premium background: soft mesh + orbs */}
       <div className="absolute inset-0 overflow-hidden" aria-hidden="true">
-        {/* Gradient Orbs */}
-        <div 
-          className="absolute top-1/4 left-1/4 w-96 h-96 bg-gradient-to-br from-primary-400 to-primary-600 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob motion-reduce:animate-none"
+        <div
+          className="absolute inset-0 opacity-[0.4]"
           style={{
-            transform: prefersReducedMotion ? 'none' : `translate(${mousePosition.x * 30}px, ${mousePosition.y * 30}px)`
+            background: 'radial-gradient(ellipse 80% 50% at 50% -20%, rgba(255, 138, 0, 0.15), transparent), radial-gradient(ellipse 60% 40% at 100% 50%, rgba(0, 107, 111, 0.08), transparent), radial-gradient(ellipse 50% 30% at 0% 80%, rgba(255, 138, 0, 0.06), transparent)'
           }}
         />
-        <div 
-          className="absolute top-1/3 right-1/4 w-96 h-96 bg-gradient-to-br from-secondary-400 to-secondary-600 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-2000 motion-reduce:animate-none"
+        <div
+          className="absolute top-1/4 left-1/4 w-[480px] h-[480px] rounded-full mix-blend-multiply filter blur-[100px] opacity-[0.12] animate-blob motion-reduce:animate-none"
           style={{
-            transform: prefersReducedMotion ? 'none' : `translate(${mousePosition.x * -20}px, ${mousePosition.y * -20}px)`
+            background: 'linear-gradient(135deg, #ff8a00 0%, #fb923c 100%)',
+            transform: prefersReducedMotion ? 'none' : `translate(${mousePosition.x * 24}px, ${mousePosition.y * 24}px)`
           }}
         />
-        <div 
-          className="absolute bottom-1/4 left-1/2 w-96 h-96 bg-gradient-to-br from-primary-300 to-secondary-600 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-4000 motion-reduce:animate-none"
+        <div
+          className="absolute top-1/3 right-1/4 w-[400px] h-[400px] rounded-full mix-blend-multiply filter blur-[90px] opacity-[0.1] animate-blob animation-delay-2000 motion-reduce:animate-none"
           style={{
-            transform: prefersReducedMotion ? 'none' : `translate(${mousePosition.x * 15}px, ${mousePosition.y * 15}px)`
+            background: 'linear-gradient(135deg, #006b6f 0%, #0d9488 100%)',
+            transform: prefersReducedMotion ? 'none' : `translate(${mousePosition.x * -16}px, ${mousePosition.y * -16}px)`
           }}
         />
-
-        {/* Grid Pattern */}
-        <div 
-          className="absolute inset-0 bg-grid-pattern opacity-5"
+        <div
+          className="absolute inset-0 opacity-[0.03]"
           style={{
-            backgroundImage: 'linear-gradient(rgba(255, 138, 0, 0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(255, 138, 0, 0.1) 1px, transparent 1px)',
-            backgroundSize: '50px 50px'
+            backgroundImage: 'linear-gradient(rgba(0,0,0,0.06) 1px, transparent 1px), linear-gradient(90deg, rgba(0,0,0,0.06) 1px, transparent 1px)',
+            backgroundSize: '64px 64px'
           }}
         />
-        {/* Subtle noise overlay – disabled when reduced motion */}
-        <div className="hero-noise-overlay" aria-hidden="true" />
       </div>
 
-      {/* FULLSCREEN: Edge-to-edge, LARGE elements for enjoyable browsing */}
-      <div className="relative z-10 w-full max-w-[2000px] mx-auto px-4 sm:px-6 lg:px-10 xl:px-16 py-10 sm:py-14 lg:py-20 xl:py-24">
+      <div className="relative z-10 w-full max-w-[2000px] mx-auto px-4 sm:px-6 lg:px-10 xl:px-16 py-14 sm:py-16 lg:py-24 xl:py-28">
         <div className="text-center">
-          {/* Floating Badge – staggered reveal, soft ring */}
+          {/* Badge – egy sor, premium */}
           <div
-            className={`inline-flex items-center px-5 sm:px-6 lg:px-8 py-2.5 sm:py-3 lg:py-4 bg-white/80 backdrop-blur-sm rounded-full shadow-lg border border-primary-100 ring-2 ring-primary-200/50 mb-6 sm:mb-8 lg:mb-10 animate-float ${mounted ? 'hero-reveal' : 'opacity-0'}`}
+            className={`inline-flex items-center gap-2.5 px-5 sm:px-6 py-2.5 sm:py-3 bg-white rounded-full shadow-[0_2px_20px_rgba(0,0,0,0.06)] border border-gray-100/80 mb-8 sm:mb-10 lg:mb-12 ${mounted ? 'hero-reveal' : 'opacity-0'}`}
             style={mounted ? { animationDelay: `${HERO_REVEAL_DELAY.badge}ms` } : undefined}
           >
-            <Sparkles className="w-5 h-5 sm:w-6 sm:h-6 lg:w-7 lg:h-7 text-primary-500 mr-2.5 animate-pulse" />
-            <span className="text-sm sm:text-base lg:text-xl xl:text-2xl font-bold bg-gradient-to-r from-primary-500 to-secondary-600 bg-clip-text text-transparent">
-              AI-Powered Furniture Shopping
+            <span className="flex h-2 w-2 rounded-full bg-emerald-500 animate-pulse" aria-hidden />
+            <span className="text-sm sm:text-base font-semibold text-gray-700">
+              AI-alapú bútorvásárlás
             </span>
-            <span className="ml-2.5 px-3 py-1 sm:py-1.5 bg-green-100 text-green-700 text-xs sm:text-sm lg:text-base font-bold rounded-full">
+            <span className="px-2.5 py-0.5 bg-primary-500/10 text-primary-700 text-xs font-bold rounded-full">
               ÚJ
             </span>
           </div>
 
-          {/* Main Heading – staggered lines, gradient line with depth */}
-          <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl 2xl:text-9xl font-extrabold mb-6 sm:mb-8 lg:mb-12 leading-[1.1]">
-            <span className={`block text-gray-900 mb-2 ${mounted ? 'hero-reveal' : 'opacity-0'}`} style={mounted ? { animationDelay: `${HERO_REVEAL_DELAY.line1}ms` } : undefined}>Találd meg az</span>
-            <span
-              className={`block bg-gradient-to-r from-primary-500 via-secondary-700 to-pink-600 bg-clip-text text-transparent animate-gradient motion-reduce:animate-none ${mounted ? 'hero-reveal' : 'opacity-0'}`}
-              style={{
-                ...(mounted ? { animationDelay: `${HERO_REVEAL_DELAY.line2}ms` } : {}),
-                textShadow: '0 2px 24px rgba(255, 138, 0, 0.18)'
-              }}
-            >
-              ideális bútort
+          {/* Headline – egy üzenet, nagy impact */}
+          <h1 className="mb-6 sm:mb-8 lg:mb-10">
+            <span className={`block text-[2.5rem] sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl 2xl:text-8xl font-extrabold tracking-tight text-gray-900 leading-[1.08] ${mounted ? 'hero-reveal' : 'opacity-0'}`} style={mounted ? { animationDelay: `${HERO_REVEAL_DELAY.line1}ms` } : undefined}>
+              Találd meg az ideális bútort
             </span>
-            <span className={`block text-gray-900 mt-2 ${mounted ? 'hero-reveal' : 'opacity-0'}`} style={mounted ? { animationDelay: `${HERO_REVEAL_DELAY.line3}ms` } : undefined}>AI segítséggel</span>
+            <span
+              className={`block text-[2.5rem] sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl 2xl:text-8xl font-extrabold tracking-tight leading-[1.08] bg-gradient-to-r from-primary-500 via-secondary-600 to-primary-600 bg-clip-text text-transparent animate-gradient motion-reduce:animate-none ${mounted ? 'hero-reveal' : 'opacity-0'}`}
+              style={mounted ? { animationDelay: `${HERO_REVEAL_DELAY.line2}ms` } : undefined}
+            >
+              AI segítséggel
+            </span>
           </h1>
 
-          {/* Subheading */}
-          <p className={`text-lg sm:text-xl md:text-2xl lg:text-3xl xl:text-4xl text-gray-600 max-w-6xl mx-auto mb-10 sm:mb-12 lg:mb-16 leading-relaxed px-2 ${mounted ? 'hero-reveal' : 'opacity-0'}`} style={mounted ? { animationDelay: `${HERO_REVEAL_DELAY.sub}ms` } : undefined}>
-            Forradalmi AI technológia találkozik a bútorvásárlással. 
-            <span className="font-semibold text-primary-500"> Fotózz, tervezz, vásárolj</span> - minden egy helyen.
+          <p className={`text-base sm:text-lg md:text-xl lg:text-2xl text-gray-600 max-w-2xl mx-auto mb-10 sm:mb-12 lg:mb-14 leading-relaxed ${mounted ? 'hero-reveal' : 'opacity-0'}`} style={mounted ? { animationDelay: `${HERO_REVEAL_DELAY.sub}ms` } : undefined}>
+            Fotózz, tervezz, vásárolj – minden egy helyen. Forradalmi technológia a tökéletes otthonért.
           </p>
 
-          {/* CTA Buttons – 44px touch, primary with hover glow */}
-          <div className={`flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center items-stretch sm:items-center mb-12 sm:mb-14 lg:mb-16 px-3 ${mounted ? 'hero-reveal' : 'opacity-0'}`} style={mounted ? { animationDelay: `${HERO_REVEAL_DELAY.cta}ms` } : undefined}>
+          {/* CTA */}
+          <div className={`flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center items-stretch sm:items-center mb-14 sm:mb-16 lg:mb-20 ${mounted ? 'hero-reveal' : 'opacity-0'}`} style={mounted ? { animationDelay: `${HERO_REVEAL_DELAY.cta}ms` } : undefined}>
             <button
               type="button"
               onClick={onTryAI}
-              className="hero-cta-glow group relative w-full sm:w-auto min-h-[44px] px-6 py-3.5 sm:px-8 sm:py-4 lg:px-10 lg:py-4 bg-gradient-to-r from-primary-500 to-secondary-700 text-white rounded-xl font-bold text-base sm:text-lg lg:text-xl shadow-xl hover:shadow-primary-500/50 transition-all transform hover:-translate-y-1 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-400 focus-visible:ring-offset-2 overflow-hidden flex items-center justify-center"
+              className="hero-cta-glow group relative w-full sm:w-auto min-h-[48px] px-8 py-4 sm:px-10 sm:py-4 bg-gradient-to-r from-primary-500 to-secondary-700 text-white rounded-2xl font-bold text-base sm:text-lg shadow-[0_4px_24px_rgba(255,138,0,0.35)] hover:shadow-[0_8px_32px_rgba(255,138,0,0.4)] transition-all duration-300 hover:-translate-y-0.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-400 focus-visible:ring-offset-2 overflow-hidden flex items-center justify-center"
               aria-label="Próbáld ki az AI funkciókat"
             >
-              <span className="relative z-10 flex items-center">
-                <Sparkles className="w-5 h-5 sm:w-5 sm:h-5 lg:w-6 lg:h-6 mr-2" aria-hidden />
+              <span className="relative z-10 flex items-center gap-2">
+                <Sparkles className="w-5 h-5 sm:w-6 sm:h-6" aria-hidden />
                 Próbáld ki az AI-t
-                <ArrowRight className="w-5 h-5 sm:w-5 sm:h-5 lg:w-6 lg:h-6 ml-2 group-hover:translate-x-1 transition-transform" aria-hidden />
+                <ArrowRight className="w-5 h-5 sm:w-6 sm:h-6 group-hover:translate-x-1 transition-transform" aria-hidden />
               </span>
-              <div className="absolute inset-0 bg-gradient-to-r from-secondary-700 to-pink-600 opacity-0 group-hover:opacity-100 transition-opacity" aria-hidden />
+              <div className="absolute inset-0 bg-gradient-to-r from-secondary-700 to-primary-600 opacity-0 group-hover:opacity-100 transition-opacity duration-300" aria-hidden />
             </button>
-
             <button
               type="button"
               onClick={onExplore}
-              className="w-full sm:w-auto min-h-[44px] px-6 py-3.5 sm:px-8 sm:py-4 lg:px-10 lg:py-4 bg-white text-gray-900 rounded-xl font-bold text-base sm:text-lg lg:text-xl shadow-lg hover:shadow-xl transition-all transform hover:-translate-y-1 border-2 border-gray-200 hover:border-primary-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-400 focus-visible:ring-offset-2 flex items-center justify-center"
-              aria-label="Kollekció megtekintése – termékek böngészése"
+              className="w-full sm:w-auto min-h-[48px] px-8 py-4 sm:px-10 sm:py-4 bg-white text-gray-900 rounded-2xl font-bold text-base sm:text-lg shadow-[0_2px_12px_rgba(0,0,0,0.06)] hover:shadow-[0_4px_20px_rgba(0,0,0,0.08)] transition-all duration-300 hover:-translate-y-0.5 border border-gray-200/80 hover:border-primary-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-400 focus-visible:ring-offset-2 flex items-center justify-center gap-2"
+              aria-label="Kollekció megtekintése"
             >
               Kollekció megtekintése
-              <ChevronRight className="w-5 h-5 lg:w-6 lg:h-6 ml-2" aria-hidden />
+              <ArrowRight className="w-5 h-5" aria-hidden />
             </button>
           </div>
 
           {quickCategories.length > 0 && (
-            <div className={`flex flex-wrap items-center justify-center gap-2 sm:gap-3 mb-10 sm:mb-12 ${mounted ? 'hero-reveal' : 'opacity-0'}`} style={mounted ? { animationDelay: `${HERO_REVEAL_DELAY.cta + 120}ms` } : undefined}>
-              <span className="text-xs sm:text-sm font-semibold text-gray-500">Gyors kategóriák:</span>
+            <div className={`flex flex-wrap items-center justify-center gap-2 sm:gap-3 ${mounted ? 'hero-reveal' : 'opacity-0'}`} style={mounted ? { animationDelay: `${HERO_REVEAL_DELAY.cta + 80}ms` } : undefined}>
+              <span className="text-xs sm:text-sm font-medium text-gray-400">Gyors kategóriák:</span>
               {quickCategories.map((cat) => (
                 <button
                   key={cat}
                   type="button"
                   onClick={() => onQuickCategory?.(cat)}
-                  className="px-4 py-2 rounded-full bg-white/90 border border-gray-200 text-gray-700 font-semibold text-xs sm:text-sm hover:bg-primary-50 hover:text-primary-700 transition-colors"
+                  className="px-4 py-2 rounded-full bg-white/90 border border-gray-200/80 text-gray-600 font-medium text-sm hover:bg-primary-50 hover:text-primary-700 hover:border-primary-200 transition-colors shadow-sm"
                 >
                   {cat}
                 </button>
@@ -176,38 +174,32 @@ export const ModernHero = ({ onExplore, onTryAI, quickCategories = [], onQuickCa
             </div>
           )}
 
-          {/* Stats – staggered reveal */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 lg:gap-5 max-w-5xl mx-auto px-2">
-            {[
-              { icon: Package, value: '170K+', label: 'Termék' },
-              { icon: Users, value: '50K+', label: 'Elégedett vásárló' },
-              { icon: Star, value: '4.9/5', label: 'Értékelés' },
-              { icon: Zap, value: '24/7', label: 'AI Support' }
-            ].map((stat, idx) => (
+          {/* Stats – premium kártyák */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 max-w-4xl mx-auto mt-12 sm:mt-14 lg:mt-16">
+            {stats.map((stat, idx) => (
               <div
                 key={idx}
-                className={`bg-white/60 backdrop-blur-sm rounded-xl lg:rounded-2xl p-4 sm:p-5 lg:p-6 border border-white/20 shadow-lg hover:shadow-xl transition-all transform hover:-translate-y-1 hover:border-primary-100 ${mounted ? 'hero-reveal' : 'opacity-0'}`}
+                className={`bg-white/80 backdrop-blur-sm rounded-2xl p-4 sm:p-5 border border-gray-100/80 shadow-[0_2px_12px_rgba(0,0,0,0.04)] hover:shadow-[0_4px_20px_rgba(0,0,0,0.06)] hover:border-primary-100/60 transition-all duration-300 ${mounted ? 'hero-reveal' : 'opacity-0'}`}
                 style={mounted ? { animationDelay: `${HERO_REVEAL_DELAY.stats[idx]}ms` } : undefined}
               >
-                <stat.icon className="w-8 h-8 sm:w-9 sm:h-9 lg:w-10 lg:h-10 text-primary-500 mx-auto mb-2 lg:mb-3" />
-                <div className="text-2xl sm:text-2xl lg:text-3xl font-extrabold text-gray-900 mb-1">{stat.value}</div>
-                <div className="text-sm sm:text-sm lg:text-base text-gray-600 font-medium">{stat.label}</div>
+                <stat.icon className="w-8 h-8 sm:w-9 sm:h-9 text-primary-500 mx-auto mb-2" aria-hidden />
+                <div className="text-xl sm:text-2xl font-extrabold text-gray-900 mb-0.5">{stat.value}</div>
+                <div className="text-xs sm:text-sm text-gray-500 font-medium">{stat.label}</div>
               </div>
             ))}
           </div>
         </div>
       </div>
 
-      {/* Scroll Indicator – clickable to scroll to products */}
       <button
         type="button"
         onClick={onExplore}
-        className="absolute bottom-8 left-1/2 transform -translate-x-1/2 flex flex-col items-center gap-2 animate-bounce motion-reduce:animate-none min-h-[44px] min-w-[44px] justify-center focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-400 focus-visible:ring-offset-2 rounded-lg"
+        className="absolute bottom-6 left-1/2 -translate-x-1/2 flex flex-col items-center gap-1.5 min-h-[44px] min-w-[44px] justify-center focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-400 focus-visible:ring-offset-2 rounded-xl text-gray-400 hover:text-primary-500 transition-colors motion-reduce:animate-none animate-bounce"
         aria-label="Görgess a termékekhez"
       >
-        <span className="text-xs sm:text-sm font-medium text-gray-500 uppercase tracking-wider">Görgess le</span>
-        <div className="w-6 h-10 border-2 border-primary-500 rounded-full flex justify-center p-1 pointer-events-none">
-          <div className="w-1.5 h-3 bg-primary-500 rounded-full animate-scroll motion-reduce:animate-none" />
+        <span className="text-[10px] font-semibold uppercase tracking-widest">Görgess</span>
+        <div className="w-6 h-9 border-2 border-current rounded-full flex justify-center pt-1">
+          <div className="w-1 h-2 bg-current rounded-full animate-scroll motion-reduce:animate-none" />
         </div>
       </button>
     </div>
@@ -215,85 +207,53 @@ export const ModernHero = ({ onExplore, onTryAI, quickCategories = [], onQuickCa
 };
 
 /**
- * AI Features - Ultra-compact, professional showcase
- * Smart hover effects and elegant design
+ * AI Features Showcase – wow kártyák, egyértelmű CTA
  */
 export const AIFeaturesShowcase = ({ onFeatureClick }) => {
   const [activeFeature, setActiveFeature] = useState(0);
   const [isHovering, setIsHovering] = useState(false);
 
   const features = [
-    {
-      icon: Camera,
-      title: 'Képfelismerés',
-      shortDesc: 'Fotózz és keress',
-      color: 'from-blue-500 to-primary-500',
-      bgColor: 'bg-blue-50',
-      stat: '99%',
-      statLabel: 'pontosság'
-    },
-    {
-      icon: MessageCircle,
-      title: 'AI Chat',
-      shortDesc: 'Személyes tanácsadó',
-      color: 'from-secondary-600 to-secondary-700',
-      bgColor: 'bg-secondary-50',
-      stat: '24/7',
-      statLabel: 'elérhető'
-    },
-    {
-      icon: Move3d,
-      title: 'Szobatervező',
-      shortDesc: 'Virtuális elhelyezés',
-      color: 'from-emerald-500 to-green-600',
-      bgColor: 'bg-emerald-50',
-      stat: 'AR',
-      statLabel: 'támogatás'
-    }
+    { icon: Camera, title: 'Képfelismerés', shortDesc: 'Fotózz és keress', color: 'from-blue-500 to-primary-500', bgColor: 'bg-blue-50', stat: '99%', statLabel: 'pontosság' },
+    { icon: MessageCircle, title: 'AI Chat', shortDesc: 'Személyes tanácsadó', color: 'from-secondary-600 to-secondary-700', bgColor: 'bg-secondary-50', stat: '24/7', statLabel: 'elérhető' },
+    { icon: Move3d, title: 'Szobatervező', shortDesc: 'Virtuális elhelyezés', color: 'from-emerald-500 to-green-600', bgColor: 'bg-emerald-50', stat: 'AR', statLabel: 'támogatás' }
   ];
 
   useEffect(() => {
     if (isHovering) return;
-    const interval = setInterval(() => {
-      setActiveFeature((prev) => (prev + 1) % features.length);
-    }, 4000);
+    const interval = setInterval(() => setActiveFeature((prev) => (prev + 1) % features.length), 4000);
     return () => clearInterval(interval);
-  }, [isHovering]);
+  }, [isHovering, features.length]);
 
   return (
-    <div className="py-6 sm:py-8 lg:py-10 bg-gradient-to-b from-gray-50/50 to-white">
-      <div className="w-full max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Compact Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-5 sm:mb-6">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 sm:w-11 sm:h-11 bg-gradient-to-br from-primary-500 to-secondary-700 rounded-xl flex items-center justify-center shadow-lg">
-              <Sparkles className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
+    <section className="py-12 sm:py-14 lg:py-16 bg-white border-t border-gray-100/80" aria-labelledby="ai-features-heading">
+      <div className="w-full max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-10">
+        <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-8 sm:mb-10">
+          <div className="flex items-center gap-4">
+            <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-primary-500 to-secondary-700 flex items-center justify-center shadow-[0_4px_20px_rgba(255,138,0,0.25)]">
+              <Sparkles className="w-7 h-7 text-white" aria-hidden />
             </div>
             <div>
-              <h2 className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-900">
+              <h2 id="ai-features-heading" className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 tracking-tight">
                 AI a <span className="bg-gradient-to-r from-primary-500 to-secondary-700 bg-clip-text text-transparent">szolgálatodban</span>
               </h2>
-              <p className="text-xs sm:text-sm text-gray-500">Okos funkciók a tökéletes választáshoz</p>
+              <p className="text-sm sm:text-base text-gray-500 mt-1">Okos funkciók a tökéletes választáshoz</p>
             </div>
           </div>
-          
-          {/* Progress dots - desktop only */}
-          <div className="hidden sm:flex items-center gap-1.5">
+          <div className="hidden sm:flex items-center gap-2">
             {features.map((_, idx) => (
               <button
                 key={idx}
                 onClick={() => setActiveFeature(idx)}
-                className={`h-1.5 rounded-full transition-all duration-300 ${
-                  activeFeature === idx ? 'w-6 bg-primary-500' : 'w-1.5 bg-gray-300 hover:bg-gray-400'
-                }`}
+                className={`h-2 rounded-full transition-all duration-300 ${activeFeature === idx ? 'w-8 bg-primary-500' : 'w-2 bg-gray-200 hover:bg-gray-300'}`}
+                aria-label={`Funkció ${idx + 1}`}
               />
             ))}
           </div>
         </div>
 
-        {/* Feature Cards - Horizontal scroll on mobile, grid on desktop */}
-        <div 
-          className="flex gap-3 sm:grid sm:grid-cols-3 sm:gap-4 overflow-x-auto pb-2 sm:pb-0 -mx-4 px-4 sm:mx-0 sm:px-0 snap-x snap-mandatory sm:snap-none scrollbar-hide"
+        <div
+          className="flex gap-4 sm:grid sm:grid-cols-3 overflow-x-auto pb-2 -mx-4 px-4 sm:mx-0 sm:px-0 snap-x snap-mandatory sm:snap-none scrollbar-hide"
           onMouseEnter={() => setIsHovering(true)}
           onMouseLeave={() => setIsHovering(false)}
         >
@@ -305,78 +265,44 @@ export const AIFeaturesShowcase = ({ onFeatureClick }) => {
                 onFeatureClick?.(feature);
               }}
               className={`
-                relative flex-shrink-0 w-[280px] sm:w-auto snap-center
-                group p-4 sm:p-5 rounded-xl sm:rounded-2xl text-left
-                transition-all duration-300 border-2
-                ${activeFeature === idx 
-                  ? `${feature.bgColor} border-transparent shadow-lg` 
-                  : 'bg-white border-gray-100 hover:border-gray-200 hover:shadow-md'
-                }
+                relative flex-shrink-0 w-[300px] sm:w-auto snap-center text-left
+                rounded-2xl p-5 sm:p-6 border-2 transition-all duration-300
+                ${activeFeature === idx ? `${feature.bgColor} border-primary-200 shadow-[0_8px_30px_rgba(0,0,0,0.08)]` : 'bg-gray-50/80 border-gray-100 hover:border-gray-200 hover:shadow-md'}
               `}
             >
-              {/* Top Row: Icon + Title + Stat */}
-              <div className="flex items-start justify-between gap-3 mb-3">
-                <div className="flex items-center gap-3">
-                  <div className={`
-                    w-10 h-10 sm:w-11 sm:h-11 rounded-xl flex items-center justify-center shrink-0
-                    transition-all duration-300
-                    ${activeFeature === idx 
-                      ? `bg-gradient-to-br ${feature.color} shadow-md` 
-                      : 'bg-gray-100 group-hover:bg-gray-200'
-                    }
-                  `}>
-                    <feature.icon className={`w-5 h-5 sm:w-6 sm:h-6 transition-colors ${
-                      activeFeature === idx ? 'text-white' : 'text-gray-600'
-                    }`} />
-                  </div>
-                  <div>
-                    <h3 className="font-bold text-gray-900 text-sm sm:text-base">{feature.title}</h3>
-                    <p className="text-xs text-gray-500">{feature.shortDesc}</p>
-                  </div>
+              <div className="flex items-start justify-between gap-3 mb-4">
+                <div className={`w-12 h-12 rounded-xl flex items-center justify-center transition-colors ${activeFeature === idx ? `bg-gradient-to-br ${feature.color} shadow-md` : 'bg-white border border-gray-200'}`}>
+                  <feature.icon className={`w-6 h-6 ${activeFeature === idx ? 'text-white' : 'text-gray-600'}`} aria-hidden />
                 </div>
-                
-                {/* Stat Badge */}
-                <div className={`
-                  text-right shrink-0 px-2 py-1 rounded-lg
-                  ${activeFeature === idx ? 'bg-white/80' : 'bg-gray-50'}
-                `}>
-                  <div className="text-sm sm:text-base font-bold text-gray-900">{feature.stat}</div>
-                  <div className="text-[10px] text-gray-500">{feature.statLabel}</div>
+                <div className="text-right">
+                  <div className="text-lg font-bold text-gray-900">{feature.stat}</div>
+                  <div className="text-xs text-gray-500">{feature.statLabel}</div>
                 </div>
               </div>
-
-              {/* Bottom: CTA hint */}
-              <div className={`
-                flex items-center gap-1.5 text-xs font-medium transition-all
-                ${activeFeature === idx ? 'text-primary-600' : 'text-gray-400 group-hover:text-gray-600'}
-              `}>
-                <span>Kipróbálom</span>
-                <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
-              </div>
-
-              {/* Active indicator line */}
-              <div className={`
-                absolute bottom-0 left-4 right-4 h-0.5 rounded-full transition-all duration-300
-                ${activeFeature === idx ? `bg-gradient-to-r ${feature.color}` : 'bg-transparent'}
-              `} />
+              <h3 className="font-bold text-gray-900 text-base sm:text-lg mb-1">{feature.title}</h3>
+              <p className="text-sm text-gray-500 mb-4">{feature.shortDesc}</p>
+              <span className={`inline-flex items-center gap-1.5 text-sm font-semibold ${activeFeature === idx ? 'text-primary-600' : 'text-gray-500'}`}>
+                Kipróbálom <ArrowRight className="w-4 h-4" />
+              </span>
+              {activeFeature === idx && (
+                <div className={`absolute bottom-0 left-6 right-6 h-1 rounded-full bg-gradient-to-r ${feature.color}`} />
+              )}
             </button>
           ))}
         </div>
 
-        {/* Mobile progress dots */}
-        <div className="flex sm:hidden justify-center gap-1.5 mt-3">
+        <div className="flex sm:hidden justify-center gap-2 mt-4">
           {features.map((_, idx) => (
             <button
               key={idx}
               onClick={() => setActiveFeature(idx)}
-              className={`h-1.5 rounded-full transition-all duration-300 ${
-                activeFeature === idx ? 'w-5 bg-primary-500' : 'w-1.5 bg-gray-300'
-              }`}
+              className={`h-2 rounded-full transition-all duration-300 ${activeFeature === idx ? 'w-6 bg-primary-500' : 'w-2 bg-gray-300'}`}
+              aria-label={`Funkció ${idx + 1}`}
             />
           ))}
         </div>
       </div>
-    </div>
+    </section>
   );
 };
 

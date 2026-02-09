@@ -44,11 +44,11 @@ export const EnhancedProductCard = ({
   const [isVisible, setIsVisible] = useState(false);
   const [notifySaved, setNotifySaved] = useState(false);
   const toneClasses = {
-    default: '',
-    popular: 'bg-gradient-to-b from-white via-white to-amber-50/50 ring-1 ring-amber-100/80',
-    new: 'bg-gradient-to-b from-white via-white to-indigo-50/60 ring-1 ring-indigo-100/80',
-    favorites: 'bg-gradient-to-b from-white via-white to-rose-50/60 ring-1 ring-rose-100/80',
-    personal: 'bg-gradient-to-b from-white via-white to-purple-50/60 ring-1 ring-purple-100/80'
+    default: 'lux-card',
+    popular: 'lux-card lux-card--popular',
+    new: 'lux-card lux-card--new',
+    favorites: 'lux-card lux-card--favorites',
+    personal: 'lux-card lux-card--personal'
   };
   const sizeClasses = {
     default: {

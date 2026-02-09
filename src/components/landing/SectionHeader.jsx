@@ -33,10 +33,10 @@ const SectionHeader = ({
             {Icon && <Icon className="w-6 h-6 sm:w-7 sm:h-7 text-white" aria-hidden />}
           </div>
           <div>
-            <h2 id={id} className={`section-title ${prominent ? 'text-2xl sm:text-3xl lg:text-4xl' : 'text-xl sm:text-2xl lg:text-3xl'} font-extrabold text-gray-900`}>
+            <h2 id={id} className={`section-title ${prominent ? 'text-2xl sm:text-3xl lg:text-4xl' : 'text-xl sm:text-2xl lg:text-3xl'} font-extrabold lux-title`}>
               {title}
             </h2>
-            {subtitle && <p className={`section-subtitle ${prominent ? 'text-base sm:text-lg' : 'text-sm'} text-gray-600`}>{subtitle}</p>}
+            {subtitle && <p className={`section-subtitle ${prominent ? 'text-base sm:text-lg' : 'text-sm'} lux-subtitle`}>{subtitle}</p>}
           </div>
         </div>
         {actions && (

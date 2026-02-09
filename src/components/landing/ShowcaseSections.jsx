@@ -51,50 +51,45 @@ export const SocialProof = () => {
   };
 
   return (
-    <div className="py-8 sm:py-10 lg:py-14 xl:py-16 bg-white border-t border-gray-100">
-      <div className="w-full max-w-[2000px] mx-auto px-0 lg:px-10 xl:px-16">
-        {/* Happy Customers Counter */}
-        <div className="text-center mb-10 sm:mb-12 lg:mb-16 xl:mb-20">
-          <div className="inline-flex items-center gap-2 mb-4 sm:mb-5 lg:mb-6 px-4 py-2 sm:px-5 sm:py-2.5 lg:px-6 lg:py-3 bg-primary-50 rounded-full">
-            <Users className="w-5 h-5 sm:w-6 sm:h-6 lg:w-7 lg:h-7 text-primary-500" />
-            <span className="text-sm sm:text-base lg:text-lg xl:text-xl font-bold text-primary-500 uppercase tracking-wide">
-              Elégedett Vásárlóink
-            </span>
+    <div className="py-12 sm:py-14 lg:py-16 xl:py-20 bg-white border-t border-gray-100/80">
+      <div className="w-full max-w-[2000px] mx-auto px-4 sm:px-6 lg:px-10 xl:px-16">
+        <div className="text-center mb-12 sm:mb-14 lg:mb-16">
+          <div className="inline-flex items-center gap-2.5 mb-6 px-5 py-2.5 bg-primary-50 rounded-full">
+            <Users className="w-5 h-5 sm:w-6 sm:h-6 text-primary-500" aria-hidden />
+            <span className="text-sm font-bold text-primary-600 uppercase tracking-wide">Elégedett vásárlóink</span>
           </div>
-          <div className="text-5xl sm:text-6xl lg:text-7xl xl:text-8xl font-extrabold bg-gradient-to-r from-primary-500 to-secondary-700 bg-clip-text text-transparent mb-3 sm:mb-4 lg:mb-5">
+          <div className="text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-extrabold tracking-tight bg-gradient-to-r from-primary-500 to-secondary-700 bg-clip-text text-transparent mb-3">
             {count.toLocaleString('hu-HU')}+
           </div>
-          <p className="text-base sm:text-lg lg:text-2xl xl:text-3xl text-gray-600">
+          <p className="text-base sm:text-lg lg:text-xl text-gray-500">
             csatlakozott már a Marketly közösséghez
           </p>
         </div>
 
-        {/* Trust Badges */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 lg:gap-5">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-5 lg:gap-6">
           {trustBadges.map((badge, idx) => (
             <div
               key={idx}
-              className="group relative bg-gradient-to-br from-gray-50 to-white rounded-xl lg:rounded-2xl p-4 sm:p-5 lg:p-6 border border-gray-100 hover:border-primary-200 hover:shadow-xl transition-all transform hover:-translate-y-1"
+              className="group rounded-2xl p-5 sm:p-6 bg-gray-50/80 border border-gray-100 hover:border-primary-100 hover:shadow-[0_8px_30px_rgba(0,0,0,0.06)] transition-all duration-300 hover:-translate-y-0.5"
             >
-              <div className={`w-11 h-11 sm:w-12 sm:h-12 lg:w-14 lg:h-14 bg-gradient-to-br ${colorClasses[badge.color]} rounded-xl flex items-center justify-center mb-3 sm:mb-4 transform group-hover:rotate-6 transition-transform`}>
-                <badge.icon className="w-5 h-5 sm:w-6 sm:h-6 lg:w-7 lg:h-7 text-white" />
+              <div className={`w-12 h-12 sm:w-14 sm:h-14 rounded-xl bg-gradient-to-br ${colorClasses[badge.color]} flex items-center justify-center mb-4 group-hover:scale-105 transition-transform`}>
+                <badge.icon className="w-6 h-6 sm:w-7 sm:h-7 text-white" aria-hidden />
               </div>
-              <h3 className="font-bold text-gray-900 text-sm sm:text-base lg:text-lg leading-tight">{badge.label}</h3>
+              <h3 className="font-bold text-gray-900 text-base lg:text-lg leading-tight">{badge.label}</h3>
             </div>
           ))}
         </div>
 
-        {/* Star Rating */}
-        <div className="mt-10 sm:mt-12 lg:mt-16 xl:mt-20 text-center">
-          <div className="flex justify-center items-center gap-1.5 sm:gap-2 lg:gap-2.5 mb-3 sm:mb-4 lg:mb-5">
+        <div className="mt-12 sm:mt-14 lg:mt-16 text-center">
+          <div className="flex justify-center gap-1.5 sm:gap-2 mb-3">
             {[...Array(5)].map((_, i) => (
-              <Star key={i} className="w-6 h-6 sm:w-7 sm:h-7 lg:w-9 lg:h-9 xl:w-11 xl:h-11 fill-yellow-400 text-yellow-400" />
+              <Star key={i} className="w-6 h-6 sm:w-7 sm:h-7 lg:w-8 lg:h-8 fill-amber-400 text-amber-400" aria-hidden />
             ))}
           </div>
-          <p className="text-lg sm:text-xl lg:text-2xl xl:text-3xl font-bold text-gray-900 mb-1.5 sm:mb-2">
+          <p className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-900 mb-1">
             4.9 / 5.0 átlagos értékelés
           </p>
-          <p className="text-base sm:text-lg lg:text-xl xl:text-2xl text-gray-600">
+          <p className="text-sm sm:text-base text-gray-500">
             12,487 valós véleményből
           </p>
         </div>
