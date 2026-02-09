@@ -34,13 +34,14 @@ const PersonalizedSection = ({
 }) => {
   const [activeTab, setActiveTab] = useState('foryou');
   const [refreshKey, setRefreshKey] = useState(0);
-  const [viewSize, setViewSize] = useState(12);
+  const [viewSize, setViewSize] = useState(36);
+  const [focusOrder, setFocusOrder] = useState('match');
   const [focusFilters, setFocusFilters] = useState([]);
   const [showWhyPanel, setShowWhyPanel] = useState(false);
   const [recoTweaks, setRecoTweaks] = useState(getRecommendationTweaks());
   const abVariant = useMemo(() => getABVariant('similar-cta'), []);
   // User adatok
-  const recentlyViewed = useMemo(() => getViewedProducts(12).filter((p) => (p.inStock ?? p.in_stock ?? true)), []);
+  const recentlyViewed = useMemo(() => getViewedProducts(50).filter((p) => (p.inStock ?? p.in_stock ?? true)), []);
   const styleDNA = useMemo(() => getStyleDNA(), []);
   const topCategories = useMemo(() => getTopCategories(6), []);
   const searchHistory = useMemo(() => getSearchHistory(6), []);
@@ -53,7 +54,7 @@ const PersonalizedSection = ({
   // Személyre szabott ajánlások
   const forYouProducts = useMemo(() => {
     if (!products?.length) return [];
-    const base = getPersonalizedRecommendations(products, 12).filter((p) => (p.inStock ?? p.in_stock ?? true));
+    const base = getPersonalizedRecommendations(products, 120).filter((p) => (p.inStock ?? p.in_stock ?? true));
     return [...base].sort(() => (refreshKey % 2 === 0 ? 1 : -1) * (Math.random() - 0.5));
   }, [products, refreshKey]);
   
@@ -64,7 +65,7 @@ const PersonalizedSection = ({
       .filter(p => (p.inStock ?? p.in_stock ?? true))
       .filter(p => (p.salePrice || p.price) > 50000)
       .sort(() => Math.random() - 0.5)
-      .slice(0, 12);
+      .slice(0, 120);
   }, [products, refreshKey]);
 
   const cartBasedProducts = useMemo(() => {
@@ -78,7 +79,7 @@ const PersonalizedSection = ({
         if (item && item.id && (item.inStock ?? item.in_stock ?? true)) merged.set(item.id, item);
       });
     });
-    return Array.from(merged.values()).slice(0, 24);
+    return Array.from(merged.values()).slice(0, 120);
   }, [products, cartItems, recentlyViewed]);
 
   const tabs = [
@@ -89,22 +90,27 @@ const PersonalizedSection = ({
   ];
 
   const currentProductsRaw = tabs.find(t => t.id === activeTab)?.products || [];
-  const currentProducts = focusFilters.length > 0
-    ? currentProductsRaw.filter((p) => {
-        const text = `${p.name || ''} ${p.category || ''} ${p.description || ''}`.toLowerCase();
-        return focusFilters.some((f) => {
-          if (f.type === 'category') return (p.category || '').toLowerCase().includes(f.value.toLowerCase());
-          if (f.type === 'style') return f.keywords?.some((kw) => text.includes(kw));
-          if (f.type === 'room') return f.keywords?.some((kw) => text.includes(kw));
-          return false;
-        });
-      })
-    : currentProductsRaw;
-  const visibleProducts = currentProducts.slice(0, Math.max(12, viewSize));
-  const inStockCount = useMemo(
-    () => currentProducts.filter((p) => (p.inStock ?? p.in_stock ?? true)).length,
-    [currentProducts]
-  );
+  const getFocusScore = useCallback((product) => {
+    if (!product) return 0;
+    const text = `${product.name || ''} ${product.category || ''} ${product.description || ''}`.toLowerCase();
+    return focusFilters.reduce((score, f) => {
+      if (f.type === 'category') return score + ((product.category || '').toLowerCase().includes(f.value.toLowerCase()) ? 2 : 0);
+      if (f.type === 'style') return score + (f.keywords?.some((kw) => text.includes(kw)) ? 2 : 0);
+      if (f.type === 'room') return score + (f.keywords?.some((kw) => text.includes(kw)) ? 2 : 0);
+      return score;
+    }, 0);
+  }, [focusFilters]);
+
+  const currentProducts = useMemo(() => {
+    if (!focusFilters.length) return currentProductsRaw;
+    const filtered = currentProductsRaw.filter((p) => getFocusScore(p) > 0);
+    if (focusOrder === 'match') {
+      return [...filtered].sort((a, b) => getFocusScore(b) - getFocusScore(a));
+    }
+    return [...filtered].sort(() => (refreshKey % 2 === 0 ? 1 : -1) * (Math.random() - 0.5));
+  }, [currentProductsRaw, focusFilters, focusOrder, getFocusScore, refreshKey]);
+
+  const visibleProducts = currentProducts.slice(0, Math.max(24, viewSize));
 
   const fallbackCategories = useMemo(() => {
     if (topCategories.length > 0) return topCategories;
@@ -276,7 +282,7 @@ const PersonalizedSection = ({
             actions={
               <div className="flex items-center gap-2 flex-wrap">
                 <div className="inline-flex items-center rounded-full bg-white border border-gray-100 shadow-sm p-1">
-                  {[12, 24].map((size) => (
+                {[24, 36, 48].map((size) => (
                     <button
                       key={size}
                       onClick={() => setViewSize(size)}
@@ -315,21 +321,6 @@ const PersonalizedSection = ({
             }
           />
         
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 mb-6">
-          <div className="rounded-2xl bg-white/90 border border-gray-100 p-4 shadow-sm">
-            <p className="text-xs text-gray-500">Neked ajánlott</p>
-            <p className="text-lg font-bold text-gray-900">{forYouProducts.length.toLocaleString('hu-HU')} termék</p>
-          </div>
-          <div className="rounded-2xl bg-white/90 border border-gray-100 p-4 shadow-sm">
-            <p className="text-xs text-gray-500">Nemrég nézted</p>
-            <p className="text-lg font-bold text-gray-900">{recentlyViewed.length.toLocaleString('hu-HU')} termék</p>
-          </div>
-          <div className="rounded-2xl bg-white/90 border border-gray-100 p-4 shadow-sm">
-            <p className="text-xs text-gray-500">Készleten</p>
-            <p className="text-lg font-bold text-gray-900">{inStockCount.toLocaleString('hu-HU')} termék</p>
-          </div>
-        </div>
-
         {styleDNA?.styleDNA && (
           <div className="mb-4 inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white border border-primary-100 text-primary-700 text-xs font-semibold shadow-sm">
             <Info className="w-3.5 h-3.5" />
@@ -507,31 +498,71 @@ const PersonalizedSection = ({
                 {room.label} ({focusCounts.rooms.get(room.id) || 0})
               </button>
             ))}
+            {focusFilters.length > 0 && (
+              <div className="ml-auto flex flex-wrap items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => setFocusOrder('match')}
+                  className={`px-3 py-1.5 rounded-full text-xs font-semibold border transition-colors ${
+                    focusOrder === 'match'
+                      ? 'bg-primary-600 text-white border-primary-600'
+                      : 'bg-white text-gray-600 border-gray-200 hover:bg-gray-50'
+                  }`}
+                >
+                  Legjobb illeszkedés
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setFocusOrder('mix')}
+                  className={`px-3 py-1.5 rounded-full text-xs font-semibold border transition-colors ${
+                    focusOrder === 'mix'
+                      ? 'bg-gray-900 text-white border-gray-900'
+                      : 'bg-white text-gray-600 border-gray-200 hover:bg-gray-50'
+                  }`}
+                >
+                  Változatos
+                </button>
+              </div>
+            )}
           </div>
         )}
 
-        <ProductCarousel className="mt-2">
-          {visibleProducts.map((product, index) => {
-            const stockLevel = getStockLevel(product);
-            const highlightBadge = stockLevel !== null && stockLevel <= 3 ? `Utolsó ${stockLevel} db` : '';
-            return (
-              <EnhancedProductCard
-                key={product.id}
-                product={product}
-                onToggleWishlist={onToggleWishlist}
-                isWishlisted={wishlist.includes(product.id)}
-                onQuickView={onProductClick}
-                index={index}
-                highlightBadge={highlightBadge}
-                recommendationReasons={buildRecommendationReasons(product)}
-                sectionId={`personalized-${activeTab}`}
-                showFeedback
-                size="compact"
-                tone="personal"
-              />
-            );
-          })}
-        </ProductCarousel>
+        {currentProducts.length === 0 ? (
+          <div className="mt-6 rounded-2xl border border-gray-200 bg-white p-6 text-center">
+            <p className="text-sm font-semibold text-gray-700">Nincs találat a fókusz alapján</p>
+            <p className="text-xs text-gray-500 mt-1">Próbálj más fókuszt, vagy állítsd vissza az összesre.</p>
+            <button
+              type="button"
+              onClick={() => setFocusFilters([])}
+              className="mt-3 inline-flex items-center justify-center px-4 py-2 rounded-full bg-gray-900 text-white text-xs font-semibold"
+            >
+              Fókusz törlése
+            </button>
+          </div>
+        ) : (
+          <ProductCarousel className="mt-2">
+            {visibleProducts.map((product, index) => {
+              const stockLevel = getStockLevel(product);
+              const highlightBadge = stockLevel !== null && stockLevel <= 3 ? `Utolsó ${stockLevel} db` : '';
+              return (
+                <EnhancedProductCard
+                  key={product.id}
+                  product={product}
+                  onToggleWishlist={onToggleWishlist}
+                  isWishlisted={wishlist.includes(product.id)}
+                  onQuickView={onProductClick}
+                  index={index}
+                  highlightBadge={highlightBadge}
+                  recommendationReasons={buildRecommendationReasons(product)}
+                  sectionId={`personalized-${activeTab}`}
+                  showFeedback
+                  size="compact"
+                  tone="personal"
+                />
+              );
+            })}
+          </ProductCarousel>
+        )}
 
         {currentProducts.length > visibleProducts.length && (
           <div className="mt-6 flex justify-center">
