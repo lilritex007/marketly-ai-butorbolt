@@ -5,6 +5,7 @@ phases:
   setup:
     nixPkgs:
       - nodejs_20
+      - npm-10_x
       - python3
   install:
     cmds:
