@@ -70,7 +70,7 @@ export default function NewArrivalsSection({ products = [], onProductClick, onTo
             badge="Újdonságok"
             contextLabel={contextLabel}
             prominent
-            className="border border-primary-100 shadow-sm"
+            className="border border-primary-100 shadow-sm section-header-hero section-header-hero--new"
             meta={`Összesen: ${newArrivals.length.toLocaleString('hu-HU')} termék`}
             helpText="Csak készleten lévő termékek"
             actions={

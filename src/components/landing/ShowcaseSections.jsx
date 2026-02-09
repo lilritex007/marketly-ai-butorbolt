@@ -147,7 +147,7 @@ export const LiveShowcase = ({ products = [], onProductClick }) => {
             eyebrow="Közösségi kedvencek"
             badge="Közönségkedvenc"
             prominent
-            className="border border-rose-100 shadow-sm"
+            className="border border-rose-100 shadow-sm section-header-hero section-header-hero--favorites"
             meta={`Összesen: ${showcaseProducts.length.toLocaleString('hu-HU')} termék`}
             helpText="Csak készleten lévő termékek"
             actions={

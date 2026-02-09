@@ -95,7 +95,7 @@ export default function MostPopularSection({ products = [], onProductClick, onTo
             badge={saleCount > 0 ? `${saleCount} akciós termék` : 'Prémium válogatás'}
             contextLabel={contextLabel}
             prominent
-            className="border border-amber-100 shadow-sm"
+            className="border border-amber-100 shadow-sm section-header-hero section-header-hero--popular"
             meta={`Raktáron: ${inStockCount.toLocaleString('hu-HU')} • Összesen: ${mostPopular.length.toLocaleString('hu-HU')}`}
             helpText="Csak készleten lévő termékek"
             actions={

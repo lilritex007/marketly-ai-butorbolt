@@ -511,6 +511,40 @@
   }
 }
 
+@media (max-width: 1024px) {
+  .section-frame {
+    max-width: 100%;
+    border-radius: 22px;
+  }
+}
+
+.section-header-hero {
+  border-radius: 22px;
+  padding: 14px 16px;
+  border: 1px solid rgba(226, 232, 240, 0.7);
+}
+
+.section-header-hero h2 {
+  text-shadow: 0 8px 24px rgba(15, 23, 42, 0.25);
+  letter-spacing: -0.02em;
+}
+
+.section-header-hero--popular {
+  background: linear-gradient(90deg, rgba(251, 191, 36, 0.35), rgba(255, 255, 255, 0.88), rgba(249, 115, 22, 0.3));
+}
+
+.section-header-hero--new {
+  background: linear-gradient(90deg, rgba(99, 102, 241, 0.32), rgba(255, 255, 255, 0.9), rgba(139, 92, 246, 0.28));
+}
+
+.section-header-hero--personal {
+  background: linear-gradient(90deg, rgba(139, 92, 246, 0.32), rgba(255, 255, 255, 0.9), rgba(59, 130, 246, 0.26));
+}
+
+.section-header-hero--favorites {
+  background: linear-gradient(90deg, rgba(244, 63, 94, 0.32), rgba(255, 255, 255, 0.9), rgba(251, 113, 133, 0.28));
+}
+
 /* ========================================
    SCROLLBAR (SCOPED)
    ======================================== */

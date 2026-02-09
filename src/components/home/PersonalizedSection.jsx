@@ -270,7 +270,7 @@ const PersonalizedSection = ({
             badge={styleDNA?.styleDNA ? 'Style DNA aktív' : 'AI ajánlás'}
             contextLabel={contextLabel}
             prominent
-            className="border border-primary-100 shadow-sm"
+            className="border border-primary-100 shadow-sm section-header-hero section-header-hero--personal"
             meta={`Megjelenítve: ${Math.min(visibleProducts.length, currentProducts.length)} / ${currentProducts.length} termék`}
             helpText="Csak készleten lévő termékek"
             actions={
