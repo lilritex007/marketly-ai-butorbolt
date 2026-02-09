@@ -83,7 +83,7 @@ export default function MostPopularSection({ products = [], onProductClick, onTo
       role="region"
       data-section="most-popular"
     >
-      <div className="w-full max-w-[2000px] mx-auto px-4 sm:px-6 lg:px-10 xl:px-16">
+      <div className="w-full max-w-[2000px] mx-auto px-0 lg:px-10 xl:px-16">
         <div className="section-frame">
           <SectionHeader
             id="most-popular-heading"

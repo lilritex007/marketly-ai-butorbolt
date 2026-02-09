@@ -58,7 +58,7 @@ export default function NewArrivalsSection({ products = [], onProductClick, onTo
       role="region"
       data-section="new-arrivals"
     >
-      <div className="w-full max-w-[2000px] mx-auto px-4 sm:px-6 lg:px-10 xl:px-16">
+      <div className="w-full max-w-[2000px] mx-auto px-0 lg:px-10 xl:px-16">
         <div className="section-frame">
           <SectionHeader
             id="new-arrivals-heading"

@@ -52,7 +52,7 @@ export const SocialProof = () => {
 
   return (
     <div className="py-8 sm:py-10 lg:py-14 xl:py-16 bg-white border-t border-gray-100">
-      <div className="w-full max-w-[2000px] mx-auto px-4 sm:px-6 lg:px-10 xl:px-16">
+      <div className="w-full max-w-[2000px] mx-auto px-0 lg:px-10 xl:px-16">
         {/* Happy Customers Counter */}
         <div className="text-center mb-10 sm:mb-12 lg:mb-16 xl:mb-20">
           <div className="inline-flex items-center gap-2 mb-4 sm:mb-5 lg:mb-6 px-4 py-2 sm:px-5 sm:py-2.5 lg:px-6 lg:py-3 bg-primary-50 rounded-full">
