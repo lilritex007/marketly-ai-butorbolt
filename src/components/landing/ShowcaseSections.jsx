@@ -8,6 +8,7 @@ import SectionHeader from './SectionHeader';
 import { EnhancedProductCard } from '../product/EnhancedProductCard';
 import { getStockLevel } from '../../utils/helpers';
 import { trackSectionEvent } from '../../services/userPreferencesService';
+import ProductCarousel from '../ui/ProductCarousel';
 
 /**
  * Social Proof & Trust Signals
@@ -136,29 +137,33 @@ export const LiveShowcase = ({ products = [], onProductClick }) => {
       data-section={SECTION_ID}
     >
       <div className="w-full max-w-[2000px] mx-auto px-4 sm:px-6 lg:px-10 xl:px-16">
-        <SectionHeader
-          id="customer-favorites-heading"
-          title="Vásárlóink kedvencei"
-          subtitle="A legjobbra értékelt és legtöbbet választott bútorok"
-          Icon={Heart}
-          accentClass="from-pink-500 to-rose-600"
-          eyebrow="Közösségi kedvencek"
-          badge="Közönségkedvenc"
-          meta={`Összesen: ${showcaseProducts.length.toLocaleString('hu-HU')} termék`}
-          helpText="Csak készleten lévő termékek"
-          actions={
-            <button
-              type="button"
-              onClick={() => setSeed((v) => v + 1)}
-              className="inline-flex items-center gap-2 px-3 py-2 rounded-lg text-rose-700 bg-rose-50 border border-rose-100 hover:bg-rose-100 transition-colors text-sm font-semibold min-h-[44px]"
-            >
-              <RefreshCw className="w-4 h-4" />
-              Frissítem
-            </button>
-          }
-        />
+        <div className="rounded-[28px] bg-gradient-to-r from-rose-100 via-white to-pink-100 p-[2px] shadow-lg">
+          <SectionHeader
+            id="customer-favorites-heading"
+            title="Vásárlóink kedvencei"
+            subtitle="A legjobbra értékelt és legtöbbet választott bútorok"
+            Icon={Heart}
+            accentClass="from-pink-500 to-rose-600"
+            eyebrow="Közösségi kedvencek"
+            badge="Közönségkedvenc"
+            prominent
+            className="border border-rose-100 shadow-sm"
+            meta={`Összesen: ${showcaseProducts.length.toLocaleString('hu-HU')} termék`}
+            helpText="Csak készleten lévő termékek"
+            actions={
+              <button
+                type="button"
+                onClick={() => setSeed((v) => v + 1)}
+                className="inline-flex items-center gap-2 px-3 py-2 rounded-lg text-rose-700 bg-rose-50 border border-rose-100 hover:bg-rose-100 transition-colors text-sm font-semibold min-h-[44px]"
+              >
+                <RefreshCw className="w-4 h-4" />
+                Frissítem
+              </button>
+            }
+          />
+        </div>
         {showcaseProducts.length > 0 ? (
-          <div className="product-grid">
+          <ProductCarousel className="mt-2">
             {showcaseProducts.map((product, index) => {
               const stockLevel = getStockLevel(product);
               const highlightBadge = stockLevel !== null && stockLevel <= 3 ? `Utolsó ${stockLevel} db` : '';
@@ -174,7 +179,7 @@ export const LiveShowcase = ({ products = [], onProductClick }) => {
                 />
               );
             })}
-          </div>
+          </ProductCarousel>
         ) : (
           <div className="text-center py-12 bg-white rounded-2xl shadow-inner">
             <Heart className="w-12 h-12 text-gray-300 mx-auto mb-3" />

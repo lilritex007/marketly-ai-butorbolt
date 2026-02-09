@@ -17,6 +17,7 @@ import {
 } from '../../services/userPreferencesService';
 import SectionHeader from '../landing/SectionHeader';
 import { EnhancedProductCard } from '../product/EnhancedProductCard';
+import ProductCarousel from '../ui/ProductCarousel';
 import { getStockLevel } from '../../utils/helpers';
 
 /**
@@ -258,58 +259,62 @@ const PersonalizedSection = ({
       <div className="absolute -top-20 -right-16 w-72 h-72 bg-primary-200/30 blur-3xl rounded-full" aria-hidden />
       <div className="absolute -bottom-24 -left-16 w-80 h-80 bg-secondary-200/30 blur-3xl rounded-full" aria-hidden />
       <div className="w-full max-w-[2000px] mx-auto px-4 sm:px-6 lg:px-10 xl:px-16">
-        <SectionHeader
-          id="personalized-heading"
-          title="Személyre szabva neked"
-          subtitle={styleDNA?.styleDNA ? styleDNA.styleDNA.split('.')[0] : 'AI ajánlások a böngészésed alapján'}
-          Icon={Sparkles}
-          accentClass="from-primary-500 to-secondary-700"
-          eyebrow="Neked szól"
-          badge={styleDNA?.styleDNA ? 'Style DNA aktív' : 'AI ajánlás'}
-          contextLabel={contextLabel}
-          meta={`Megjelenítve: ${Math.min(visibleProducts.length, currentProducts.length)} / ${currentProducts.length} termék`}
-          helpText="Csak készleten lévő termékek"
-          actions={
-            <div className="flex items-center gap-2 flex-wrap">
-              <div className="inline-flex items-center rounded-full bg-white border border-gray-100 shadow-sm p-1">
-                {[12, 24].map((size) => (
-                  <button
-                    key={size}
-                    onClick={() => setViewSize(size)}
-                    className={`px-3 py-1.5 rounded-full text-xs font-semibold transition-colors min-h-[36px] ${
-                      viewSize === size
-                        ? 'bg-primary-500 text-white'
-                        : 'text-gray-600 hover:bg-gray-100'
-                    }`}
-                  >
-                    {size} db
-                  </button>
-                ))}
+        <div className="rounded-[28px] bg-gradient-to-r from-purple-100 via-white to-indigo-100 p-[2px] shadow-lg">
+          <SectionHeader
+            id="personalized-heading"
+            title="Személyre szabva neked"
+            subtitle={styleDNA?.styleDNA ? styleDNA.styleDNA.split('.')[0] : 'AI ajánlások a böngészésed alapján'}
+            Icon={Sparkles}
+            accentClass="from-primary-500 to-secondary-700"
+            eyebrow="Neked szól"
+            badge={styleDNA?.styleDNA ? 'Style DNA aktív' : 'AI ajánlás'}
+            contextLabel={contextLabel}
+            prominent
+            className="border border-primary-100 shadow-sm"
+            meta={`Megjelenítve: ${Math.min(visibleProducts.length, currentProducts.length)} / ${currentProducts.length} termék`}
+            helpText="Csak készleten lévő termékek"
+            actions={
+              <div className="flex items-center gap-2 flex-wrap">
+                <div className="inline-flex items-center rounded-full bg-white border border-gray-100 shadow-sm p-1">
+                  {[12, 24].map((size) => (
+                    <button
+                      key={size}
+                      onClick={() => setViewSize(size)}
+                      className={`px-3 py-1.5 rounded-full text-xs font-semibold transition-colors min-h-[36px] ${
+                        viewSize === size
+                          ? 'bg-primary-500 text-white'
+                          : 'text-gray-600 hover:bg-gray-100'
+                      }`}
+                    >
+                      {size} db
+                    </button>
+                  ))}
+                </div>
+                <button
+                  onClick={() => {
+                    trackABEvent('similar-cta', 'click');
+                    if (abVariant === 'A' && fallbackCategories.length > 0) {
+                      setFocusFilters(fallbackCategories.slice(0, 2).map((cat) => ({ id: cat, type: 'category', value: cat })));
+                    }
+                    setRefreshKey((v) => v + 1);
+                  }}
+                  className="inline-flex items-center gap-2 px-3 py-2 rounded-lg text-primary-700 bg-primary-50 border border-primary-100 hover:bg-primary-100 transition-colors text-sm font-semibold min-h-[44px]"
+                >
+                  <RefreshCw className="w-4 h-4" />
+                  {refreshKey % 2 === 0 ? 'Hasonlókat kérek' : 'Frissítem'}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setShowWhyPanel((v) => !v)}
+                  className="inline-flex items-center gap-2 px-3 py-2 rounded-lg text-gray-600 bg-white border border-gray-200 hover:bg-gray-50 transition-colors text-sm font-semibold min-h-[44px]"
+                >
+                  <SlidersHorizontal className="w-4 h-4" />
+                  Miért ezt?
+                </button>
               </div>
-              <button
-                onClick={() => {
-                  trackABEvent('similar-cta', 'click');
-                  if (abVariant === 'A' && fallbackCategories.length > 0) {
-                    setFocusFilters(fallbackCategories.slice(0, 2).map((cat) => ({ id: cat, type: 'category', value: cat })));
-                  }
-                  setRefreshKey((v) => v + 1);
-                }}
-                className="inline-flex items-center gap-2 px-3 py-2 rounded-lg text-primary-700 bg-primary-50 border border-primary-100 hover:bg-primary-100 transition-colors text-sm font-semibold min-h-[44px]"
-              >
-                <RefreshCw className="w-4 h-4" />
-                {refreshKey % 2 === 0 ? 'Hasonlókat kérek' : 'Frissítem'}
-              </button>
-              <button
-                type="button"
-                onClick={() => setShowWhyPanel((v) => !v)}
-                className="inline-flex items-center gap-2 px-3 py-2 rounded-lg text-gray-600 bg-white border border-gray-200 hover:bg-gray-50 transition-colors text-sm font-semibold min-h-[44px]"
-              >
-                <SlidersHorizontal className="w-4 h-4" />
-                Miért ezt?
-              </button>
-            </div>
-          }
-        />
+            }
+          />
+        </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 mb-6">
           <div className="rounded-2xl bg-white/90 border border-gray-100 p-4 shadow-sm">
@@ -506,7 +511,7 @@ const PersonalizedSection = ({
           </div>
         )}
 
-        <div className="product-grid">
+        <ProductCarousel className="mt-2">
           {visibleProducts.map((product, index) => {
             const stockLevel = getStockLevel(product);
             const highlightBadge = stockLevel !== null && stockLevel <= 3 ? `Utolsó ${stockLevel} db` : '';
@@ -525,7 +530,7 @@ const PersonalizedSection = ({
               />
             );
           })}
-        </div>
+        </ProductCarousel>
 
         {currentProducts.length > visibleProducts.length && (
           <div className="mt-6 flex justify-center">
