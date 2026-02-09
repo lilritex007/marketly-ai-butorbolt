@@ -63,10 +63,9 @@ export const ModernHero = ({ onExplore, onTryAI, quickCategories = [], onQuickCa
   ];
 
   return (
-    <div
+    <section
       ref={heroRef}
-      onMouseMove={handlePointerMove}
-      className="relative min-h-[80vh] flex items-center justify-center overflow-hidden bg-[#fafaf9]"
+      className="min-h-screen flex items-center justify-center bg-gray-50"
       aria-label="Főoldal – AI bútorbolt"
     >
       {/* Premium background: soft mesh + orbs */}
@@ -209,7 +208,7 @@ export const ModernHero = ({ onExplore, onTryAI, quickCategories = [], onQuickCa
           <div className="w-1 h-2 bg-current rounded-full animate-scroll motion-reduce:animate-none" />
         </div>
       </button>
-    </div>
+    </section>
   );
 };
 

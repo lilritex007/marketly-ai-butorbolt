@@ -32,8 +32,9 @@ import BackToTop from './components/ux/BackToTop';
 import LiveSocialProof from './components/ux/LiveSocialProof';
 import LiveActivityStrip from './components/ux/LiveActivityStrip';
 
-// Landing Components
-import { ModernHero, AIFeaturesShowcase } from './components/landing/ModernHero';
+// Landing Components  
+import SimpleHero from './components/landing/SimpleHero';
+import { AIFeaturesShowcase } from './components/landing/ModernHero';
 import { SocialProof, LiveShowcase, InteractiveCTA } from './components/landing/ShowcaseSections';
 import TrustStrip from './components/landing/TrustStrip';
 import InspirationSection from './components/landing/InspirationSection';
@@ -1353,61 +1354,34 @@ const App = () => {
               }}
             />
             
-            {/* AI Szuper Funkciók – perfect cards */}
-            <section data-ai-features className="py-16 bg-gray-50 border-t border-gray-100">
-              <div className="w-full max-w-6xl mx-auto px-4 sm:px-6 lg:px-16">
-                <div className="text-center mb-12">
-                  <div className="inline-flex items-center gap-2 px-4 py-2 bg-white rounded-full shadow-sm mb-6">
-                    <Bot className="w-5 h-5 text-primary-500" aria-hidden />
-                    <span className="text-xs font-bold text-primary-600 uppercase tracking-wider">Próbáld ki</span>
-                  </div>
-                  <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 tracking-tight mb-3">
-                    AI Szuper Funkciók
-                  </h2>
-                  <p className="text-base sm:text-lg text-gray-500 max-w-2xl mx-auto">
-                    Személyre szabott ajánlások és szobatervezés
-                  </p>
-                </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto">
+            {/* AI Szuper Funkciók */}
+            <section data-ai-features className="py-20 bg-white">
+              <div className="max-w-6xl mx-auto px-6">
+                <h2 className="text-3xl font-bold text-gray-900 text-center mb-12">
+                  AI Funkciók
+                </h2>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <button
                     type="button"
                     onClick={() => setShowStyleQuiz(true)}
-                    className="group relative p-8 rounded-xl bg-white border border-gray-200 shadow-md hover:shadow-lg hover:border-primary-200 hover:-translate-y-0.5 active:scale-[0.98] transition-all duration-200 text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-400 focus-visible:ring-offset-2"
+                    className="p-6 rounded-lg bg-white border border-gray-200 hover:shadow-md hover:-translate-y-1 transition-all duration-200 text-left"
                   >
-                    <div className="flex items-start gap-4">
-                      <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-primary-500 to-secondary-700 flex items-center justify-center shadow-primary shrink-0">
-                        <Sparkles className="w-7 h-7 text-white" aria-hidden />
-                      </div>
-                      <div className="flex-1">
-                        <h3 className="text-xl font-bold text-gray-900 mb-2">AI Stílus Quiz</h3>
-                        <p className="text-sm text-gray-500 mb-3">
-                          5 kérdés a Style DNA-dhoz
-                        </p>
-                        <span className="inline-flex items-center gap-2 text-primary-600 font-semibold text-sm">
-                          Kezdem <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform duration-200" aria-hidden />
-                        </span>
-                      </div>
-                    </div>
+                    <Sparkles className="w-8 h-8 text-primary-500 mb-4" aria-hidden />
+                    <h3 className="text-lg font-semibold text-gray-900 mb-2">AI Stílus Quiz</h3>
+                    <p className="text-sm text-gray-600">
+                      5 kérdés a Style DNA-dhoz
+                    </p>
                   </button>
                   <button
                     type="button"
                     onClick={() => setShowRoomDesigner(true)}
-                    className="group relative p-8 rounded-xl bg-white border border-gray-200 shadow-md hover:shadow-lg hover:border-secondary-200 hover:-translate-y-0.5 active:scale-[0.98] transition-all duration-200 text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-secondary-400 focus-visible:ring-offset-2"
+                    className="p-6 rounded-lg bg-white border border-gray-200 hover:shadow-md hover:-translate-y-1 transition-all duration-200 text-left"
                   >
-                    <div className="flex items-start gap-4">
-                      <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-secondary-600 to-secondary-700 flex items-center justify-center shadow-md shrink-0">
-                        <Camera className="w-7 h-7 text-white" aria-hidden />
-                      </div>
-                      <div className="flex-1">
-                        <h3 className="text-xl font-bold text-gray-900 mb-2">AI Szoba Tervező</h3>
-                        <p className="text-sm text-gray-500 mb-3">
-                          Tervezd meg a tökéletes szobát
-                        </p>
-                        <span className="inline-flex items-center gap-2 text-secondary-700 font-semibold text-sm">
-                          Kezdem <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform duration-200" aria-hidden />
-                        </span>
-                      </div>
-                    </div>
+                    <Camera className="w-8 h-8 text-primary-500 mb-4" aria-hidden />
+                    <h3 className="text-lg font-semibold text-gray-900 mb-2">AI Szoba Tervező</h3>
+                    <p className="text-sm text-gray-600">
+                      Tervezd meg a tökéletes szobát
+                    </p>
                   </button>
                 </div>
               </div>
