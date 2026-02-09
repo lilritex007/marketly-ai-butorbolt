@@ -197,6 +197,59 @@
   text-shadow: 0 10px 24px rgba(15, 23, 42, 0.25);
 }
 
+/* Premium ecommerce card */
+#mkt-butorbolt-app .ecom-card {
+  position: relative;
+  background: linear-gradient(180deg, #ffffff 0%, #ffffff 70%, #f8fafc 100%);
+  border: 1px solid rgba(226, 232, 240, 0.9);
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.08);
+}
+
+#mkt-butorbolt-app .ecom-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  background: linear-gradient(120deg, rgba(255, 255, 255, 0.55), rgba(255, 255, 255, 0) 45%);
+}
+
+#mkt-butorbolt-app .ecom-card__image {
+  background: linear-gradient(180deg, #f8fafc, #ffffff);
+}
+
+#mkt-butorbolt-app .ecom-card__image::after {
+  content: '';
+  position: absolute;
+  inset: 10px;
+  border-radius: 18px;
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  pointer-events: none;
+}
+
+/* Section header hero */
+#mkt-butorbolt-app .section-header-hero {
+  position: relative;
+  overflow: hidden;
+}
+
+#mkt-butorbolt-app .section-header-hero::after {
+  content: '';
+  position: absolute;
+  left: 12px;
+  top: 12px;
+  bottom: 12px;
+  width: 6px;
+  border-radius: 999px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.85), rgba(0, 0, 0, 0.1));
+  opacity: 0.7;
+}
+
+#mkt-butorbolt-app .section-header-hero h2 {
+  text-transform: none;
+  letter-spacing: -0.02em;
+}
+
 /* Responsive text size overrides - sm: breakpoint (640px) */
 @media (min-width: 640px) {
   #mkt-butorbolt-app .sm\:text-xs { font-size: 12px !important; }
@@ -410,6 +463,52 @@
       grid-template-columns: repeat(7, 1fr);
     }
   }
+
+/* Premium card surfaces */
+#mkt-butorbolt-app .card-premium {
+  background: linear-gradient(180deg, rgba(255,255,255,0.98), rgba(248,250,252,0.98));
+  border: 1px solid rgba(226, 232, 240, 0.9);
+  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.08), 0 1px 0 rgba(255, 255, 255, 0.8) inset;
+}
+
+#mkt-butorbolt-app .card-premium:hover {
+  box-shadow: 0 16px 40px rgba(15, 23, 42, 0.12), 0 1px 0 rgba(255, 255, 255, 0.8) inset;
+}
+
+#mkt-butorbolt-app .badge-soft {
+  background: linear-gradient(90deg, rgba(255,255,255,0.9), rgba(248,250,252,0.9));
+  border: 1px solid rgba(226, 232, 240, 0.9);
+}
+
+#mkt-butorbolt-app .section-title {
+  letter-spacing: -0.02em;
+}
+
+#mkt-butorbolt-app .section-subtitle {
+  opacity: 0.85;
+}
+
+/* Premium product header shell */
+#mkt-butorbolt-app .products-header-shell {
+  background: radial-gradient(circle at 12% 0%, rgba(255, 138, 0, 0.22), transparent 55%),
+              radial-gradient(circle at 88% 0%, rgba(99, 102, 241, 0.2), transparent 55%),
+              linear-gradient(180deg, rgba(255,255,255,0.95), rgba(248,250,252,0.98));
+  border: 1px solid rgba(226, 232, 240, 0.9);
+  box-shadow: 0 18px 46px rgba(15, 23, 42, 0.12);
+  border-radius: 24px;
+}
+
+#mkt-butorbolt-app .products-header-shell h2 {
+  text-shadow: 0 10px 24px rgba(15, 23, 42, 0.25);
+  letter-spacing: -0.02em;
+}
+
+/* Search bar emphasis */
+#mkt-butorbolt-app .search-hero {
+  background: linear-gradient(90deg, rgba(255, 138, 0, 0.22), rgba(255,255,255,0.9), rgba(99, 102, 241, 0.2));
+  border: 2px solid rgba(255, 138, 0, 0.25);
+  box-shadow: 0 16px 42px rgba(15, 23, 42, 0.14);
+}
 
   /* Section spacing - UNIFIED scale */
   .section-padding {

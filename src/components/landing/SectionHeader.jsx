@@ -16,7 +16,7 @@ const SectionHeader = ({
   className = ''
 }) => {
   return (
-    <div className={`relative flex flex-col gap-4 mb-6 lg:mb-8 ${prominent ? 'p-4 sm:p-5 rounded-3xl bg-white/70 border border-gray-100 shadow-sm backdrop-blur-sm' : ''} ${className}`}>
+    <div className={`relative flex flex-col gap-4 mb-6 lg:mb-8 ${prominent ? 'p-4 sm:p-5 rounded-3xl bg-white/70 border border-gray-100 shadow-sm backdrop-blur-sm section-header-hero' : ''} ${className}`}>
       {prominent && (
         <div className="absolute inset-0 rounded-3xl bg-gradient-to-r from-white/90 via-white/70 to-transparent pointer-events-none" />
       )}
@@ -33,10 +33,10 @@ const SectionHeader = ({
             {Icon && <Icon className="w-6 h-6 sm:w-7 sm:h-7 text-white" aria-hidden />}
           </div>
           <div>
-            <h2 id={id} className={`${prominent ? 'text-2xl sm:text-3xl lg:text-4xl' : 'text-xl sm:text-2xl lg:text-3xl'} font-extrabold text-gray-900`}>
+            <h2 id={id} className={`section-title ${prominent ? 'text-2xl sm:text-3xl lg:text-4xl' : 'text-xl sm:text-2xl lg:text-3xl'} font-extrabold text-gray-900`}>
               {title}
             </h2>
-            {subtitle && <p className={`${prominent ? 'text-base sm:text-lg' : 'text-sm'} text-gray-600`}>{subtitle}</p>}
+            {subtitle && <p className={`section-subtitle ${prominent ? 'text-base sm:text-lg' : 'text-sm'} text-gray-600`}>{subtitle}</p>}
           </div>
         </div>
         {actions && (

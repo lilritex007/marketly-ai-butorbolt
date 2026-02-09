@@ -145,7 +145,7 @@ export const EnhancedProductCard = ({
       ref={cardRef}
       className={`
         group relative rounded-xl sm:rounded-2xl lg:rounded-2xl xl:rounded-3xl overflow-hidden 
-        border border-gray-100 shadow-sm hover:shadow-xl h-full flex flex-col
+        ecom-card card-premium hover:shadow-xl h-full flex flex-col
         hover-card tap-scale
         ${toneClasses[tone] || ''}
         ${isVisible ? 'opacity-100' : 'opacity-0 translate-y-3'}
@@ -208,7 +208,7 @@ export const EnhancedProductCard = ({
       {/* Image Section - FILL the space */}
       <div 
         onClick={handleQuickView} 
-        className="relative aspect-square overflow-hidden bg-gray-50 cursor-pointer"
+        className="relative aspect-square overflow-hidden ecom-card__image cursor-pointer"
       >
         {/* Simple placeholder */}
         {!imageLoaded && (
