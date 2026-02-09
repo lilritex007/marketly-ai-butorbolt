@@ -51,50 +51,50 @@ export const SocialProof = () => {
   };
 
   return (
-    <div className="py-12 sm:py-14 lg:py-16 xl:py-20 bg-white border-t border-gray-100/80">
-      <div className="w-full max-w-[2000px] mx-auto px-4 sm:px-6 lg:px-10 xl:px-16">
-        <div className="text-center mb-12 sm:mb-14 lg:mb-16">
-          <div className="inline-flex items-center gap-2.5 mb-6 px-5 py-2.5 bg-primary-50 rounded-full">
-            <Users className="w-5 h-5 sm:w-6 sm:h-6 text-primary-500" aria-hidden />
-            <span className="text-sm font-bold text-primary-600 uppercase tracking-wide">Elégedett vásárlóink</span>
+    <section className="py-20 bg-gray-50 border-t border-gray-100" aria-labelledby="social-proof-heading">
+      <div className="w-full max-w-8xl mx-auto px-4 sm:px-6 lg:px-16">
+        <div className="text-center mb-12">
+          <div className="inline-flex items-center gap-2 mb-6 px-4 py-2 bg-white rounded-full shadow-sm">
+            <Users className="w-5 h-5 text-primary-500" aria-hidden />
+            <span className="text-xs font-bold text-primary-600 uppercase tracking-wider">Bizalom</span>
           </div>
-          <div className="text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-extrabold tracking-tight bg-gradient-to-r from-primary-500 to-secondary-700 bg-clip-text text-transparent mb-3">
+          <div className="text-5xl sm:text-6xl lg:text-7xl font-bold tracking-tight bg-gradient-to-r from-primary-500 to-secondary-600 bg-clip-text text-transparent mb-3">
             {count.toLocaleString('hu-HU')}+
           </div>
-          <p className="text-base sm:text-lg lg:text-xl text-gray-500">
-            csatlakozott már a Marketly közösséghez
+          <p className="text-lg text-gray-500">
+            elégedett vásárló
           </p>
         </div>
 
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-5 lg:gap-6">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-16">
           {trustBadges.map((badge, idx) => (
             <div
               key={idx}
-              className="group rounded-2xl p-5 sm:p-6 bg-gray-50/80 border border-gray-100 hover:border-primary-100 hover:shadow-[0_8px_30px_rgba(0,0,0,0.06)] transition-all duration-300 hover:-translate-y-0.5"
+              className="group text-center p-6 rounded-xl bg-white border border-gray-200 shadow-sm hover:shadow-md hover:border-gray-300 hover:-translate-y-0.5 transition-all duration-200"
             >
-              <div className={`w-12 h-12 sm:w-14 sm:h-14 rounded-xl bg-gradient-to-br ${colorClasses[badge.color]} flex items-center justify-center mb-4 group-hover:scale-105 transition-transform`}>
-                <badge.icon className="w-6 h-6 sm:w-7 sm:h-7 text-white" aria-hidden />
+              <div className={`w-12 h-12 mx-auto rounded-xl bg-gradient-to-br ${colorClasses[badge.color]} flex items-center justify-center mb-3`}>
+                <badge.icon className="w-6 h-6 text-white" aria-hidden />
               </div>
-              <h3 className="font-bold text-gray-900 text-base lg:text-lg leading-tight">{badge.label}</h3>
+              <h3 className="font-semibold text-gray-900 text-sm leading-tight">{badge.label}</h3>
             </div>
           ))}
         </div>
 
-        <div className="mt-12 sm:mt-14 lg:mt-16 text-center">
-          <div className="flex justify-center gap-1.5 sm:gap-2 mb-3">
+        <div className="text-center">
+          <div className="flex justify-center gap-1.5 mb-3">
             {[...Array(5)].map((_, i) => (
-              <Star key={i} className="w-6 h-6 sm:w-7 sm:h-7 lg:w-8 lg:h-8 fill-amber-400 text-amber-400" aria-hidden />
+              <Star key={i} className="w-7 h-7 fill-amber-400 text-amber-400" aria-hidden />
             ))}
           </div>
-          <p className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-900 mb-1">
+          <p className="text-xl font-bold text-gray-900 mb-1">
             4.9 / 5.0 átlagos értékelés
           </p>
-          <p className="text-sm sm:text-base text-gray-500">
+          <p className="text-sm text-gray-500">
             12,487 valós véleményből
           </p>
         </div>
       </div>
-    </div>
+    </section>
   );
 };
 
@@ -220,67 +220,39 @@ export const LiveShowcase = ({ products = [], onProductClick, rotationTick = 0 }
  */
 export const InteractiveCTA = ({ onGetStarted }) => {
   return (
-    <div className="py-10 sm:py-12 lg:py-16 xl:py-20 bg-gradient-to-br from-primary-500 via-secondary-700 to-pink-600 relative overflow-hidden">
-      {/* Animated Background */}
-      <div className="absolute inset-0 opacity-20">
-        <div className="absolute top-0 left-0 w-48 sm:w-72 lg:w-96 h-48 sm:h-72 lg:h-96 bg-white rounded-full filter blur-3xl animate-blob" />
-        <div className="absolute top-0 right-0 w-48 sm:w-72 lg:w-96 h-48 sm:h-72 lg:h-96 bg-yellow-300 rounded-full filter blur-3xl animate-blob animation-delay-2000" />
-        <div className="absolute bottom-0 left-1/2 w-48 sm:w-72 lg:w-96 h-48 sm:h-72 lg:h-96 bg-pink-300 rounded-full filter blur-3xl animate-blob animation-delay-4000" />
+    <section className="py-20 bg-gradient-to-br from-primary-500 to-secondary-700 relative overflow-hidden">
+      <div className="absolute inset-0 opacity-10" aria-hidden>
+        <div className="absolute top-0 left-0 w-96 h-96 bg-white rounded-full filter blur-[120px] animate-blob motion-reduce:animate-none" />
+        <div className="absolute bottom-0 right-0 w-96 h-96 bg-yellow-200 rounded-full filter blur-[120px] animate-blob animation-delay-2000 motion-reduce:animate-none" />
       </div>
 
-      <div className="relative z-10 w-full max-w-5xl xl:max-w-6xl mx-auto px-4 sm:px-6 lg:px-10 xl:px-16 text-center">
-        <div className="inline-flex items-center px-4 py-2 sm:px-5 sm:py-2.5 lg:px-6 lg:py-3 bg-white/20 backdrop-blur-sm rounded-full mb-5 sm:mb-6 lg:mb-8">
-          <Sparkles className="w-5 h-5 sm:w-6 sm:h-6 lg:w-7 lg:h-7 text-white mr-2 animate-pulse" />
-          <span className="text-sm sm:text-base lg:text-lg xl:text-xl font-bold text-white">Kezdd el ma!</span>
+      <div className="relative z-10 w-full max-w-3xl mx-auto px-4 sm:px-6 lg:px-16 text-center">
+        <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/20 backdrop-blur-sm rounded-full mb-8">
+          <Sparkles className="w-5 h-5 text-white" aria-hidden />
+          <span className="text-xs font-bold text-white uppercase tracking-wider">Kezdd el</span>
         </div>
 
-        <h2 className="text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-extrabold text-white mb-5 sm:mb-6 lg:mb-8 leading-tight">
-          Készen állsz a <br />
-          <span className="text-yellow-300">tökéletes bútor</span> megtalálására?
+        <h2 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-white mb-6 leading-tight">
+          Készen állsz a tökéletes bútor megtalálására?
         </h2>
 
-        <p className="text-base sm:text-lg lg:text-xl xl:text-2xl text-white/90 mb-8 sm:mb-10 lg:mb-12 max-w-4xl mx-auto leading-relaxed">
-          Csatlakozz 50.000+ elégedett vásárlónkhoz és fedezd fel, hogyan könnyítheti meg az AI a bútorvásárlást
+        <p className="text-lg text-white/90 mb-10">
+          Csatlakozz 50.000+ elégedett vásárlónkhoz
         </p>
 
-        <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center items-center">
+        <div className="flex flex-col sm:flex-row gap-4 justify-center">
           <button
+            type="button"
             onClick={onGetStarted}
-            className="group w-full sm:w-auto px-6 py-3 sm:px-7 sm:py-3.5 lg:px-8 lg:py-4 bg-white text-primary-500 rounded-xl font-bold text-base sm:text-lg shadow-xl hover:shadow-white/50 transition-all transform hover:-translate-y-1 flex items-center justify-center"
+            className="group w-full sm:w-auto min-h-[48px] px-8 py-4 bg-white text-primary-600 rounded-xl font-semibold text-base shadow-2xl hover:shadow-white/30 hover:-translate-y-0.5 active:scale-[0.98] transition-all duration-200 flex items-center justify-center gap-2 focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2"
+            aria-label="Böngészés indítása"
           >
-            Kezdjük el most
-            <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
+            Böngészem a termékeket
+            <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform duration-200" aria-hidden />
           </button>
-
-          <button 
-            onClick={() => {
-              const aiSection = document.querySelector('[data-ai-features]');
-              if (aiSection) aiSection.scrollIntoView({ behavior: 'smooth' });
-              else window.scrollTo({ top: 0, behavior: 'smooth' });
-            }}
-            className="w-full sm:w-auto px-6 py-3 sm:px-7 sm:py-3.5 lg:px-8 lg:py-4 bg-white/10 backdrop-blur-sm text-white rounded-xl font-bold text-base sm:text-lg border-2 border-white/30 hover:bg-white/20 transition-all"
-          >
-            Tudj meg többet
-          </button>
-        </div>
-
-        {/* Trust indicators */}
-        <div className="mt-8 sm:mt-10 lg:mt-12 flex flex-wrap justify-center gap-5 sm:gap-6 lg:gap-8 text-white/80">
-          <div className="flex items-center gap-2">
-            <Check className="w-5 h-5 sm:w-5 sm:h-5" />
-            <span className="text-sm sm:text-base font-medium">Ingyenes kipróbálás</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <Check className="w-5 h-5 sm:w-5 sm:h-5" />
-            <span className="text-sm sm:text-base font-medium">Nincs kártyaigény</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <Check className="w-5 h-5 sm:w-5 sm:h-5" />
-            <span className="text-sm sm:text-base font-medium">24/7 support</span>
-          </div>
         </div>
       </div>
-    </div>
+    </section>
   );
 };
 

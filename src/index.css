@@ -8,52 +8,42 @@
    Does NOT affect UNAS shop header/footer
    ======================================== */
 
-/* CSS Custom Properties (global, doesn't affect layout) */
+/* ========================================
+   PERFECT DESIGN SYSTEM - CSS VARIABLES
+   Egyszerű = Prémium
+   ======================================== */
 :root {
-  /* ========================================
-     BRAND COLORS
-     Primary: Orange #ff8a00
-     Secondary: Teal #006b6f
-     ======================================== */
-  --color-primary: #ff8a00;
-  --color-primary-light: #ffad4d;
-  --color-primary-dark: #ea7600;
-  --color-secondary: #006b6f;
-  --color-secondary-light: #0d9488;
-  --color-secondary-dark: #005a5d;
+  /* BRAND COLORS */
+  --color-primary: #FF8A00;
+  --color-primary-hover: #EA7600;
+  --color-secondary: #006B6F;
+  --color-secondary-hover: #005A5D;
   
-  /* ========================================
-     UNIFIED TYPOGRAPHY SCALE
-     Minimum: 12px (tiny) - Maximum: varies by context
-     ======================================== */
-  
-  /* Base text sizes */
-  --text-tiny: 0.75rem;      /* 12px - badges, labels */
-  --text-small: 0.875rem;    /* 14px - secondary text */
+  /* PERFECT TYPOGRAPHY SCALE */
+  --text-caption: 0.75rem;   /* 12px - label, badge */
+  --text-small: 0.875rem;    /* 14px - metadata */
   --text-body: 1rem;         /* 16px - body text */
-  --text-medium: 1.125rem;   /* 18px - emphasis */
-  --text-large: 1.25rem;     /* 20px - sub-headings, prices */
-  --text-xl: 1.5rem;         /* 24px - section titles */
-  --text-2xl: 1.875rem;      /* 30px - major headings */
-  --text-3xl: 2.25rem;       /* 36px - hero sub-titles */
-  --text-4xl: 3rem;          /* 48px - hero titles */
-  --text-display: 3.75rem;   /* 60px - display text */
+  --text-body-lg: 1.125rem;  /* 18px - intro text */
+  --text-h2: 1.5rem;         /* 24px - subsection */
+  --text-h1: 2.5rem;         /* 40px - section heading */
+  --text-hero: 4rem;         /* 64px - hero heading */
   
-  /* Spacing */
-  --space-xs: 0.25rem;
-  --space-sm: 0.5rem;
-  --space-md: 0.75rem;
-  --space-lg: 1rem;
-  --space-xl: 1.5rem;
-  --space-2xl: 2rem;
-  --space-3xl: 3rem;
+  /* SPACING - 8px alapegység */
+  --space-xs: 0.25rem;   /* 4px */
+  --space-sm: 0.5rem;    /* 8px */
+  --space-md: 1rem;      /* 16px */
+  --space-lg: 1.5rem;    /* 24px */
+  --space-xl: 2rem;      /* 32px */
+  --space-2xl: 3rem;     /* 48px */
+  --space-3xl: 4rem;     /* 64px */
+  --space-4xl: 6rem;     /* 96px */
   
-  /* Radius */
-  --radius-sm: 0.375rem;
-  --radius-md: 0.5rem;
-  --radius-lg: 0.75rem;
-  --radius-xl: 1rem;
-  --radius-2xl: 1.25rem;
+  /* BORDER RADIUS */
+  --radius-sm: 0.5rem;   /* 8px - input, badge */
+  --radius-md: 0.75rem;  /* 12px - button, chip */
+  --radius-lg: 1rem;     /* 16px - card */
+  --radius-xl: 1.5rem;   /* 24px - modal */
+  --radius-2xl: 2rem;    /* 32px - section frame */
   
   /* Touch target */
   --touch-target: 44px;
@@ -1207,4 +1197,56 @@
 
 #mkt-butorbolt-app.dark-mode input::placeholder {
   color: #64748b !important;
+}
+
+/* ========================================
+   PERFECT DESIGN SYSTEM - UTILITIES
+   Button és Card osztályok
+   ======================================== */
+
+/* BUTTON SYSTEM */
+#mkt-butorbolt-app .btn-primary {
+  @apply px-8 py-4 min-h-[48px] bg-primary-500 text-white rounded-xl font-semibold text-base;
+  @apply shadow-md hover:shadow-primary-lg hover:bg-primary-600 hover:-translate-y-0.5;
+  @apply active:scale-[0.98] transition-all duration-200;
+  @apply focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-400 focus-visible:ring-offset-2;
+}
+
+#mkt-butorbolt-app .btn-secondary {
+  @apply px-8 py-4 min-h-[48px] bg-white text-gray-900 rounded-xl font-semibold text-base;
+  @apply border-2 border-gray-200 shadow-sm hover:shadow-md hover:border-primary-300 hover:-translate-y-0.5;
+  @apply active:scale-[0.98] transition-all duration-200;
+  @apply focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-400 focus-visible:ring-offset-2;
+}
+
+#mkt-butorbolt-app .btn-text {
+  @apply text-primary-600 font-medium text-base hover:text-primary-700 hover:underline;
+  @apply transition-colors duration-200;
+  @apply focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-400 rounded;
+}
+
+/* CARD SYSTEM */
+#mkt-butorbolt-app .card-product {
+  @apply bg-white rounded-lg border border-gray-200 shadow-sm;
+  @apply hover:shadow-md hover:border-primary-200 hover:-translate-y-0.5;
+  @apply transition-all duration-200;
+}
+
+#mkt-butorbolt-app .card-feature {
+  @apply bg-white rounded-xl border border-gray-100 p-6 shadow-sm;
+  @apply hover:shadow-lg hover:border-primary-100;
+  @apply transition-all duration-300;
+}
+
+#mkt-butorbolt-app .card-section-frame {
+  @apply bg-white/90 backdrop-blur-sm rounded-2xl border border-gray-100 p-8 shadow-lg;
+}
+
+/* FOCUS RING - Universal */
+#mkt-butorbolt-app button:focus-visible,
+#mkt-butorbolt-app a:focus-visible,
+#mkt-butorbolt-app input:focus-visible,
+#mkt-butorbolt-app textarea:focus-visible,
+#mkt-butorbolt-app select:focus-visible {
+  @apply outline-none ring-2 ring-primary-400 ring-offset-2;
 }

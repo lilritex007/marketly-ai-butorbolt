@@ -65,7 +65,7 @@ export const ModernHero = ({ onExplore, onTryAI, quickCategories = [], onQuickCa
     <div
       ref={heroRef}
       onMouseMove={handlePointerMove}
-      className="relative min-h-[90vh] flex items-center justify-center overflow-hidden bg-[#fafaf9]"
+      className="relative min-h-[80vh] flex items-center justify-center overflow-hidden bg-[#fafaf9]"
       aria-label="Főoldal – AI bútorbolt"
     >
       {/* Premium background: soft mesh + orbs */}
@@ -115,42 +115,40 @@ export const ModernHero = ({ onExplore, onTryAI, quickCategories = [], onQuickCa
             </span>
           </div>
 
-          {/* Headline – egy üzenet, nagy impact */}
-          <h1 className="mb-6 sm:mb-8 lg:mb-10">
-            <span className={`block text-[2.5rem] sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl 2xl:text-8xl font-extrabold tracking-tight text-gray-900 leading-[1.08] ${mounted ? 'hero-reveal' : 'opacity-0'}`} style={mounted ? { animationDelay: `${HERO_REVEAL_DELAY.line1}ms` } : undefined}>
+          {/* Headline – egy üzenet, tökéletes hierarchia */}
+          <h1 className="mb-10 sm:mb-12">
+            <span className={`block text-[2.5rem] sm:text-5xl lg:text-6xl xl:text-[4rem] font-bold tracking-tight text-gray-900 leading-[1.1] ${mounted ? 'hero-reveal' : 'opacity-0'}`} style={mounted ? { animationDelay: `${HERO_REVEAL_DELAY.line1}ms` } : undefined}>
               Találd meg az ideális bútort
             </span>
             <span
-              className={`block text-[2.5rem] sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl 2xl:text-8xl font-extrabold tracking-tight leading-[1.08] bg-gradient-to-r from-primary-500 via-secondary-600 to-primary-600 bg-clip-text text-transparent animate-gradient motion-reduce:animate-none ${mounted ? 'hero-reveal' : 'opacity-0'}`}
+              className={`block text-[2.5rem] sm:text-5xl lg:text-6xl xl:text-[4rem] font-bold tracking-tight leading-[1.1] bg-gradient-to-r from-primary-500 via-secondary-600 to-primary-600 bg-clip-text text-transparent animate-gradient motion-reduce:animate-none ${mounted ? 'hero-reveal' : 'opacity-0'}`}
               style={mounted ? { animationDelay: `${HERO_REVEAL_DELAY.line2}ms` } : undefined}
             >
               AI segítséggel
             </span>
           </h1>
 
-          <p className={`text-base sm:text-lg md:text-xl lg:text-2xl text-gray-600 max-w-2xl mx-auto mb-10 sm:mb-12 lg:mb-14 leading-relaxed ${mounted ? 'hero-reveal' : 'opacity-0'}`} style={mounted ? { animationDelay: `${HERO_REVEAL_DELAY.sub}ms` } : undefined}>
+          <p className={`text-lg sm:text-xl lg:text-2xl text-gray-500 max-w-2xl mx-auto mb-12 leading-relaxed ${mounted ? 'hero-reveal' : 'opacity-0'}`} style={mounted ? { animationDelay: `${HERO_REVEAL_DELAY.sub}ms` } : undefined}>
             Fotózz, tervezz, vásárolj – minden egy helyen. Forradalmi technológia a tökéletes otthonért.
           </p>
 
-          {/* CTA */}
-          <div className={`flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center items-stretch sm:items-center mb-14 sm:mb-16 lg:mb-20 ${mounted ? 'hero-reveal' : 'opacity-0'}`} style={mounted ? { animationDelay: `${HERO_REVEAL_DELAY.cta}ms` } : undefined}>
+          {/* CTA - Perfect buttons */}
+          <div className={`flex flex-col sm:flex-row gap-4 justify-center items-stretch sm:items-center mb-16 ${mounted ? 'hero-reveal' : 'opacity-0'}`} style={mounted ? { animationDelay: `${HERO_REVEAL_DELAY.cta}ms` } : undefined}>
             <button
               type="button"
               onClick={onTryAI}
-              className="hero-cta-glow group relative w-full sm:w-auto min-h-[48px] px-8 py-4 sm:px-10 sm:py-4 bg-gradient-to-r from-primary-500 to-secondary-700 text-white rounded-2xl font-bold text-base sm:text-lg shadow-[0_4px_24px_rgba(255,138,0,0.35)] hover:shadow-[0_8px_32px_rgba(255,138,0,0.4)] transition-all duration-300 hover:-translate-y-0.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-400 focus-visible:ring-offset-2 overflow-hidden flex items-center justify-center"
+              className="group relative w-full sm:w-auto min-h-[48px] px-8 py-4 bg-primary-500 text-white rounded-xl font-semibold text-base shadow-primary hover:shadow-primary-lg hover:bg-primary-600 hover:-translate-y-0.5 active:scale-[0.98] transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-400 focus-visible:ring-offset-2 overflow-hidden flex items-center justify-center gap-2"
               aria-label="Próbáld ki az AI funkciókat"
             >
-              <span className="relative z-10 flex items-center gap-2">
-                <Sparkles className="w-5 h-5 sm:w-6 sm:h-6" aria-hidden />
-                Próbáld ki az AI-t
-                <ArrowRight className="w-5 h-5 sm:w-6 sm:h-6 group-hover:translate-x-1 transition-transform" aria-hidden />
-              </span>
-              <div className="absolute inset-0 bg-gradient-to-r from-secondary-700 to-primary-600 opacity-0 group-hover:opacity-100 transition-opacity duration-300" aria-hidden />
+              <Sparkles className="w-5 h-5" aria-hidden />
+              Próbáld ki az AI-t
+              <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform duration-200" aria-hidden />
+              <div className="absolute inset-0 bg-gradient-to-r from-secondary-700 to-primary-600 opacity-0 group-hover:opacity-100 transition-opacity duration-200" aria-hidden />
             </button>
             <button
               type="button"
               onClick={onExplore}
-              className="w-full sm:w-auto min-h-[48px] px-8 py-4 sm:px-10 sm:py-4 bg-white text-gray-900 rounded-2xl font-bold text-base sm:text-lg shadow-[0_2px_12px_rgba(0,0,0,0.06)] hover:shadow-[0_4px_20px_rgba(0,0,0,0.08)] transition-all duration-300 hover:-translate-y-0.5 border border-gray-200/80 hover:border-primary-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-400 focus-visible:ring-offset-2 flex items-center justify-center gap-2"
+              className="w-full sm:w-auto min-h-[48px] px-8 py-4 bg-white text-gray-900 rounded-xl font-semibold text-base border-2 border-gray-200 shadow-sm hover:shadow-md hover:border-primary-300 hover:-translate-y-0.5 active:scale-[0.98] transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-400 focus-visible:ring-offset-2 flex items-center justify-center gap-2"
               aria-label="Kollekció megtekintése"
             >
               Kollekció megtekintése
@@ -174,17 +172,17 @@ export const ModernHero = ({ onExplore, onTryAI, quickCategories = [], onQuickCa
             </div>
           )}
 
-          {/* Stats – premium kártyák */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 max-w-4xl mx-auto mt-12 sm:mt-14 lg:mt-16">
+          {/* Stats – perfect cards */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-4xl mx-auto">
             {stats.map((stat, idx) => (
               <div
                 key={idx}
-                className={`bg-white/80 backdrop-blur-sm rounded-2xl p-4 sm:p-5 border border-gray-100/80 shadow-[0_2px_12px_rgba(0,0,0,0.04)] hover:shadow-[0_4px_20px_rgba(0,0,0,0.06)] hover:border-primary-100/60 transition-all duration-300 ${mounted ? 'hero-reveal' : 'opacity-0'}`}
+                className={`bg-white/90 backdrop-blur-sm rounded-xl p-5 border border-gray-200/80 shadow-sm hover:shadow-md hover:border-primary-100 transition-all duration-200 ${mounted ? 'hero-reveal' : 'opacity-0'}`}
                 style={mounted ? { animationDelay: `${HERO_REVEAL_DELAY.stats[idx]}ms` } : undefined}
               >
-                <stat.icon className="w-8 h-8 sm:w-9 sm:h-9 text-primary-500 mx-auto mb-2" aria-hidden />
-                <div className="text-xl sm:text-2xl font-extrabold text-gray-900 mb-0.5">{stat.value}</div>
-                <div className="text-xs sm:text-sm text-gray-500 font-medium">{stat.label}</div>
+                <stat.icon className="w-8 h-8 text-primary-500 mx-auto mb-2" aria-hidden />
+                <div className="text-2xl font-bold text-gray-900">{stat.value}</div>
+                <div className="text-sm text-gray-500">{stat.label}</div>
               </div>
             ))}
           </div>
@@ -226,34 +224,21 @@ export const AIFeaturesShowcase = ({ onFeatureClick }) => {
   }, [isHovering, features.length]);
 
   return (
-    <section className="py-12 sm:py-14 lg:py-16 bg-white border-t border-gray-100/80" aria-labelledby="ai-features-heading">
-      <div className="w-full max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-10">
-        <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-8 sm:mb-10">
-          <div className="flex items-center gap-4">
-            <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-primary-500 to-secondary-700 flex items-center justify-center shadow-[0_4px_20px_rgba(255,138,0,0.25)]">
-              <Sparkles className="w-7 h-7 text-white" aria-hidden />
-            </div>
-            <div>
-              <h2 id="ai-features-heading" className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 tracking-tight">
-                AI a <span className="bg-gradient-to-r from-primary-500 to-secondary-700 bg-clip-text text-transparent">szolgálatodban</span>
-              </h2>
-              <p className="text-sm sm:text-base text-gray-500 mt-1">Okos funkciók a tökéletes választáshoz</p>
-            </div>
+    <section className="py-20 bg-white border-t border-gray-100" aria-labelledby="ai-features-heading">
+      <div className="w-full max-w-8xl mx-auto px-4 sm:px-6 lg:px-16">
+        <div className="text-center mb-12">
+          <div className="inline-flex items-center gap-2 px-4 py-2 bg-primary-50 rounded-full mb-6">
+            <Sparkles className="w-5 h-5 text-primary-500" aria-hidden />
+            <span className="text-xs font-bold text-primary-600 uppercase tracking-wider">AI Powered</span>
           </div>
-          <div className="hidden sm:flex items-center gap-2">
-            {features.map((_, idx) => (
-              <button
-                key={idx}
-                onClick={() => setActiveFeature(idx)}
-                className={`h-2 rounded-full transition-all duration-300 ${activeFeature === idx ? 'w-8 bg-primary-500' : 'w-2 bg-gray-200 hover:bg-gray-300'}`}
-                aria-label={`Funkció ${idx + 1}`}
-              />
-            ))}
-          </div>
+          <h2 id="ai-features-heading" className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 tracking-tight mb-3">
+            AI a <span className="bg-gradient-to-r from-primary-500 to-secondary-600 bg-clip-text text-transparent">szolgálatodban</span>
+          </h2>
+          <p className="text-base sm:text-lg text-gray-500 max-w-2xl mx-auto">Okos funkciók a tökéletes választáshoz</p>
         </div>
 
         <div
-          className="flex gap-4 sm:grid sm:grid-cols-3 overflow-x-auto pb-2 -mx-4 px-4 sm:mx-0 sm:px-0 snap-x snap-mandatory sm:snap-none scrollbar-hide"
+          className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto"
           onMouseEnter={() => setIsHovering(true)}
           onMouseLeave={() => setIsHovering(false)}
         >
@@ -265,40 +250,32 @@ export const AIFeaturesShowcase = ({ onFeatureClick }) => {
                 onFeatureClick?.(feature);
               }}
               className={`
-                relative flex-shrink-0 w-[300px] sm:w-auto snap-center text-left
-                rounded-2xl p-5 sm:p-6 border-2 transition-all duration-300
-                ${activeFeature === idx ? `${feature.bgColor} border-primary-200 shadow-[0_8px_30px_rgba(0,0,0,0.08)]` : 'bg-gray-50/80 border-gray-100 hover:border-gray-200 hover:shadow-md'}
+                relative text-left rounded-xl p-6 border transition-all duration-200
+                ${activeFeature === idx 
+                  ? 'bg-white border-primary-200 shadow-lg' 
+                  : 'bg-gray-50 border-gray-100 hover:border-gray-200 hover:shadow-md hover:-translate-y-0.5'
+                }
+                focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-400 focus-visible:ring-offset-2
               `}
             >
-              <div className="flex items-start justify-between gap-3 mb-4">
-                <div className={`w-12 h-12 rounded-xl flex items-center justify-center transition-colors ${activeFeature === idx ? `bg-gradient-to-br ${feature.color} shadow-md` : 'bg-white border border-gray-200'}`}>
+              <div className="flex items-center justify-between mb-4">
+                <div className={`w-12 h-12 rounded-xl flex items-center justify-center transition-all duration-200 ${activeFeature === idx ? `bg-gradient-to-br ${feature.color} shadow-md` : 'bg-white border border-gray-200'}`}>
                   <feature.icon className={`w-6 h-6 ${activeFeature === idx ? 'text-white' : 'text-gray-600'}`} aria-hidden />
                 </div>
                 <div className="text-right">
-                  <div className="text-lg font-bold text-gray-900">{feature.stat}</div>
-                  <div className="text-xs text-gray-500">{feature.statLabel}</div>
+                  <div className="text-base font-bold text-gray-900">{feature.stat}</div>
+                  <div className="text-xs text-gray-400">{feature.statLabel}</div>
                 </div>
               </div>
-              <h3 className="font-bold text-gray-900 text-base sm:text-lg mb-1">{feature.title}</h3>
-              <p className="text-sm text-gray-500 mb-4">{feature.shortDesc}</p>
-              <span className={`inline-flex items-center gap-1.5 text-sm font-semibold ${activeFeature === idx ? 'text-primary-600' : 'text-gray-500'}`}>
-                Kipróbálom <ArrowRight className="w-4 h-4" />
+              <h3 className="font-semibold text-gray-900 text-lg mb-2">{feature.title}</h3>
+              <p className="text-sm text-gray-500 mb-3">{feature.shortDesc}</p>
+              <span className={`inline-flex items-center gap-1.5 text-sm font-medium transition-colors ${activeFeature === idx ? 'text-primary-600' : 'text-gray-400'}`}>
+                Kipróbálom <ArrowRight className="w-4 h-4" aria-hidden />
               </span>
               {activeFeature === idx && (
-                <div className={`absolute bottom-0 left-6 right-6 h-1 rounded-full bg-gradient-to-r ${feature.color}`} />
+                <div className={`absolute bottom-0 left-0 right-0 h-1 rounded-b-xl bg-gradient-to-r ${feature.color}`} />
               )}
             </button>
-          ))}
-        </div>
-
-        <div className="flex sm:hidden justify-center gap-2 mt-4">
-          {features.map((_, idx) => (
-            <button
-              key={idx}
-              onClick={() => setActiveFeature(idx)}
-              className={`h-2 rounded-full transition-all duration-300 ${activeFeature === idx ? 'w-6 bg-primary-500' : 'w-2 bg-gray-300'}`}
-              aria-label={`Funkció ${idx + 1}`}
-            />
           ))}
         </div>
       </div>

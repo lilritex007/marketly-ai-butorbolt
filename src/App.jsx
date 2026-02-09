@@ -289,35 +289,35 @@ const FileLoaderBar = ({ onFileLoad, onUnasRefresh, isLoadingUnas, lastUpdated, 
 };
 
 const Features = () => (
-    <section className="bg-white py-14 sm:py-16 lg:py-20 border-t border-gray-100/80" aria-labelledby="features-heading">
-        <div className="w-full max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-10 xl:px-16">
-            <h2 id="features-heading" className="sr-only">Miért válassz minket</h2>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-5 sm:gap-6 lg:gap-8">
-                <div className="flex items-center gap-5 p-6 sm:p-8 rounded-2xl bg-gray-50/80 border border-gray-100 hover:border-primary-100 hover:shadow-[0_8px_30px_rgba(0,0,0,0.06)] transition-all duration-300">
-                    <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-primary-50 text-primary-600 flex items-center justify-center shrink-0">
-                        <Truck className="w-7 h-7 sm:w-8 sm:h-8" aria-hidden />
+    <section className="py-20 bg-gray-50 border-t border-gray-100" aria-labelledby="features-heading">
+        <div className="w-full max-w-8xl mx-auto px-4 sm:px-6 lg:px-16">
+            <h2 id="features-heading" className="sr-only">Szolgáltatások</h2>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="flex items-center gap-4 p-6 rounded-xl bg-white border border-gray-200 shadow-sm hover:shadow-md hover:border-gray-300 hover:-translate-y-0.5 transition-all duration-200">
+                    <div className="w-12 h-12 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0">
+                        <Truck className="w-6 h-6" aria-hidden />
                     </div>
                     <div>
-                        <h3 className="font-bold text-gray-900 text-lg sm:text-xl mb-1">Ingyenes szállítás</h3>
-                        <p className="text-sm sm:text-base text-gray-500">Minden 50.000 Ft feletti rendelésnél.</p>
+                        <h3 className="font-semibold text-gray-900 text-base mb-1">Ingyenes szállítás</h3>
+                        <p className="text-sm text-gray-500">50.000 Ft felett</p>
                     </div>
                 </div>
-                <div className="flex items-center gap-5 p-6 sm:p-8 rounded-2xl bg-gray-50/80 border border-gray-100 hover:border-emerald-100 hover:shadow-[0_8px_30px_rgba(0,0,0,0.06)] transition-all duration-300">
-                    <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0">
-                        <ShieldCheck className="w-7 h-7 sm:w-8 sm:h-8" aria-hidden />
+                <div className="flex items-center gap-4 p-6 rounded-xl bg-white border border-gray-200 shadow-sm hover:shadow-md hover:border-gray-300 hover:-translate-y-0.5 transition-all duration-200">
+                    <div className="w-12 h-12 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
+                        <ShieldCheck className="w-6 h-6" aria-hidden />
                     </div>
                     <div>
-                        <h3 className="font-bold text-gray-900 text-lg sm:text-xl mb-1">Garancia</h3>
-                        <p className="text-sm sm:text-base text-gray-500">Minden bútorra teljes körű garancia.</p>
+                        <h3 className="font-semibold text-gray-900 text-base mb-1">2 év garancia</h3>
+                        <p className="text-sm text-gray-500">Minden termékre</p>
                     </div>
                 </div>
-                <div className="flex items-center gap-5 p-6 sm:p-8 rounded-2xl bg-gray-50/80 border border-gray-100 hover:border-secondary-100 hover:shadow-[0_8px_30px_rgba(0,0,0,0.06)] transition-all duration-300">
-                    <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-secondary-50 text-secondary-700 flex items-center justify-center shrink-0">
-                        <Phone className="w-7 h-7 sm:w-8 sm:h-8" aria-hidden />
+                <div className="flex items-center gap-4 p-6 rounded-xl bg-white border border-gray-200 shadow-sm hover:shadow-md hover:border-gray-300 hover:-translate-y-0.5 transition-all duration-200">
+                    <div className="w-12 h-12 rounded-xl bg-secondary-50 text-secondary-700 flex items-center justify-center shrink-0">
+                        <Phone className="w-6 h-6" aria-hidden />
                     </div>
                     <div>
-                        <h3 className="font-bold text-gray-900 text-lg sm:text-xl mb-1">Ügyfélszolgálat</h3>
-                        <p className="text-sm sm:text-base text-gray-500">Szakértő segítség minden nap.</p>
+                        <h3 className="font-semibold text-gray-900 text-base mb-1">Ügyfélszolgálat</h3>
+                        <p className="text-sm text-gray-500">Minden nap elérhető</p>
                     </div>
                 </div>
             </div>
@@ -1353,38 +1353,38 @@ const App = () => {
               }}
             />
             
-            {/* AI Szuper Funkciók – premium kártyák */}
-            <section data-ai-features className="w-full border-t border-gray-100/80 bg-white py-12 sm:py-14 lg:py-16">
-              <div className="w-full max-w-[2000px] mx-auto px-4 sm:px-6 lg:px-10 xl:px-16">
-                <div className="text-center mb-10 sm:mb-12">
-                  <div className="inline-flex items-center gap-2.5 px-5 py-2.5 bg-primary-50 rounded-full mb-6">
-                    <Bot className="w-5 h-5 lg:w-6 lg:h-6 text-primary-500" aria-hidden />
-                    <span className="text-sm font-bold text-primary-600 uppercase tracking-wide">AI Powered</span>
+            {/* AI Szuper Funkciók – perfect cards */}
+            <section data-ai-features className="py-20 bg-gray-50 border-t border-gray-100">
+              <div className="w-full max-w-8xl mx-auto px-4 sm:px-6 lg:px-16">
+                <div className="text-center mb-12">
+                  <div className="inline-flex items-center gap-2 px-4 py-2 bg-white rounded-full shadow-sm mb-6">
+                    <Bot className="w-5 h-5 text-primary-500" aria-hidden />
+                    <span className="text-xs font-bold text-primary-600 uppercase tracking-wider">Próbáld ki</span>
                   </div>
-                  <h2 className="text-2xl sm:text-3xl lg:text-4xl xl:text-5xl font-bold text-gray-900 tracking-tight mb-3">
+                  <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 tracking-tight mb-3">
                     AI Szuper Funkciók
                   </h2>
-                  <p className="text-base sm:text-lg lg:text-xl text-gray-500 max-w-xl mx-auto">
-                    Próbáld ki a legújabb AI technológiáinkat
+                  <p className="text-base sm:text-lg text-gray-500 max-w-2xl mx-auto">
+                    Személyre szabott ajánlások és szobatervezés
                   </p>
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-5 sm:gap-6 max-w-4xl mx-auto">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto">
                   <button
                     type="button"
                     onClick={() => setShowStyleQuiz(true)}
-                    className="group relative p-6 sm:p-8 rounded-2xl bg-white border-2 border-gray-100 hover:border-primary-200 shadow-[0_4px_20px_rgba(0,0,0,0.05)] hover:shadow-[0_12px_40px_rgba(255,138,0,0.12)] transition-all duration-300 hover:-translate-y-0.5 text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-400 focus-visible:ring-offset-2"
+                    className="group relative p-8 rounded-xl bg-white border border-gray-200 shadow-md hover:shadow-lg hover:border-primary-200 hover:-translate-y-0.5 active:scale-[0.98] transition-all duration-200 text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-400 focus-visible:ring-offset-2"
                   >
                     <div className="flex items-start gap-4">
-                      <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-primary-500 to-secondary-700 flex items-center justify-center shadow-[0_4px_16px_rgba(255,138,0,0.3)] group-hover:scale-105 transition-transform shrink-0">
+                      <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-primary-500 to-secondary-700 flex items-center justify-center shadow-primary shrink-0">
                         <Sparkles className="w-7 h-7 text-white" aria-hidden />
                       </div>
-                      <div className="flex-1 min-w-0">
-                        <h3 className="text-xl sm:text-2xl font-bold text-gray-900 mb-2">AI Stílus Quiz</h3>
-                        <p className="text-gray-600 text-sm sm:text-base mb-4">
-                          5 kérdés, és megismered a Style DNA-d! Személyre szabott ajánlatok.
+                      <div className="flex-1">
+                        <h3 className="text-xl font-bold text-gray-900 mb-2">AI Stílus Quiz</h3>
+                        <p className="text-sm text-gray-500 mb-3">
+                          5 kérdés a Style DNA-dhoz
                         </p>
                         <span className="inline-flex items-center gap-2 text-primary-600 font-semibold text-sm">
-                          Kipróbálom <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                          Kezdem <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform duration-200" aria-hidden />
                         </span>
                       </div>
                     </div>
@@ -1392,19 +1392,19 @@ const App = () => {
                   <button
                     type="button"
                     onClick={() => setShowRoomDesigner(true)}
-                    className="group relative p-6 sm:p-8 rounded-2xl bg-white border-2 border-gray-100 hover:border-secondary-200 shadow-[0_4px_20px_rgba(0,0,0,0.05)] hover:shadow-[0_12px_40px_rgba(0,107,111,0.12)] transition-all duration-300 hover:-translate-y-0.5 text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-secondary-400 focus-visible:ring-offset-2"
+                    className="group relative p-8 rounded-xl bg-white border border-gray-200 shadow-md hover:shadow-lg hover:border-secondary-200 hover:-translate-y-0.5 active:scale-[0.98] transition-all duration-200 text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-secondary-400 focus-visible:ring-offset-2"
                   >
                     <div className="flex items-start gap-4">
-                      <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-secondary-600 to-secondary-700 flex items-center justify-center shadow-[0_4px_16px_rgba(0,107,111,0.3)] group-hover:scale-105 transition-transform shrink-0">
+                      <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-secondary-600 to-secondary-700 flex items-center justify-center shadow-md shrink-0">
                         <Camera className="w-7 h-7 text-white" aria-hidden />
                       </div>
-                      <div className="flex-1 min-w-0">
-                        <h3 className="text-xl sm:text-2xl font-bold text-gray-900 mb-2">AI Szoba Tervező</h3>
-                        <p className="text-gray-600 text-sm sm:text-base mb-4">
-                          Töltsd fel a szobád fotóját, és az AI megtervezi neked!
+                      <div className="flex-1">
+                        <h3 className="text-xl font-bold text-gray-900 mb-2">AI Szoba Tervező</h3>
+                        <p className="text-sm text-gray-500 mb-3">
+                          Tervezd meg a tökéletes szobát
                         </p>
                         <span className="inline-flex items-center gap-2 text-secondary-700 font-semibold text-sm">
-                          Kipróbálom <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                          Kezdem <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform duration-200" aria-hidden />
                         </span>
                       </div>
                     </div>

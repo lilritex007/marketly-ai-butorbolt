@@ -144,14 +144,14 @@ export const EnhancedProductCard = ({
     <article 
       ref={cardRef}
       className={`
-        group relative rounded-xl sm:rounded-2xl lg:rounded-2xl xl:rounded-3xl overflow-hidden 
-        ecom-card card-premium hover:shadow-xl h-full flex flex-col
-        hover-card tap-scale
+        group relative rounded-lg overflow-hidden bg-white border border-gray-200 shadow-sm
+        hover:shadow-md hover:border-gray-300 hover:-translate-y-0.5
+        h-full flex flex-col
         ${toneClasses[tone] || ''}
         ${isVisible ? 'opacity-100' : 'opacity-0 translate-y-3'}
+        transition-all duration-200
       `}
       style={{ 
-        transition: 'opacity 0.3s ease-out, transform 0.3s ease-out, box-shadow 0.2s ease-out',
         willChange: isVisible ? 'auto' : 'opacity, transform'
       }}
       onMouseEnter={() => setIsHovered(true)}

@@ -271,7 +271,7 @@ export default function Navbar({
     <>
       <nav
         id="mkt-butorbolt-navbar"
-        className={`sticky top-0 z-50 transition-all duration-300 ${isScrolled ? 'bg-white/95 backdrop-blur-xl shadow-lg shadow-gray-200/50 border-b border-gray-100' : 'bg-white/80 backdrop-blur-md'}`}
+        className={`sticky top-0 z-50 transition-all duration-200 ${isScrolled ? 'bg-white/95 backdrop-blur-xl shadow-md border-b border-gray-200' : 'bg-white/90 backdrop-blur-md border-b border-gray-100'}`}
       >
         <div className="w-full max-w-[2000px] mx-auto px-3 sm:px-4 lg:px-10 xl:px-16 2xl:px-20">
           <div className={`flex justify-between items-center transition-all duration-300 ${isScrolled ? 'h-16 sm:h-18 lg:h-20 xl:h-24' : 'h-18 sm:h-20 lg:h-24 xl:h-28'}`}>
@@ -313,7 +313,13 @@ export default function Navbar({
                   megaMenuCloseTimeoutRef.current = setTimeout(() => setShowMegaMenu(false), 180);
                 }}
               >
-                <button className={`flex items-center gap-2 lg:gap-3 xl:gap-3 px-3 lg:px-4 xl:px-6 2xl:px-7 py-2.5 lg:py-3 xl:py-3.5 2xl:py-4 rounded-xl lg:rounded-2xl font-bold text-sm lg:text-base xl:text-lg 2xl:text-xl transition-all duration-200 min-h-[44px] ${showMegaMenu ? 'bg-primary-50 text-primary-700 ring-2 ring-primary-200 shadow-sm' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'}`} aria-label="Kategóriák menü" aria-expanded={showMegaMenu} aria-haspopup="true">
+                <button 
+                  type="button"
+                  className={`flex items-center gap-2 px-4 py-3 rounded-xl font-semibold text-base transition-all duration-200 min-h-[44px] focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-400 focus-visible:ring-offset-2 ${showMegaMenu ? 'bg-primary-50 text-primary-700 border border-primary-200 shadow-sm' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100 border border-transparent'}`} 
+                  aria-label="Kategóriák menü" 
+                  aria-expanded={showMegaMenu} 
+                  aria-haspopup="true"
+                >
                   <Grid3X3 className="w-5 h-5 lg:w-5 xl:w-6 xl:h-6" />
                   <span>Kategóriák</span>
                   <ChevronDown className={`w-4 h-4 lg:w-5 xl:w-5 transition-transform duration-200 ${showMegaMenu ? 'rotate-180' : ''}`} />
