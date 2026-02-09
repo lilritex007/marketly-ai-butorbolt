@@ -109,6 +109,8 @@ export default function NewArrivalsSection({ products = [], onProductClick, onTo
                 highlightBadge={highlightBadge}
                 sectionId={SECTION_ID}
                 showFeedback
+                size="compact"
+                tone="new"
               />
             );
           })}

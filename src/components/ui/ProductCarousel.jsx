@@ -13,7 +13,8 @@ const getScrollStep = (container) => {
 const ProductCarousel = ({
   children,
   autoScroll = true,
-  intervalMs = 4500,
+  intervalMs = 6500,
+  stepFraction = 0.9,
   className = ''
 }) => {
   const containerRef = useRef(null);
@@ -23,7 +24,7 @@ const ProductCarousel = ({
     if (!autoScroll || paused) return undefined;
     const container = containerRef.current;
     if (!container) return undefined;
-    const step = getScrollStep(container);
+    const step = getScrollStep(container) * stepFraction;
     const id = setInterval(() => {
       const maxScroll = container.scrollWidth - container.clientWidth;
       const next = container.scrollLeft + step;
@@ -39,7 +40,7 @@ const ProductCarousel = ({
   const scrollByStep = (direction) => {
     const container = containerRef.current;
     if (!container) return;
-    const step = getScrollStep(container);
+    const step = getScrollStep(container) * stepFraction;
     container.scrollBy({ left: step * direction, behavior: 'smooth' });
   };
 
@@ -48,7 +49,7 @@ const ProductCarousel = ({
       <button
         type="button"
         onClick={() => scrollByStep(-1)}
-        className="absolute -left-3 sm:-left-5 top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full bg-white shadow-md border border-gray-100 flex items-center justify-center hover:bg-gray-50"
+        className="absolute left-1 sm:left-2 top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full bg-white shadow-md border border-gray-100 flex items-center justify-center hover:bg-gray-50"
         aria-label="Balra"
       >
         <ChevronLeft className="w-5 h-5 text-gray-700" />
@@ -56,7 +57,7 @@ const ProductCarousel = ({
       <button
         type="button"
         onClick={() => scrollByStep(1)}
-        className="absolute -right-3 sm:-right-5 top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full bg-white shadow-md border border-gray-100 flex items-center justify-center hover:bg-gray-50"
+        className="absolute right-1 sm:right-2 top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full bg-white shadow-md border border-gray-100 flex items-center justify-center hover:bg-gray-50"
         aria-label="Jobbra"
       >
         <ChevronRight className="w-5 h-5 text-gray-700" />
@@ -65,10 +66,13 @@ const ProductCarousel = ({
         ref={containerRef}
         onMouseEnter={() => setPaused(true)}
         onMouseLeave={() => setPaused(false)}
-        className="flex gap-4 overflow-x-auto scroll-smooth pb-3 snap-x snap-mandatory"
+        className="flex gap-4 overflow-x-auto scroll-smooth pb-3 snap-x snap-mandatory scrollbar-hide"
       >
         {React.Children.map(children, (child, index) => (
-          <div key={index} className="min-w-[240px] sm:min-w-[280px] lg:min-w-[320px] snap-start">
+          <div
+            key={index}
+            className="min-w-[170px] sm:min-w-[200px] lg:min-w-[calc((100%-80px)/6)] snap-start"
+          >
             {child}
           </div>
         ))}

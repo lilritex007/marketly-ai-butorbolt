@@ -34,13 +34,33 @@ export const EnhancedProductCard = ({
   highlightBadge,
   recommendationReasons = [],
   sectionId,
-  showFeedback = false
+  showFeedback = false,
+  size = 'default',
+  tone = 'default'
 }) => {
   const [isHovered, setIsHovered] = useState(false);
   const [imageLoaded, setImageLoaded] = useState(false);
   const [imageError, setImageError] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
   const [notifySaved, setNotifySaved] = useState(false);
+  const toneClasses = {
+    default: '',
+    popular: 'bg-gradient-to-b from-white via-white to-amber-50/50 ring-1 ring-amber-100/80',
+    new: 'bg-gradient-to-b from-white via-white to-indigo-50/60 ring-1 ring-indigo-100/80',
+    favorites: 'bg-gradient-to-b from-white via-white to-rose-50/60 ring-1 ring-rose-100/80',
+    personal: 'bg-gradient-to-b from-white via-white to-purple-50/60 ring-1 ring-purple-100/80'
+  };
+  const sizeClasses = {
+    default: {
+      image: 'p-3 sm:p-4 lg:p-5',
+      content: 'p-4 sm:p-5 lg:p-6'
+    },
+    compact: {
+      image: 'p-2.5 sm:p-3 lg:p-3.5',
+      content: 'p-3 sm:p-4 lg:p-4'
+    }
+  };
+  const sizeConfig = sizeClasses[size] || sizeClasses.default;
   const [feedbackState, setFeedbackState] = useState(() => ({
     liked: isProductLiked(product?.id),
     disliked: isProductDisliked(product?.id)
@@ -124,9 +144,10 @@ export const EnhancedProductCard = ({
     <article 
       ref={cardRef}
       className={`
-        group relative bg-white rounded-xl sm:rounded-2xl lg:rounded-2xl xl:rounded-3xl overflow-hidden 
+        group relative rounded-xl sm:rounded-2xl lg:rounded-2xl xl:rounded-3xl overflow-hidden 
         border border-gray-100 shadow-sm hover:shadow-xl h-full flex flex-col
         hover-card tap-scale
+        ${toneClasses[tone] || ''}
         ${isVisible ? 'opacity-100' : 'opacity-0 translate-y-3'}
       `}
       style={{ 
@@ -199,7 +220,7 @@ export const EnhancedProductCard = ({
           src={imageError ? PLACEHOLDER_IMAGE : (optimizedProps.src || mainImage)}
           alt={product.name} 
           className={`
-            w-full h-full object-contain p-3 sm:p-4 lg:p-5
+            w-full h-full object-contain ${sizeConfig.image}
             transition-opacity duration-300 ease-out
             ${imageLoaded ? 'opacity-100' : 'opacity-0'}
           `}
@@ -254,7 +275,7 @@ export const EnhancedProductCard = ({
       </div>
 
       {/* Content Section - UNIFIED TYPOGRAPHY */}
-      <div className="p-4 sm:p-5 lg:p-6 flex flex-col flex-1">
+      <div className={`${sizeConfig.content} flex flex-col flex-1`}>
         {/* Category - small readable (14px) */}
         <span className="text-sm font-semibold text-primary-600 uppercase tracking-wide mb-1.5 truncate">
           {product.category}

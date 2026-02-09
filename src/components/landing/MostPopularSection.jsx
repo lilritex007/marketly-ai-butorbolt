@@ -160,6 +160,8 @@ export default function MostPopularSection({ products = [], onProductClick, onTo
                 highlightBadge={highlightBadge}
                 sectionId="most-popular"
                 showFeedback
+                size="compact"
+                tone="popular"
               />
             );
           })}

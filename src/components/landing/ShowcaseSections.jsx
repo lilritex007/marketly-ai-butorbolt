@@ -176,6 +176,8 @@ export const LiveShowcase = ({ products = [], onProductClick }) => {
                   highlightBadge={highlightBadge}
                   sectionId={SECTION_ID}
                   showFeedback
+                  size="compact"
+                  tone="favorites"
                 />
               );
             })}

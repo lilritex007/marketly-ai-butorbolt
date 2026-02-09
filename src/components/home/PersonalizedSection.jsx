@@ -527,6 +527,8 @@ const PersonalizedSection = ({
                 recommendationReasons={buildRecommendationReasons(product)}
                 sectionId={`personalized-${activeTab}`}
                 showFeedback
+                size="compact"
+                tone="personal"
               />
             );
           })}
