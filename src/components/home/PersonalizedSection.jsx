@@ -12,7 +12,8 @@ import {
   resetRecommendationTweaks,
   getABVariant,
   trackABEvent,
-  trackSectionEvent
+  trackSectionEvent,
+  getPreferenceSignals
 } from '../../services/userPreferencesService';
 import SectionHeader from '../landing/SectionHeader';
 import { EnhancedProductCard } from '../product/EnhancedProductCard';
@@ -42,6 +43,7 @@ const PersonalizedSection = ({
   const styleDNA = useMemo(() => getStyleDNA(), []);
   const topCategories = useMemo(() => getTopCategories(6), []);
   const searchHistory = useMemo(() => getSearchHistory(6), []);
+  const preferenceSignals = useMemo(() => getPreferenceSignals(), []);
 
   useEffect(() => {
     trackSectionEvent(`personalized-${activeTab}`, 'section_impression');
@@ -132,6 +134,21 @@ const PersonalizedSection = ({
     }
     if (topCategories.some((c) => category.toLowerCase().includes(c.toLowerCase()))) {
       reasons.push(`Kedvelt kategória: ${category}`);
+    }
+    const categoryParts = category
+      .split('>')
+      .map((c) => c.trim().toLowerCase())
+      .filter(Boolean);
+    if (categoryParts.some((c) => (preferenceSignals.categories?.[c] || 0) > 0)) {
+      reasons.push('Tetszéseid alapján');
+    }
+    const textTokens = `${product.name || ''} ${product.category || ''}`
+      .toLowerCase()
+      .split(/[\s,\-\/]+/)
+      .map((w) => w.trim())
+      .filter((w) => w.length > 3);
+    if (textTokens.some((t) => (preferenceSignals.keywords?.[t] || 0) > 0)) {
+      reasons.push('Kulcsszavas egyezés a kedveléseidből');
     }
     if (searchHistory.length > 0) {
       const term = searchHistory.find((s) => {

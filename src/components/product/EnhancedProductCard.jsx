@@ -3,7 +3,14 @@ import { Heart, Eye, ShoppingBag, Info, ThumbsUp, ThumbsDown, Bell } from 'lucid
 import { formatPrice } from '../../utils/helpers';
 import { SmartBadges, StockBadge } from '../ui/Badge';
 import { getOptimizedImageProps, getAdaptiveQuality } from '../../utils/imageOptimizer';
-import { trackSectionEvent, requestBackInStock, likeProduct, dislikeProduct } from '../../services/userPreferencesService';
+import {
+  trackSectionEvent,
+  requestBackInStock,
+  toggleLikeProduct,
+  toggleDislikeProduct,
+  isProductLiked,
+  isProductDisliked
+} from '../../services/userPreferencesService';
 
 // Tiny placeholder for blur-up effect (1x1 transparent pixel)
 const BLUR_PLACEHOLDER = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1 1"%3E%3Crect fill="%23f3f4f6" width="1" height="1"/%3E%3C/svg%3E';
@@ -34,6 +41,10 @@ export const EnhancedProductCard = ({
   const [imageError, setImageError] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
   const [notifySaved, setNotifySaved] = useState(false);
+  const [feedbackState, setFeedbackState] = useState(() => ({
+    liked: isProductLiked(product?.id),
+    disliked: isProductDisliked(product?.id)
+  }));
   const cardRef = useRef(null);
   const impressionRef = useRef(false);
 
@@ -88,6 +99,14 @@ export const EnhancedProductCard = ({
       trackSectionEvent(sectionId, 'impression', product?.id);
     }
   }, [sectionId, isVisible, product?.id]);
+
+  useEffect(() => {
+    if (!product?.id) return;
+    setFeedbackState({
+      liked: isProductLiked(product.id),
+      disliked: isProductDisliked(product.id)
+    });
+  }, [product?.id]);
 
   const handleQuickView = () => {
     if (sectionId) trackSectionEvent(sectionId, 'click', product?.id);
@@ -284,23 +303,31 @@ export const EnhancedProductCard = ({
               type="button"
               onClick={(e) => {
                 e.stopPropagation();
-                likeProduct(product.id);
+                setFeedbackState(toggleLikeProduct(product));
               }}
-              className="px-3 py-1.5 rounded-full text-xs font-semibold bg-green-50 text-green-700 border border-green-100 hover:bg-green-100 flex items-center gap-1"
+              className={`px-3 py-1.5 rounded-full text-xs font-semibold border flex items-center gap-1 transition-colors ${
+                feedbackState.liked
+                  ? 'bg-green-600 text-white border-green-600'
+                  : 'bg-green-50 text-green-700 border-green-100 hover:bg-green-100'
+              }`}
             >
               <ThumbsUp className="w-3.5 h-3.5" />
-              Tetszik
+              {feedbackState.liked ? 'Tetszik · mentve' : 'Tetszik'}
             </button>
             <button
               type="button"
               onClick={(e) => {
                 e.stopPropagation();
-                dislikeProduct(product.id);
+                setFeedbackState(toggleDislikeProduct(product));
               }}
-              className="px-3 py-1.5 rounded-full text-xs font-semibold bg-gray-50 text-gray-700 border border-gray-200 hover:bg-gray-100 flex items-center gap-1"
+              className={`px-3 py-1.5 rounded-full text-xs font-semibold border flex items-center gap-1 transition-colors ${
+                feedbackState.disliked
+                  ? 'bg-gray-900 text-white border-gray-900'
+                  : 'bg-gray-50 text-gray-700 border-gray-200 hover:bg-gray-100'
+              }`}
             >
               <ThumbsDown className="w-3.5 h-3.5" />
-              Nem tetszik
+              {feedbackState.disliked ? 'Nem tetszik · mentve' : 'Nem tetszik'}
             </button>
           </div>
         )}

@@ -43,21 +43,6 @@ export default function NewArrivalsSection({ products = [], onProductClick, onTo
     return sliceWrap(newArrivals, start, PAGE_SIZE);
   }, [newArrivals, page]);
 
-  const timeline = useMemo(() => {
-    const now = Date.now();
-    const days = Array.from({ length: 7 }).map((_, idx) => {
-      const day = new Date(now - (6 - idx) * 24 * 60 * 60 * 1000);
-      const label = day.toLocaleDateString('hu-HU', { month: 'short', day: 'numeric' });
-      return { label, start: new Date(day.setHours(0, 0, 0, 0)).getTime(), end: new Date(day.setHours(23, 59, 59, 999)).getTime(), count: 0 };
-    });
-    newArrivals.forEach((p) => {
-      const t = toTimestamp(p.updated_at || p.updatedAt || p.created_at || p.createdAt || p.last_synced_at);
-      const bucket = days.find((d) => t >= d.start && t <= d.end);
-      if (bucket) bucket.count += 1;
-    });
-    return days;
-  }, [newArrivals]);
-
   useEffect(() => {
     trackSectionEvent(SECTION_ID, 'section_impression');
   }, []);
@@ -123,26 +108,6 @@ export default function NewArrivalsSection({ products = [], onProductClick, onTo
             );
           })}
         </div>
-      <div className="mt-6 rounded-2xl border border-gray-100 bg-white p-4 shadow-sm">
-        <div className="flex items-center gap-2 text-xs font-semibold text-gray-500 mb-3">
-          <Sparkles className="w-4 h-4 text-primary-500" />
-          Újdonságok idővonala (7 nap)
-        </div>
-        <div className="grid grid-cols-7 gap-2">
-          {timeline.map((day) => (
-            <div key={day.label} className="flex flex-col items-center gap-2">
-              <div className="w-full h-16 rounded-xl bg-gray-100 flex items-end overflow-hidden">
-                <div
-                  className="w-full bg-primary-500/80"
-                  style={{ height: `${Math.min(100, day.count * 8)}%` }}
-                />
-              </div>
-              <span className="text-[11px] text-gray-500">{day.label}</span>
-              <span className="text-[11px] font-semibold text-gray-700">{day.count}</span>
-            </div>
-          ))}
-        </div>
-      </div>
         <div className="mt-5 flex flex-wrap items-center gap-2 text-xs text-gray-500">
           <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white border border-primary-100 text-primary-700 font-semibold">
             <Sparkles className="w-3.5 h-3.5" />

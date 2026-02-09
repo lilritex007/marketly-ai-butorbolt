@@ -4,7 +4,13 @@ import { motion, AnimatePresence } from 'framer-motion';
 import QuickAddToCart from './QuickAddToCart';
 import { PLACEHOLDER_IMAGE } from '../../utils/helpers';
 import { getOptimizedImageProps } from '../../utils/imageOptimizer';
-import { requestBackInStock } from '../../services/userPreferencesService';
+import {
+  requestBackInStock,
+  toggleLikeProduct,
+  toggleDislikeProduct,
+  isProductLiked,
+  isProductDisliked
+} from '../../services/userPreferencesService';
 
 /**
  * ProductQuickPeek - Hover/click modal for quick product preview
@@ -13,11 +19,19 @@ import { requestBackInStock } from '../../services/userPreferencesService';
 const ProductQuickPeek = ({ product, isOpen, onClose, onAddToCart }) => {
   const [imageLoaded, setImageLoaded] = useState(false);
   const [activeImage, setActiveImage] = useState(0);
+  const [feedbackState, setFeedbackState] = useState(() => ({
+    liked: isProductLiked(product?.id),
+    disliked: isProductDisliked(product?.id)
+  }));
 
   useEffect(() => {
     if (isOpen) {
       setImageLoaded(false);
       setActiveImage(0);
+      setFeedbackState({
+        liked: isProductLiked(product?.id),
+        disliked: isProductDisliked(product?.id)
+      });
       // Prevent body scroll
       document.body.style.overflow = 'hidden';
     } else {
@@ -217,6 +231,37 @@ const ProductQuickPeek = ({ product, isOpen, onClose, onAddToCart }) => {
                         className="p-3 border-2 border-gray-200 rounded-lg hover:border-primary-500 hover:text-primary-500 transition-colors"
                       >
                         <Share2 className="w-5 h-5" />
+                      </button>
+                    </div>
+
+                    <div className="flex gap-2">
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setFeedbackState(toggleLikeProduct(product));
+                        }}
+                        className={`px-3 py-2 rounded-full text-xs font-semibold border flex items-center gap-1 transition-colors ${
+                          feedbackState.liked
+                            ? 'bg-green-600 text-white border-green-600'
+                            : 'bg-green-50 text-green-700 border-green-100 hover:bg-green-100'
+                        }`}
+                      >
+                        Tetszik
+                      </button>
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setFeedbackState(toggleDislikeProduct(product));
+                        }}
+                        className={`px-3 py-2 rounded-full text-xs font-semibold border flex items-center gap-1 transition-colors ${
+                          feedbackState.disliked
+                            ? 'bg-gray-900 text-white border-gray-900'
+                            : 'bg-gray-50 text-gray-700 border-gray-200 hover:bg-gray-100'
+                        }`}
+                      >
+                        Nem tetszik
                       </button>
                     </div>
 

@@ -4,7 +4,7 @@ import {
   ChevronRight, Filter, Grid3X3, List, Star, Home,
   ArrowUpDown, SlidersHorizontal, X, Check, LayoutGrid,
   Rows3, Plus, GitCompare, ChevronDown, ChevronUp, BookOpen,
-  Clock, ShieldCheck, MapPin
+  ShieldCheck, MapPin
 } from 'lucide-react';
 import { getCategoryIcon } from '../ui/Icons';
 import { EnhancedProductCard } from '../product/EnhancedProductCard';
@@ -389,55 +389,6 @@ const CategoryStory = ({ category }) => {
   );
 };
 
-/**
- * Category Activity Timeline
- */
-const CategoryTimeline = ({ products = [] }) => {
-  const toTimestamp = (value) => {
-    if (!value) return 0;
-    const t = Date.parse(value);
-    return Number.isFinite(t) ? t : 0;
-  };
-
-  const days = useMemo(() => {
-    const now = Date.now();
-    const buckets = Array.from({ length: 7 }).map((_, idx) => {
-      const day = new Date(now - (6 - idx) * 24 * 60 * 60 * 1000);
-      const label = day.toLocaleDateString('hu-HU', { month: 'short', day: 'numeric' });
-      const start = new Date(day.setHours(0, 0, 0, 0)).getTime();
-      const end = new Date(day.setHours(23, 59, 59, 999)).getTime();
-      return { label, start, end, count: 0 };
-    });
-
-    products.forEach((p) => {
-      const t = toTimestamp(p.updated_at || p.updatedAt || p.created_at || p.createdAt || p.last_synced_at);
-      const bucket = buckets.find((b) => t >= b.start && t <= b.end);
-      if (bucket) bucket.count += 1;
-    });
-
-    return buckets;
-  }, [products]);
-
-  return (
-    <div className="bg-white rounded-2xl border border-gray-100 p-4 sm:p-6 mb-6">
-      <div className="flex items-center gap-2 mb-4">
-        <Clock className="w-5 h-5 text-primary-500" />
-        <h3 className="font-bold text-gray-900">Kategória idővonal (7 nap)</h3>
-      </div>
-      <div className="space-y-3">
-        {days.map((item) => (
-          <div key={item.label} className="flex gap-3 items-center">
-            <div className="w-20 text-xs font-semibold text-gray-500">{item.label}</div>
-            <div className="flex-1 text-sm text-gray-700">
-              {item.count > 0 ? `${item.count} frissített termék` : 'Nincs frissítés'}
-            </div>
-            <div className="text-xs font-semibold text-gray-400">{item.count}</div>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-};
 
 /**
  * Price Statistics Card
@@ -910,7 +861,6 @@ const CategoryPage = ({
         <FeaturedProducts products={products} onProductClick={onProductClick} onWishlistToggle={onWishlistToggle} wishlist={wishlist} />
         <RelatedCategories currentCategory={category} allCategories={allCategories} onCategoryChange={onCategoryChange} />
         <CategoryStory category={category} />
-        <CategoryTimeline products={products} />
         
         <div className="flex gap-8">
           <SidebarFilters

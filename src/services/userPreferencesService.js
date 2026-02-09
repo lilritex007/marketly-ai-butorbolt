@@ -15,6 +15,7 @@ const STORAGE_KEYS = {
   USER_PREFERENCES: 'mkt_user_preferences',
   RECO_TWEAKS: 'mkt_reco_tweaks',
   RECO_WEIGHTS: 'mkt_reco_weights',
+  RECO_SIGNALS: 'mkt_reco_signals',
   AB_TESTS: 'mkt_ab_tests',
   BACK_IN_STOCK: 'mkt_back_in_stock',
   SECTION_EVENTS: 'mkt_section_events',
@@ -43,6 +44,8 @@ const DEFAULT_RECO_WEIGHTS = {
   roomBoost: 10,
   stockBoost: 6,
   priceFit: 8,
+  signalCategoryBoost: 4,
+  signalKeywordBoost: 2,
 };
 
 const getJSONSafe = (key, fallback) => {
@@ -154,6 +157,116 @@ export function dislikeProduct(productId) {
   }
 }
 
+const SIGNAL_LIMITS = { min: -6, max: 12 };
+
+const stopWords = new Set([
+  'és', 'vagy', 'hogy', 'egy', 'egyik', 'mely', 'ami', 'az', 'a', 'de', 'is',
+  'való', 'valamint', 's', 'és', 'the', 'for', 'with'
+]);
+
+const clampSignal = (value) => Math.max(SIGNAL_LIMITS.min, Math.min(SIGNAL_LIMITS.max, value));
+
+const extractSignalTokens = (product) => {
+  const categories = String(product?.category || '')
+    .split('>')
+    .map((c) => c.trim().toLowerCase())
+    .filter(Boolean);
+  const text = `${product?.name || ''} ${product?.category || ''}`.toLowerCase();
+  const keywords = text
+    .split(/[\s,\-\/]+/)
+    .map((w) => w.trim())
+    .filter((w) => w.length > 3 && !stopWords.has(w))
+    .slice(0, 12);
+  return { categories, keywords };
+};
+
+export function getPreferenceSignals() {
+  return getJSONSafe(STORAGE_KEYS.RECO_SIGNALS, { categories: {}, keywords: {} });
+}
+
+const savePreferenceSignals = (signals) => {
+  try {
+    localStorage.setItem(STORAGE_KEYS.RECO_SIGNALS, JSON.stringify(signals));
+  } catch {}
+};
+
+const updatePreferenceSignals = (product, delta) => {
+  if (!product?.id) return;
+  const signals = getPreferenceSignals();
+  const { categories, keywords } = extractSignalTokens(product);
+  categories.forEach((cat) => {
+    const next = clampSignal((signals.categories?.[cat] || 0) + delta);
+    signals.categories = signals.categories || {};
+    signals.categories[cat] = next;
+  });
+  keywords.forEach((kw) => {
+    const next = clampSignal((signals.keywords?.[kw] || 0) + delta);
+    signals.keywords = signals.keywords || {};
+    signals.keywords[kw] = next;
+  });
+  savePreferenceSignals(signals);
+};
+
+export function likeProductWithSignals(product) {
+  if (!product?.id) return;
+  likeProduct(product.id);
+  updatePreferenceSignals(product, 2);
+}
+
+export function dislikeProductWithSignals(product) {
+  if (!product?.id) return;
+  dislikeProduct(product.id);
+  updatePreferenceSignals(product, -3);
+}
+
+export function toggleLikeProduct(product) {
+  if (!product?.id) return { liked: false, disliked: false };
+  const liked = getLikedProducts();
+  const disliked = getDislikedProducts();
+  const isLiked = liked.includes(product.id);
+  const isDisliked = disliked.includes(product.id);
+
+  if (isLiked) {
+    localStorage.setItem(STORAGE_KEYS.LIKED_PRODUCTS, JSON.stringify(liked.filter(id => id !== product.id)));
+    updatePreferenceSignals(product, -2);
+    return { liked: false, disliked: false };
+  }
+
+  const nextLiked = [product.id, ...liked].slice(0, MAX_ITEMS.LIKED);
+  localStorage.setItem(STORAGE_KEYS.LIKED_PRODUCTS, JSON.stringify(nextLiked));
+  updatePreferenceSignals(product, 2);
+
+  if (isDisliked) {
+    localStorage.setItem(STORAGE_KEYS.DISLIKED_PRODUCTS, JSON.stringify(disliked.filter(id => id !== product.id)));
+    updatePreferenceSignals(product, 3);
+  }
+  return { liked: true, disliked: false };
+}
+
+export function toggleDislikeProduct(product) {
+  if (!product?.id) return { liked: false, disliked: false };
+  const liked = getLikedProducts();
+  const disliked = getDislikedProducts();
+  const isLiked = liked.includes(product.id);
+  const isDisliked = disliked.includes(product.id);
+
+  if (isDisliked) {
+    localStorage.setItem(STORAGE_KEYS.DISLIKED_PRODUCTS, JSON.stringify(disliked.filter(id => id !== product.id)));
+    updatePreferenceSignals(product, 3);
+    return { liked: false, disliked: false };
+  }
+
+  const nextDisliked = [product.id, ...disliked].slice(0, MAX_ITEMS.LIKED);
+  localStorage.setItem(STORAGE_KEYS.DISLIKED_PRODUCTS, JSON.stringify(nextDisliked));
+  updatePreferenceSignals(product, -3);
+
+  if (isLiked) {
+    localStorage.setItem(STORAGE_KEYS.LIKED_PRODUCTS, JSON.stringify(liked.filter(id => id !== product.id)));
+    updatePreferenceSignals(product, -2);
+  }
+  return { liked: false, disliked: true };
+}
+
 export function getLikedProducts() {
   try {
     const data = localStorage.getItem(STORAGE_KEYS.LIKED_PRODUCTS);
@@ -174,6 +287,10 @@ export function getDislikedProducts() {
 
 export function isProductLiked(productId) {
   return getLikedProducts().includes(productId);
+}
+
+export function isProductDisliked(productId) {
+  return getDislikedProducts().includes(productId);
 }
 
 // ==================== BACK IN STOCK REQUESTS ====================
@@ -490,6 +607,7 @@ export function getPersonalizedRecommendations(allProducts, limit = 12) {
   const viewedIds = getRecentlyViewedIds();
   const likedIds = getLikedProducts();
   const dislikedIds = getDislikedProducts();
+  const signals = getPreferenceSignals();
   const topCategories = getTopCategories(5);
   const styleDNA = getStyleDNA();
   const tweaks = getRecommendationTweaks();
@@ -516,6 +634,26 @@ export function getPersonalizedRecommendations(allProducts, limit = 12) {
       if (productCategory.toLowerCase().includes(cat.toLowerCase())) {
         score += (5 - index) * weights.categoryBoost * 0.2;
       }
+    });
+
+    const categoryParts = productCategory
+      .split('>')
+      .map((c) => c.trim().toLowerCase())
+      .filter(Boolean);
+    categoryParts.forEach((cat) => {
+      const signal = signals.categories?.[cat];
+      if (signal) score += signal * weights.signalCategoryBoost;
+    });
+
+    const text = `${product.name || ''} ${product.category || ''}`.toLowerCase();
+    const words = text
+      .split(/[\s,\-\/]+/)
+      .map((w) => w.trim())
+      .filter((w) => w.length > 3 && !stopWords.has(w))
+      .slice(0, 12);
+    words.forEach((kw) => {
+      const signal = signals.keywords?.[kw];
+      if (signal) score += signal * weights.signalKeywordBoost;
     });
     
     // Style DNA alapú pontozás
