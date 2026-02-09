@@ -19,7 +19,7 @@ export default function InspirationSection({ onExplore, onCategorySelect }) {
       className="py-20 bg-white border-t border-gray-100"
       aria-labelledby="inspiration-heading"
     >
-      <div className="w-full max-w-8xl mx-auto px-4 sm:px-6 lg:px-16">
+      <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-16">
         <div className="text-center mb-12">
           <h2 id="inspiration-heading" className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 tracking-tight mb-3">
             Fedezd fel a stílusokat
@@ -28,7 +28,7 @@ export default function InspirationSection({ onExplore, onCategorySelect }) {
             Gondosan válogatott kollekciók
           </p>
         </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
           {COLLECTIONS.map((col) => (
             <button
               key={col.id}

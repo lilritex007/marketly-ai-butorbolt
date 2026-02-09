@@ -1207,9 +1207,27 @@
 /* BUTTON SYSTEM */
 #mkt-butorbolt-app .btn-primary {
   @apply px-8 py-4 min-h-[48px] bg-primary-500 text-white rounded-xl font-semibold text-base;
-  @apply shadow-md hover:shadow-primary-lg hover:bg-primary-600 hover:-translate-y-0.5;
+  @apply shadow-primary hover:shadow-primary-lg hover:bg-primary-600 hover:-translate-y-0.5;
   @apply active:scale-[0.98] transition-all duration-200;
   @apply focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-400 focus-visible:ring-offset-2;
+  letter-spacing: 0.01em;
+  position: relative;
+  overflow: hidden;
+}
+
+#mkt-butorbolt-app .btn-primary::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent);
+  transition: left 0.5s;
+}
+
+#mkt-butorbolt-app .btn-primary:hover::before {
+  left: 100%;
 }
 
 #mkt-butorbolt-app .btn-secondary {
@@ -1228,8 +1246,36 @@
 /* CARD SYSTEM */
 #mkt-butorbolt-app .card-product {
   @apply bg-white rounded-lg border border-gray-200 shadow-sm;
-  @apply hover:shadow-md hover:border-primary-200 hover:-translate-y-0.5;
+  @apply hover:shadow-lg hover:-translate-y-1;
   @apply transition-all duration-200;
+  position: relative;
+}
+
+#mkt-butorbolt-app .card-product::before {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border-radius: 0.5rem;
+  padding: 1px;
+  background: linear-gradient(135deg, #ff8a0033, #006b6f33);
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  opacity: 0;
+  transition: opacity 0.2s;
+  pointer-events: none;
+}
+
+#mkt-butorbolt-app .card-product:hover::before {
+  opacity: 1;
+}
+
+#mkt-butorbolt-app .card-product:hover img {
+  transform: scale(1.05);
+}
+
+#mkt-butorbolt-app .card-product img {
+  transition: transform 0.3s ease-out;
 }
 
 #mkt-butorbolt-app .card-feature {
@@ -1249,4 +1295,42 @@
 #mkt-butorbolt-app textarea:focus-visible,
 #mkt-butorbolt-app select:focus-visible {
   @apply outline-none ring-2 ring-primary-400 ring-offset-2;
+}
+
+/* SHIMMER LOADING EFFECT */
+@keyframes shimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+#mkt-butorbolt-app .skeleton {
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(90deg, #f3f4f6 25%, #fff7ed 50%, #f3f4f6 75%);
+  background-size: 200% 100%;
+  animation: shimmer 2s infinite ease-in-out;
+}
+
+#mkt-butorbolt-app .skeleton::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  background: linear-gradient(90deg, transparent, rgba(255, 138, 0, 0.1), transparent);
+  transform: translateX(-100%);
+  animation: shimmer 2s infinite;
+}
+
+/* BLUR-UP IMAGE LOADING */
+#mkt-butorbolt-app .blur-up {
+  filter: blur(10px);
+  transform: scale(1.1);
+  transition: filter 0.4s, transform 0.4s;
+}
+
+#mkt-butorbolt-app .blur-up.loaded {
+  filter: blur(0);
+  transform: scale(1);
 }

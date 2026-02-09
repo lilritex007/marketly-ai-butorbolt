@@ -52,7 +52,7 @@ export const SocialProof = () => {
 
   return (
     <section className="py-20 bg-gray-50 border-t border-gray-100" aria-labelledby="social-proof-heading">
-      <div className="w-full max-w-8xl mx-auto px-4 sm:px-6 lg:px-16">
+      <div className="w-full max-w-6xl mx-auto px-4 sm:px-6 lg:px-16">
         <div className="text-center mb-12">
           <div className="inline-flex items-center gap-2 mb-6 px-4 py-2 bg-white rounded-full shadow-sm">
             <Users className="w-5 h-5 text-primary-500" aria-hidden />
@@ -220,7 +220,7 @@ export const LiveShowcase = ({ products = [], onProductClick, rotationTick = 0 }
  */
 export const InteractiveCTA = ({ onGetStarted }) => {
   return (
-    <section className="py-20 bg-gradient-to-br from-primary-500 to-secondary-700 relative overflow-hidden">
+    <section className="py-24 bg-gradient-to-br from-primary-500 to-secondary-700 relative overflow-hidden">
       <div className="absolute inset-0 opacity-10" aria-hidden>
         <div className="absolute top-0 left-0 w-96 h-96 bg-white rounded-full filter blur-[120px] animate-blob motion-reduce:animate-none" />
         <div className="absolute bottom-0 right-0 w-96 h-96 bg-yellow-200 rounded-full filter blur-[120px] animate-blob animation-delay-2000 motion-reduce:animate-none" />

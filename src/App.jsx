@@ -290,7 +290,7 @@ const FileLoaderBar = ({ onFileLoad, onUnasRefresh, isLoadingUnas, lastUpdated, 
 
 const Features = () => (
     <section className="py-20 bg-gray-50 border-t border-gray-100" aria-labelledby="features-heading">
-        <div className="w-full max-w-8xl mx-auto px-4 sm:px-6 lg:px-16">
+        <div className="w-full max-w-6xl mx-auto px-4 sm:px-6 lg:px-16">
             <h2 id="features-heading" className="sr-only">Szolgáltatások</h2>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div className="flex items-center gap-4 p-6 rounded-xl bg-white border border-gray-200 shadow-sm hover:shadow-md hover:border-gray-300 hover:-translate-y-0.5 transition-all duration-200">
@@ -1354,8 +1354,8 @@ const App = () => {
             />
             
             {/* AI Szuper Funkciók – perfect cards */}
-            <section data-ai-features className="py-20 bg-gray-50 border-t border-gray-100">
-              <div className="w-full max-w-8xl mx-auto px-4 sm:px-6 lg:px-16">
+            <section data-ai-features className="py-16 bg-gray-50 border-t border-gray-100">
+              <div className="w-full max-w-6xl mx-auto px-4 sm:px-6 lg:px-16">
                 <div className="text-center mb-12">
                   <div className="inline-flex items-center gap-2 px-4 py-2 bg-white rounded-full shadow-sm mb-6">
                     <Bot className="w-5 h-5 text-primary-500" aria-hidden />

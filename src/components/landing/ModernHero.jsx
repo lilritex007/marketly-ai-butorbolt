@@ -3,6 +3,7 @@ import {
   Sparkles, Camera, Move3d, MessageCircle, ArrowRight,
   Package, Users, Star, Zap
 } from 'lucide-react';
+import { CountUp } from '../ui/CountUp';
 
 const HERO_REVEAL_DELAY = { badge: 0, line1: 100, line2: 220, line3: 340, sub: 460, cta: 600, stats: [720, 820, 920, 1020] };
 
@@ -34,7 +35,7 @@ export const ModernHero = ({ onExplore, onTryAI, quickCategories = [], onQuickCa
   }, []);
 
   const handlePointerMove = (e) => {
-    if (prefersReducedMotion) return;
+    if (prefersReducedMotion || window.innerWidth < 768) return; // Skip on mobile
     lastEventRef.current = e;
     if (rafRef.current) return;
     rafRef.current = requestAnimationFrame(() => {
@@ -42,8 +43,8 @@ export const ModernHero = ({ onExplore, onTryAI, quickCategories = [], onQuickCa
       const ev = lastEventRef.current;
       if (!ev || !heroRef.current) return;
       const rect = heroRef.current.getBoundingClientRect();
-      const x = (ev.clientX - rect.left) / rect.width;
-      const y = (ev.clientY - rect.top) / rect.height;
+      const x = ((ev.clientX - rect.left) / rect.width - 0.5) * 2; // -1 to 1
+      const y = ((ev.clientY - rect.top) / rect.height - 0.5) * 2; // -1 to 1
       setMousePosition({ x, y });
     });
   };
@@ -55,10 +56,10 @@ export const ModernHero = ({ onExplore, onTryAI, quickCategories = [], onQuickCa
   }, []);
 
   const stats = [
-    { icon: Package, value: '170K+', label: 'Termék' },
-    { icon: Users, value: '50K+', label: 'Elégedett vásárló' },
-    { icon: Star, value: '4.9/5', label: 'Értékelés' },
-    { icon: Zap, value: '24/7', label: 'AI támogatás' }
+    { icon: Package, value: 170, suffix: 'K+', label: 'Termék', decimals: 0 },
+    { icon: Users, value: 50, suffix: 'K+', label: 'Elégedett vásárló', decimals: 0 },
+    { icon: Star, value: 4.9, suffix: '/5', label: 'Értékelés', decimals: 1 },
+    { icon: Zap, value: 24, suffix: '/7', label: 'AI támogatás', decimals: 0 }
   ];
 
   return (
@@ -117,18 +118,18 @@ export const ModernHero = ({ onExplore, onTryAI, quickCategories = [], onQuickCa
 
           {/* Headline – egy üzenet, tökéletes hierarchia */}
           <h1 className="mb-10 sm:mb-12">
-            <span className={`block text-[2.5rem] sm:text-5xl lg:text-6xl xl:text-[4rem] font-bold tracking-tight text-gray-900 leading-[1.1] ${mounted ? 'hero-reveal' : 'opacity-0'}`} style={mounted ? { animationDelay: `${HERO_REVEAL_DELAY.line1}ms` } : undefined}>
+            <span className={`block text-[2.5rem] sm:text-5xl lg:text-6xl xl:text-[4rem] font-bold text-gray-900 leading-[1.08] ${mounted ? 'hero-reveal' : 'opacity-0'}`} style={mounted ? { animationDelay: `${HERO_REVEAL_DELAY.line1}ms`, letterSpacing: '-0.03em' } : { letterSpacing: '-0.03em' }}>
               Találd meg az ideális bútort
             </span>
             <span
-              className={`block text-[2.5rem] sm:text-5xl lg:text-6xl xl:text-[4rem] font-bold tracking-tight leading-[1.1] bg-gradient-to-r from-primary-500 via-secondary-600 to-primary-600 bg-clip-text text-transparent animate-gradient motion-reduce:animate-none ${mounted ? 'hero-reveal' : 'opacity-0'}`}
-              style={mounted ? { animationDelay: `${HERO_REVEAL_DELAY.line2}ms` } : undefined}
+              className={`block text-[2.5rem] sm:text-5xl lg:text-6xl xl:text-[4rem] font-bold leading-[1.08] bg-gradient-to-r from-primary-500 via-violet-600 to-secondary-600 bg-clip-text text-transparent animate-gradient motion-reduce:animate-none ${mounted ? 'hero-reveal' : 'opacity-0'}`}
+              style={mounted ? { animationDelay: `${HERO_REVEAL_DELAY.line2}ms`, letterSpacing: '-0.03em' } : { letterSpacing: '-0.03em' }}
             >
               AI segítséggel
             </span>
           </h1>
 
-          <p className={`text-lg sm:text-xl lg:text-2xl text-gray-500 max-w-2xl mx-auto mb-12 leading-relaxed ${mounted ? 'hero-reveal' : 'opacity-0'}`} style={mounted ? { animationDelay: `${HERO_REVEAL_DELAY.sub}ms` } : undefined}>
+          <p className={`text-lg sm:text-xl lg:text-2xl text-gray-500 max-w-2xl mx-auto mb-12 ${mounted ? 'hero-reveal' : 'opacity-0'}`} style={mounted ? { animationDelay: `${HERO_REVEAL_DELAY.sub}ms`, lineHeight: '1.6' } : { lineHeight: '1.6' }}>
             Fotózz, tervezz, vásárolj – minden egy helyen. Forradalmi technológia a tökéletes otthonért.
           </p>
 
@@ -181,7 +182,15 @@ export const ModernHero = ({ onExplore, onTryAI, quickCategories = [], onQuickCa
                 style={mounted ? { animationDelay: `${HERO_REVEAL_DELAY.stats[idx]}ms` } : undefined}
               >
                 <stat.icon className="w-8 h-8 text-primary-500 mx-auto mb-2" aria-hidden />
-                <div className="text-2xl font-bold text-gray-900">{stat.value}</div>
+                <div className="text-2xl font-bold text-gray-900">
+                  <CountUp 
+                    end={stat.value} 
+                    duration={2000} 
+                    suffix={stat.suffix} 
+                    decimals={stat.decimals}
+                    delay={HERO_REVEAL_DELAY.stats[idx] + 200}
+                  />
+                </div>
                 <div className="text-sm text-gray-500">{stat.label}</div>
               </div>
             ))}
