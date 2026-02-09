@@ -1,4 +1,4 @@
-import React, { useMemo, useState, useEffect } from 'react';
+import React, { useMemo, useState, useEffect, useRef } from 'react';
 import { Package, ArrowRight, RefreshCw, Sparkles } from 'lucide-react';
 import { EnhancedProductCard } from '../product/EnhancedProductCard';
 import { getStockLevel } from '../../utils/helpers';
@@ -24,8 +24,11 @@ const sliceWrap = (items, start, size) => {
   return [...first, ...rest];
 };
 
-export default function NewArrivalsSection({ products = [], onProductClick, onToggleWishlist, wishlist = [], onViewAll, onAddToCart, contextLabel = '' }) {
+export default function NewArrivalsSection({ products = [], onProductClick, onToggleWishlist, wishlist = [], onViewAll, onAddToCart, contextLabel = '', rotationTick = 0 }) {
   const [page, setPage] = useState(0);
+  const [isInteracting, setIsInteracting] = useState(false);
+  const [isInView, setIsInView] = useState(true);
+  const sectionRef = useRef(null);
   const newArrivals = useMemo(() => {
     if (!products.length) return [];
     const inStock = products.filter((p) => (p.inStock ?? p.in_stock ?? true));
@@ -48,10 +51,33 @@ export default function NewArrivalsSection({ products = [], onProductClick, onTo
     trackSectionEvent(SECTION_ID, 'section_impression');
   }, []);
 
+  useEffect(() => {
+    if (!rotationTick || isInView || isInteracting) return;
+    setPage((p) => p + 1);
+  }, [rotationTick, isInView, isInteracting]);
+
+  useEffect(() => {
+    if (typeof window === 'undefined' || !('IntersectionObserver' in window)) return;
+    if (!sectionRef.current || !(sectionRef.current instanceof Element)) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        setIsInView(entry.isIntersecting);
+      },
+      { threshold: 0.15 }
+    );
+    try {
+      observer.observe(sectionRef.current);
+    } catch (err) {
+      return;
+    }
+    return () => observer.disconnect();
+  }, []);
+
   if (visibleProducts.length === 0) return null;
 
   return (
     <section
+      ref={sectionRef}
       className="section-shell section-world section-world--new py-10 sm:py-12 lg:py-16"
       aria-labelledby="new-arrivals-heading"
       aria-label="Friss beérkezés"
@@ -92,7 +118,7 @@ export default function NewArrivalsSection({ products = [], onProductClick, onTo
               </>
             }
           />
-          <ProductCarousel className="mt-2">
+          <ProductCarousel className="mt-2" onInteractionChange={setIsInteracting}>
             {visibleProducts.map((product, index) => {
               const stockLevel = getStockLevel(product);
               const highlightBadge = stockLevel !== null && stockLevel <= 3 ? `Utolsó ${stockLevel} db` : '';

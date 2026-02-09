@@ -624,6 +624,7 @@ const App = () => {
   isLoadingMoreRef.current = isLoadingMore;
   const [wishlist, setWishlist] = useLocalStorage('mkt_wishlist', []);
   const [wishlistItems, setWishlistItems] = useState([]);
+  const [sectionRotateTick, setSectionRotateTick] = useState(0);
   const [searchQuery, setSearchQuery] = useState("");
   const searchQueryRef = useRef(searchQuery);
   searchQueryRef.current = searchQuery;
@@ -934,6 +935,13 @@ const App = () => {
       window.history.scrollRestoration = 'manual';
       window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
     }
+  }, []);
+
+  useEffect(() => {
+    const id = setInterval(() => {
+      setSectionRotateTick((t) => t + 1);
+    }, 30000);
+    return () => clearInterval(id);
   }, []);
 
 
@@ -1433,6 +1441,7 @@ const App = () => {
             <LiveShowcase 
               products={featuredBase} 
               onProductClick={handleProductView}
+              rotationTick={sectionRotateTick}
             />
             </FadeInOnScroll>
 
@@ -1450,6 +1459,7 @@ const App = () => {
                   onViewAll={scrollToProductsSection}
                   onAddToCart={handleAddToCart}
                   contextLabel={sectionContextLabel}
+                  rotationTick={sectionRotateTick}
                 />
               </FadeInOnScroll>
             )}
@@ -1464,6 +1474,7 @@ const App = () => {
                   onViewAll={scrollToProductsSection}
                   onAddToCart={handleAddToCart}
                   contextLabel={sectionContextLabel}
+                  rotationTick={sectionRotateTick}
                 />
               </FadeInOnScroll>
             )}

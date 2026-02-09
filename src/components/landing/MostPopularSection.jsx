@@ -1,4 +1,4 @@
-import React, { useMemo, useState, useEffect } from 'react';
+import React, { useMemo, useState, useEffect, useRef } from 'react';
 import { TrendingUp, ArrowRight, RefreshCw, Flame } from 'lucide-react';
 import { EnhancedProductCard } from '../product/EnhancedProductCard';
 import { getStockLevel } from '../../utils/helpers';
@@ -21,10 +21,13 @@ const sliceWrap = (items, start, size) => {
   return [...first, ...rest];
 };
 
-export default function MostPopularSection({ products = [], onProductClick, onToggleWishlist, wishlist = [], onViewAll, onAddToCart, contextLabel = '' }) {
+export default function MostPopularSection({ products = [], onProductClick, onToggleWishlist, wishlist = [], onViewAll, onAddToCart, contextLabel = '', rotationTick = 0 }) {
   const [page, setPage] = useState(0);
   const [period, setPeriod] = useState('weekly');
   const [autoRotate, setAutoRotate] = useState(true);
+  const [isInteracting, setIsInteracting] = useState(false);
+  const [isInView, setIsInView] = useState(true);
+  const sectionRef = useRef(null);
   const mostPopular = useMemo(() => {
     if (!products.length) return [];
     const inStock = products.filter((p) => (p.inStock ?? p.in_stock ?? true));
@@ -62,21 +65,44 @@ export default function MostPopularSection({ products = [], onProductClick, onTo
   const inStockCount = useMemo(() => mostPopular.length, [mostPopular]);
 
   useEffect(() => {
-    if (!autoRotate) return undefined;
+    if (!autoRotate || isInView || isInteracting) return undefined;
     const t = setInterval(() => {
       setPeriod((prev) => (prev === 'weekly' ? 'monthly' : 'weekly'));
     }, 8000);
     return () => clearInterval(t);
-  }, [autoRotate]);
+  }, [autoRotate, isInView, isInteracting]);
 
   useEffect(() => {
     trackSectionEvent(SECTION_ID, 'section_impression');
+  }, []);
+
+  useEffect(() => {
+    if (!rotationTick || isInView || isInteracting) return;
+    setPage((p) => p + 1);
+  }, [rotationTick, isInView, isInteracting]);
+
+  useEffect(() => {
+    if (typeof window === 'undefined' || !('IntersectionObserver' in window)) return;
+    if (!sectionRef.current || !(sectionRef.current instanceof Element)) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        setIsInView(entry.isIntersecting);
+      },
+      { threshold: 0.15 }
+    );
+    try {
+      observer.observe(sectionRef.current);
+    } catch (err) {
+      return;
+    }
+    return () => observer.disconnect();
   }, []);
 
   if (visibleProducts.length === 0) return null;
 
   return (
     <section
+      ref={sectionRef}
       className="section-shell section-world section-world--popular py-10 sm:py-12 lg:py-16"
       aria-labelledby="most-popular-heading"
       aria-label="Legnépszerűbb termékek"
@@ -143,7 +169,7 @@ export default function MostPopularSection({ products = [], onProductClick, onTo
               </>
             }
           />
-          <ProductCarousel className="mt-2">
+          <ProductCarousel className="mt-2" onInteractionChange={setIsInteracting}>
             {visibleProducts.map((product, index) => {
               const stockLevel = getStockLevel(product);
               const highlightBadge = stockLevel !== null && stockLevel <= 3 ? `Utolsó ${stockLevel} db` : '';

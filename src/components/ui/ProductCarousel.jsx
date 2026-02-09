@@ -15,10 +15,12 @@ const ProductCarousel = ({
   autoScroll = true,
   intervalMs = 6500,
   stepFraction = 0.9,
-  className = ''
+  className = '',
+  onInteractionChange
 }) => {
   const containerRef = useRef(null);
   const [paused, setPaused] = useState(false);
+  const interactionTimeoutRef = useRef(null);
 
   useEffect(() => {
     if (!autoScroll || paused) return undefined;
@@ -64,8 +66,31 @@ const ProductCarousel = ({
       </button>
       <div
         ref={containerRef}
-        onMouseEnter={() => setPaused(true)}
-        onMouseLeave={() => setPaused(false)}
+        onMouseEnter={() => {
+          setPaused(true);
+          onInteractionChange?.(true);
+        }}
+        onMouseLeave={() => {
+          setPaused(false);
+          onInteractionChange?.(false);
+        }}
+        onPointerDown={() => {
+          setPaused(true);
+          onInteractionChange?.(true);
+          if (interactionTimeoutRef.current) clearTimeout(interactionTimeoutRef.current);
+          interactionTimeoutRef.current = setTimeout(() => {
+            setPaused(false);
+            onInteractionChange?.(false);
+          }, 4000);
+        }}
+        onFocusCapture={() => {
+          setPaused(true);
+          onInteractionChange?.(true);
+        }}
+        onBlurCapture={() => {
+          setPaused(false);
+          onInteractionChange?.(false);
+        }}
         className="flex gap-4 overflow-x-auto scroll-smooth pb-3 snap-x snap-mandatory scrollbar-hide"
       >
         {React.Children.map(children, (child, index) => (

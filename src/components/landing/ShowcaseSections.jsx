@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { 
   Shield, Truck, Award, Clock, Heart, Star, 
   ArrowRight, Check, TrendingUp, Zap, Users,
@@ -112,8 +112,11 @@ export const SocialProof = () => {
  */
 const SECTION_ID = 'customer-favorites';
 
-export const LiveShowcase = ({ products = [], onProductClick }) => {
+export const LiveShowcase = ({ products = [], onProductClick, rotationTick = 0 }) => {
   const [seed, setSeed] = useState(0);
+  const [isInteracting, setIsInteracting] = useState(false);
+  const [isInView, setIsInView] = useState(true);
+  const sectionRef = useRef(null);
 
   // Randomize and select products on each render
   const showcaseProducts = React.useMemo(() => {
@@ -129,8 +132,31 @@ export const LiveShowcase = ({ products = [], onProductClick }) => {
     trackSectionEvent(SECTION_ID, 'section_impression');
   }, []);
 
+  useEffect(() => {
+    if (!rotationTick || isInView || isInteracting) return;
+    setSeed((v) => v + 1);
+  }, [rotationTick, isInView, isInteracting]);
+
+  useEffect(() => {
+    if (typeof window === 'undefined' || !('IntersectionObserver' in window)) return;
+    if (!sectionRef.current || !(sectionRef.current instanceof Element)) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        setIsInView(entry.isIntersecting);
+      },
+      { threshold: 0.15 }
+    );
+    try {
+      observer.observe(sectionRef.current);
+    } catch (err) {
+      return;
+    }
+    return () => observer.disconnect();
+  }, []);
+
   return (
     <div
+      ref={sectionRef}
       className="section-shell section-world section-world--favorites py-8 sm:py-10 lg:py-14 xl:py-16 overflow-hidden"
       role="region"
       aria-label="Vásárlóink kedvencei"
@@ -162,7 +188,7 @@ export const LiveShowcase = ({ products = [], onProductClick }) => {
             }
           />
           {showcaseProducts.length > 0 ? (
-            <ProductCarousel className="mt-2">
+            <ProductCarousel className="mt-2" onInteractionChange={setIsInteracting}>
               {showcaseProducts.map((product, index) => {
                 const stockLevel = getStockLevel(product);
                 const highlightBadge = stockLevel !== null && stockLevel <= 3 ? `Utolsó ${stockLevel} db` : '';
