@@ -3,7 +3,8 @@ import {
   ArrowLeft, TrendingUp, Package, Tag, Sparkles, 
   ChevronRight, Filter, Grid3X3, List, Star, Home,
   ArrowUpDown, SlidersHorizontal, X, Check, LayoutGrid,
-  Rows3, Plus, GitCompare, ChevronDown, ChevronUp
+  Rows3, Plus, GitCompare, ChevronDown, ChevronUp, BookOpen,
+  Clock, ShieldCheck, MapPin
 } from 'lucide-react';
 import { getCategoryIcon } from '../ui/Icons';
 import { EnhancedProductCard } from '../product/EnhancedProductCard';
@@ -132,12 +133,12 @@ const SidebarFilters = ({
 }) => {
   // Extract unique values from products
   const filterOptions = useMemo(() => {
-    const brands = new Set();
-    const colors = new Set();
+    const brands = new Map();
+    const colors = new Map();
     
     products.forEach(p => {
-      if (p.brand) brands.add(p.brand);
-      if (p.color) colors.add(p.color);
+      if (p.brand) brands.set(p.brand, (brands.get(p.brand) || 0) + 1);
+      if (p.color) colors.set(p.color, (colors.get(p.color) || 0) + 1);
     });
     
     const prices = products.map(p => p.salePrice || p.price).filter(p => p > 0);
@@ -145,12 +146,41 @@ const SidebarFilters = ({
     const maxPrice = Math.max(...prices) || 1000000;
     
     return {
-      brands: Array.from(brands).sort(),
-      colors: Array.from(colors).sort(),
+      brands: Array.from(brands.entries()).sort((a, b) => b[1] - a[1]),
+      colors: Array.from(colors.entries()).sort((a, b) => b[1] - a[1]),
       priceMin: minPrice,
       priceMax: maxPrice
     };
   }, [products]);
+
+  const previewCounts = useMemo(() => {
+    const brandCounts = new Map();
+    const colorCounts = new Map();
+    let inStock = 0;
+
+    products.forEach((p) => {
+      const price = p.salePrice || p.price || 0;
+      if (price < priceRange[0] || price > priceRange[1]) return;
+
+      const isInStock = p.inStock ?? p.in_stock ?? true;
+      const brandOk = !filters.brands?.length || filters.brands.includes(p.brand);
+      const colorOk = !filters.colors?.length || filters.colors.includes(p.color);
+
+      if (brandOk && colorOk && isInStock) inStock += 1;
+
+      const baseForBrand = (filters.inStockOnly ? isInStock : true) && colorOk;
+      if (baseForBrand && p.brand) {
+        brandCounts.set(p.brand, (brandCounts.get(p.brand) || 0) + 1);
+      }
+
+      const baseForColor = (filters.inStockOnly ? isInStock : true) && brandOk;
+      if (baseForColor && p.color) {
+        colorCounts.set(p.color, (colorCounts.get(p.color) || 0) + 1);
+      }
+    });
+
+    return { brands: brandCounts, colors: colorCounts, inStock };
+  }, [products, filters, priceRange]);
 
   const toggleFilter = (type, value) => {
     const current = filters[type] || [];
@@ -167,8 +197,15 @@ const SidebarFilters = ({
         {title}
       </h4>
       <div className="space-y-2 max-h-40 overflow-y-auto">
-        {items.map(item => (
-          <label key={item} className="flex items-center gap-2 cursor-pointer group">
+        {items.map(([item, count]) => {
+          const preview = type === 'brands'
+            ? previewCounts.brands.get(item)
+            : type === 'colors'
+              ? previewCounts.colors.get(item)
+              : count;
+          return (
+          <label key={item} className="flex items-center justify-between gap-2 cursor-pointer group">
+            <div className="flex items-center gap-2">
             <input
               type="checkbox"
               checked={(filters[type] || []).includes(item)}
@@ -176,8 +213,10 @@ const SidebarFilters = ({
               className="w-4 h-4 rounded border-gray-300 text-primary-500 focus:ring-primary-500"
             />
             <span className="text-sm text-gray-600 group-hover:text-gray-900">{item}</span>
+            </div>
+            <span className="text-xs text-gray-400">{preview ?? count}</span>
           </label>
-        ))}
+        )})}
       </div>
     </div>
   );
@@ -230,7 +269,7 @@ const SidebarFilters = ({
             onChange={() => onFilterChange({ ...filters, inStockOnly: !filters.inStockOnly })}
             className="w-4 h-4 rounded border-gray-300 text-primary-500 focus:ring-primary-500"
           />
-          <span className="text-sm text-gray-700">Csak készleten</span>
+          <span className="text-sm text-gray-700">Csak készleten ({previewCounts.inStock})</span>
         </label>
       </div>
 
@@ -304,6 +343,97 @@ const RelatedCategories = ({ currentCategory, allCategories, onCategoryChange })
             </button>
           );
         })}
+      </div>
+    </div>
+  );
+};
+
+/**
+ * Category Story Blocks
+ */
+const CategoryStory = ({ category }) => {
+  const base = category || 'Kategória';
+  const blocks = [
+    {
+      title: `${base} történet`,
+      text: 'Válogatott anyagok, tartós szerkezet, időtálló forma.',
+      icon: BookOpen
+    },
+    {
+      title: 'Anyag és komfort',
+      text: 'Lélegző szövetek, masszív fa/fém váz, kényelmes használat.',
+      icon: ShieldCheck
+    },
+    {
+      title: 'Elhelyezés',
+      text: 'Nappali, háló vagy iroda? Segítünk az ideális méret kiválasztásában.',
+      icon: MapPin
+    }
+  ];
+
+  return (
+    <div className="grid gap-4 sm:gap-6 sm:grid-cols-2 lg:grid-cols-3 mb-6">
+      {blocks.map((block) => {
+        const Icon = block.icon;
+        return (
+          <div key={block.title} className="bg-white rounded-2xl border border-gray-100 p-4 sm:p-5 shadow-sm">
+            <div className="w-10 h-10 rounded-xl bg-primary-50 text-primary-600 flex items-center justify-center mb-3">
+              <Icon className="w-5 h-5" />
+            </div>
+            <h3 className="font-bold text-gray-900 mb-1.5">{block.title}</h3>
+            <p className="text-sm text-gray-600">{block.text}</p>
+          </div>
+        );
+      })}
+    </div>
+  );
+};
+
+/**
+ * Category Activity Timeline
+ */
+const CategoryTimeline = ({ products = [] }) => {
+  const toTimestamp = (value) => {
+    if (!value) return 0;
+    const t = Date.parse(value);
+    return Number.isFinite(t) ? t : 0;
+  };
+
+  const days = useMemo(() => {
+    const now = Date.now();
+    const buckets = Array.from({ length: 7 }).map((_, idx) => {
+      const day = new Date(now - (6 - idx) * 24 * 60 * 60 * 1000);
+      const label = day.toLocaleDateString('hu-HU', { month: 'short', day: 'numeric' });
+      const start = new Date(day.setHours(0, 0, 0, 0)).getTime();
+      const end = new Date(day.setHours(23, 59, 59, 999)).getTime();
+      return { label, start, end, count: 0 };
+    });
+
+    products.forEach((p) => {
+      const t = toTimestamp(p.updated_at || p.updatedAt || p.created_at || p.createdAt || p.last_synced_at);
+      const bucket = buckets.find((b) => t >= b.start && t <= b.end);
+      if (bucket) bucket.count += 1;
+    });
+
+    return buckets;
+  }, [products]);
+
+  return (
+    <div className="bg-white rounded-2xl border border-gray-100 p-4 sm:p-6 mb-6">
+      <div className="flex items-center gap-2 mb-4">
+        <Clock className="w-5 h-5 text-primary-500" />
+        <h3 className="font-bold text-gray-900">Kategória idővonal (7 nap)</h3>
+      </div>
+      <div className="space-y-3">
+        {days.map((item) => (
+          <div key={item.label} className="flex gap-3 items-center">
+            <div className="w-20 text-xs font-semibold text-gray-500">{item.label}</div>
+            <div className="flex-1 text-sm text-gray-700">
+              {item.count > 0 ? `${item.count} frissített termék` : 'Nincs frissítés'}
+            </div>
+            <div className="text-xs font-semibold text-gray-400">{item.count}</div>
+          </div>
+        ))}
       </div>
     </div>
   );
@@ -572,6 +702,7 @@ const CategoryPage = ({
   const [presetName, setPresetName] = useState('');
   const [savedPresets, setSavedPresets] = useState([]);
   const loadMoreRef = useRef(null);
+  const scrollKey = `mkt_category_scroll_${category}`;
   
   const theme = getCategoryTheme(category);
   const likedIds = useMemo(() => getLikedProducts(), []);
@@ -585,6 +716,30 @@ const CategoryPage = ({
       setSavedPresets([]);
     }
   }, [category]);
+
+  useEffect(() => {
+    const saved = sessionStorage.getItem(scrollKey);
+    if (saved) {
+      const y = parseInt(saved, 10);
+      if (Number.isFinite(y)) {
+        requestAnimationFrame(() => window.scrollTo({ top: y, behavior: 'auto' }));
+      }
+    }
+  }, [scrollKey]);
+
+  useEffect(() => {
+    let ticking = false;
+    const onScroll = () => {
+      if (ticking) return;
+      ticking = true;
+      requestAnimationFrame(() => {
+        sessionStorage.setItem(scrollKey, String(window.scrollY || 0));
+        ticking = false;
+      });
+    };
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, [scrollKey]);
 
   const savePreset = () => {
     const name = presetName.trim();
@@ -632,6 +787,14 @@ const CategoryPage = ({
       return;
     }
   };
+
+  const quickCounts = useMemo(() => {
+    const inStock = products.filter((p) => (p.inStock ?? p.in_stock ?? true)).length;
+    const under100 = products.filter((p) => (p.salePrice || p.price) <= 100000).length;
+    const premium = products.filter((p) => (p.salePrice || p.price) >= 250000).length;
+    const discount = products.filter((p) => p.salePrice && p.price > p.salePrice).length;
+    return { inStock, under100, premium, discount };
+  }, [products]);
   
   // Initialize price range from products
   useEffect(() => {
@@ -746,6 +909,8 @@ const CategoryPage = ({
         <PriceStats products={products} stats={stats} />
         <FeaturedProducts products={products} onProductClick={onProductClick} onWishlistToggle={onWishlistToggle} wishlist={wishlist} />
         <RelatedCategories currentCategory={category} allCategories={allCategories} onCategoryChange={onCategoryChange} />
+        <CategoryStory category={category} />
+        <CategoryTimeline products={products} />
         
         <div className="flex gap-8">
           <SidebarFilters
@@ -762,10 +927,10 @@ const CategoryPage = ({
             <div className="mb-4 rounded-2xl border border-gray-100 bg-white p-4 shadow-sm">
               <div className="flex flex-wrap items-center gap-2 mb-3">
                 <span className="text-xs font-semibold text-gray-500">Gyors szűrők:</span>
-                <button onClick={() => quickApply('in-stock')} className="px-3 py-1.5 rounded-full text-xs font-semibold border border-gray-200 hover:bg-gray-50">Készleten</button>
-                <button onClick={() => quickApply('under-100')} className="px-3 py-1.5 rounded-full text-xs font-semibold border border-gray-200 hover:bg-gray-50">100k alatt</button>
-                <button onClick={() => quickApply('premium')} className="px-3 py-1.5 rounded-full text-xs font-semibold border border-gray-200 hover:bg-gray-50">Prémium</button>
-                <button onClick={() => quickApply('discount')} className="px-3 py-1.5 rounded-full text-xs font-semibold border border-gray-200 hover:bg-gray-50">Akciók</button>
+                <button onClick={() => quickApply('in-stock')} className="px-3 py-1.5 rounded-full text-xs font-semibold border border-gray-200 hover:bg-gray-50">Készleten ({quickCounts.inStock})</button>
+                <button onClick={() => quickApply('under-100')} className="px-3 py-1.5 rounded-full text-xs font-semibold border border-gray-200 hover:bg-gray-50">100k alatt ({quickCounts.under100})</button>
+                <button onClick={() => quickApply('premium')} className="px-3 py-1.5 rounded-full text-xs font-semibold border border-gray-200 hover:bg-gray-50">Prémium ({quickCounts.premium})</button>
+                <button onClick={() => quickApply('discount')} className="px-3 py-1.5 rounded-full text-xs font-semibold border border-gray-200 hover:bg-gray-50">Akciók ({quickCounts.discount})</button>
               </div>
               <div className="flex flex-wrap items-center gap-2">
                 <input
@@ -808,6 +973,7 @@ const CategoryPage = ({
                     onToggleWishlist={onWishlistToggle}
                     isWishlisted={wishlist?.includes(product.id)}
                     index={index}
+                    sectionId={`category-${category}`}
                   />
                 ))}
               </div>

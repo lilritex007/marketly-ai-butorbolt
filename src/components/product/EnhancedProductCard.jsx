@@ -1,7 +1,9 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Heart, Eye, ShoppingBag, Info } from 'lucide-react';
+import { Heart, Eye, ShoppingBag, Info, ThumbsUp, ThumbsDown, Bell } from 'lucide-react';
 import { formatPrice } from '../../utils/helpers';
 import { SmartBadges, StockBadge } from '../ui/Badge';
+import { getOptimizedImageProps, getAdaptiveQuality } from '../../utils/imageOptimizer';
+import { trackSectionEvent, requestBackInStock, likeProduct, dislikeProduct } from '../../services/userPreferencesService';
 
 // Tiny placeholder for blur-up effect (1x1 transparent pixel)
 const BLUR_PLACEHOLDER = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1 1"%3E%3Crect fill="%23f3f4f6" width="1" height="1"/%3E%3C/svg%3E';
@@ -23,13 +25,17 @@ export const EnhancedProductCard = ({
   onAddToCart,
   index = 0,
   highlightBadge,
-  recommendationReasons = []
+  recommendationReasons = [],
+  sectionId,
+  showFeedback = false
 }) => {
   const [isHovered, setIsHovered] = useState(false);
   const [imageLoaded, setImageLoaded] = useState(false);
   const [imageError, setImageError] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
+  const [notifySaved, setNotifySaved] = useState(false);
   const cardRef = useRef(null);
+  const impressionRef = useRef(false);
 
   const images = product.images || [];
   const mainImage = images[0] || PLACEHOLDER_IMAGE;
@@ -43,6 +49,7 @@ export const EnhancedProductCard = ({
   const reasonsText = recommendationReasons && recommendationReasons.length > 0
     ? recommendationReasons.slice(0, 2).join(' • ')
     : '';
+  const optimizedProps = getOptimizedImageProps(mainImage, product.name, { responsive: true, lazy: false, quality: getAdaptiveQuality() });
 
   // Intersection Observer for scroll animation - optimized
   useEffect(() => {
@@ -74,6 +81,25 @@ export const EnhancedProductCard = ({
     }
     return () => observer.disconnect();
   }, [index]);
+
+  useEffect(() => {
+    if (sectionId && isVisible && !impressionRef.current) {
+      impressionRef.current = true;
+      trackSectionEvent(sectionId, 'impression', product?.id);
+    }
+  }, [sectionId, isVisible, product?.id]);
+
+  const handleQuickView = () => {
+    if (sectionId) trackSectionEvent(sectionId, 'click', product?.id);
+    onQuickView?.(product);
+  };
+
+  const handleNotify = (e) => {
+    e.stopPropagation();
+    requestBackInStock(product);
+    setNotifySaved(true);
+    setTimeout(() => setNotifySaved(false), 2000);
+  };
 
   return (
     <article 
@@ -141,7 +167,7 @@ export const EnhancedProductCard = ({
 
       {/* Image Section - FILL the space */}
       <div 
-        onClick={() => onQuickView?.(product)} 
+        onClick={handleQuickView} 
         className="relative aspect-square overflow-hidden bg-gray-50 cursor-pointer"
       >
         {/* Simple placeholder */}
@@ -151,7 +177,7 @@ export const EnhancedProductCard = ({
         
         {/* Actual image */}
         <img 
-          src={imageError ? PLACEHOLDER_IMAGE : mainImage}
+          src={imageError ? PLACEHOLDER_IMAGE : (optimizedProps.src || mainImage)}
           alt={product.name} 
           className={`
             w-full h-full object-contain p-3 sm:p-4 lg:p-5
@@ -159,6 +185,8 @@ export const EnhancedProductCard = ({
             ${imageLoaded ? 'opacity-100' : 'opacity-0'}
           `}
           style={{ transform: 'translateZ(0)' }}
+          srcSet={optimizedProps.srcSet}
+          sizes={optimizedProps.sizes}
           loading="lazy"
           decoding="async"
           onLoad={() => setImageLoaded(true)}
@@ -167,9 +195,19 @@ export const EnhancedProductCard = ({
 
         {!inStock && (
           <div className="absolute inset-0 bg-white/70 backdrop-blur-[1px] flex items-center justify-center">
-            <span className="px-3 py-1.5 rounded-full bg-gray-900 text-white text-xs font-bold tracking-wide">
-              Elfogyott
-            </span>
+            <div className="flex flex-col items-center gap-2">
+              <span className="px-3 py-1.5 rounded-full bg-gray-900 text-white text-xs font-bold tracking-wide">
+                Elfogyott
+              </span>
+              <button
+                type="button"
+                onClick={handleNotify}
+                className="px-3 py-1.5 rounded-full bg-white text-gray-800 text-xs font-semibold border border-gray-200 hover:bg-gray-50 flex items-center gap-1"
+              >
+                <Bell className="w-3.5 h-3.5" />
+                {notifySaved ? 'Elmentve' : 'Értesítést kérek'}
+              </button>
+            </div>
           </div>
         )}
         
@@ -205,7 +243,7 @@ export const EnhancedProductCard = ({
         
         {/* Product Name - body to large (16-20px) */}
         <h3 
-          onClick={() => onQuickView?.(product)} 
+          onClick={handleQuickView} 
           className="text-base sm:text-lg lg:text-xl font-bold text-gray-900 line-clamp-2 leading-snug cursor-pointer hover:text-primary-600 transition-colors mb-3" 
           title={product.name}
         >
@@ -230,7 +268,7 @@ export const EnhancedProductCard = ({
             <button 
               onClick={(e) => { 
                 e.stopPropagation(); 
-                onQuickView?.(product); 
+                handleQuickView(); 
               }} 
               className="shrink-0 w-11 h-11 sm:w-12 sm:h-12 lg:w-14 lg:h-14 flex items-center justify-center bg-primary-500 text-white rounded-xl hover:bg-primary-600 transition-all tap-scale focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-400 focus-visible:ring-offset-2"
               aria-label="Részletek"
@@ -239,6 +277,33 @@ export const EnhancedProductCard = ({
             </button>
           </div>
         </div>
+
+        {showFeedback && (
+          <div className="mt-3 flex items-center gap-2">
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                likeProduct(product.id);
+              }}
+              className="px-3 py-1.5 rounded-full text-xs font-semibold bg-green-50 text-green-700 border border-green-100 hover:bg-green-100 flex items-center gap-1"
+            >
+              <ThumbsUp className="w-3.5 h-3.5" />
+              Tetszik
+            </button>
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                dislikeProduct(product.id);
+              }}
+              className="px-3 py-1.5 rounded-full text-xs font-semibold bg-gray-50 text-gray-700 border border-gray-200 hover:bg-gray-100 flex items-center gap-1"
+            >
+              <ThumbsDown className="w-3.5 h-3.5" />
+              Nem tetszik
+            </button>
+          </div>
+        )}
       </div>
     </article>
   );

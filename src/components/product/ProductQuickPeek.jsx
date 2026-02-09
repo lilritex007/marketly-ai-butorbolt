@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { X, ShoppingCart, Heart, Share2, ExternalLink, Sparkles } from 'lucide-react';
+import { X, ShoppingCart, Heart, Share2, ExternalLink, Sparkles, Bell } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import QuickAddToCart from './QuickAddToCart';
 import { PLACEHOLDER_IMAGE } from '../../utils/helpers';
+import { getOptimizedImageProps } from '../../utils/imageOptimizer';
+import { requestBackInStock } from '../../services/userPreferencesService';
 
 /**
  * ProductQuickPeek - Hover/click modal for quick product preview
@@ -41,6 +43,7 @@ const ProductQuickPeek = ({ product, isOpen, onClose, onAddToCart }) => {
   const images = Array.isArray(product.images) && product.images.length > 0
     ? product.images
     : product.image ? [product.image] : [];
+  const imageProps = getOptimizedImageProps(images[activeImage] || product.image || PLACEHOLDER_IMAGE, product.name, { responsive: true, lazy: false });
   
   return (
     <AnimatePresence>
@@ -89,7 +92,7 @@ const ProductQuickPeek = ({ product, isOpen, onClose, onAddToCart }) => {
                   <div className="space-y-4">
                     <div className="relative aspect-square bg-gray-100 rounded-xl overflow-hidden group">
                       <img
-                        src={images[activeImage] || product.image || PLACEHOLDER_IMAGE}
+                        src={imageProps.src || (images[activeImage] || product.image || PLACEHOLDER_IMAGE)}
                         alt={product.name}
                         onLoad={() => setImageLoaded(true)}
                         className={`
@@ -97,6 +100,8 @@ const ProductQuickPeek = ({ product, isOpen, onClose, onAddToCart }) => {
                           transition-all duration-300
                           ${imageLoaded ? 'opacity-100 scale-100' : 'opacity-0 scale-105'}
                         `}
+                        srcSet={imageProps.srcSet}
+                        sizes={imageProps.sizes}
                       />
                       
                       {!imageLoaded && (
@@ -177,11 +182,22 @@ const ProductQuickPeek = ({ product, isOpen, onClose, onAddToCart }) => {
 
                     {/* Actions */}
                     <div className="flex gap-3 mt-auto">
-                      <QuickAddToCart
-                        product={product}
-                        onAdd={onAddToCart}
-                        className="flex-1"
-                      />
+                      {(product.inStock ?? product.in_stock) ? (
+                        <QuickAddToCart
+                          product={product}
+                          onAdd={onAddToCart}
+                          className="flex-1"
+                        />
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={() => requestBackInStock(product)}
+                          className="flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-lg border-2 border-gray-200 text-gray-700 font-semibold hover:bg-gray-50"
+                        >
+                          <Bell className="w-4 h-4" />
+                          Értesítést kérek
+                        </button>
+                      )}
                       
                       <button
                         onClick={(e) => {

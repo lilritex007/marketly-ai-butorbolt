@@ -3,12 +3,13 @@ import { TrendingUp, ArrowRight, RefreshCw, Flame } from 'lucide-react';
 import { EnhancedProductCard } from '../product/EnhancedProductCard';
 import { getStockLevel } from '../../utils/helpers';
 import SectionHeader from './SectionHeader';
-import { getLikedProducts, getViewedProducts } from '../../services/userPreferencesService';
+import { getLikedProducts, getViewedProducts, trackSectionEvent } from '../../services/userPreferencesService';
 
 /**
  * Legnépszerűbb – valós adat: akciós termékek (nagy kedvezmény) + többi ár szerint, max 8.
  */
 const PAGE_SIZE = 12;
+const SECTION_ID = 'most-popular';
 
 const sliceWrap = (items, start, size) => {
   if (items.length <= size) return items;
@@ -66,6 +67,10 @@ export default function MostPopularSection({ products = [], onProductClick, onTo
     }, 8000);
     return () => clearInterval(t);
   }, [autoRotate]);
+
+  useEffect(() => {
+    trackSectionEvent(SECTION_ID, 'section_impression');
+  }, []);
 
   if (visibleProducts.length === 0) return null;
 
@@ -148,6 +153,8 @@ export default function MostPopularSection({ products = [], onProductClick, onTo
               onAddToCart={onAddToCart || (() => {})}
               index={index}
               highlightBadge={highlightBadge}
+              sectionId="most-popular"
+              showFeedback
             />
           )})}
         </div>

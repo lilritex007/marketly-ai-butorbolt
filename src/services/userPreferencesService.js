@@ -16,6 +16,8 @@ const STORAGE_KEYS = {
   RECO_TWEAKS: 'mkt_reco_tweaks',
   RECO_WEIGHTS: 'mkt_reco_weights',
   AB_TESTS: 'mkt_ab_tests',
+  BACK_IN_STOCK: 'mkt_back_in_stock',
+  SECTION_EVENTS: 'mkt_section_events',
 };
 
 const MAX_ITEMS = {
@@ -24,6 +26,8 @@ const MAX_ITEMS = {
   SEARCHES: 20,
   FEEDBACK: 100,
 };
+
+const MAX_BACK_IN_STOCK = 100;
 
 const DEFAULT_RECO_TWEAKS = {
   avoidStyles: [],
@@ -170,6 +174,61 @@ export function getDislikedProducts() {
 
 export function isProductLiked(productId) {
   return getLikedProducts().includes(productId);
+}
+
+// ==================== BACK IN STOCK REQUESTS ====================
+
+export function requestBackInStock(product) {
+  if (!product?.id) return;
+  const list = getBackInStockRequests();
+  const filtered = list.filter((p) => p.id !== product.id);
+  const next = [
+    {
+      id: product.id,
+      name: product.name,
+      image: product.images?.[0] || product.image,
+      requestedAt: Date.now()
+    },
+    ...filtered
+  ].slice(0, MAX_BACK_IN_STOCK);
+  try {
+    localStorage.setItem(STORAGE_KEYS.BACK_IN_STOCK, JSON.stringify(next));
+  } catch (e) {
+    console.warn('Failed to save back-in-stock request:', e);
+  }
+}
+
+export function getBackInStockRequests(limit = 50) {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEYS.BACK_IN_STOCK);
+    const list = raw ? JSON.parse(raw) : [];
+    return limit ? list.slice(0, limit) : list;
+  } catch {
+    return [];
+  }
+}
+
+// ==================== SECTION EVENTS (CTR) ====================
+
+export function trackSectionEvent(sectionId, type = 'impression', productId = null) {
+  if (!sectionId) return;
+  const data = getJSONSafe(STORAGE_KEYS.SECTION_EVENTS, {});
+  const entry = data[sectionId] || { impressions: 0, clicks: 0, lastEventAt: 0, products: {} };
+  if (type === 'click') entry.clicks += 1;
+  else entry.impressions += 1;
+  entry.lastEventAt = Date.now();
+  if (productId) {
+    entry.products[productId] = (entry.products[productId] || 0) + 1;
+  }
+  data[sectionId] = entry;
+  try {
+    localStorage.setItem(STORAGE_KEYS.SECTION_EVENTS, JSON.stringify(data));
+  } catch {}
+}
+
+export function getSectionStats(sectionId) {
+  const data = getJSONSafe(STORAGE_KEYS.SECTION_EVENTS, {});
+  return data[sectionId] || { impressions: 0, clicks: 0, lastEventAt: 0, products: {} };
 }
 
 // ==================== SEARCH HISTORY ====================
@@ -609,5 +668,9 @@ export default {
   getPersonalizedContext,
   getPersonalizedRecommendations,
   getSimilarProducts,
+  requestBackInStock,
+  getBackInStockRequests,
+  trackSectionEvent,
+  getSectionStats,
   clearAllData,
 };

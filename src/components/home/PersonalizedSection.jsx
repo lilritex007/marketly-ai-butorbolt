@@ -11,7 +11,8 @@ import {
   setRecommendationTweaks,
   resetRecommendationTweaks,
   getABVariant,
-  trackABEvent
+  trackABEvent,
+  trackSectionEvent
 } from '../../services/userPreferencesService';
 import SectionHeader from '../landing/SectionHeader';
 import { EnhancedProductCard } from '../product/EnhancedProductCard';
@@ -41,6 +42,10 @@ const PersonalizedSection = ({
   const styleDNA = useMemo(() => getStyleDNA(), []);
   const topCategories = useMemo(() => getTopCategories(6), []);
   const searchHistory = useMemo(() => getSearchHistory(6), []);
+
+  useEffect(() => {
+    trackSectionEvent(`personalized-${activeTab}`, 'section_impression');
+  }, [activeTab]);
   
   // Személyre szabott ajánlások
   const forYouProducts = useMemo(() => {
@@ -184,6 +189,33 @@ const PersonalizedSection = ({
     { id: 'dining', label: 'Étkező', keywords: ['étkező', 'asztal', 'szék'] },
     { id: 'office', label: 'Iroda', keywords: ['íróasztal', 'iroda', 'forgószék'] },
   ];
+
+  const focusCounts = useMemo(() => {
+    const counts = {
+      categories: new Map(),
+      styles: new Map(),
+      rooms: new Map()
+    };
+    currentProductsRaw.forEach((p) => {
+      const text = `${p.name || ''} ${p.category || ''} ${p.description || ''}`.toLowerCase();
+      fallbackCategories.forEach((cat) => {
+        if ((p.category || '').toLowerCase().includes(cat.toLowerCase())) {
+          counts.categories.set(cat, (counts.categories.get(cat) || 0) + 1);
+        }
+      });
+      styleFilters.forEach((style) => {
+        if (style.keywords?.some((kw) => text.includes(kw))) {
+          counts.styles.set(style.id, (counts.styles.get(style.id) || 0) + 1);
+        }
+      });
+      roomFilters.forEach((room) => {
+        if (room.keywords?.some((kw) => text.includes(kw))) {
+          counts.rooms.set(room.id, (counts.rooms.get(room.id) || 0) + 1);
+        }
+      });
+    });
+    return counts;
+  }, [currentProductsRaw, fallbackCategories, styleFilters, roomFilters]);
 
   const toggleFilter = (filter) => {
     setFocusFilters((prev) => {
@@ -410,7 +442,7 @@ const PersonalizedSection = ({
                 focusFilters.length === 0 ? 'bg-gray-900 text-white border-gray-900' : 'bg-white text-gray-600 border-gray-100 hover:bg-gray-50'
               }`}
             >
-              Összes
+              Összes ({currentProductsRaw.length})
             </button>
             {fallbackCategories.map((cat) => (
               <button
@@ -423,7 +455,7 @@ const PersonalizedSection = ({
                     : 'bg-white text-gray-600 border-gray-100 hover:bg-gray-50'
                 }`}
               >
-                {cat}
+                {cat} ({focusCounts.categories.get(cat) || 0})
               </button>
             ))}
             {styleFilters.map((style) => (
@@ -437,7 +469,7 @@ const PersonalizedSection = ({
                     : 'bg-white text-gray-600 border-gray-100 hover:bg-gray-50'
                 }`}
               >
-                {style.label}
+                {style.label} ({focusCounts.styles.get(style.id) || 0})
               </button>
             ))}
             {roomFilters.map((room) => (
@@ -451,7 +483,7 @@ const PersonalizedSection = ({
                     : 'bg-white text-gray-600 border-gray-100 hover:bg-gray-50'
                 }`}
               >
-                {room.label}
+                {room.label} ({focusCounts.rooms.get(room.id) || 0})
               </button>
             ))}
           </div>
@@ -471,6 +503,8 @@ const PersonalizedSection = ({
                 index={index}
                 highlightBadge={highlightBadge}
                 recommendationReasons={buildRecommendationReasons(product)}
+                sectionId={`personalized-${activeTab}`}
+                showFeedback
               />
             );
           })}

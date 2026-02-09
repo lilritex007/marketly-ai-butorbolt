@@ -7,6 +7,7 @@ import {
 import SectionHeader from './SectionHeader';
 import { EnhancedProductCard } from '../product/EnhancedProductCard';
 import { getStockLevel } from '../../utils/helpers';
+import { trackSectionEvent } from '../../services/userPreferencesService';
 
 /**
  * Social Proof & Trust Signals
@@ -108,6 +109,8 @@ export const SocialProof = () => {
  * - Arrow navigation for desktop
  * - Compact mobile cards
  */
+const SECTION_ID = 'customer-favorites';
+
 export const LiveShowcase = ({ products = [], onProductClick }) => {
   const [seed, setSeed] = useState(0);
 
@@ -121,12 +124,16 @@ export const LiveShowcase = ({ products = [], onProductClick }) => {
     return [];
   }, [products, seed]);
 
+  useEffect(() => {
+    trackSectionEvent(SECTION_ID, 'section_impression');
+  }, []);
+
   return (
     <div
       className="section-shell section-shell--favorites py-8 sm:py-10 lg:py-14 xl:py-16 overflow-hidden"
       role="region"
       aria-label="Vásárlóink kedvencei"
-      data-section="customer-favorites"
+      data-section={SECTION_ID}
     >
       <div className="w-full max-w-[2000px] mx-auto px-4 sm:px-6 lg:px-10 xl:px-16">
         <SectionHeader
@@ -162,6 +169,8 @@ export const LiveShowcase = ({ products = [], onProductClick }) => {
                   onQuickView={onProductClick}
                   index={index}
                   highlightBadge={highlightBadge}
+                  sectionId={SECTION_ID}
+                  showFeedback
                 />
               );
             })}
