@@ -52,14 +52,14 @@ export default function NewArrivalsSection({ products = [], onProductClick, onTo
 
   return (
     <section
-      className="section-shell section-shell--new py-10 sm:py-12 lg:py-16"
+      className="section-shell section-world section-world--new py-10 sm:py-12 lg:py-16"
       aria-labelledby="new-arrivals-heading"
       aria-label="Friss beérkezés"
       role="region"
       data-section="new-arrivals"
     >
       <div className="w-full max-w-[2000px] mx-auto px-4 sm:px-6 lg:px-10 xl:px-16">
-        <div className="rounded-[28px] bg-gradient-to-r from-indigo-100 via-white to-purple-100 p-[2px] shadow-lg">
+        <div className="section-frame">
           <SectionHeader
             id="new-arrivals-heading"
             title="Friss beérkezés"
@@ -92,35 +92,35 @@ export default function NewArrivalsSection({ products = [], onProductClick, onTo
               </>
             }
           />
-        </div>
-        <ProductCarousel className="mt-2">
-          {visibleProducts.map((product, index) => {
-            const stockLevel = getStockLevel(product);
-            const highlightBadge = stockLevel !== null && stockLevel <= 3 ? `Utolsó ${stockLevel} db` : '';
-            return (
+          <ProductCarousel className="mt-2">
+            {visibleProducts.map((product, index) => {
+              const stockLevel = getStockLevel(product);
+              const highlightBadge = stockLevel !== null && stockLevel <= 3 ? `Utolsó ${stockLevel} db` : '';
+              return (
               <EnhancedProductCard
-                key={product.id}
-                product={product}
-                onToggleWishlist={onToggleWishlist}
-                isWishlisted={wishlist.includes(product.id)}
-                onQuickView={onProductClick}
-                onAddToCart={onAddToCart || (() => {})}
-                index={index}
-                highlightBadge={highlightBadge}
+                  key={product.id}
+                  product={product}
+                  onToggleWishlist={onToggleWishlist}
+                  isWishlisted={wishlist.includes(product.id)}
+                  onQuickView={onProductClick}
+                  onAddToCart={onAddToCart || (() => {})}
+                  index={index}
+                  highlightBadge={highlightBadge}
                 sectionId={SECTION_ID}
                 showFeedback
-                size="compact"
-                tone="new"
-              />
-            );
-          })}
-        </ProductCarousel>
-        <div className="mt-5 flex flex-wrap items-center gap-2 text-xs text-gray-500">
-          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white border border-primary-100 text-primary-700 font-semibold">
-            <Sparkles className="w-3.5 h-3.5" />
-            Frissítve
-          </span>
-          <span>Az újdonságok automatikusan a legfrissebb termékekből válogatnak.</span>
+                  size="compact"
+                  tone="new"
+                />
+              );
+            })}
+          </ProductCarousel>
+          <div className="mt-5 flex flex-wrap items-center gap-2 text-xs text-gray-500">
+            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white border border-primary-100 text-primary-700 font-semibold">
+              <Sparkles className="w-3.5 h-3.5" />
+              Frissítve
+            </span>
+            <span>Az újdonságok automatikusan a legfrissebb termékekből válogatnak.</span>
+          </div>
         </div>
       </div>
     </section>

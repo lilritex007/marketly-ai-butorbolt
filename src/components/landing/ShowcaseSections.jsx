@@ -131,13 +131,13 @@ export const LiveShowcase = ({ products = [], onProductClick }) => {
 
   return (
     <div
-      className="section-shell section-shell--favorites py-8 sm:py-10 lg:py-14 xl:py-16 overflow-hidden"
+      className="section-shell section-world section-world--favorites py-8 sm:py-10 lg:py-14 xl:py-16 overflow-hidden"
       role="region"
       aria-label="Vásárlóink kedvencei"
       data-section={SECTION_ID}
     >
       <div className="w-full max-w-[2000px] mx-auto px-4 sm:px-6 lg:px-10 xl:px-16">
-        <div className="rounded-[28px] bg-gradient-to-r from-rose-100 via-white to-pink-100 p-[2px] shadow-lg">
+        <div className="section-frame">
           <SectionHeader
             id="customer-favorites-heading"
             title="Vásárlóink kedvencei"
@@ -161,34 +161,34 @@ export const LiveShowcase = ({ products = [], onProductClick }) => {
               </button>
             }
           />
+          {showcaseProducts.length > 0 ? (
+            <ProductCarousel className="mt-2">
+              {showcaseProducts.map((product, index) => {
+                const stockLevel = getStockLevel(product);
+                const highlightBadge = stockLevel !== null && stockLevel <= 3 ? `Utolsó ${stockLevel} db` : '';
+                return (
+                  <EnhancedProductCard
+                    key={product.id || index}
+                    product={product}
+                    onQuickView={onProductClick}
+                    index={index}
+                    highlightBadge={highlightBadge}
+                    sectionId={SECTION_ID}
+                    showFeedback
+                    size="compact"
+                    tone="favorites"
+                  />
+                );
+              })}
+            </ProductCarousel>
+          ) : (
+            <div className="text-center py-12 bg-white rounded-2xl shadow-inner">
+              <Heart className="w-12 h-12 text-gray-300 mx-auto mb-3" />
+              <p className="text-gray-500">Nincs elég adat a kedvencekhez</p>
+              <p className="text-gray-400 text-sm">Térj vissza később!</p>
+            </div>
+          )}
         </div>
-        {showcaseProducts.length > 0 ? (
-          <ProductCarousel className="mt-2">
-            {showcaseProducts.map((product, index) => {
-              const stockLevel = getStockLevel(product);
-              const highlightBadge = stockLevel !== null && stockLevel <= 3 ? `Utolsó ${stockLevel} db` : '';
-              return (
-                <EnhancedProductCard
-                  key={product.id || index}
-                  product={product}
-                  onQuickView={onProductClick}
-                  index={index}
-                  highlightBadge={highlightBadge}
-                  sectionId={SECTION_ID}
-                  showFeedback
-                  size="compact"
-                  tone="favorites"
-                />
-              );
-            })}
-          </ProductCarousel>
-        ) : (
-          <div className="text-center py-12 bg-white rounded-2xl shadow-inner">
-            <Heart className="w-12 h-12 text-gray-300 mx-auto mb-3" />
-            <p className="text-gray-500">Nincs elég adat a kedvencekhez</p>
-            <p className="text-gray-400 text-sm">Térj vissza később!</p>
-          </div>
-        )}
       </div>
     </div>
   );

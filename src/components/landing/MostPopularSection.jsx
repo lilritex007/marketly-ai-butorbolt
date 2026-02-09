@@ -77,14 +77,14 @@ export default function MostPopularSection({ products = [], onProductClick, onTo
 
   return (
     <section
-      className="section-shell section-shell--popular py-10 sm:py-12 lg:py-16"
+      className="section-shell section-world section-world--popular py-10 sm:py-12 lg:py-16"
       aria-labelledby="most-popular-heading"
       aria-label="Legnépszerűbb termékek"
       role="region"
       data-section="most-popular"
     >
       <div className="w-full max-w-[2000px] mx-auto px-4 sm:px-6 lg:px-10 xl:px-16">
-        <div className="rounded-[28px] bg-gradient-to-r from-amber-100 via-white to-orange-100 p-[2px] shadow-lg">
+        <div className="section-frame">
           <SectionHeader
             id="most-popular-heading"
             title="Legnépszerűbb"
@@ -143,35 +143,35 @@ export default function MostPopularSection({ products = [], onProductClick, onTo
               </>
             }
           />
-        </div>
-        <ProductCarousel className="mt-2">
-          {visibleProducts.map((product, index) => {
-            const stockLevel = getStockLevel(product);
-            const highlightBadge = stockLevel !== null && stockLevel <= 3 ? `Utolsó ${stockLevel} db` : '';
-            return (
-              <EnhancedProductCard
-                key={product.id}
-                product={product}
-                onToggleWishlist={onToggleWishlist}
-                isWishlisted={wishlist.includes(product.id)}
-                onQuickView={onProductClick}
-                onAddToCart={onAddToCart || (() => {})}
-                index={index}
-                highlightBadge={highlightBadge}
-                sectionId="most-popular"
-                showFeedback
-                size="compact"
-                tone="popular"
-              />
-            );
-          })}
-        </ProductCarousel>
-        <div className="mt-5 flex flex-wrap items-center gap-2 text-xs text-gray-500">
-          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white border border-amber-100 text-amber-700 font-semibold">
-            <Flame className="w-3.5 h-3.5" />
-            Most pörög
-          </span>
-          <span>Dinamikus válogatás a készleten lévő és akciós termékekből.</span>
+          <ProductCarousel className="mt-2">
+            {visibleProducts.map((product, index) => {
+              const stockLevel = getStockLevel(product);
+              const highlightBadge = stockLevel !== null && stockLevel <= 3 ? `Utolsó ${stockLevel} db` : '';
+              return (
+                <EnhancedProductCard
+                  key={product.id}
+                  product={product}
+                  onToggleWishlist={onToggleWishlist}
+                  isWishlisted={wishlist.includes(product.id)}
+                  onQuickView={onProductClick}
+                  onAddToCart={onAddToCart || (() => {})}
+                  index={index}
+                  highlightBadge={highlightBadge}
+                  sectionId="most-popular"
+                  showFeedback
+                  size="compact"
+                  tone="popular"
+                />
+              );
+            })}
+          </ProductCarousel>
+          <div className="mt-5 flex flex-wrap items-center gap-2 text-xs text-gray-500">
+            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white border border-amber-100 text-amber-700 font-semibold">
+              <Flame className="w-3.5 h-3.5" />
+              Most pörög
+            </span>
+            <span>Dinamikus válogatás a készleten lévő és akciós termékekből.</span>
+          </div>
         </div>
       </div>
     </section>

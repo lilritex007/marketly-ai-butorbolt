@@ -447,34 +447,68 @@
    ======================================== */
 .section-shell {
   position: relative;
-  border-top: none;
-  border-bottom: none;
+  border: none;
   box-shadow: none;
   outline: none;
 }
 
-.section-shell::before {
-  content: none;
-}
-
+.section-shell::before,
 .section-shell::after {
   content: none;
 }
 
-.section-shell--popular {
-  background: linear-gradient(180deg, #fff, #fff7ed 40%, #fff3dd 100%);
+.section-world {
+  position: relative;
+  overflow: hidden;
 }
 
-.section-shell--new {
-  background: linear-gradient(180deg, #f1f5f9 0%, #ffffff 60%, #eef2ff 100%);
+.section-world::before {
+  content: '';
+  position: absolute;
+  left: 10%;
+  right: 10%;
+  top: -30px;
+  height: 6px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.85), rgba(255, 255, 255, 0.2));
+  opacity: 0.7;
 }
 
-.section-shell--personal {
-  background: linear-gradient(180deg, #ffffff 0%, #f1f5ff 45%, #e0e7ff 100%);
+.section-world--popular {
+  background: radial-gradient(circle at 15% -10%, rgba(251, 191, 36, 0.32), transparent 55%),
+              linear-gradient(180deg, #fffaf0 0%, #fff7ed 55%, #ffffff 100%);
 }
 
-.section-shell--favorites {
-  background: linear-gradient(180deg, #ffe4e6 0%, #ffffff 55%, #fff1f2 100%);
+.section-world--new {
+  background: radial-gradient(circle at 12% -10%, rgba(99, 102, 241, 0.28), transparent 55%),
+              linear-gradient(180deg, #f8fafc 0%, #eef2ff 55%, #ffffff 100%);
+}
+
+.section-world--personal {
+  background: radial-gradient(circle at 12% -10%, rgba(139, 92, 246, 0.28), transparent 55%),
+              linear-gradient(180deg, #f8fafc 0%, #ede9fe 55%, #ffffff 100%);
+}
+
+.section-world--favorites {
+  background: radial-gradient(circle at 12% -10%, rgba(244, 63, 94, 0.26), transparent 55%),
+              linear-gradient(180deg, #fff1f2 0%, #ffe4e6 55%, #ffffff 100%);
+}
+
+.section-frame {
+  max-width: 1600px;
+  margin: 0 auto;
+  background: rgba(255, 255, 255, 0.9);
+  border: 1px solid rgba(226, 232, 240, 0.9);
+  box-shadow: 0 12px 40px rgba(15, 23, 42, 0.06);
+  border-radius: 28px;
+  padding: 22px 20px 24px;
+  backdrop-filter: blur(6px);
+}
+
+@media (min-width: 768px) {
+  .section-frame {
+    padding: 26px 28px 30px;
+  }
 }
 
 /* ========================================

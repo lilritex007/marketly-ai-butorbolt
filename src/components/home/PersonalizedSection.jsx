@@ -251,7 +251,7 @@ const PersonalizedSection = ({
 
   return (
     <section
-      className="section-shell section-shell--personal relative py-10 sm:py-14 lg:py-20 overflow-hidden"
+      className="section-shell section-world section-world--personal relative py-10 sm:py-14 lg:py-20 overflow-hidden"
       aria-label="Személyre szabott ajánlások"
       role="region"
       data-section="personalized"
@@ -259,7 +259,7 @@ const PersonalizedSection = ({
       <div className="absolute -top-20 -right-16 w-72 h-72 bg-primary-200/30 blur-3xl rounded-full" aria-hidden />
       <div className="absolute -bottom-24 -left-16 w-80 h-80 bg-secondary-200/30 blur-3xl rounded-full" aria-hidden />
       <div className="w-full max-w-[2000px] mx-auto px-4 sm:px-6 lg:px-10 xl:px-16">
-        <div className="rounded-[28px] bg-gradient-to-r from-purple-100 via-white to-indigo-100 p-[2px] shadow-lg">
+        <div className="section-frame">
           <SectionHeader
             id="personalized-heading"
             title="Személyre szabva neked"
@@ -314,8 +314,7 @@ const PersonalizedSection = ({
               </div>
             }
           />
-        </div>
-
+        
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 mb-6">
           <div className="rounded-2xl bg-white/90 border border-gray-100 p-4 shadow-sm">
             <p className="text-xs text-gray-500">Neked ajánlott</p>
@@ -554,6 +553,7 @@ const PersonalizedSection = ({
             <p className="text-gray-400 text-sm">Böngéssz a kínálatban!</p>
           </div>
         )}
+        </div>
       </div>
     </section>
   );
