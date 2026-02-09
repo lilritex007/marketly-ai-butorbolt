@@ -17,6 +17,7 @@ export const useScrollAnimation = (options = {}) => {
   const [hasAnimated, setHasAnimated] = useState(false);
 
   useEffect(() => {
+    if (typeof window === 'undefined' || !('IntersectionObserver' in window)) return;
     const element = ref.current;
     if (!element || !(element instanceof Element)) return;
 
@@ -75,6 +76,7 @@ export const useStaggerAnimation = (itemCount, options = {}) => {
   const [visibleItems, setVisibleItems] = useState(new Set());
 
   useEffect(() => {
+    if (typeof window === 'undefined' || !('IntersectionObserver' in window)) return;
     const container = containerRef.current;
     if (!container || !(container instanceof Element)) return;
 

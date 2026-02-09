@@ -52,6 +52,7 @@ export const useInfiniteScroll = (allItems, itemsPerPage = 20) => {
 
   // Intersection Observer for automatic loading
   useEffect(() => {
+    if (typeof window === 'undefined' || !('IntersectionObserver' in window)) return;
     if (!sentinelRef.current || !(sentinelRef.current instanceof Element)) return;
 
     const options = {

@@ -77,6 +77,7 @@ export const useIntersectionObserver = (options = {}) => {
   optionsRef.current = options;
 
   useEffect(() => {
+    if (typeof window === 'undefined' || !('IntersectionObserver' in window)) return;
     if (!ref || !(ref instanceof Element)) return;
 
     const observer = new IntersectionObserver(([entry]) => {

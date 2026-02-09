@@ -20,10 +20,18 @@ export const ModernHero = ({ onExplore, onTryAI, quickCategories = [], onQuickCa
 
   useEffect(() => {
     const mq = window.matchMedia('(prefers-reduced-motion: reduce)');
+    if (!mq) return undefined;
     setPrefersReducedMotion(mq.matches);
     const handler = () => setPrefersReducedMotion(mq.matches);
-    mq.addEventListener('change', handler);
-    return () => mq.removeEventListener('change', handler);
+    if (typeof mq.addEventListener === 'function') {
+      mq.addEventListener('change', handler);
+      return () => mq.removeEventListener('change', handler);
+    }
+    if (typeof mq.addListener === 'function') {
+      mq.addListener(handler);
+      return () => mq.removeListener(handler);
+    }
+    return undefined;
   }, []);
 
   const handlePointerMove = (e) => {

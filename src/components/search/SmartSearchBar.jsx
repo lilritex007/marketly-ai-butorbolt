@@ -83,9 +83,6 @@ const SmartSearchBar = ({
       return;
     }
     if (products.length > 0 && (products.length !== indexedCountRef.current || indexVersion !== indexedVersionRef.current)) {
-      // #region agent log
-      fetch('http://localhost:7244/ingest/4b0575bc-02d3-43f2-bc91-db7897d5cbba',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({runId:'pre',hypothesisId:'H3',location:'SmartSearchBar.jsx:useEffect',message:'index build start',data:{products:products.length,indexVersion},timestamp:Date.now()})}).catch(()=>{});
-      // #endregion
       console.log(`📊 Products: ${products.length}, starting async index build...`);
       setIndexStatus({ ready: false, building: true, count: 0 });
       
@@ -102,16 +99,10 @@ const SmartSearchBar = ({
               building: false, 
               count: stats.productCount 
             });
-            // #region agent log
-            fetch('http://localhost:7244/ingest/4b0575bc-02d3-43f2-bc91-db7897d5cbba',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({runId:'pre',hypothesisId:'H3',location:'SmartSearchBar.jsx:useEffect',message:'index build success',data:{count:stats.productCount,words:stats.wordCount,ms:stats.buildTime},timestamp:Date.now()})}).catch(()=>{});
-            // #endregion
           }
         } catch (err) {
           console.error('Index build error:', err);
           setIndexStatus({ ready: false, building: false, count: 0 });
-          // #region agent log
-          fetch('http://localhost:7244/ingest/4b0575bc-02d3-43f2-bc91-db7897d5cbba',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({runId:'pre',hypothesisId:'H3',location:'SmartSearchBar.jsx:useEffect',message:'index build error',data:{error:String(err)},timestamp:Date.now()})}).catch(()=>{});
-          // #endregion
         }
       };
       

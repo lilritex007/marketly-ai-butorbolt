@@ -26,13 +26,21 @@ const StickyAddToCart = ({
         setIsShown(window.scrollY > 400);
         return;
       }
+      if (typeof window === 'undefined' || !('IntersectionObserver' in window)) {
+        setIsShown(window.scrollY > 400);
+        return;
+      }
       const observer = new IntersectionObserver(
         ([entry]) => {
           setIsShown(!entry.isIntersecting);
         },
         { threshold: 0.1, root: null }
       );
-      observer.observe(el);
+      try {
+        observer.observe(el);
+      } catch (err) {
+        return;
+      }
       return () => observer.disconnect();
     }
     const handleScroll = () => setIsShown(window.scrollY > 400);

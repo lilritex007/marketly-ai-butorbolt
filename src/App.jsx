@@ -875,9 +875,6 @@ const App = () => {
     if (append) setIsLoadingMore(true);
     
     try {
-      // #region agent log
-      fetch('http://localhost:7244/ingest/4b0575bc-02d3-43f2-bc91-db7897d5cbba',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({runId:'pre',hypothesisId:'H1',location:'App.jsx:loadUnasData',message:'loadUnasData start',data:{silent,append,limit,offset,search:search?.length||0,category},timestamp:Date.now()})}).catch(()=>{});
-      // #endregion
       const categoryMainList = Array.isArray(categoryMain)
         ? categoryMain.filter(Boolean)
         : (typeof categoryMain === 'string' && categoryMain.trim()
@@ -913,17 +910,11 @@ const App = () => {
           scrollToProductsSectionRef.current?.()
         }));
       }
-      // #region agent log
-      fetch('http://localhost:7244/ingest/4b0575bc-02d3-43f2-bc91-db7897d5cbba',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({runId:'pre',hypothesisId:'H1',location:'App.jsx:loadUnasData',message:'loadUnasData success',data:{newCount:newProducts.length,totalCount,append},timestamp:Date.now()})}).catch(()=>{});
-      // #endregion
       if (!append) setTotalProductsCount(totalCount);
       setLastUpdated(data.lastSync || data.lastUpdated);
       setDataSource('unas');
       setUnasError(null);
     } catch (err) {
-      // #region agent log
-      fetch('http://localhost:7244/ingest/4b0575bc-02d3-43f2-bc91-db7897d5cbba',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({runId:'pre',hypothesisId:'H1',location:'App.jsx:loadUnasData',message:'loadUnasData error',data:{error:String(err)},timestamp:Date.now()})}).catch(()=>{});
-      // #endregion
       if (!append) setUnasError('Termékek betöltése sikertelen');
     } finally {
       if (!silent && !append) setIsLoadingUnas(false);
@@ -1100,7 +1091,6 @@ const App = () => {
           setSearchIndexReady(true);
           setSearchIndexVersion((v) => v + 1);
           // #region agent log
-          fetch('http://localhost:7244/ingest/4b0575bc-02d3-43f2-bc91-db7897d5cbba',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({runId:'pre',hypothesisId:'H2',location:'App.jsx:searchIndex',message:'search index loaded',data:{count:data.products.length,lastSync:data.lastSync||null},timestamp:Date.now()})}).catch(()=>{});
           // #endregion
           if (data.lastSync) setLastUpdated(data.lastSync);
           const q = searchQueryRef.current.trim();

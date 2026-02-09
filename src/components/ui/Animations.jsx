@@ -17,19 +17,22 @@ export const FadeInOnScroll = ({
 
   useEffect(() => {
     const mq = window.matchMedia('(prefers-reduced-motion: reduce)');
+    if (!mq) return undefined;
     setPrefersReducedMotion(mq.matches);
     const handler = () => setPrefersReducedMotion(mq.matches);
-    mq.addEventListener('change', handler);
-    return () => mq.removeEventListener('change', handler);
+    if (typeof mq.addEventListener === 'function') {
+      mq.addEventListener('change', handler);
+      return () => mq.removeEventListener('change', handler);
+    }
+    if (typeof mq.addListener === 'function') {
+      mq.addListener(handler);
+      return () => mq.removeListener(handler);
+    }
+    return undefined;
   }, []);
 
   useEffect(() => {
-    if (!ref.current || !(ref.current instanceof Element)) {
-      // #region agent log
-      fetch('http://localhost:7244/ingest/4b0575bc-02d3-43f2-bc91-db7897d5cbba',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({runId:'pre',hypothesisId:'H4',location:'Animations.jsx:FadeInOnScroll',message:'observer skipped (no element)',data:{hasRef:!!ref.current},timestamp:Date.now()})}).catch(()=>{});
-      // #endregion
-      return;
-    }
+    if (!ref.current || !(ref.current instanceof Element)) return;
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {
@@ -41,7 +44,11 @@ export const FadeInOnScroll = ({
     );
 
     try {
+    try {
       observer.observe(ref.current);
+    } catch (err) {
+      return;
+    }
     } catch (err) {
       return;
     }
@@ -263,7 +270,11 @@ export const CountUp = ({ end, duration = 2000, prefix = '', suffix = '', classN
       { threshold: 0.5 }
     );
 
-    observer.observe(ref.current);
+    try {
+      observer.observe(ref.current);
+    } catch (err) {
+      return;
+    }
     return () => observer.disconnect();
   }, [hasStarted]);
 

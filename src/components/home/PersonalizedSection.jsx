@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { Sparkles, Clock, TrendingUp, RefreshCw, ShoppingCart, Info, SlidersHorizontal } from 'lucide-react';
 import {
   getViewedProducts,
