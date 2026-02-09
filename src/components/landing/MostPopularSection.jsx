@@ -24,7 +24,7 @@ const sliceWrap = (items, start, size) => {
 export default function MostPopularSection({ products = [], onProductClick, onToggleWishlist, wishlist = [], onViewAll, onAddToCart, contextLabel = '', rotationTick = 0 }) {
   const [page, setPage] = useState(0);
   const [period, setPeriod] = useState('weekly');
-  const [autoRotate, setAutoRotate] = useState(true);
+  const [autoRotate, setAutoRotate] = useState(false);
   const [isInteracting, setIsInteracting] = useState(false);
   const [isInView, setIsInView] = useState(true);
   const sectionRef = useRef(null);
