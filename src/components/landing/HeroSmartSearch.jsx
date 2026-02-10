@@ -1,6 +1,12 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Search, Sparkles, Camera, ArrowRight, Wand2, X, Package, CheckCircle2, TrendingUp, ChevronRight, Plus, SlidersHorizontal, BrainCircuit, RotateCcw, Filter, Award } from 'lucide-react';
-import { getAutocompleteSuggestions, parseSearchIntent } from '../../services/aiSearchService';
+import {
+  buildSearchIndex,
+  getAutocompleteSuggestions,
+  getProactiveSuggestions,
+  parseSearchIntent,
+  smartSearch
+} from '../../services/aiSearchService';
 import { trackSearch, trackSectionEvent, getSearchHistory, getViewedProducts, getLikedProducts } from '../../services/userPreferencesService';
 
 const QUICK_INTENTS = [
@@ -16,6 +22,7 @@ const QUICK_FILTER_PRESETS = {
   stilus: ['modern', 'skandináv', 'minimalista'],
   helyiseg: ['nappaliba', 'hálószobába', 'előszobába']
 };
+const PROACTIVE_QUICK = getProactiveSuggestions().map((item) => item.query);
 
 const escapeRegExp = (value = '') => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
@@ -40,6 +47,9 @@ export default function HeroSmartSearch({
   const [preferredCategories, setPreferredCategories] = useState([]);
   const [preferredKeywords, setPreferredKeywords] = useState([]);
   const [searchPulse, setSearchPulse] = useState(false);
+  const [smartResults, setSmartResults] = useState([]);
+  const [smartTotalMatches, setSmartTotalMatches] = useState(0);
+  const [isIndexBuilding, setIsIndexBuilding] = useState(false);
   const instantSearchRef = useRef('');
 
   const trimmedQuery = query.trim();
@@ -48,6 +58,35 @@ export default function HeroSmartSearch({
     if (trimmedQuery.length < 2 || !Array.isArray(products) || products.length === 0) return [];
     const local = getAutocompleteSuggestions(products, trimmedQuery, 6) || [];
     return local;
+  }, [products, trimmedQuery]);
+
+  useEffect(() => {
+    let cancelled = false;
+    if (!Array.isArray(products) || products.length === 0) return () => { cancelled = true; };
+    setIsIndexBuilding(true);
+    buildSearchIndex(products)
+      .catch(() => false)
+      .finally(() => {
+        if (!cancelled) setIsIndexBuilding(false);
+      });
+    return () => { cancelled = true; };
+  }, [products]);
+
+  useEffect(() => {
+    if (!Array.isArray(products) || products.length === 0) {
+      setSmartResults([]);
+      setSmartTotalMatches(0);
+      return;
+    }
+    if (trimmedQuery.length < 2) {
+      setSmartResults([]);
+      setSmartTotalMatches(0);
+      return;
+    }
+
+    const result = smartSearch(products, trimmedQuery, { limit: 24 });
+    setSmartResults(result?.results || []);
+    setSmartTotalMatches(result?.totalMatches || 0);
   }, [products, trimmedQuery]);
 
   const queryTokens = useMemo(() => (
@@ -97,13 +136,14 @@ export default function HeroSmartSearch({
 
   const queryMatchedProducts = useMemo(() => {
     if (!Array.isArray(products) || products.length === 0 || trimmedQuery.length < 2) return [];
+    if (smartResults.length > 0) return smartResults.slice(0, 40);
     return products
       .filter((p) => {
         const haystack = `${p?.name || ''} ${p?.category || ''}`.toLowerCase();
         return queryTokens.some((token) => haystack.includes(token));
       })
       .slice(0, 30);
-  }, [products, trimmedQuery, queryTokens]);
+  }, [products, trimmedQuery, queryTokens, smartResults]);
 
   const rankedQueryProducts = useMemo(() => {
     if (queryMatchedProducts.length === 0) return [];
@@ -155,6 +195,23 @@ export default function HeroSmartSearch({
     return unique;
   }, [products, suggestions, rankedQueryProducts]);
 
+  const starterProducts = useMemo(() => {
+    if (!Array.isArray(products) || products.length === 0) return [];
+    const likedSet = new Set(likedProductIds.map(String));
+    const viewedSet = new Set(viewedProductIds.map(String));
+    const scored = products.map((p) => {
+      const id = String(p?.id || '');
+      const category = String(p?.category || '').toLowerCase();
+      let score = 0;
+      if (likedSet.has(id)) score += 40;
+      if (viewedSet.has(id)) score += 20;
+      if (preferredCategories.some((cat) => category.includes(String(cat).toLowerCase()))) score += 14;
+      if (Number(p?.salePrice || p?.price || 0) > 0) score += 6;
+      return { p, score };
+    });
+    return scored.sort((a, b) => b.score - a.score).slice(0, 10).map((entry) => entry.p);
+  }, [products, likedProductIds, viewedProductIds, preferredCategories]);
+
   const contextualSuggestions = useMemo(() => {
     if (rankedQueryProducts.length === 0) return [];
     const categoryMap = new Map();
@@ -171,8 +228,9 @@ export default function HeroSmartSearch({
 
   const actualResultCount = useMemo(() => {
     if (trimmedQuery.length < 2) return null;
+    if (smartTotalMatches > 0) return smartTotalMatches;
     return rankedQueryProducts.length;
-  }, [trimmedQuery, rankedQueryProducts.length]);
+  }, [trimmedQuery, smartTotalMatches, rankedQueryProducts.length]);
 
   const confidenceScore = useMemo(() => {
     if (actualResultCount === null) return 0;
@@ -188,7 +246,7 @@ export default function HeroSmartSearch({
   }, [actualResultCount]);
 
   const dynamicQuickSuggestions = useMemo(() => {
-    if (trimmedQuery.length < 2) return QUICK_INTENTS.slice(0, 4);
+    if (trimmedQuery.length < 2) return [...PROACTIVE_QUICK, ...QUICK_INTENTS].slice(0, 6);
     const base = [];
     const firstToken = queryTokens[0];
     if (firstToken) {
@@ -205,7 +263,7 @@ export default function HeroSmartSearch({
     }
     const unique = [];
     const seen = new Set();
-    [...base, ...contextualSuggestions, ...QUICK_INTENTS].forEach((q) => {
+    [...base, ...contextualSuggestions, ...PROACTIVE_QUICK, ...QUICK_INTENTS].forEach((q) => {
       const key = q.toLowerCase();
       if (!seen.has(key) && q.trim().length >= 3) {
         seen.add(key);
@@ -215,17 +273,41 @@ export default function HeroSmartSearch({
     return unique.slice(0, 6);
   }, [trimmedQuery, queryTokens, intent, activeFilters.length, contextualSuggestions]);
 
+  const quickHitSuggestions = useMemo(() => {
+    return dynamicQuickSuggestions.slice(0, 8).map((text) => {
+      const t = text.toLowerCase();
+      let badge = { label: 'Kapcsolódó', classes: 'bg-gray-100 text-gray-700 border-gray-200' };
+      if (trimmedQuery.length >= 2 && t.includes(trimmedQuery.toLowerCase())) {
+        badge = { label: 'Pontos egyezés', classes: 'bg-emerald-50 text-emerald-700 border-emerald-200' };
+      } else if (Array.isArray(intent?.styles) && intent.styles.some((s) => t.includes(String(s).toLowerCase()))) {
+        badge = { label: 'Stílus egyezés', classes: 'bg-violet-50 text-violet-700 border-violet-200' };
+      } else if (Array.isArray(intent?.colors) && intent.colors.some((c) => t.includes(String(c).toLowerCase()))) {
+        badge = { label: 'Szín egyezés', classes: 'bg-sky-50 text-sky-700 border-sky-200' };
+      } else if (t.includes('alatt') || t.includes('akció')) {
+        badge = { label: 'Ár / akció', classes: 'bg-amber-50 text-amber-700 border-amber-200' };
+      }
+      return { text, badge };
+    });
+  }, [dynamicQuickSuggestions, trimmedQuery, intent]);
+
   const rewriteSuggestions = useMemo(() => {
     if (trimmedQuery.length < 2) return [];
-    const base = trimmedQuery;
     const first = queryTokens[0] || 'bútor';
+    const topCategories = rankedQueryProducts
+      .map((p) => String(p?.category || '').split('>').pop()?.trim())
+      .filter(Boolean)
+      .slice(0, 3);
+    const mainCategory = topCategories[0] || first;
+    const topStyle = Array.isArray(intent?.styles) && intent.styles[0] ? intent.styles[0] : 'modern';
+    const topColor = Array.isArray(intent?.colors) && intent.colors[0] ? intent.colors[0] : 'bézs';
+
     return [
-      `${base} modern stílusban`,
-      `${first} 20%-kal szélesebb árkerettel`,
-      `${first} prémium kivitelben`,
-      `${first} gyors szállítással`
+      `${mainCategory} ${topStyle} stílusban`,
+      `${topColor} ${mainCategory} 120e alatt`,
+      `${mainCategory} prémium kivitelben gyors szállítással`,
+      `${mainCategory} kisebb térbe, keskeny kivitel`
     ];
-  }, [trimmedQuery, queryTokens]);
+  }, [trimmedQuery, queryTokens, rankedQueryProducts, intent]);
 
   const hasNoResults = trimmedQuery.length >= 2 && suggestions.length === 0;
   const rescueSuggestions = useMemo(() => {
@@ -375,6 +457,8 @@ export default function HeroSmartSearch({
     return { text: 'Ajánlott', classes: 'bg-gray-50 text-gray-700 border-gray-200' };
   };
 
+  const displayedTopProducts = trimmedQuery.length < 2 ? starterProducts : previewProducts;
+
   useEffect(() => {
     setDismissedFilterIds([]);
   }, [trimmedQuery]);
@@ -491,6 +575,10 @@ export default function HeroSmartSearch({
             <Wand2 className="w-3.5 h-3.5" aria-hidden />
             Okos ajánlások
           </span>
+          <span className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold ${isIndexBuilding ? 'bg-amber-50 text-amber-700' : 'bg-emerald-50 text-emerald-700'}`}>
+            <Sparkles className="w-3.5 h-3.5" aria-hidden />
+            {isIndexBuilding ? 'AI motor tanul...' : 'AI motor aktív'}
+          </span>
         </div>
 
         <form onSubmit={handleSubmit} className="relative">
@@ -507,6 +595,9 @@ export default function HeroSmartSearch({
                 aria-label="Hero okoskereső"
               />
             </div>
+            <p className="text-[11px] text-primary-700/90 mt-1 px-1 font-medium">
+              Kattints a mezőbe és gépelj - az AI azonnal értelmezi a keresési szándékod.
+            </p>
             <div className="mt-2 grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-2">
               <button
                 type="button"
@@ -670,17 +761,17 @@ export default function HeroSmartSearch({
               </button>
             </div>
 
-            {previewProducts.length > 0 && (
+            {displayedTopProducts.length > 0 && (
               <div className="p-3 border-b border-gray-100 bg-gradient-to-br from-primary-100/55 via-white to-secondary-100/55">
                 <div className="flex items-center justify-between mb-2">
                   <p className="inline-flex items-center gap-1.5 text-xs font-semibold text-gray-600 uppercase tracking-wide">
                     <TrendingUp className="w-3.5 h-3.5 text-primary-500" aria-hidden />
-                    Legjobb találatok
+                    {trimmedQuery.length < 2 ? 'Ajánlott neked indulásnak' : 'Legjobb találatok'}
                   </p>
-                  <span className="text-[11px] text-gray-500">{previewProducts.length} db</span>
+                  <span className="text-[11px] text-gray-500">{displayedTopProducts.length} db</span>
                 </div>
                 <div className="flex gap-2 overflow-x-auto pb-1 snap-x snap-mandatory">
-                  {previewProducts.map((p, index) => {
+                  {displayedTopProducts.map((p, index) => {
                     const badge = getTopBadge(p, index);
                     return (
                       <div
@@ -749,14 +840,15 @@ export default function HeroSmartSearch({
                 <div>
                   <p className="text-xs text-gray-500 mb-2">Gyorstalálatok ehhez a kereséshez:</p>
                   <div className="flex flex-wrap gap-2 mb-2">
-                    {dynamicQuickSuggestions.slice(0, 5).map((q) => (
+                    {quickHitSuggestions.slice(0, 6).map((item) => (
                       <button
-                        key={`dyn-${q}`}
+                        key={`dyn-${item.text}`}
                         type="button"
-                        onClick={() => applySuggestion(q)}
-                        className="px-3 py-1.5 rounded-full border border-primary-200 bg-gradient-to-r from-primary-50 to-secondary-50 text-primary-700 text-xs font-medium hover:from-primary-100 hover:to-secondary-100 transition-colors"
+                        onClick={() => applySuggestion(item.text)}
+                        className="px-2.5 py-1.5 rounded-full border border-primary-200 bg-gradient-to-r from-primary-50 to-secondary-50 text-primary-700 text-xs font-medium hover:from-primary-100 hover:to-secondary-100 transition-colors inline-flex items-center gap-1.5"
                       >
-                        {q}
+                        <span>{item.text}</span>
+                        <span className={`px-1.5 py-0.5 rounded-full border text-[10px] ${item.badge.classes}`}>{item.badge.label}</span>
                       </button>
                     ))}
                   </div>
@@ -779,14 +871,15 @@ export default function HeroSmartSearch({
             ) : (
               <div className="p-3 space-y-3">
                 <div className="flex flex-wrap gap-2">
-                  {dynamicQuickSuggestions.map((q) => (
+                  {quickHitSuggestions.map((item) => (
                     <button
-                      key={q}
+                      key={item.text}
                       type="button"
-                      onClick={() => applySuggestion(q)}
-                      className="px-3 py-1.5 rounded-full border border-gray-200 bg-white text-gray-700 text-xs hover:bg-primary-50 hover:text-primary-700 hover:border-primary-200 transition-colors"
+                      onClick={() => applySuggestion(item.text)}
+                      className="px-2.5 py-1.5 rounded-full border border-gray-200 bg-white text-gray-700 text-xs hover:bg-primary-50 hover:text-primary-700 hover:border-primary-200 transition-colors inline-flex items-center gap-1.5"
                     >
-                      {q}
+                      <span>{item.text}</span>
+                      <span className={`px-1.5 py-0.5 rounded-full border text-[10px] ${item.badge.classes}`}>{item.badge.label}</span>
                     </button>
                   ))}
                 </div>
