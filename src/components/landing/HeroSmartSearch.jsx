@@ -614,51 +614,32 @@ export default function HeroSmartSearch({
         <div className="pointer-events-none absolute inset-x-0 top-0 h-16 bg-gradient-to-r from-primary-300/60 via-transparent to-secondary-300/60" aria-hidden />
         <div className="pointer-events-none absolute -right-10 -top-10 w-36 h-36 rounded-full bg-secondary-300/25 blur-3xl" aria-hidden />
         <div className="pointer-events-none absolute -left-10 -bottom-8 w-28 h-28 rounded-full bg-primary-300/20 blur-2xl" aria-hidden />
-        <div className="flex flex-wrap items-center gap-2 mb-3">
+        <div className="mb-3">
+          <h3 className="text-lg sm:text-xl font-extrabold tracking-tight text-gray-900 mb-2">
+            AI keresőközpont
+          </h3>
+          <div className="flex flex-wrap items-center gap-2">
           <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-primary-50 text-primary-700 text-xs font-semibold">
             <Sparkles className="w-3.5 h-3.5" aria-hidden />
-            AI keresés
+            <span title="AI keresés">AI keresés</span>
           </span>
           <button
             type="button"
             onClick={onTryAI}
             className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-secondary-50 text-secondary-700 text-xs font-semibold hover:bg-secondary-100 transition-colors"
+            title="Képalapú keresés indítása"
           >
             <Camera className="w-3.5 h-3.5" aria-hidden />
             Képből keresés
           </button>
-          <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-gray-100 text-gray-700 text-xs font-semibold">
+          <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-gray-100 text-gray-700 text-xs font-semibold" title="Okos ajánlási réteg aktív">
             <Wand2 className="w-3.5 h-3.5" aria-hidden />
-            Okos ajánlások
+            Ajánlások
           </span>
-          <span className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold ${isIndexBuilding ? 'bg-amber-50 text-amber-700' : 'bg-emerald-50 text-emerald-700'}`}>
+          <span className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold ${isIndexBuilding ? 'bg-amber-50 text-amber-700' : 'bg-emerald-50 text-emerald-700'}`} title={isIndexBuilding ? 'AI index építése folyamatban' : 'AI index kész'}>
             <Sparkles className="w-3.5 h-3.5" aria-hidden />
             {isIndexBuilding ? 'AI motor tanul...' : 'AI motor aktív'}
           </span>
-        </div>
-
-        <div className="mb-3 rounded-xl border border-primary-200 bg-gradient-to-r from-primary-50 via-white to-secondary-50 p-2.5">
-          <div className="flex items-center justify-between gap-2 mb-2">
-            <p className="text-[11px] uppercase tracking-wide font-semibold text-primary-700">AI Command Deck</p>
-            <div className="flex items-center gap-1.5">
-              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-              <span className="w-2 h-2 rounded-full bg-secondary-500 animate-pulse [animation-delay:120ms]" />
-              <span className="w-2 h-2 rounded-full bg-primary-500 animate-pulse [animation-delay:240ms]" />
-            </div>
-          </div>
-          <div className="grid grid-cols-3 gap-2">
-            <div className="rounded-lg bg-white border border-primary-100 px-2 py-1.5">
-              <p className="text-[10px] uppercase text-gray-500 font-semibold">Találat</p>
-              <p className="text-xs font-bold text-gray-800">{actualResultCount ?? 0}</p>
-            </div>
-            <div className="rounded-lg bg-white border border-violet-100 px-2 py-1.5">
-              <p className="text-[10px] uppercase text-gray-500 font-semibold">Intent</p>
-              <p className="text-xs font-bold text-gray-800">{intentTimeline.length || 0}</p>
-            </div>
-            <div className="rounded-lg bg-white border border-emerald-100 px-2 py-1.5">
-              <p className="text-[10px] uppercase text-gray-500 font-semibold">Minőség</p>
-              <p className="text-xs font-bold text-gray-800">{confidenceMeta.label}</p>
-            </div>
           </div>
         </div>
 
@@ -676,9 +657,20 @@ export default function HeroSmartSearch({
                 aria-label="Hero okoskereső"
               />
             </div>
-            <p className="text-[11px] text-primary-800 mt-1 px-1 font-semibold">
-              Kattints a mezőbe és gépelj - az AI azonnal értelmezi a keresési szándékod.
-            </p>
+            <div className="mt-1 px-1 flex items-center gap-2 text-[11px] text-primary-800 font-semibold">
+              <span className="inline-flex items-center gap-1" title="Gépelés közben élő javaslatok jelennek meg">
+                <Sparkles className="w-3 h-3" aria-hidden />
+                Élő
+              </span>
+              <span className="inline-flex items-center gap-1" title="A kereső az összes indexelt termékben keres">
+                <Search className="w-3 h-3" aria-hidden />
+                Teljes katalógus
+              </span>
+              <span className="inline-flex items-center gap-1" title="Intent felismerés és okos javaslat">
+                <BrainCircuit className="w-3 h-3" aria-hidden />
+                AI intent
+              </span>
+            </div>
             <div className="mt-2 grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-2">
               <button
                 type="button"
@@ -742,7 +734,7 @@ export default function HeroSmartSearch({
 
         <div className="mt-3 rounded-xl border border-secondary-300/70 bg-gradient-to-r from-secondary-100/75 to-primary-100/65 px-3 py-2">
           <div className="flex items-center justify-between gap-3 mb-1.5">
-            <p className="text-[11px] uppercase tracking-wide font-semibold text-gray-500">Keresési pontosság</p>
+            <p className="text-[11px] uppercase tracking-wide font-semibold text-gray-600">Pontosság</p>
             <span className="text-xs font-semibold text-gray-700">{actualResultCount ?? 0} tényleges találat</span>
           </div>
           <div className="h-1.5 rounded-full bg-gray-100 overflow-hidden">
@@ -750,7 +742,7 @@ export default function HeroSmartSearch({
           </div>
           {actualResultCount !== null && (
             <p className="mt-1.5 text-xs text-gray-500">
-              Várható találatok: <span className="font-semibold text-gray-700">{actualResultCount}</span> · {confidenceMeta.label}
+              Találatok: <span className="font-semibold text-gray-700">{actualResultCount}</span> · {confidenceMeta.label}
             </p>
           )}
         </div>
@@ -819,7 +811,7 @@ export default function HeroSmartSearch({
 
         {intentTimeline.length > 0 && (
           <div className="mt-3 rounded-xl border border-primary-100 bg-white px-3 py-2">
-            <p className="text-[11px] uppercase tracking-wide font-semibold text-gray-500 mb-2">AI keresési értelmezés</p>
+            <p className="text-[11px] uppercase tracking-wide font-semibold text-gray-500 mb-2">AI értelmezés</p>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
               {intentTimeline.map((step, idx) => (
                 <div key={`${step.title}-${idx}`} className={`rounded-lg border px-2.5 py-2 ${step.tone}`}>
@@ -833,7 +825,7 @@ export default function HeroSmartSearch({
 
         {searchJourney.length > 0 && (
           <div className="mt-3 rounded-xl border border-emerald-100 bg-emerald-50/45 px-3 py-2">
-            <p className="text-[11px] uppercase tracking-wide font-semibold text-gray-500 mb-2">Legutóbbi sikeres kereséseid</p>
+            <p className="text-[11px] uppercase tracking-wide font-semibold text-gray-500 mb-2">Előzmények</p>
             <div className="flex flex-wrap gap-2">
               {searchJourney.slice(0, 4).map((q) => (
                 <button
@@ -953,7 +945,7 @@ export default function HeroSmartSearch({
                   ))}
                 </div>
                 <div>
-                  <p className="text-xs text-gray-500 mb-2">Gyorstalálatok ehhez a kereséshez:</p>
+                  <p className="text-xs text-gray-600 font-semibold mb-2">Gyorstalálatok</p>
                   <div className="flex flex-wrap gap-2 mb-2">
                     {quickHitSuggestions.slice(0, 6).map((item) => (
                       <button
