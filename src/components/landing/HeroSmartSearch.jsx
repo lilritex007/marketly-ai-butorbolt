@@ -47,6 +47,7 @@ export default function HeroSmartSearch({
   const [preferredCategories, setPreferredCategories] = useState([]);
   const [preferredKeywords, setPreferredKeywords] = useState([]);
   const [searchPulse, setSearchPulse] = useState(false);
+  const [hoverCard, setHoverCard] = useState({ id: null, rx: 0, ry: 0 });
   const [smartResults, setSmartResults] = useState([]);
   const [smartTotalMatches, setSmartTotalMatches] = useState(0);
   const [isIndexBuilding, setIsIndexBuilding] = useState(false);
@@ -309,6 +310,40 @@ export default function HeroSmartSearch({
     ];
   }, [trimmedQuery, queryTokens, rankedQueryProducts, intent]);
 
+  const rewriteSuggestionsWithQuality = useMemo(() => {
+    if (!Array.isArray(products) || products.length === 0) return [];
+    return rewriteSuggestions.map((text) => {
+      const result = smartSearch(products, text, { limit: 12 });
+      const count = Number(result?.totalMatches || 0);
+      let quality = { label: 'Közepes', classes: 'bg-amber-50 text-amber-700 border-amber-200' };
+      if (count >= 16) quality = { label: 'Erős', classes: 'bg-emerald-50 text-emerald-700 border-emerald-200' };
+      else if (count <= 3) quality = { label: 'Szűk', classes: 'bg-rose-50 text-rose-700 border-rose-200' };
+      return { text, count, quality };
+    });
+  }, [rewriteSuggestions, products]);
+
+  const intentTimeline = useMemo(() => {
+    if (!intent || trimmedQuery.length < 2) return [];
+    const timeline = [];
+    if (Array.isArray(intent.productTypes) && intent.productTypes[0]) {
+      timeline.push({ title: 'Terméktípus felismerve', value: intent.productTypes[0], tone: 'bg-primary-50 border-primary-200 text-primary-700' });
+    }
+    if (Array.isArray(intent.styles) && intent.styles[0]) {
+      timeline.push({ title: 'Stílus felismerve', value: intent.styles[0], tone: 'bg-violet-50 border-violet-200 text-violet-700' });
+    }
+    if (Array.isArray(intent.colors) && intent.colors[0]) {
+      timeline.push({ title: 'Szín preferencia', value: intent.colors[0], tone: 'bg-sky-50 border-sky-200 text-sky-700' });
+    }
+    if (intent.priceRange?.max || intent.priceRange?.min) {
+      const priceText = intent.priceRange?.max
+        ? `${Math.round((intent.priceRange.max || 0) / 1000)}k alatt`
+        : `${Math.round((intent.priceRange.min || 0) / 1000)}k felett`;
+      timeline.push({ title: 'Árhatár', value: priceText, tone: 'bg-amber-50 border-amber-200 text-amber-700' });
+    }
+    timeline.push({ title: 'Találati magabiztosság', value: `${actualResultCount ?? 0} találat`, tone: 'bg-emerald-50 border-emerald-200 text-emerald-700' });
+    return timeline.slice(0, 5);
+  }, [intent, trimmedQuery, actualResultCount]);
+
   const hasNoResults = trimmedQuery.length >= 2 && suggestions.length === 0;
   const rescueSuggestions = useMemo(() => {
     if (!hasNoResults) return [];
@@ -320,6 +355,13 @@ export default function HeroSmartSearch({
     base.push(`${trimmedQuery} modern`);
     return base.map((v) => v.trim()).filter((v) => v.length >= 3).slice(0, 3);
   }, [hasNoResults, trimmedQuery]);
+
+  const triggerFullSearch = (inputQuery, source = 'submit') => {
+    const safeQuery = String(inputQuery || '').trim();
+    if (!safeQuery) return;
+    onSearch?.(safeQuery, { source });
+    setIsOpen(false);
+  };
 
   const handleSubmit = (e) => {
     e?.preventDefault?.();
@@ -337,7 +379,7 @@ export default function HeroSmartSearch({
       } catch {}
       return next;
     });
-    onSearch?.(trimmedQuery, { source: 'submit' });
+    triggerFullSearch(trimmedQuery, 'submit');
     setTimeout(() => {
       setIsSearching(false);
       setIsOpen(false);
@@ -346,7 +388,7 @@ export default function HeroSmartSearch({
 
   const applySuggestion = (text, opts = {}) => {
     if (!text) return;
-    const { submit = false } = opts;
+    const { submit = true, source = 'suggestion' } = opts;
     setQuery(text);
     setDidSearch(true);
     trackSearch(text);
@@ -361,8 +403,7 @@ export default function HeroSmartSearch({
       return next;
     });
     if (submit) {
-      onSearch?.(text, { source: 'submit' });
-      setIsOpen(false);
+      triggerFullSearch(text, source);
       return;
     }
     setIsOpen(true);
@@ -455,6 +496,15 @@ export default function HeroSmartSearch({
     if (index === 1) return { text: 'Top #2', classes: 'bg-blue-50 text-blue-700 border-blue-200' };
     if (index === 2) return { text: 'Top #3', classes: 'bg-violet-50 text-violet-700 border-violet-200' };
     return { text: 'Ajánlott', classes: 'bg-gray-50 text-gray-700 border-gray-200' };
+  };
+
+  const handleCardMouseMove = (event, productId) => {
+    const rect = event.currentTarget.getBoundingClientRect();
+    const px = (event.clientX - rect.left) / rect.width;
+    const py = (event.clientY - rect.top) / rect.height;
+    const rx = (0.5 - py) * 6;
+    const ry = (px - 0.5) * 8;
+    setHoverCard({ id: String(productId), rx, ry });
   };
 
   const displayedTopProducts = trimmedQuery.length < 2 ? starterProducts : previewProducts;
@@ -554,7 +604,7 @@ export default function HeroSmartSearch({
 
   return (
     <div className="w-full max-w-4xl mx-auto mb-8 sm:mb-10 overflow-x-hidden">
-      <div className="relative rounded-3xl border border-primary-200 bg-gradient-to-br from-white via-primary-50/40 to-secondary-50/35 backdrop-blur-sm shadow-[0_26px_52px_rgba(15,23,42,0.16)] p-2.5 sm:p-4 overflow-hidden max-w-full">
+      <div className="relative rounded-3xl border border-primary-300/70 bg-gradient-to-br from-white via-primary-50/45 to-secondary-50/40 backdrop-blur-sm shadow-[0_30px_60px_rgba(15,23,42,0.18)] p-2.5 sm:p-4 overflow-hidden max-w-full">
         <div className="pointer-events-none absolute inset-x-0 top-0 h-16 bg-gradient-to-r from-primary-300/60 via-transparent to-secondary-300/60" aria-hidden />
         <div className="pointer-events-none absolute -right-10 -top-10 w-36 h-36 rounded-full bg-secondary-300/25 blur-3xl" aria-hidden />
         <div className="pointer-events-none absolute -left-10 -bottom-8 w-28 h-28 rounded-full bg-primary-300/20 blur-2xl" aria-hidden />
@@ -582,7 +632,7 @@ export default function HeroSmartSearch({
         </div>
 
         <form onSubmit={handleSubmit} className="relative">
-          <div className={`rounded-2xl border border-primary-200/70 bg-white p-2.5 shadow-[0_10px_24px_rgba(15,23,42,0.08)] focus-within:ring-2 focus-within:ring-primary-300 focus-within:border-primary-300 transition-all ${searchPulse ? 'ring-2 ring-emerald-200 border-emerald-300' : ''}`}>
+          <div className={`rounded-2xl border-2 border-primary-300/80 bg-white p-2.5 shadow-[0_14px_30px_rgba(15,23,42,0.10)] focus-within:ring-4 focus-within:ring-primary-200/70 focus-within:border-primary-400 transition-all ${searchPulse ? 'ring-4 ring-emerald-200 border-emerald-400' : ''}`}>
             <p className="text-[11px] uppercase tracking-wide font-semibold text-primary-700 mb-1.5 px-1">Azonnali keresőmező</p>
             <div className="flex items-center gap-2">
               <Search className="w-5 h-5 text-gray-400 ml-1 shrink-0" aria-hidden />
@@ -595,7 +645,7 @@ export default function HeroSmartSearch({
                 aria-label="Hero okoskereső"
               />
             </div>
-            <p className="text-[11px] text-primary-700/90 mt-1 px-1 font-medium">
+            <p className="text-[11px] text-primary-800 mt-1 px-1 font-semibold">
               Kattints a mezőbe és gépelj - az AI azonnal értelmezi a keresési szándékod.
             </p>
             <div className="mt-2 grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-2">
@@ -659,7 +709,7 @@ export default function HeroSmartSearch({
           )}
         </form>
 
-        <div className="mt-3 rounded-xl border border-secondary-200 bg-gradient-to-r from-secondary-50/65 to-primary-50/55 px-3 py-2">
+        <div className="mt-3 rounded-xl border border-secondary-300/70 bg-gradient-to-r from-secondary-100/75 to-primary-100/65 px-3 py-2">
           <div className="flex items-center justify-between gap-3 mb-1.5">
             <p className="text-[11px] uppercase tracking-wide font-semibold text-gray-500">Keresési pontosság</p>
             <span className="text-xs font-semibold text-gray-700">{actualResultCount ?? 0} tényleges találat</span>
@@ -673,6 +723,18 @@ export default function HeroSmartSearch({
             </p>
           )}
         </div>
+
+        {trimmedQuery.length >= 2 && (
+          <div className="mt-2">
+            <button
+              type="button"
+              onClick={() => triggerFullSearch(trimmedQuery, 'submit')}
+              className="w-full min-h-[44px] rounded-xl bg-gradient-to-r from-secondary-700 via-secondary-600 to-primary-500 text-white font-semibold text-sm shadow-[0_10px_24px_rgba(15,23,42,0.18)] hover:opacity-95 active:scale-[0.99] transition-all"
+            >
+              Összes találat megnyitása ({actualResultCount ?? 0})
+            </button>
+          </div>
+        )}
 
         {activeFilters.length > 0 && (
           <div className="mt-3 flex flex-wrap gap-2 rounded-xl border border-blue-100 bg-blue-50/60 px-2.5 py-2">
@@ -708,16 +770,33 @@ export default function HeroSmartSearch({
               <BrainCircuit className="w-3.5 h-3.5" aria-hidden />
               AI átfogalmazás
             </button>
-            {showRewriteOptions && rewriteSuggestions.slice(0, 3).map((item) => (
+            {showRewriteOptions && rewriteSuggestionsWithQuality.slice(0, 3).map((item) => (
               <button
-                key={item}
+                key={item.text}
                 type="button"
-                onClick={() => applyRewrite(item)}
-                className="px-3 py-1.5 rounded-full border border-violet-200 bg-white text-violet-700 text-xs hover:bg-violet-50 transition-colors"
+                onClick={() => applyRewrite(item.text)}
+                className="px-2.5 py-1.5 rounded-full border border-violet-200 bg-white text-violet-700 text-xs hover:bg-violet-50 transition-colors inline-flex items-center gap-1.5"
               >
-                {item}
+                <span>{item.text}</span>
+                <span className={`px-1.5 py-0.5 rounded-full border text-[10px] ${item.quality.classes}`}>
+                  {item.quality.label} • {item.count}
+                </span>
               </button>
             ))}
+          </div>
+        )}
+
+        {intentTimeline.length > 0 && (
+          <div className="mt-3 rounded-xl border border-primary-100 bg-white px-3 py-2">
+            <p className="text-[11px] uppercase tracking-wide font-semibold text-gray-500 mb-2">AI keresési értelmezés</p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              {intentTimeline.map((step, idx) => (
+                <div key={`${step.title}-${idx}`} className={`rounded-lg border px-2.5 py-2 ${step.tone}`}>
+                  <p className="text-[11px] font-semibold uppercase tracking-wide opacity-90">{step.title}</p>
+                  <p className="text-xs font-semibold mt-0.5">{step.value}</p>
+                </div>
+              ))}
+            </div>
           </div>
         )}
 
@@ -729,7 +808,7 @@ export default function HeroSmartSearch({
                 <button
                   key={`journey-${q}`}
                   type="button"
-                  onClick={() => applySuggestion(q)}
+                      onClick={() => applySuggestion(q, { submit: true, source: 'history' })}
                   className="px-3 py-1.5 rounded-full border border-gray-200 bg-white text-gray-700 text-xs hover:bg-primary-50 hover:text-primary-700 hover:border-primary-200 transition-colors"
                 >
                   <RotateCcw className="w-3 h-3 inline mr-1" aria-hidden />
@@ -779,6 +858,8 @@ export default function HeroSmartSearch({
                         role="button"
                         tabIndex={0}
                         onClick={() => handlePreviewProductClick(p)}
+                        onMouseMove={(e) => handleCardMouseMove(e, p.id || p.name)}
+                        onMouseLeave={() => setHoverCard({ id: null, rx: 0, ry: 0 })}
                         onKeyDown={(e) => {
                           if (e.key === 'Enter' || e.key === ' ') {
                             e.preventDefault();
@@ -786,6 +867,9 @@ export default function HeroSmartSearch({
                           }
                         }}
                         className="min-w-[170px] sm:min-w-[220px] lg:min-w-[240px] snap-start text-left rounded-xl border border-primary-100 bg-white hover:bg-white hover:border-primary-300 hover:shadow-lg transition-all p-2.5"
+                        style={hoverCard.id === String(p.id || p.name)
+                          ? { transform: `perspective(900px) rotateX(${hoverCard.rx}deg) rotateY(${hoverCard.ry}deg) translateY(-2px)` }
+                          : undefined}
                       >
                         <div className="w-full h-24 sm:h-28 rounded-lg bg-gray-100 overflow-hidden mb-2 flex items-center justify-center">
                           {getProductImage(p) ? <img src={getProductImage(p)} alt="" className="w-full h-full object-cover" /> : <Package className="w-5 h-5 text-gray-400" aria-hidden />}
@@ -830,7 +914,7 @@ export default function HeroSmartSearch({
                     <button
                       key={idx}
                       type="button"
-                      onClick={() => applySuggestion(s.text || s.query || '')}
+                      onClick={() => applySuggestion(s.text || s.query || '', { submit: true, source: 'suggestion' })}
                       className="text-left px-3 py-2.5 rounded-xl border border-gray-200 bg-white hover:bg-gray-50 hover:border-primary-200 transition-colors min-h-[48px]"
                     >
                       <p className="text-sm font-medium text-gray-800 truncate">{s.text || s.query}</p>
@@ -844,7 +928,7 @@ export default function HeroSmartSearch({
                       <button
                         key={`dyn-${item.text}`}
                         type="button"
-                        onClick={() => applySuggestion(item.text)}
+                        onClick={() => applySuggestion(item.text, { submit: true, source: 'quick-hit' })}
                         className="px-2.5 py-1.5 rounded-full border border-primary-200 bg-gradient-to-r from-primary-50 to-secondary-50 text-primary-700 text-xs font-medium hover:from-primary-100 hover:to-secondary-100 transition-colors inline-flex items-center gap-1.5"
                       >
                         <span>{item.text}</span>
@@ -858,7 +942,7 @@ export default function HeroSmartSearch({
                         <button
                           key={`journey-inline-${q}`}
                           type="button"
-                          onClick={() => applySuggestion(q)}
+                          onClick={() => applySuggestion(q, { submit: true, source: 'journey' })}
                           className="px-2.5 py-1 rounded-full border border-gray-200 bg-white text-gray-600 text-[11px] hover:bg-gray-50 transition-colors"
                         >
                           Gyors újrafuttatás: {q}
@@ -875,7 +959,7 @@ export default function HeroSmartSearch({
                     <button
                       key={item.text}
                       type="button"
-                      onClick={() => applySuggestion(item.text)}
+                      onClick={() => applySuggestion(item.text, { submit: true, source: 'quick-hit' })}
                       className="px-2.5 py-1.5 rounded-full border border-gray-200 bg-white text-gray-700 text-xs hover:bg-primary-50 hover:text-primary-700 hover:border-primary-200 transition-colors inline-flex items-center gap-1.5"
                     >
                       <span>{item.text}</span>
@@ -891,7 +975,7 @@ export default function HeroSmartSearch({
                         <button
                           key={q}
                           type="button"
-                          onClick={() => applySuggestion(q)}
+                          onClick={() => applySuggestion(q, { submit: true, source: 'rescue' })}
                           className="px-3 py-1.5 rounded-full border border-primary-200 bg-primary-50 text-primary-700 text-xs hover:bg-primary-100 transition-colors"
                         >
                           {q}
