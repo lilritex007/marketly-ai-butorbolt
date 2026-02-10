@@ -681,16 +681,11 @@ export default function HeroSmartSearch({
 
   return (
     <section
-      className="w-full max-w-full mx-auto mb-8 sm:mb-12 overflow-x-hidden min-w-0 box-border"
-      style={{
-        width: '100%',
-        maxWidth: 'min(100%, 72rem)',
-        paddingLeft: 'clamp(0.5rem, 3vw, 2rem)',
-        paddingRight: 'clamp(0.5rem, 3vw, 2rem)',
-      }}
+      className="w-full max-w-full mx-auto mb-8 sm:mb-12 min-w-0 box-border px-0 sm:px-4 md:px-6 lg:px-8 -mx-4 sm:mx-auto"
+      style={{ width: '100%', maxWidth: 'min(100%, 72rem)', touchAction: 'pan-y' }}
       aria-label="Találat Stúdió – AI kereső"
     >
-      <div className="relative rounded-2xl overflow-hidden border border-gray-200/90 bg-white/95 backdrop-blur-sm w-full min-w-0 max-w-full">
+      <div className="relative rounded-none sm:rounded-2xl overflow-x-clip overflow-y-visible border-0 sm:border border-gray-200/90 bg-white/95 backdrop-blur-sm w-full min-w-0 max-w-full">
         <div className="absolute inset-0 pointer-events-none overflow-hidden rounded-[inherit]" aria-hidden>
           <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary-400/40 to-transparent" />
           <div className="absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-secondary-400/30 to-transparent" />
@@ -739,10 +734,11 @@ export default function HeroSmartSearch({
           {/* Keresősáv */}
           <form onSubmit={handleSubmit} className="space-y-3 sm:space-y-4">
             <div
-              className={`rounded-xl sm:rounded-2xl border bg-white p-2 sm:p-3 transition-all duration-200 focus-within:border-primary-500 focus-within:ring-2 focus-within:ring-primary-300/50 ${searchPulse ? 'border-emerald-500 ring-2 ring-emerald-300/50' : 'border-gray-200'}`}
+              className={`rounded-none sm:rounded-2xl border-0 sm:border bg-white p-2 sm:p-3 transition-all duration-200 focus-within:border-primary-500 focus-within:ring-2 focus-within:ring-primary-300/50 ${searchPulse ? 'border-emerald-500 ring-2 ring-emerald-300/50' : 'border-gray-200'}`}
             >
-              <div className="flex flex-col xs:flex-row gap-2 sm:gap-3">
-                <div className="flex-1 flex items-center gap-3 rounded-xl bg-gray-50/90 border border-gray-200/90 px-3 py-3 sm:py-3.5 min-h-[48px] min-w-0">
+              {/* Mobilon: keresősáv teljes szélesség, alatta Szűrők + Keresés gombok */}
+              <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
+                <div className="flex-1 flex items-center gap-3 rounded-xl bg-gray-50/90 border border-gray-200/90 px-3 py-3 sm:py-3.5 min-h-[48px] min-w-0 w-full">
                   <Search className="w-5 h-5 text-primary-500 shrink-0" aria-hidden />
                   <input
                     type="search"
@@ -750,25 +746,25 @@ export default function HeroSmartSearch({
                     onChange={(e) => setQuery(e.target.value)}
                     onFocus={() => setIsOpen(true)}
                     placeholder="Termék, stílus, ár... pl. bézs kanapé 100e alatt"
-                    className="flex-1 min-w-0 bg-transparent outline-none text-base sm:text-base text-gray-900 placeholder:text-gray-500"
+                    className="flex-1 min-w-0 bg-transparent outline-none text-base text-gray-900 placeholder:text-gray-500"
                     aria-label="Keresés a teljes katalógusban"
                     autoComplete="off"
                   />
                 </div>
-                <div className="flex gap-2 sm:gap-3">
+                <div className="flex gap-2 sm:gap-3 flex-shrink-0 w-full sm:w-auto">
                   <button
                     type="button"
                     onClick={() => setShowQuickFilterPanel((prev) => !prev)}
-                    className={`flex-1 xs:flex-none min-h-[48px] min-w-[48px] sm:min-h-[48px] px-4 rounded-xl border-2 text-sm font-semibold inline-flex items-center justify-center gap-2 transition-all duration-150 touch-manipulation active:scale-[0.98] ${showQuickFilterPanel ? 'border-primary-400 bg-primary-50 text-primary-800' : 'border-gray-200 bg-white text-gray-700 hover:bg-gray-50'}`}
+                    className={`w-[30%] sm:w-auto min-h-[48px] px-3 sm:px-4 rounded-xl border-2 text-sm font-semibold inline-flex items-center justify-center gap-2 transition-all duration-150 touch-manipulation active:scale-[0.98] ${showQuickFilterPanel ? 'border-primary-400 bg-primary-50 text-primary-800' : 'border-gray-200 bg-white text-gray-700 hover:bg-gray-50'}`}
                     title="Gyors szűrők"
                     aria-expanded={showQuickFilterPanel}
                   >
                     <Filter className="w-4 h-4 shrink-0" aria-hidden />
-                    <span className="hidden xs:inline">Szűrők</span>
+                    <span>Szűrők</span>
                   </button>
                   <button
                     type="submit"
-                    className="flex-1 xs:flex-none min-h-[48px] min-w-[48px] sm:min-h-[48px] px-4 sm:px-5 rounded-xl bg-gradient-to-r from-primary-500 to-secondary-600 text-white text-sm font-bold shadow-lg hover:opacity-95 active:scale-[0.98] transition-all duration-150 inline-flex items-center justify-center gap-2 touch-manipulation"
+                    className="w-[70%] sm:w-auto min-h-[48px] px-4 sm:px-5 rounded-xl bg-gradient-to-r from-primary-500 to-secondary-600 text-white text-sm font-bold shadow-lg hover:opacity-95 active:scale-[0.98] transition-all duration-150 inline-flex items-center justify-center gap-2 touch-manipulation"
                     aria-busy={isSearching}
                   >
                     {isSearching ? (
