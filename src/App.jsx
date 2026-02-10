@@ -931,11 +931,12 @@ const App = () => {
     }
   }, [getCategoryMainList]);
 
-  // Server-side search (marketplace-style)
-  const handleServerSearch = useCallback((query) => {
+  // Server-side search (marketplace-style). scrollFromEffect: true = görgetés az effect-ben (pl. header keresés), false = hívó intézi (pl. hero)
+  const requestScrollToProductsRef = useRef(false);
+  const handleServerSearch = useCallback((query, opts = {}) => {
     hasUserSearchedRef.current = true;
+    if (opts.scrollFromEffect !== false) requestScrollToProductsRef.current = true;
     setSearchQuery(query);
-    // API hívás a debouncedSearch useEffect-ben
   }, []);
   const hasUserSearchedRef = useRef(false);
   useLayoutEffect(() => {
@@ -1049,7 +1050,9 @@ const App = () => {
       limit: INITIAL_PAGE,
       offset: 0
     });
-    if (hasUserSearchedRef.current && debouncedSearch.trim()) {
+    // Csak akkor görgetünk a termékekre, ha a felhasználó most indított keresést/kategóriaváltást (ne listagörgetéskor)
+    if (requestScrollToProductsRef.current && debouncedSearch.trim()) {
+      requestScrollToProductsRef.current = false;
       setTimeout(() => scrollToProductsSectionRef.current?.(), 120);
     }
   }, [categoryFilter, debouncedSearch, canUseLocalSearch, getCategoryMainList]);
@@ -1350,9 +1353,9 @@ const App = () => {
                 if (meta?.source !== 'instant') {
                   setActiveTab('shop');
                 }
-                handleServerSearch(query);
+                handleServerSearch(query, { scrollFromEffect: false });
                 if (meta?.source !== 'instant') {
-                  setTimeout(() => scrollToProductsSectionRef.current?.(), 120);
+                  setTimeout(() => scrollToProductsSectionRef.current?.(), 150);
                 }
               }}
               quickCategories={(categoryHierarchy?.mainCategories || []).slice(0, 6).map((c) => c.name)}

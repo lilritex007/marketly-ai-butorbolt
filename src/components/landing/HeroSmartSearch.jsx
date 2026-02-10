@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { Search, Sparkles, Camera, ArrowRight, Wand2, X, Package, CheckCircle2, TrendingUp, ChevronRight, Plus, SlidersHorizontal, BrainCircuit, RotateCcw, Filter, Award } from 'lucide-react';
+import { Search, Sparkles, Camera, ArrowRight, Wand2, X, Package, CheckCircle2, TrendingUp, ChevronRight, Plus, SlidersHorizontal, BrainCircuit, RotateCcw, Filter, Award, Lightbulb } from 'lucide-react';
 import {
   buildSearchIndex,
   getAutocompleteSuggestions,
@@ -681,29 +681,29 @@ export default function HeroSmartSearch({
 
   return (
     <section
-      className="w-full max-w-4xl mx-auto px-4 sm:px-5 mb-8 sm:mb-12 overflow-x-hidden min-w-0"
+      className="w-full max-w-full mx-auto mb-8 sm:mb-12 overflow-x-hidden min-w-0 box-border px-0 sm:px-0"
+      style={{ maxWidth: 'min(100%, 72rem)', paddingLeft: 'clamp(0.75rem, 4vw, 2rem)', paddingRight: 'clamp(0.75rem, 4vw, 2rem)' }}
       aria-label="Találat Stúdió – AI kereső"
     >
-      <div className="relative rounded-2xl sm:rounded-[1.75rem] md:rounded-[2rem] border-2 border-primary-300/90 bg-gradient-to-b from-white via-primary-50/70 to-white shadow-[0_20px_40px_rgba(15,23,42,0.12)] sm:shadow-[0_28px_56px_rgba(15,23,42,0.14)] overflow-hidden">
-        {/* Subtle gradient orbs */}
+      <div className="relative rounded-2xl overflow-hidden border border-gray-200/90 bg-white/95 backdrop-blur-sm max-w-full min-w-0">
         <div className="absolute inset-0 pointer-events-none overflow-hidden rounded-[inherit]" aria-hidden>
-          <div className="absolute -top-16 -right-16 w-48 h-48 sm:w-64 sm:h-64 rounded-full bg-primary-400/12 blur-3xl" />
-          <div className="absolute -bottom-16 -left-16 w-40 h-40 sm:w-56 sm:h-56 rounded-full bg-secondary-500/10 blur-3xl" />
+          <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary-400/40 to-transparent" />
+          <div className="absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-secondary-400/30 to-transparent" />
         </div>
 
-        <div className="relative z-10 p-4 sm:p-5 md:p-6">
-          {/* Fejléc: Találat Stúdió + alcím */}
-          <header className="mb-4 sm:mb-6">
+        <div className="relative z-10 p-4 sm:p-5 md:p-6 lg:p-7">
+          {/* Fejléc – Inspiration + Hero trust stílus */}
+          <header className="mb-5 sm:mb-6">
             <div className="flex flex-wrap items-center justify-between gap-3 sm:gap-4">
-              <div className="flex items-center gap-3 min-w-0">
-                <span className="flex h-10 w-10 sm:h-11 sm:w-11 shrink-0 rounded-2xl bg-gradient-to-br from-primary-500 to-secondary-600 text-white items-center justify-center shadow-lg">
-                  <Search className="w-5 h-5 sm:w-6 sm:h-6" aria-hidden />
+              <div className="flex items-center gap-3 min-w-0 flex-1">
+                <span className="flex h-11 w-11 sm:h-12 sm:w-12 shrink-0 rounded-2xl bg-gradient-to-br from-primary-500 via-primary-600 to-secondary-600 text-white items-center justify-center shadow-[0_4px_14px_rgba(255,138,0,0.4)]">
+                  <Search className="w-6 h-6 sm:w-7 sm:h-7" aria-hidden />
                 </span>
                 <div className="min-w-0">
-                  <h2 className="text-lg sm:text-xl md:text-2xl font-extrabold tracking-tight text-gray-900 truncate">
+                  <h2 className="text-xl sm:text-2xl md:text-3xl font-extrabold tracking-tight text-gray-900 truncate bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">
                     Találat Stúdió
                   </h2>
-                  <p className="text-xs sm:text-sm text-gray-500 mt-0.5">
+                  <p className="text-sm text-gray-500 mt-0.5">
                     AI kereső a teljes katalógusban
                   </p>
                 </div>
@@ -712,7 +712,7 @@ export default function HeroSmartSearch({
                 <button
                   type="button"
                   onClick={onTryAI}
-                  className="inline-flex items-center justify-center h-10 min-w-[44px] sm:h-11 sm:min-w-[44px] px-3 sm:px-0 rounded-xl bg-secondary-100 text-secondary-700 hover:bg-secondary-200 active:scale-95 transition-all touch-manipulation gap-1.5"
+                  className="inline-flex items-center justify-center h-11 min-w-[48px] sm:h-12 sm:min-w-[48px] px-3 sm:px-0 rounded-xl bg-gradient-to-r from-secondary-500/15 to-secondary-600/20 text-secondary-700 hover:from-secondary-500/25 hover:to-secondary-600/30 border border-secondary-200/60 active:scale-95 transition-all touch-manipulation gap-1.5"
                   title="Képből keresés"
                   aria-label="Képből keresés"
                 >
@@ -720,7 +720,7 @@ export default function HeroSmartSearch({
                   <span className="text-xs font-semibold sm:hidden">Képből</span>
                 </button>
                 <span
-                  className={`inline-flex items-center justify-center h-10 w-10 sm:h-11 sm:w-11 rounded-xl ${isIndexBuilding ? 'bg-amber-100 text-amber-700' : 'bg-emerald-100 text-emerald-700'}`}
+                  className={`inline-flex items-center justify-center h-11 w-11 sm:h-12 sm:w-12 rounded-xl ${isIndexBuilding ? 'bg-amber-500/15 text-amber-700 border border-amber-300/60' : 'bg-emerald-500/15 text-emerald-700 border border-emerald-300/60'}`}
                   title={isIndexBuilding ? 'Index épül' : 'Index kész'}
                   aria-live="polite"
                 >
@@ -728,13 +728,13 @@ export default function HeroSmartSearch({
                 </span>
               </div>
             </div>
-            <div className="mt-3 h-px bg-gradient-to-r from-transparent via-primary-200/80 to-transparent" aria-hidden />
+            <div className="mt-4 h-1 rounded-full bg-gradient-to-r from-primary-500 via-primary-400 to-secondary-500 max-w-24 opacity-90" aria-hidden />
           </header>
 
           {/* Keresősáv */}
           <form onSubmit={handleSubmit} className="space-y-3 sm:space-y-4">
             <div
-              className={`rounded-xl sm:rounded-2xl border-2 bg-white/95 shadow-md sm:shadow-lg p-2 sm:p-3 transition-all duration-200 focus-within:border-primary-500 focus-within:ring-4 focus-within:ring-primary-200/50 focus-within:shadow-[0_0_0_4px_rgba(251,146,60,0.15)] ${searchPulse ? 'border-emerald-400 ring-4 ring-emerald-200/50' : 'border-primary-300/90'}`}
+              className={`rounded-xl sm:rounded-2xl border bg-white p-2 sm:p-3 transition-all duration-200 focus-within:border-primary-500 focus-within:ring-2 focus-within:ring-primary-300/50 ${searchPulse ? 'border-emerald-500 ring-2 ring-emerald-300/50' : 'border-gray-200'}`}
             >
               <div className="flex flex-col xs:flex-row gap-2 sm:gap-3">
                 <div className="flex-1 flex items-center gap-3 rounded-xl bg-gray-50/90 border border-gray-200/90 px-3 py-3 sm:py-3.5 min-h-[48px] min-w-0">
@@ -777,8 +777,12 @@ export default function HeroSmartSearch({
               </div>
             </div>
           {showQuickFilterPanel && (
-            <div className="mt-3 rounded-xl border-2 border-amber-200/90 bg-amber-50/70 sm:bg-amber-50/50 p-4 shadow-md">
-              <p className="text-xs font-bold text-amber-800/90 mb-3">Gyors szűrők</p>
+            <div className="mt-3 rounded-xl border border-amber-200/80 bg-gradient-to-br from-amber-50 to-white p-4 relative overflow-hidden">
+              <div className="absolute left-0 bottom-0 w-full h-0.5 bg-gradient-to-r from-amber-400 via-amber-500 to-primary-500" aria-hidden />
+              <p className="text-xs font-bold text-amber-800 flex items-center gap-2 mb-3">
+                <span className="w-7 h-7 rounded-lg bg-gradient-to-br from-amber-500 to-orange-500 text-white flex items-center justify-center"><Filter className="w-3.5 h-3.5" aria-hidden /></span>
+                Gyors szűrők
+              </p>
               <div className="space-y-3">
                 {Object.entries(QUICK_FILTER_PRESETS).map(([group, values]) => (
                   <div key={group} className="flex flex-wrap items-center gap-2">
@@ -819,11 +823,12 @@ export default function HeroSmartSearch({
           )}
           </form>
 
-          {/* Pontosság – emerald */}
-          <div className="mt-4 rounded-xl border border-emerald-200/90 bg-emerald-50/60 backdrop-blur-sm px-4 py-3" role="status" aria-live="polite">
+          {/* Pontosság – trust card stílus */}
+          <div className="mt-4 rounded-xl border border-emerald-200/80 bg-gradient-to-br from-emerald-50 to-white px-4 py-3 relative overflow-hidden" role="status" aria-live="polite">
+            <div className="absolute left-0 bottom-0 w-full h-0.5 bg-gradient-to-r from-emerald-400 via-emerald-500 to-secondary-500" aria-hidden />
             <div className="flex items-center justify-between gap-2 mb-2">
-              <span className="text-xs font-semibold text-emerald-800/90 flex items-center gap-1.5">
-                <Award className="w-3.5 h-3.5 text-emerald-600" aria-hidden />
+              <span className="text-xs font-bold text-emerald-800 flex items-center gap-2">
+                <span className="w-7 h-7 rounded-lg bg-gradient-to-br from-emerald-500 to-emerald-600 text-white flex items-center justify-center"><Award className="w-3.5 h-3.5" aria-hidden /></span>
                 Találatok
               </span>
               <span className={`text-sm font-bold text-emerald-900 tabular-nums transition-transform duration-300 ${resultCountPulse ? 'scale-125' : 'scale-100'}`}>{actualResultCount ?? 0}</span>
@@ -841,7 +846,7 @@ export default function HeroSmartSearch({
               <button
                 type="button"
                 onClick={() => triggerFullSearch(trimmedQuery, 'submit')}
-                className="w-full min-h-[48px] rounded-xl bg-gradient-to-r from-primary-600 to-secondary-600 text-white font-semibold text-sm shadow-lg hover:opacity-95 active:scale-[0.98] transition-all duration-150 touch-manipulation"
+                className="w-full min-h-[48px] rounded-xl bg-gradient-to-r from-primary-500 via-primary-600 to-secondary-600 text-white font-bold text-sm shadow-[0_4px_14px_rgba(255,138,0,0.35)] hover:shadow-[0_6px_20px_rgba(255,138,0,0.4)] hover:-translate-y-0.5 active:scale-[0.98] transition-all duration-200 touch-manipulation"
               >
                 Összes találat megnyitása ({actualResultCount ?? 0})
               </button>
@@ -849,7 +854,12 @@ export default function HeroSmartSearch({
           )}
 
           {activeFilters.length > 0 && (
-            <div className="mt-3 sm:mt-4 flex flex-wrap gap-2 rounded-xl border border-sky-200/90 bg-sky-50/60 px-4 py-3">
+            <div className="mt-3 sm:mt-4 flex flex-wrap gap-2 rounded-xl border border-sky-200/80 bg-gradient-to-br from-sky-50 to-white px-4 py-3 relative overflow-hidden">
+              <div className="absolute left-0 bottom-0 w-full h-0.5 bg-gradient-to-r from-sky-400 via-blue-500 to-indigo-500" aria-hidden />
+              <span className="w-full flex items-center gap-2 mb-1 text-xs font-bold text-sky-800">
+                <span className="w-6 h-6 rounded-lg bg-gradient-to-br from-sky-500 to-blue-600 text-white flex items-center justify-center"><SlidersHorizontal className="w-3 h-3" aria-hidden /></span>
+                Aktív szűrők
+              </span>
               {activeFilters.map((f) => (
                 <button
                   key={f.id}
@@ -873,13 +883,14 @@ export default function HeroSmartSearch({
           )}
 
           {trimmedQuery.length >= 2 && (
-            <div className="mt-3 sm:mt-4 flex flex-wrap items-center gap-2 rounded-xl border border-secondary-200/90 bg-secondary-50/60 px-4 py-3">
+            <div className="mt-3 sm:mt-4 flex flex-wrap items-center gap-2 rounded-xl border border-secondary-200/80 bg-gradient-to-br from-secondary-50 to-white px-4 py-3 relative overflow-hidden">
+              <div className="absolute left-0 bottom-0 w-full h-0.5 bg-gradient-to-r from-secondary-400 via-teal-500 to-emerald-500" aria-hidden />
               <button
                 type="button"
                 onClick={() => setShowRewriteOptions((prev) => !prev)}
-                className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-secondary-100/80 text-secondary-800 text-xs font-semibold hover:bg-secondary-200/80 transition-colors touch-manipulation min-h-[40px]"
+                className="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-gradient-to-r from-secondary-500/20 to-teal-500/20 text-secondary-800 text-xs font-bold border border-secondary-200/80 hover:from-secondary-500/30 hover:to-teal-500/30 transition-colors touch-manipulation min-h-[40px]"
               >
-                <BrainCircuit className="w-3.5 h-3.5" aria-hidden />
+                <span className="w-6 h-6 rounded-lg bg-gradient-to-br from-secondary-500 to-secondary-600 text-white flex items-center justify-center shrink-0"><BrainCircuit className="w-3 h-3" aria-hidden /></span>
                 AI átfogalmazás
               </button>
               {showRewriteOptions && rewriteSuggestionsWithQuality.slice(0, 3).map((item) => (
@@ -899,8 +910,12 @@ export default function HeroSmartSearch({
           )}
 
           {intentTimeline.length > 0 && (
-            <div className="mt-3 sm:mt-4 rounded-xl border border-indigo-200/80 bg-indigo-50/50 px-4 py-3">
-              <p className="text-[11px] uppercase tracking-wide font-semibold text-indigo-700/90 mb-2">AI értelmezés</p>
+            <div className="mt-3 sm:mt-4 rounded-xl border border-indigo-200/80 bg-gradient-to-br from-indigo-50 to-white px-4 py-3 relative overflow-hidden">
+              <div className="absolute left-0 bottom-0 w-full h-0.5 bg-gradient-to-r from-indigo-400 via-violet-500 to-purple-500" aria-hidden />
+              <p className="text-xs font-bold text-indigo-800 flex items-center gap-2 mb-2">
+                <span className="w-7 h-7 rounded-lg bg-gradient-to-br from-indigo-500 to-violet-600 text-white flex items-center justify-center"><Lightbulb className="w-3.5 h-3.5" aria-hidden /></span>
+                AI értelmezés
+              </p>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                 {intentTimeline.map((step, idx) => (
                   <div key={`${step.title}-${idx}`} className={`rounded-lg border px-3 py-2 ${step.tone}`}>
@@ -913,8 +928,12 @@ export default function HeroSmartSearch({
           )}
 
           {(historyGrouped.today.length > 0 || historyGrouped.earlier.length > 0) && (
-            <div className="mt-3 sm:mt-4 rounded-xl border border-gray-200 bg-gray-100/80 px-4 py-3">
-              <p className="text-[11px] uppercase tracking-wide font-semibold text-gray-600 mb-2">Előzmények</p>
+            <div className="mt-3 sm:mt-4 rounded-xl border border-gray-200/90 bg-gradient-to-br from-gray-50 to-white px-4 py-3 relative overflow-hidden">
+              <div className="absolute left-0 bottom-0 w-full h-0.5 bg-gradient-to-r from-gray-300 via-gray-400 to-primary-400" aria-hidden />
+              <p className="text-xs font-bold text-gray-700 flex items-center gap-2 mb-2">
+                <span className="w-7 h-7 rounded-lg bg-gradient-to-br from-gray-500 to-gray-600 text-white flex items-center justify-center"><RotateCcw className="w-3.5 h-3.5" aria-hidden /></span>
+                Előzmények
+              </p>
               {historyGrouped.today.length > 0 && (
                 <div className="mb-2">
                   <p className="text-[10px] font-bold uppercase tracking-wide text-gray-500 mb-1.5">Ma</p>
@@ -987,14 +1006,17 @@ export default function HeroSmartSearch({
 
         {isOpen && (
           <div
-            className="mt-4 rounded-xl sm:rounded-2xl border-2 border-primary-200/90 bg-white overflow-hidden max-h-[70vh] sm:max-h-[65vh] overflow-y-auto overflow-x-hidden shadow-xl overscroll-contain"
+            className="mt-4 rounded-xl sm:rounded-2xl border border-gray-200 bg-white overflow-hidden max-h-[70vh] sm:max-h-[65vh] overflow-y-auto overflow-x-hidden shadow-lg overscroll-contain max-w-full min-w-0"
             onScroll={() => {
               setPreviewProduct(null);
               setPreviewAnchor(null);
             }}
           >
-            <div className="sticky top-0 z-10 bg-gradient-to-r from-primary-50/95 via-white to-secondary-50/95 backdrop-blur-md border-b border-primary-100 px-4 py-3 flex items-center justify-between min-h-[52px]">
-              <p className="text-sm font-bold text-gray-800">Javaslatok és találatok</p>
+            <div className="sticky top-0 z-10 bg-white/98 backdrop-blur-md border-b border-gray-200 px-4 py-3 flex items-center justify-between min-h-[52px]">
+              <p className="text-sm font-bold text-gray-800 flex items-center gap-2">
+                <TrendingUp className="w-4 h-4 text-primary-500" aria-hidden />
+                Javaslatok és találatok
+              </p>
               <button
                 type="button"
                 onClick={() => setIsOpen(false)}
