@@ -685,13 +685,11 @@ export default function HeroSmartSearch({
       style={{ width: '100%', maxWidth: 'min(100%, 72rem)', touchAction: 'pan-y' }}
       aria-label="AI Kereső"
     >
-      <div className="relative w-full min-w-0 max-w-full sm:mx-4 md:mx-6 lg:mx-8">
-        {/* Márkahű felső + alsó színátmenetes border – sarkokon kissé túlfut */}
-        <div className="absolute -left-2 -right-2 top-0 h-1 rounded-t-xl sm:rounded-t-2xl bg-gradient-to-r from-primary-500 via-secondary-500 to-primary-400 pointer-events-none z-20" aria-hidden />
-        <div className="absolute -left-2 -right-2 bottom-0 h-1 rounded-b-xl sm:rounded-b-2xl bg-gradient-to-r from-secondary-500 via-primary-500 to-secondary-400 pointer-events-none z-20" aria-hidden />
-
-        <div className="relative rounded-xl sm:rounded-2xl overflow-x-clip overflow-y-visible border-0 sm:border border-gray-200/90 bg-white/95 backdrop-blur-sm">
-          <div className="relative z-10 px-3 sm:px-6 md:px-8 lg:px-10 py-5 sm:py-6 md:py-7 min-w-0">
+      <div className="relative rounded-xl sm:rounded-2xl overflow-x-clip overflow-y-visible border-0 sm:border border-gray-200/90 bg-white/95 backdrop-blur-sm w-full min-w-0 max-w-full sm:mx-4 md:mx-6 lg:mx-8">
+        <div className="relative z-10 px-3 sm:px-6 md:px-8 lg:px-10 py-5 sm:py-6 md:py-7 min-w-0">
+          {/* Márkahű felső + alsó színátmenetes border – a szekció belsejében */}
+          <div className="absolute inset-x-0 top-0 h-1 rounded-t-xl sm:rounded-t-2xl bg-gradient-to-r from-primary-500 via-secondary-500 to-primary-400 pointer-events-none" aria-hidden />
+          <div className="absolute inset-x-0 bottom-0 h-1 rounded-b-xl sm:rounded-b-2xl bg-gradient-to-r from-secondary-500 via-primary-500 to-secondary-400 pointer-events-none" aria-hidden />
           {/* Fejléc – AI Kereső */}
           <header className="mb-5 sm:mb-6 relative -mx-3 sm:-mx-6 md:-mx-8 lg:-mx-10 -mt-5 sm:-mt-6 md:-mt-7 px-4 sm:px-6 md:px-8 lg:px-10 pt-5 sm:pt-6 md:pt-7 pb-4 sm:pb-5 overflow-hidden rounded-t-[inherit]">
             {/* Félig színátmenetes háttér */}
@@ -1276,7 +1274,6 @@ export default function HeroSmartSearch({
             )}
           </div>
         )}
-        </div>
         </div>
       </div>
     </section>
