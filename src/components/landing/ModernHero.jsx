@@ -57,6 +57,12 @@ export const ModernHero = ({ onExplore, onTryAI, quickCategories = [], onQuickCa
             </span>
           </h1>
 
+          <div
+            className={`mx-auto h-1.5 w-28 rounded-full bg-gradient-to-r from-primary-500 to-secondary-700 mb-8 ${mounted ? 'hero-reveal' : 'opacity-0'}`}
+            style={mounted ? { animationDelay: `${HERO_REVEAL_DELAY.line2 + 40}ms` } : undefined}
+            aria-hidden
+          />
+
           <p
             className={`text-base sm:text-lg lg:text-2xl text-gray-600 max-w-3xl mx-auto mb-10 sm:mb-12 ${mounted ? 'hero-reveal' : 'opacity-0'}`}
             style={mounted ? { animationDelay: `${HERO_REVEAL_DELAY.sub}ms`, lineHeight: '1.6' } : { lineHeight: '1.6' }}
@@ -74,6 +80,7 @@ export const ModernHero = ({ onExplore, onTryAI, quickCategories = [], onQuickCa
               className="group relative w-full sm:w-auto min-h-[48px] px-8 py-4 bg-gradient-to-r from-primary-500 to-secondary-700 text-white rounded-2xl font-semibold text-base shadow-[0_12px_30px_rgba(255,138,0,0.35)] hover:shadow-[0_16px_36px_rgba(255,138,0,0.45)] hover:-translate-y-0.5 active:scale-[0.98] transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-300 focus-visible:ring-offset-2 flex items-center justify-center gap-2"
               aria-label="Kezdj AI tervezéssel"
             >
+              <span className="px-2.5 py-1 rounded-full bg-white/20 text-[11px] font-bold uppercase tracking-wide">Most</span>
               <Sparkles className="w-5 h-5" aria-hidden />
               Kezdjük AI-val
               <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform duration-200" aria-hidden />
@@ -111,14 +118,15 @@ export const ModernHero = ({ onExplore, onTryAI, quickCategories = [], onQuickCa
           )}
 
           <div className={`w-full max-w-4xl ${mounted ? 'hero-reveal' : 'opacity-0'}`} style={mounted ? { animationDelay: `${HERO_REVEAL_DELAY.cta + 180}ms` } : undefined}>
-            <div className="rounded-3xl border border-gray-200 bg-white p-5 sm:p-6 shadow-sm">
+            <div className="rounded-3xl border border-gray-200 bg-white p-5 sm:p-6 shadow-[0_10px_30px_rgba(15,23,42,0.06)]">
               <p className="text-gray-600 text-sm font-semibold uppercase tracking-wider mb-4">AI Concierge</p>
               <div className="grid grid-cols-2 gap-3 sm:gap-4">
             {stats.map((stat, idx) => (
               <div
                 key={idx}
-                    className="bg-gray-50 rounded-2xl p-4 border border-gray-200"
+                    className="relative bg-white rounded-2xl p-4 border border-gray-200 shadow-sm"
               >
+                    <div className="absolute inset-x-4 top-0 h-px bg-gradient-to-r from-primary-300 to-secondary-400 opacity-80" />
                     <stat.icon className="w-6 h-6 text-primary-500 mb-2" aria-hidden />
                     <div className="text-xl sm:text-2xl font-bold text-gray-900">
                   <CountUp
