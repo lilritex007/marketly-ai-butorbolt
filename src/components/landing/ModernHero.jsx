@@ -124,10 +124,13 @@ export const ModernHero = ({ onExplore, onTryAI, quickCategories = [], onQuickCa
             {stats.map((stat, idx) => (
               <div
                 key={idx}
-                    className="relative bg-white rounded-2xl p-4 border border-gray-200 shadow-sm"
+                    className="group relative overflow-hidden bg-white rounded-2xl p-4 border border-gray-200 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-200"
               >
-                    <div className="absolute inset-x-4 top-0 h-px bg-gradient-to-r from-primary-300 to-secondary-400 opacity-80" />
-                    <stat.icon className="w-6 h-6 text-primary-500 mb-2" aria-hidden />
+                    <div className="absolute inset-0 bg-gradient-to-tr from-primary-100/70 via-transparent to-secondary-100/45" aria-hidden />
+                    <div className="absolute left-0 bottom-0 w-[72%] h-[2px] bg-gradient-to-r from-primary-500 via-primary-400 to-transparent" aria-hidden />
+                    <div className="absolute left-0 bottom-0 w-24 h-24 bg-gradient-to-tr from-primary-500/20 to-secondary-400/10 rotate-12 -translate-x-7 translate-y-7 blur-[1px]" aria-hidden />
+                    <div className="relative z-10">
+                    <stat.icon className="w-6 h-6 text-primary-600 mb-2" aria-hidden />
                     <div className="text-xl sm:text-2xl font-bold text-gray-900">
                   <CountUp
                     end={stat.value}
@@ -137,7 +140,8 @@ export const ModernHero = ({ onExplore, onTryAI, quickCategories = [], onQuickCa
                     delay={HERO_REVEAL_DELAY.stats[idx] + 180}
                   />
                 </div>
-                    <div className="text-xs text-gray-500">{stat.label}</div>
+                    <div className="text-xs text-gray-600">{stat.label}</div>
+                    </div>
               </div>
             ))}
               </div>
