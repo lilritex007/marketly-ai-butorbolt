@@ -4,13 +4,21 @@ import {
   Package, Users, Star, Zap
 } from 'lucide-react';
 import { CountUp } from '../ui/CountUp';
+import HeroSmartSearch from './HeroSmartSearch';
 
 const HERO_REVEAL_DELAY = { badge: 0, line1: 100, line2: 220, line3: 340, sub: 460, cta: 600, stats: [720, 820, 920, 1020] };
 
 /**
  * Premium Hero – egyetlen üzenet, erős vizuál, légzés
  */
-export const ModernHero = ({ onExplore, onTryAI, quickCategories = [], onQuickCategory }) => {
+export const ModernHero = ({
+  onExplore,
+  onTryAI,
+  quickCategories = [],
+  onQuickCategory,
+  products = [],
+  onHeroSearch
+}) => {
   const mounted = true;
 
   const stats = [
@@ -93,8 +101,19 @@ export const ModernHero = ({ onExplore, onTryAI, quickCategories = [], onQuickCa
           </p>
 
           <div
+            className={`${mounted ? 'hero-reveal' : 'opacity-0'}`}
+            style={mounted ? { animationDelay: `${HERO_REVEAL_DELAY.sub + 80}ms` } : undefined}
+          >
+            <HeroSmartSearch
+              products={products}
+              onSearch={onHeroSearch}
+              onTryAI={onTryAI}
+            />
+          </div>
+
+          <div
             className={`flex flex-col sm:flex-row gap-4 justify-center items-stretch sm:items-center mb-8 sm:mb-10 ${mounted ? 'hero-reveal' : 'opacity-0'}`}
-            style={mounted ? { animationDelay: `${HERO_REVEAL_DELAY.cta}ms` } : undefined}
+            style={mounted ? { animationDelay: `${HERO_REVEAL_DELAY.cta + 120}ms` } : undefined}
           >
             <button
               type="button"

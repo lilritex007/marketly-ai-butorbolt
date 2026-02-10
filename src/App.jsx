@@ -1343,6 +1343,12 @@ const App = () => {
             <ModernHero 
               onExplore={scrollToProductsSection}
               onTryAI={() => setActiveTab('visual-search')}
+              products={SERVER_SEARCH_ONLY ? products : (searchIndexReady ? searchIndexRef.current : products)}
+              onHeroSearch={(query) => {
+                setActiveTab('shop');
+                handleServerSearch(query);
+                setTimeout(() => scrollToProductsSectionRef.current?.(), 120);
+              }}
               quickCategories={(categoryHierarchy?.mainCategories || []).slice(0, 6).map((c) => c.name)}
               onQuickCategory={(name) => {
                 setActiveTab('shop');
