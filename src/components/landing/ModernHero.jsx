@@ -19,6 +19,28 @@ export const ModernHero = ({ onExplore, onTryAI, quickCategories = [], onQuickCa
     { icon: Star, value: 4.9, suffix: '/5', label: 'Értékelés', decimals: 1 },
     { icon: Zap, value: 24, suffix: '/7', label: 'AI támogatás', decimals: 0 }
   ];
+  const statCardStyles = [
+    {
+      card: 'from-emerald-50 to-white border-emerald-200',
+      iconWrap: 'from-emerald-500 to-emerald-600',
+      edge: 'from-emerald-500 via-emerald-400 to-transparent'
+    },
+    {
+      card: 'from-blue-50 to-white border-blue-200',
+      iconWrap: 'from-blue-500 to-blue-600',
+      edge: 'from-blue-500 via-blue-400 to-transparent'
+    },
+    {
+      card: 'from-amber-50 to-white border-amber-200',
+      iconWrap: 'from-amber-500 to-orange-600',
+      edge: 'from-amber-500 via-amber-400 to-transparent'
+    },
+    {
+      card: 'from-secondary-50 to-white border-secondary-200',
+      iconWrap: 'from-secondary-600 to-secondary-700',
+      edge: 'from-secondary-600 via-secondary-500 to-transparent'
+    }
+  ];
 
   return (
     <section
@@ -117,20 +139,21 @@ export const ModernHero = ({ onExplore, onTryAI, quickCategories = [], onQuickCa
             </div>
           )}
 
-          <div className={`w-full max-w-4xl ${mounted ? 'hero-reveal' : 'opacity-0'}`} style={mounted ? { animationDelay: `${HERO_REVEAL_DELAY.cta + 180}ms` } : undefined}>
-            <div className="rounded-3xl border border-gray-200 bg-white p-5 sm:p-6 shadow-[0_10px_30px_rgba(15,23,42,0.06)]">
-              <p className="text-gray-600 text-sm font-semibold uppercase tracking-wider mb-4">AI Concierge</p>
-              <div className="grid grid-cols-2 gap-3 sm:gap-4">
-            {stats.map((stat, idx) => (
+          <div className={`w-full max-w-6xl ${mounted ? 'hero-reveal' : 'opacity-0'}`} style={mounted ? { animationDelay: `${HERO_REVEAL_DELAY.cta + 180}ms` } : undefined}>
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+            {stats.map((stat, idx) => {
+              const style = statCardStyles[idx % statCardStyles.length];
+              return (
               <div
                 key={idx}
-                    className="group relative overflow-hidden bg-white rounded-2xl p-4 border border-gray-200 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-200"
+                    className={`group relative overflow-hidden bg-gradient-to-tr ${style.card} rounded-2xl p-4 border shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-200`}
               >
-                    <div className="absolute inset-0 bg-gradient-to-tr from-primary-100/70 via-transparent to-secondary-100/45" aria-hidden />
-                    <div className="absolute left-0 bottom-0 w-[72%] h-[2px] bg-gradient-to-r from-primary-500 via-primary-400 to-transparent" aria-hidden />
-                    <div className="absolute left-0 bottom-0 w-24 h-24 bg-gradient-to-tr from-primary-500/20 to-secondary-400/10 rotate-12 -translate-x-7 translate-y-7 blur-[1px]" aria-hidden />
+                    <div className={`absolute left-0 bottom-0 w-[78%] h-[2px] bg-gradient-to-r ${style.edge}`} aria-hidden />
+                    <div className="absolute left-0 bottom-0 w-24 h-24 bg-gradient-to-tr from-black/5 to-transparent rotate-12 -translate-x-7 translate-y-7 blur-[1px]" aria-hidden />
                     <div className="relative z-10">
-                    <stat.icon className="w-6 h-6 text-primary-600 mb-2" aria-hidden />
+                    <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${style.iconWrap} text-white flex items-center justify-center mb-2.5 shadow-sm`}>
+                      <stat.icon className="w-5 h-5" aria-hidden />
+                    </div>
                     <div className="text-xl sm:text-2xl font-bold text-gray-900">
                   <CountUp
                     end={stat.value}
@@ -143,9 +166,9 @@ export const ModernHero = ({ onExplore, onTryAI, quickCategories = [], onQuickCa
                     <div className="text-xs text-gray-600">{stat.label}</div>
                     </div>
               </div>
-            ))}
+              );
+            })}
               </div>
-            </div>
           </div>
         </div>
       </div>
