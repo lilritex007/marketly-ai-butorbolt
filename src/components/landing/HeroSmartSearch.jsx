@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { Search, Sparkles, Camera, ArrowRight, Wand2, X, Package, CheckCircle2, TrendingUp, ChevronRight, Plus, SlidersHorizontal, BrainCircuit, RotateCcw } from 'lucide-react';
+import { Search, Sparkles, Camera, ArrowRight, Wand2, X, Package, CheckCircle2, TrendingUp, ChevronRight, Plus, SlidersHorizontal, BrainCircuit, RotateCcw, Filter } from 'lucide-react';
 import { getAutocompleteSuggestions, parseSearchIntent } from '../../services/aiSearchService';
-import { trackSearch, trackSectionEvent, getSearchHistory } from '../../services/userPreferencesService';
+import { trackSearch, trackSectionEvent, getSearchHistory, getViewedProducts, getLikedProducts } from '../../services/userPreferencesService';
 
 const QUICK_INTENTS = [
   'bézs kanapé 100e alatt',
@@ -11,6 +11,11 @@ const QUICK_INTENTS = [
 ];
 
 const SUCCESSFUL_SEARCHES_KEY = 'mkt_successful_hero_searches';
+const QUICK_FILTER_PRESETS = {
+  ar: ['80e alatt', '120e alatt', '180e alatt'],
+  stilus: ['modern', 'skandináv', 'minimalista'],
+  helyiseg: ['nappaliba', 'hálószobába', 'előszobába']
+};
 
 const escapeRegExp = (value = '') => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
@@ -28,6 +33,12 @@ export default function HeroSmartSearch({
   const [compareProducts, setCompareProducts] = useState([]);
   const [searchJourney, setSearchJourney] = useState([]);
   const [showRewriteOptions, setShowRewriteOptions] = useState(false);
+  const [showQuickFilterPanel, setShowQuickFilterPanel] = useState(false);
+  const [likedProductIds, setLikedProductIds] = useState([]);
+  const [viewedProductIds, setViewedProductIds] = useState([]);
+  const [preferredCategories, setPreferredCategories] = useState([]);
+  const [preferredKeywords, setPreferredKeywords] = useState([]);
+  const [searchPulse, setSearchPulse] = useState(false);
 
   const trimmedQuery = query.trim();
 
@@ -82,6 +93,46 @@ export default function HeroSmartSearch({
     [parsedFilters, dismissedFilterIds]
   );
 
+  const queryMatchedProducts = useMemo(() => {
+    if (!Array.isArray(products) || products.length === 0 || trimmedQuery.length < 2) return [];
+    return products
+      .filter((p) => {
+        const haystack = `${p?.name || ''} ${p?.category || ''}`.toLowerCase();
+        return queryTokens.some((token) => haystack.includes(token));
+      })
+      .slice(0, 30);
+  }, [products, trimmedQuery, queryTokens]);
+
+  const rankedQueryProducts = useMemo(() => {
+    if (queryMatchedProducts.length === 0) return [];
+
+    const likedSet = new Set(likedProductIds.map(String));
+    const viewedSet = new Set(viewedProductIds.map(String));
+
+    return queryMatchedProducts
+      .map((product) => {
+        const name = String(product?.name || '').toLowerCase();
+        const categoryFull = String(product?.category || '').toLowerCase();
+        const categoryLeaf = categoryFull.split('>').pop()?.trim() || '';
+        let score = 0;
+
+        queryTokens.forEach((token) => {
+          if (name.includes(token)) score += 20;
+          if (categoryFull.includes(token)) score += 12;
+          if (preferredKeywords.some((kw) => token.includes(kw) || kw.includes(token))) score += 6;
+        });
+
+        if (preferredCategories.some((cat) => categoryFull.includes(cat.toLowerCase()))) score += 15;
+        if (categoryLeaf && preferredCategories.some((cat) => categoryLeaf.includes(cat.toLowerCase()))) score += 10;
+        if (likedSet.has(String(product?.id))) score += 40;
+        if (viewedSet.has(String(product?.id))) score += 12;
+
+        return { product, score };
+      })
+      .sort((a, b) => b.score - a.score)
+      .map((entry) => entry.product);
+  }, [queryMatchedProducts, queryTokens, preferredKeywords, preferredCategories, likedProductIds, viewedProductIds]);
+
   const previewProducts = useMemo(() => {
     if (!Array.isArray(products) || products.length === 0) return [];
 
@@ -89,16 +140,7 @@ export default function HeroSmartSearch({
       .filter((s) => s?.type === 'product' && s?.product)
       .map((s) => s.product);
 
-    const byQuery = trimmedQuery.length < 2
-      ? []
-      : products
-        .filter((p) => {
-          const haystack = `${p?.name || ''} ${p?.category || ''}`.toLowerCase();
-          return queryTokens.some((token) => haystack.includes(token));
-        })
-        .slice(0, 8);
-
-    const merged = [...byAutocomplete, ...byQuery];
+    const merged = [...byAutocomplete, ...rankedQueryProducts];
     const unique = [];
     const seen = new Set();
     for (const item of merged) {
@@ -109,7 +151,26 @@ export default function HeroSmartSearch({
       if (unique.length >= 3) break;
     }
     return unique;
-  }, [products, suggestions, trimmedQuery, queryTokens]);
+  }, [products, suggestions, rankedQueryProducts]);
+
+  const contextualSuggestions = useMemo(() => {
+    if (rankedQueryProducts.length === 0) return [];
+    const categoryMap = new Map();
+    rankedQueryProducts.forEach((p) => {
+      const category = String(p?.category || '').split('>').pop()?.trim();
+      if (!category) return;
+      categoryMap.set(category, (categoryMap.get(category) || 0) + 1);
+    });
+    return [...categoryMap.entries()]
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 3)
+      .map(([category]) => `${category} akció`);
+  }, [rankedQueryProducts]);
+
+  const estimatedResultCount = useMemo(() => {
+    if (trimmedQuery.length < 2) return null;
+    return rankedQueryProducts.length;
+  }, [trimmedQuery, rankedQueryProducts.length]);
 
   const confidenceScore = useMemo(() => {
     const queryScore = Math.min(trimmedQuery.length * 3.5, 35);
@@ -143,7 +204,7 @@ export default function HeroSmartSearch({
     }
     const unique = [];
     const seen = new Set();
-    [...base, ...QUICK_INTENTS].forEach((q) => {
+    [...base, ...contextualSuggestions, ...QUICK_INTENTS].forEach((q) => {
       const key = q.toLowerCase();
       if (!seen.has(key) && q.trim().length >= 3) {
         seen.add(key);
@@ -151,7 +212,7 @@ export default function HeroSmartSearch({
       }
     });
     return unique.slice(0, 6);
-  }, [trimmedQuery, queryTokens, intent, activeFilters.length]);
+  }, [trimmedQuery, queryTokens, intent, activeFilters.length, contextualSuggestions]);
 
   const rewriteSuggestions = useMemo(() => {
     if (trimmedQuery.length < 2) return [];
@@ -184,6 +245,7 @@ export default function HeroSmartSearch({
     setDidSearch(true);
     trackSearch(trimmedQuery);
     trackSectionEvent(`hero-search-${variant}`, 'click', 'submit');
+    setSearchPulse(true);
     setSearchJourney((prev) => {
       const next = [trimmedQuery, ...prev.filter((q) => q.toLowerCase() !== trimmedQuery.toLowerCase())].slice(0, 6);
       try {
@@ -204,6 +266,7 @@ export default function HeroSmartSearch({
     setDidSearch(true);
     trackSearch(text);
     trackSectionEvent(`hero-search-${variant}`, 'click', 'suggestion');
+    setSearchPulse(true);
     setSearchJourney((prev) => {
       const next = [text, ...prev.filter((q) => q.toLowerCase() !== text.toLowerCase())].slice(0, 6);
       try {
@@ -260,6 +323,20 @@ export default function HeroSmartSearch({
     trackSectionEvent(`hero-search-${variant}`, 'click', 'rewrite');
   };
 
+  const applyQuickFilterToken = (token) => {
+    if (!token) return;
+    const normalized = String(token).trim();
+    if (!normalized) return;
+    setQuery((prev) => {
+      const base = prev.trim();
+      if (!base) return normalized;
+      if (base.toLowerCase().includes(normalized.toLowerCase())) return base;
+      return `${base} ${normalized}`.trim();
+    });
+    setIsOpen(true);
+    trackSectionEvent(`hero-search-${variant}`, 'click', `quick-filter-${normalized}`);
+  };
+
   const formatPrice = (value) => {
     const amount = Number(value || 0);
     return amount > 0 ? `${amount.toLocaleString('hu-HU')} Ft` : 'Ár hamarosan';
@@ -270,9 +347,64 @@ export default function HeroSmartSearch({
     return product.image || product.images?.[0] || product.thumbnail || '';
   };
 
+  const isPersonalMatch = (product) => {
+    const category = String(product?.category || '').toLowerCase();
+    const id = String(product?.id || '');
+    if (likedProductIds.includes(id)) return true;
+    return preferredCategories.some((cat) => category.includes(String(cat).toLowerCase()));
+  };
+
   useEffect(() => {
     setDismissedFilterIds([]);
   }, [trimmedQuery]);
+
+  useEffect(() => {
+    if (!searchPulse) return undefined;
+    const timer = setTimeout(() => setSearchPulse(false), 650);
+    return () => clearTimeout(timer);
+  }, [searchPulse]);
+
+  useEffect(() => {
+    try {
+      const liked = getLikedProducts().map((id) => String(id));
+      const viewed = getViewedProducts(30);
+      const viewedIds = viewed.map((item) => String(item?.id)).filter(Boolean);
+      const categoryCounter = new Map();
+      const keywordCounter = new Map();
+
+      viewed.forEach((item) => {
+        const category = String(item?.category || '').split('>').pop()?.trim();
+        if (category) {
+          categoryCounter.set(category, (categoryCounter.get(category) || 0) + 1);
+        }
+        String(item?.name || '')
+          .toLowerCase()
+          .split(/[\s,/-]+/)
+          .map((token) => token.trim())
+          .filter((token) => token.length >= 4)
+          .forEach((token) => keywordCounter.set(token, (keywordCounter.get(token) || 0) + 1));
+      });
+
+      const topCategories = [...categoryCounter.entries()]
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 4)
+        .map(([name]) => name);
+      const topKeywords = [...keywordCounter.entries()]
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 6)
+        .map(([name]) => name);
+
+      setLikedProductIds(liked);
+      setViewedProductIds(viewedIds);
+      setPreferredCategories(topCategories);
+      setPreferredKeywords(topKeywords);
+    } catch {
+      setLikedProductIds([]);
+      setViewedProductIds([]);
+      setPreferredCategories([]);
+      setPreferredKeywords([]);
+    }
+  }, []);
 
   useEffect(() => {
     try {
@@ -318,7 +450,7 @@ export default function HeroSmartSearch({
         </div>
 
         <form onSubmit={handleSubmit} className="relative">
-          <div className="flex items-center gap-2 rounded-2xl border border-gray-200 bg-white p-2 shadow-sm focus-within:ring-2 focus-within:ring-primary-300 focus-within:border-primary-300 transition-all">
+          <div className={`flex items-center gap-2 rounded-2xl border border-gray-200 bg-white p-2 shadow-sm focus-within:ring-2 focus-within:ring-primary-300 focus-within:border-primary-300 transition-all ${searchPulse ? 'ring-2 ring-emerald-200 border-emerald-300 scale-[1.01]' : ''}`}>
             <Search className="w-5 h-5 text-gray-400 ml-1" aria-hidden />
             <input
               value={query}
@@ -329,6 +461,14 @@ export default function HeroSmartSearch({
               aria-label="Hero okoskereső"
             />
             <button
+              type="button"
+              onClick={() => setShowQuickFilterPanel((prev) => !prev)}
+              className={`min-h-[40px] px-2.5 rounded-xl border text-xs font-semibold inline-flex items-center gap-1.5 transition-colors ${showQuickFilterPanel ? 'border-primary-300 bg-primary-50 text-primary-700' : 'border-gray-200 bg-white text-gray-600 hover:bg-gray-50'}`}
+            >
+              <Filter className="w-3.5 h-3.5" aria-hidden />
+              Szűrők
+            </button>
+            <button
               type="submit"
               className="min-h-[44px] px-4 sm:px-5 rounded-xl bg-gradient-to-r from-primary-500 to-secondary-700 text-white text-sm font-semibold hover:opacity-95 active:scale-[0.98] transition-all inline-flex items-center gap-1.5"
             >
@@ -336,16 +476,62 @@ export default function HeroSmartSearch({
               {isSearching ? <span className="w-4 h-4 rounded-full border-2 border-white/80 border-t-transparent animate-spin" aria-hidden /> : <ArrowRight className="w-4 h-4" aria-hidden />}
             </button>
           </div>
+          {showQuickFilterPanel && (
+            <div className="mt-2 rounded-2xl border border-gray-200 bg-white p-3 shadow-[0_10px_24px_rgba(15,23,42,0.08)]">
+              <p className="text-xs text-gray-500 mb-2">Gyors szűrők (egy koppintásos)</p>
+              <div className="space-y-2">
+                {Object.entries(QUICK_FILTER_PRESETS).map(([group, values]) => (
+                  <div key={group} className="flex flex-wrap items-center gap-2">
+                    <span className="text-[11px] font-semibold uppercase tracking-wide text-gray-500 min-w-14">
+                      {group}
+                    </span>
+                    {values.map((value) => (
+                      <button
+                        key={`${group}-${value}`}
+                        type="button"
+                        onClick={() => applyQuickFilterToken(value)}
+                        className="px-2.5 py-1 rounded-full border border-gray-200 bg-gray-50 text-gray-700 text-xs hover:bg-primary-50 hover:text-primary-700 hover:border-primary-200 transition-colors"
+                      >
+                        {value}
+                      </button>
+                    ))}
+                  </div>
+                ))}
+                {preferredCategories.length > 0 && (
+                  <div className="flex flex-wrap items-center gap-2 pt-1">
+                    <span className="text-[11px] font-semibold uppercase tracking-wide text-gray-500 min-w-14">
+                      Neked
+                    </span>
+                    {preferredCategories.slice(0, 3).map((value) => (
+                      <button
+                        key={`fav-${value}`}
+                        type="button"
+                        onClick={() => applyQuickFilterToken(value)}
+                        className="px-2.5 py-1 rounded-full border border-primary-200 bg-primary-50 text-primary-700 text-xs hover:bg-primary-100 transition-colors"
+                      >
+                        {value}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
         </form>
 
         <div className="mt-3 rounded-xl border border-gray-200 bg-white/80 px-3 py-2">
           <div className="flex items-center justify-between gap-3 mb-1.5">
-            <p className="text-[11px] uppercase tracking-wide font-semibold text-gray-500">Query confidence</p>
+            <p className="text-[11px] uppercase tracking-wide font-semibold text-gray-500">Keresési pontosság</p>
             <span className="text-xs font-semibold text-gray-700">{confidenceMeta.label}</span>
           </div>
           <div className="h-1.5 rounded-full bg-gray-100 overflow-hidden">
             <div className={`h-full ${confidenceMeta.tone} transition-all duration-300`} style={{ width: `${confidenceScore}%` }} />
           </div>
+          {estimatedResultCount !== null && (
+            <p className="mt-1.5 text-xs text-gray-500">
+              Várható találatok: <span className="font-semibold text-gray-700">{estimatedResultCount}</span>
+            </p>
+          )}
         </div>
 
         {activeFilters.length > 0 && (
@@ -463,6 +649,11 @@ export default function HeroSmartSearch({
                         {getProductImage(p) ? <img src={getProductImage(p)} alt="" className="w-full h-full object-cover" /> : <Package className="w-5 h-5 text-gray-400" aria-hidden />}
                       </div>
                       <p className="text-xs font-medium text-gray-800 truncate">{p.name}</p>
+                      {isPersonalMatch(p) && (
+                        <span className="inline-flex mt-1 px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 text-[11px] font-semibold">
+                          Neked ajánlott
+                        </span>
+                      )}
                       <div className="mt-1 flex items-center justify-between">
                         <p className="text-xs text-primary-600 font-semibold">{formatPrice(p.salePrice || p.price)}</p>
                         <div className="flex items-center gap-1">
@@ -504,19 +695,33 @@ export default function HeroSmartSearch({
                   ))}
                 </div>
                 <div>
-                  <p className="text-xs text-gray-500 mb-2">Gyors javaslatok ehhez:</p>
-                  <div className="flex flex-wrap gap-2">
-                    {dynamicQuickSuggestions.slice(0, 4).map((q) => (
+                  <p className="text-xs text-gray-500 mb-2">Gyorstalálatok ehhez a kereséshez:</p>
+                  <div className="flex flex-wrap gap-2 mb-2">
+                    {dynamicQuickSuggestions.slice(0, 5).map((q) => (
                       <button
                         key={`dyn-${q}`}
                         type="button"
                         onClick={() => applySuggestion(q)}
-                        className="px-3 py-1.5 rounded-full border border-primary-200 bg-primary-50 text-primary-700 text-xs hover:bg-primary-100 transition-colors"
+                        className="px-3 py-1.5 rounded-full border border-primary-200 bg-gradient-to-r from-primary-50 to-secondary-50 text-primary-700 text-xs font-medium hover:from-primary-100 hover:to-secondary-100 transition-colors"
                       >
                         {q}
                       </button>
                     ))}
                   </div>
+                  {searchJourney.length > 0 && (
+                    <div className="flex flex-wrap gap-2">
+                      {searchJourney.slice(0, 2).map((q) => (
+                        <button
+                          key={`journey-inline-${q}`}
+                          type="button"
+                          onClick={() => applySuggestion(q)}
+                          className="px-2.5 py-1 rounded-full border border-gray-200 bg-white text-gray-600 text-[11px] hover:bg-gray-50 transition-colors"
+                        >
+                          Gyors újrafuttatás: {q}
+                        </button>
+                      ))}
+                    </div>
+                  )}
                 </div>
               </div>
             ) : (
@@ -534,7 +739,7 @@ export default function HeroSmartSearch({
                   ))}
                 </div>
                 {hasNoResults && rescueSuggestions.length > 0 && (
-                  <div>
+                  <div className="rounded-xl border border-primary-100 bg-primary-50/60 p-2.5">
                     <p className="text-xs text-gray-500 mb-2">Nincs találat. Próbáld inkább:</p>
                     <div className="flex flex-wrap gap-2">
                       {rescueSuggestions.map((q) => (
@@ -548,6 +753,14 @@ export default function HeroSmartSearch({
                         </button>
                       ))}
                     </div>
+                    <button
+                      type="button"
+                      onClick={onTryAI}
+                      className="mt-2 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-secondary-600 text-white text-xs font-semibold hover:bg-secondary-700 transition-colors"
+                    >
+                      <Camera className="w-3.5 h-3.5" aria-hidden />
+                      Próbáld képalapú kereséssel
+                    </button>
                   </div>
                 )}
               </div>
@@ -556,7 +769,7 @@ export default function HeroSmartSearch({
             {compareProducts.length > 0 && (
               <div className="sticky bottom-0 z-10 border-t border-gray-200 bg-white/95 backdrop-blur-sm px-3 py-2">
                 <div className="flex flex-wrap items-center gap-2">
-                  <p className="text-xs font-semibold text-gray-600">Compare tray:</p>
+                  <p className="text-xs font-semibold text-gray-600">Összevető tálca:</p>
                   {compareProducts.map((p) => (
                     <span key={`cmp-${p.id}`} className="inline-flex items-center gap-1.5 px-2 py-1 rounded-full bg-gray-100 text-gray-700 text-xs">
                       {p.name}

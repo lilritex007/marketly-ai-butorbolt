@@ -46,9 +46,9 @@ export const ModernHero = ({
     ? {
       line1: 'Alakítsd át a teret,',
       line2: 'mielőtt egyetlen bútort megvennél.',
-      sub: 'AI útvonalterv, azonnali vizualizáció és valódi termékek egyetlen premium élményben.',
+      sub: 'AI útvonalterv, azonnali vizualizáció és valódi termékek egyetlen prémium élményben.',
       ctaPrimary: 'Személyes AI terv indul',
-      ctaBadge: 'PRO',
+      ctaBadge: 'PRÉMIUM',
       ctaSecondary: 'Inspiráció böngészése'
     }
     : {
@@ -107,7 +107,7 @@ export const ModernHero = ({
           >
             <span className="flex h-2.5 w-2.5 rounded-full bg-primary-500" aria-hidden />
             <span className="text-xs sm:text-sm font-semibold text-gray-700 uppercase tracking-wide">
-              Marketly Signature AI
+              Marketly AI rendszer
             </span>
           </div>
 
