@@ -33,8 +33,7 @@ import LiveSocialProof from './components/ux/LiveSocialProof';
 import LiveActivityStrip from './components/ux/LiveActivityStrip';
 
 // Landing Components  
-import SimpleHero from './components/landing/SimpleHero';
-import { AIFeaturesShowcase } from './components/landing/ModernHero';
+import { ModernHero, AIFeaturesShowcase } from './components/landing/ModernHero';
 import { SocialProof, LiveShowcase, InteractiveCTA } from './components/landing/ShowcaseSections';
 import TrustStrip from './components/landing/TrustStrip';
 import InspirationSection from './components/landing/InspirationSection';
@@ -1333,9 +1332,14 @@ const App = () => {
               />
             )}
             
-            <SimpleHero 
+            <ModernHero 
               onExplore={scrollToProductsSection}
               onTryAI={() => setActiveTab('visual-search')}
+              quickCategories={(categoryHierarchy?.mainCategories || []).slice(0, 6).map((c) => c.name)}
+              onQuickCategory={(name) => {
+                setActiveTab('shop');
+                handleCategoryChange(name);
+              }}
             />
             <TrustStrip />
             <AIFeaturesShowcase 
