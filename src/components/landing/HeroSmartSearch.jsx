@@ -1,6 +1,7 @@
 import React, { useMemo, useState } from 'react';
-import { Search, Sparkles, Camera, ArrowRight, Wand2 } from 'lucide-react';
+import { Search, Sparkles, Camera, ArrowRight, Wand2, X, Package, CheckCircle2 } from 'lucide-react';
 import { getAutocompleteSuggestions, parseSearchIntent } from '../../services/aiSearchService';
+import { trackSearch, trackSectionEvent } from '../../services/userPreferencesService';
 
 const QUICK_INTENTS = [
   'bézs kanapé 100e alatt',
@@ -12,10 +13,13 @@ const QUICK_INTENTS = [
 export default function HeroSmartSearch({
   products = [],
   onSearch,
-  onTryAI
+  onTryAI,
+  variant = 'A'
 }) {
   const [query, setQuery] = useState('');
   const [isOpen, setIsOpen] = useState(false);
+  const [isSearching, setIsSearching] = useState(false);
+  const [didSearch, setDidSearch] = useState(false);
 
   const trimmedQuery = query.trim();
 
@@ -30,16 +34,66 @@ export default function HeroSmartSearch({
     return parseSearchIntent(trimmedQuery);
   }, [trimmedQuery]);
 
+  const intentTokens = useMemo(() => {
+    if (!intent) return [];
+    const tokens = [];
+    if (Array.isArray(intent.productTypes) && intent.productTypes.length > 0) {
+      tokens.push(`termék: ${intent.productTypes[0]}`);
+    }
+    if (Array.isArray(intent.styles) && intent.styles.length > 0) {
+      tokens.push(`stílus: ${intent.styles[0]}`);
+    }
+    if (Array.isArray(intent.colors) && intent.colors.length > 0) {
+      tokens.push(`szín: ${intent.colors[0]}`);
+    }
+    if (intent.priceRange?.max && Number.isFinite(intent.priceRange.max)) {
+      tokens.push(`max ár: ${Math.round(intent.priceRange.max / 1000)}k`);
+    } else if (intent.priceRange?.min) {
+      tokens.push(`min ár: ${Math.round(intent.priceRange.min / 1000)}k`);
+    }
+    if (intent.isOnSale) tokens.push('akciós');
+    return tokens.slice(0, 4);
+  }, [intent]);
+
+  const previewProducts = useMemo(() => {
+    return suggestions
+      .filter((s) => s?.type === 'product' && s?.product)
+      .map((s) => s.product)
+      .slice(0, 3);
+  }, [suggestions]);
+
+  const hasNoResults = trimmedQuery.length >= 2 && suggestions.length === 0;
+  const rescueSuggestions = useMemo(() => {
+    if (!hasNoResults) return [];
+    const q = trimmedQuery.toLowerCase();
+    const base = [];
+    if (q.includes('alatt')) base.push(q.replace(/(\d+\s*(e|ez|ezer|k).*)/i, '').trim());
+    if (q.includes('olcsó')) base.push(q.replace('olcsó', ''));
+    base.push(`${trimmedQuery} akció`);
+    base.push(`${trimmedQuery} modern`);
+    return base.map((v) => v.trim()).filter((v) => v.length >= 3).slice(0, 3);
+  }, [hasNoResults, trimmedQuery]);
+
   const handleSubmit = (e) => {
     e?.preventDefault?.();
     if (!trimmedQuery) return;
+    setIsSearching(true);
+    setDidSearch(true);
+    trackSearch(trimmedQuery);
+    trackSectionEvent(`hero-search-${variant}`, 'click', 'submit');
     onSearch?.(trimmedQuery);
-    setIsOpen(false);
+    setTimeout(() => {
+      setIsSearching(false);
+      setIsOpen(false);
+    }, 350);
   };
 
   const applySuggestion = (text) => {
     if (!text) return;
     setQuery(text);
+    setDidSearch(true);
+    trackSearch(text);
+    trackSectionEvent(`hero-search-${variant}`, 'click', 'suggestion');
     onSearch?.(text);
     setIsOpen(false);
   };
@@ -81,26 +135,69 @@ export default function HeroSmartSearch({
               type="submit"
               className="min-h-[44px] px-4 sm:px-5 rounded-xl bg-gradient-to-r from-primary-500 to-secondary-700 text-white text-sm font-semibold hover:opacity-95 active:scale-[0.98] transition-all inline-flex items-center gap-1.5"
             >
-              Keresés
-              <ArrowRight className="w-4 h-4" aria-hidden />
+              {isSearching ? 'Keresés...' : 'Keresés'}
+              {isSearching ? <span className="w-4 h-4 rounded-full border-2 border-white/80 border-t-transparent animate-spin" aria-hidden /> : <ArrowRight className="w-4 h-4" aria-hidden />}
             </button>
           </div>
         </form>
 
-        {intent && (
+        {intentTokens.length > 0 && (
           <div className="mt-3 flex flex-wrap gap-2">
-            {(intent.filters || []).slice(0, 3).map((f, idx) => (
-              <span key={`${f.type}-${idx}`} className="px-2.5 py-1 rounded-full bg-gray-100 text-gray-700 text-xs">
-                {f.type}: {String(f.value)}
+            {intentTokens.map((token, idx) => (
+              <span key={`${token}-${idx}`} className="px-2.5 py-1 rounded-full bg-gray-100 text-gray-700 text-xs">
+                {token}
               </span>
             ))}
           </div>
         )}
 
+        {didSearch && !isOpen && (
+          <div className="mt-3 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 text-xs font-medium">
+            <CheckCircle2 className="w-3.5 h-3.5" aria-hidden />
+            Keresés elindítva
+          </div>
+        )}
+
         {isOpen && (
-          <div className="mt-3">
+          <div className="mt-3 rounded-2xl border border-gray-200 bg-white overflow-hidden max-h-[56vh] overflow-y-auto">
+            <div className="sticky top-0 z-10 bg-white/95 backdrop-blur-sm border-b border-gray-100 px-3 py-2 flex items-center justify-between">
+              <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Okos javaslatok</p>
+              <button
+                type="button"
+                onClick={() => setIsOpen(false)}
+                className="p-1.5 rounded-lg text-gray-500 hover:text-gray-700 hover:bg-gray-100 transition-colors"
+                aria-label="Keresőpanel bezárása"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            {previewProducts.length > 0 && (
+              <div className="p-3 border-b border-gray-100">
+                <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Talán ezt keresed</p>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                  {previewProducts.map((p) => (
+                    <button
+                      key={p.id}
+                      type="button"
+                      onClick={() => applySuggestion(p.name)}
+                      className="text-left rounded-xl border border-gray-200 bg-white hover:bg-gray-50 hover:border-primary-200 transition-colors p-2"
+                    >
+                      <div className="w-full h-16 rounded-lg bg-gray-100 overflow-hidden mb-2 flex items-center justify-center">
+                        {p.image ? <img src={p.image} alt="" className="w-full h-full object-cover" /> : <Package className="w-5 h-5 text-gray-400" aria-hidden />}
+                      </div>
+                      <p className="text-xs font-medium text-gray-800 truncate">{p.name}</p>
+                      <p className="text-xs text-primary-600 font-semibold mt-1">
+                        {(p.salePrice || p.price || 0).toLocaleString('hu-HU')} Ft
+                      </p>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
             {suggestions.length > 0 ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              <div className="p-3 grid grid-cols-1 sm:grid-cols-2 gap-2">
                 {suggestions.slice(0, 6).map((s, idx) => (
                   <button
                     key={idx}
@@ -113,17 +210,36 @@ export default function HeroSmartSearch({
                 ))}
               </div>
             ) : (
-              <div className="flex flex-wrap gap-2">
-                {QUICK_INTENTS.map((q) => (
-                  <button
-                    key={q}
-                    type="button"
-                    onClick={() => applySuggestion(q)}
-                    className="px-3 py-1.5 rounded-full border border-gray-200 bg-white text-gray-700 text-xs hover:bg-primary-50 hover:text-primary-700 hover:border-primary-200 transition-colors"
-                  >
-                    {q}
-                  </button>
-                ))}
+              <div className="p-3 space-y-3">
+                <div className="flex flex-wrap gap-2">
+                  {QUICK_INTENTS.map((q) => (
+                    <button
+                      key={q}
+                      type="button"
+                      onClick={() => applySuggestion(q)}
+                      className="px-3 py-1.5 rounded-full border border-gray-200 bg-white text-gray-700 text-xs hover:bg-primary-50 hover:text-primary-700 hover:border-primary-200 transition-colors"
+                    >
+                      {q}
+                    </button>
+                  ))}
+                </div>
+                {hasNoResults && rescueSuggestions.length > 0 && (
+                  <div>
+                    <p className="text-xs text-gray-500 mb-2">Nincs találat. Próbáld inkább:</p>
+                    <div className="flex flex-wrap gap-2">
+                      {rescueSuggestions.map((q) => (
+                        <button
+                          key={q}
+                          type="button"
+                          onClick={() => applySuggestion(q)}
+                          className="px-3 py-1.5 rounded-full border border-primary-200 bg-primary-50 text-primary-700 text-xs hover:bg-primary-100 transition-colors"
+                        >
+                          {q}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
             )}
           </div>

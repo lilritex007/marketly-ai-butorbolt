@@ -5,6 +5,7 @@ import {
 } from 'lucide-react';
 import { CountUp } from '../ui/CountUp';
 import HeroSmartSearch from './HeroSmartSearch';
+import { trackSectionEvent } from '../../services/userPreferencesService';
 
 const HERO_REVEAL_DELAY = { badge: 0, line1: 100, line2: 220, line3: 340, sub: 460, cta: 600, stats: [720, 820, 920, 1020] };
 
@@ -20,6 +21,44 @@ export const ModernHero = ({
   onHeroSearch
 }) => {
   const mounted = true;
+  const [heroVariant, setHeroVariant] = useState('A');
+
+  useEffect(() => {
+    try {
+      const storageKey = 'mkt_hero_ab_variant';
+      const existing = localStorage.getItem(storageKey);
+      if (existing === 'A' || existing === 'B') {
+        setHeroVariant(existing);
+        trackSectionEvent(`hero-variant-${existing}`, 'impression');
+        return;
+      }
+      const assigned = Math.random() < 0.5 ? 'A' : 'B';
+      localStorage.setItem(storageKey, assigned);
+      setHeroVariant(assigned);
+      trackSectionEvent(`hero-variant-${assigned}`, 'impression');
+    } catch {
+      setHeroVariant('A');
+      trackSectionEvent('hero-variant-A', 'impression');
+    }
+  }, []);
+
+  const heroCopy = heroVariant === 'B'
+    ? {
+      line1: 'Alakítsd át a teret,',
+      line2: 'mielőtt egyetlen bútort megvennél.',
+      sub: 'AI útvonalterv, azonnali vizualizáció és valódi termékek egyetlen premium élményben.',
+      ctaPrimary: 'Személyes AI terv indul',
+      ctaBadge: 'PRO',
+      ctaSecondary: 'Inspiráció böngészése'
+    }
+    : {
+      line1: 'Tervezz úgy,',
+      line2: 'mintha ez lenne az álomotthonod.',
+      sub: 'Fotó, AI-tervezés, valós ajánlatok. Egyetlen flow, ami 5 perc alatt eljuttat az ihlettől a rendelésig.',
+      ctaPrimary: 'Kezdjük AI-val',
+      ctaBadge: 'Most',
+      ctaSecondary: 'Kollekció megtekintése'
+    };
 
   const stats = [
     { icon: Package, value: 170, suffix: 'K+', label: 'Termék', decimals: 0 },
@@ -77,13 +116,13 @@ export const ModernHero = ({
               className={`block text-[2.3rem] sm:text-5xl lg:text-6xl font-extrabold text-gray-900 leading-[1.03] ${mounted ? 'hero-reveal' : 'opacity-0'}`}
               style={mounted ? { animationDelay: `${HERO_REVEAL_DELAY.line1}ms`, letterSpacing: '-0.03em' } : { letterSpacing: '-0.03em' }}
             >
-              Tervezz úgy,
+              {heroCopy.line1}
             </span>
             <span
               className={`block text-[2.3rem] sm:text-5xl lg:text-6xl font-extrabold leading-[1.03] bg-gradient-to-r from-primary-500 to-secondary-700 bg-clip-text text-transparent ${mounted ? 'hero-reveal' : 'opacity-0'}`}
               style={mounted ? { animationDelay: `${HERO_REVEAL_DELAY.line2}ms`, letterSpacing: '-0.03em' } : { letterSpacing: '-0.03em' }}
             >
-              mintha ez lenne az álomotthonod.
+              {heroCopy.line2}
             </span>
           </h1>
 
@@ -97,7 +136,7 @@ export const ModernHero = ({
             className={`text-base sm:text-lg lg:text-2xl text-gray-600 max-w-3xl mx-auto mb-10 sm:mb-12 ${mounted ? 'hero-reveal' : 'opacity-0'}`}
             style={mounted ? { animationDelay: `${HERO_REVEAL_DELAY.sub}ms`, lineHeight: '1.6' } : { lineHeight: '1.6' }}
           >
-            Fotó, AI-tervezés, valós ajánlatok. Egyetlen flow, ami 5 perc alatt eljuttat az ihlettől a rendelésig.
+            {heroCopy.sub}
           </p>
 
           <div
@@ -108,6 +147,7 @@ export const ModernHero = ({
               products={products}
               onSearch={onHeroSearch}
               onTryAI={onTryAI}
+              variant={heroVariant}
             />
           </div>
 
@@ -117,22 +157,28 @@ export const ModernHero = ({
           >
             <button
               type="button"
-              onClick={onTryAI}
+              onClick={() => {
+                trackSectionEvent(`hero-variant-${heroVariant}`, 'click', 'cta-primary');
+                onTryAI?.();
+              }}
               className="group relative w-full sm:w-auto min-h-[48px] px-8 py-4 bg-gradient-to-r from-primary-500 to-secondary-700 text-white rounded-2xl font-semibold text-base shadow-[0_12px_30px_rgba(255,138,0,0.35)] hover:shadow-[0_16px_36px_rgba(255,138,0,0.45)] hover:-translate-y-0.5 active:scale-[0.98] transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-300 focus-visible:ring-offset-2 flex items-center justify-center gap-2"
               aria-label="Kezdj AI tervezéssel"
             >
-              <span className="px-2.5 py-1 rounded-full bg-white/20 text-[11px] font-bold uppercase tracking-wide">Most</span>
+              <span className="px-2.5 py-1 rounded-full bg-white/20 text-[11px] font-bold uppercase tracking-wide">{heroCopy.ctaBadge}</span>
               <Sparkles className="w-5 h-5" aria-hidden />
-              Kezdjük AI-val
+              {heroCopy.ctaPrimary}
               <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform duration-200" aria-hidden />
             </button>
             <button
               type="button"
-              onClick={onExplore}
+              onClick={() => {
+                trackSectionEvent(`hero-variant-${heroVariant}`, 'click', 'cta-secondary');
+                onExplore?.();
+              }}
               className="w-full sm:w-auto min-h-[48px] px-8 py-4 bg-white text-gray-900 rounded-2xl font-semibold text-base border border-gray-200 shadow-sm hover:border-gray-300 hover:shadow-md hover:-translate-y-0.5 active:scale-[0.98] transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-300 focus-visible:ring-offset-2 flex items-center justify-center gap-2"
               aria-label="Kollekció böngészése"
             >
-              Kollekció megtekintése
+              {heroCopy.ctaSecondary}
               <ArrowRight className="w-5 h-5" aria-hidden />
             </button>
           </div>
