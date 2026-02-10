@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { Search, Sparkles, Camera, ArrowRight, Wand2, X, Package, CheckCircle2, TrendingUp, ChevronRight, Plus, SlidersHorizontal, BrainCircuit, RotateCcw, Filter } from 'lucide-react';
+import { Search, Sparkles, Camera, ArrowRight, Wand2, X, Package, CheckCircle2, TrendingUp, ChevronRight, Plus, SlidersHorizontal, BrainCircuit, RotateCcw, Filter, Award } from 'lucide-react';
 import { getAutocompleteSuggestions, parseSearchIntent } from '../../services/aiSearchService';
 import { trackSearch, trackSectionEvent, getSearchHistory, getViewedProducts, getLikedProducts } from '../../services/userPreferencesService';
 
@@ -23,7 +23,8 @@ export default function HeroSmartSearch({
   products = [],
   onSearch,
   onTryAI,
-  variant = 'A'
+  variant = 'A',
+  onOpenProductQuickView
 }) {
   const [query, setQuery] = useState('');
   const [isOpen, setIsOpen] = useState(false);
@@ -148,7 +149,7 @@ export default function HeroSmartSearch({
       if (!id || seen.has(id)) continue;
       seen.add(id);
       unique.push(item);
-      if (unique.length >= 3) break;
+      if (unique.length >= 10) break;
     }
     return unique;
   }, [products, suggestions, rankedQueryProducts]);
@@ -167,24 +168,23 @@ export default function HeroSmartSearch({
       .map(([category]) => `${category} akció`);
   }, [rankedQueryProducts]);
 
-  const estimatedResultCount = useMemo(() => {
+  const actualResultCount = useMemo(() => {
     if (trimmedQuery.length < 2) return null;
     return rankedQueryProducts.length;
   }, [trimmedQuery, rankedQueryProducts.length]);
 
   const confidenceScore = useMemo(() => {
-    const queryScore = Math.min(trimmedQuery.length * 3.5, 35);
-    const filterScore = Math.min(activeFilters.length * 14, 35);
-    const suggestionScore = suggestions.length > 0 ? Math.min(suggestions.length * 7, 25) : 0;
-    const productScore = previewProducts.length > 0 ? 5 : 0;
-    return Math.max(8, Math.min(100, Math.round(queryScore + filterScore + suggestionScore + productScore)));
-  }, [trimmedQuery, activeFilters.length, suggestions.length, previewProducts.length]);
+    if (actualResultCount === null) return 0;
+    return Math.max(0, Math.min(100, Math.round((Math.min(actualResultCount, 24) / 24) * 100)));
+  }, [actualResultCount]);
 
   const confidenceMeta = useMemo(() => {
-    if (confidenceScore >= 75) return { label: 'Magas találati esély', tone: 'bg-emerald-500' };
-    if (confidenceScore >= 45) return { label: 'Közepes találati esély', tone: 'bg-amber-500' };
-    return { label: 'Finomítsd a keresést', tone: 'bg-rose-500' };
-  }, [confidenceScore]);
+    if (actualResultCount === null) return { label: 'Kezdj el gépelni', tone: 'bg-gray-300' };
+    if (actualResultCount >= 18) return { label: `${actualResultCount} erős találat`, tone: 'bg-emerald-500' };
+    if (actualResultCount >= 8) return { label: `${actualResultCount} releváns találat`, tone: 'bg-amber-500' };
+    if (actualResultCount >= 1) return { label: `${actualResultCount} találat`, tone: 'bg-orange-500' };
+    return { label: 'Nincs találat', tone: 'bg-rose-500' };
+  }, [actualResultCount]);
 
   const dynamicQuickSuggestions = useMemo(() => {
     if (trimmedQuery.length < 2) return QUICK_INTENTS.slice(0, 4);
@@ -280,9 +280,9 @@ export default function HeroSmartSearch({
 
   const handlePreviewProductClick = (product) => {
     const name = product?.name || '';
-    if (!name) return;
+    if (!name || !product) return;
     trackSectionEvent(`hero-search-${variant}`, 'click', String(product?.id || 'preview-product'));
-    applySuggestion(name);
+    onOpenProductQuickView?.(product);
   };
 
   const removeFilter = (filter) => {
@@ -352,6 +352,19 @@ export default function HeroSmartSearch({
     const id = String(product?.id || '');
     if (likedProductIds.includes(id)) return true;
     return preferredCategories.some((cat) => category.includes(String(cat).toLowerCase()));
+  };
+
+  const getTopBadge = (product, index) => {
+    if (likedProductIds.includes(String(product?.id || ''))) {
+      return { text: 'Kedvenc találat', classes: 'bg-rose-50 text-rose-700 border-rose-200' };
+    }
+    if (isPersonalMatch(product)) {
+      return { text: 'Neked ajánlott', classes: 'bg-emerald-50 text-emerald-700 border-emerald-200' };
+    }
+    if (index === 0) return { text: 'Top #1', classes: 'bg-amber-50 text-amber-700 border-amber-200' };
+    if (index === 1) return { text: 'Top #2', classes: 'bg-blue-50 text-blue-700 border-blue-200' };
+    if (index === 2) return { text: 'Top #3', classes: 'bg-violet-50 text-violet-700 border-violet-200' };
+    return { text: 'Ajánlott', classes: 'bg-gray-50 text-gray-700 border-gray-200' };
   };
 
   useEffect(() => {
@@ -428,7 +441,7 @@ export default function HeroSmartSearch({
 
   return (
     <div className="w-full max-w-4xl mx-auto mb-8 sm:mb-10">
-      <div className="relative rounded-3xl border border-gray-200/90 bg-white/95 backdrop-blur-sm shadow-[0_20px_44px_rgba(15,23,42,0.12)] p-3 sm:p-4 overflow-hidden">
+      <div className="relative rounded-3xl border border-gray-200/90 bg-white/95 backdrop-blur-sm shadow-[0_20px_44px_rgba(15,23,42,0.12)] p-2.5 sm:p-4 overflow-hidden">
         <div className="pointer-events-none absolute inset-x-0 top-0 h-16 bg-gradient-to-r from-primary-100/70 via-transparent to-secondary-100/70" aria-hidden />
         <div className="flex flex-wrap items-center gap-2 mb-3">
           <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-primary-50 text-primary-700 text-xs font-semibold">
@@ -450,31 +463,35 @@ export default function HeroSmartSearch({
         </div>
 
         <form onSubmit={handleSubmit} className="relative">
-          <div className={`flex items-center gap-2 rounded-2xl border border-gray-200 bg-white p-2 shadow-sm focus-within:ring-2 focus-within:ring-primary-300 focus-within:border-primary-300 transition-all ${searchPulse ? 'ring-2 ring-emerald-200 border-emerald-300 scale-[1.01]' : ''}`}>
-            <Search className="w-5 h-5 text-gray-400 ml-1" aria-hidden />
-            <input
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              onFocus={() => setIsOpen(true)}
-              placeholder="Mit keresel? pl. bézs kanapé 180 cm alatt"
-              className="flex-1 bg-transparent outline-none text-sm sm:text-base text-gray-900 placeholder:text-gray-400 py-2"
-              aria-label="Hero okoskereső"
-            />
-            <button
-              type="button"
-              onClick={() => setShowQuickFilterPanel((prev) => !prev)}
-              className={`min-h-[40px] px-2.5 rounded-xl border text-xs font-semibold inline-flex items-center gap-1.5 transition-colors ${showQuickFilterPanel ? 'border-primary-300 bg-primary-50 text-primary-700' : 'border-gray-200 bg-white text-gray-600 hover:bg-gray-50'}`}
-            >
-              <Filter className="w-3.5 h-3.5" aria-hidden />
-              Szűrők
-            </button>
-            <button
-              type="submit"
-              className="min-h-[44px] px-4 sm:px-5 rounded-xl bg-gradient-to-r from-primary-500 to-secondary-700 text-white text-sm font-semibold hover:opacity-95 active:scale-[0.98] transition-all inline-flex items-center gap-1.5"
-            >
-              {isSearching ? 'Keresés...' : 'Keresés'}
-              {isSearching ? <span className="w-4 h-4 rounded-full border-2 border-white/80 border-t-transparent animate-spin" aria-hidden /> : <ArrowRight className="w-4 h-4" aria-hidden />}
-            </button>
+          <div className={`rounded-2xl border border-gray-200 bg-white p-2 shadow-sm focus-within:ring-2 focus-within:ring-primary-300 focus-within:border-primary-300 transition-all ${searchPulse ? 'ring-2 ring-emerald-200 border-emerald-300 scale-[1.01]' : ''}`}>
+            <div className="flex items-center gap-2">
+              <Search className="w-5 h-5 text-gray-400 ml-1 shrink-0" aria-hidden />
+              <input
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                onFocus={() => setIsOpen(true)}
+                placeholder="Mit keresel? pl. bézs kanapé 180 cm alatt"
+                className="flex-1 bg-transparent outline-none text-sm sm:text-base text-gray-900 placeholder:text-gray-400 py-2 min-w-0"
+                aria-label="Hero okoskereső"
+              />
+            </div>
+            <div className="mt-2 grid grid-cols-2 gap-2 sm:flex sm:justify-end">
+              <button
+                type="button"
+                onClick={() => setShowQuickFilterPanel((prev) => !prev)}
+                className={`min-h-[40px] px-2.5 rounded-xl border text-xs font-semibold inline-flex items-center justify-center gap-1.5 transition-colors ${showQuickFilterPanel ? 'border-primary-300 bg-primary-50 text-primary-700' : 'border-gray-200 bg-white text-gray-600 hover:bg-gray-50'}`}
+              >
+                <Filter className="w-3.5 h-3.5" aria-hidden />
+                Szűrők
+              </button>
+              <button
+                type="submit"
+                className="min-h-[40px] px-4 sm:px-5 rounded-xl bg-gradient-to-r from-primary-500 to-secondary-700 text-white text-sm font-semibold hover:opacity-95 active:scale-[0.98] transition-all inline-flex items-center justify-center gap-1.5"
+              >
+                {isSearching ? 'Keresés...' : 'Keresés'}
+                {isSearching ? <span className="w-4 h-4 rounded-full border-2 border-white/80 border-t-transparent animate-spin" aria-hidden /> : <ArrowRight className="w-4 h-4" aria-hidden />}
+              </button>
+            </div>
           </div>
           {showQuickFilterPanel && (
             <div className="mt-2 rounded-2xl border border-gray-200 bg-white p-3 shadow-[0_10px_24px_rgba(15,23,42,0.08)]">
@@ -522,14 +539,14 @@ export default function HeroSmartSearch({
         <div className="mt-3 rounded-xl border border-gray-200 bg-white/80 px-3 py-2">
           <div className="flex items-center justify-between gap-3 mb-1.5">
             <p className="text-[11px] uppercase tracking-wide font-semibold text-gray-500">Keresési pontosság</p>
-            <span className="text-xs font-semibold text-gray-700">{confidenceMeta.label}</span>
+            <span className="text-xs font-semibold text-gray-700">{actualResultCount ?? 0} találat</span>
           </div>
           <div className="h-1.5 rounded-full bg-gray-100 overflow-hidden">
             <div className={`h-full ${confidenceMeta.tone} transition-all duration-300`} style={{ width: `${confidenceScore}%` }} />
           </div>
-          {estimatedResultCount !== null && (
+          {actualResultCount !== null && (
             <p className="mt-1.5 text-xs text-gray-500">
-              Várható találatok: <span className="font-semibold text-gray-700">{estimatedResultCount}</span>
+              Várható találatok: <span className="font-semibold text-gray-700">{actualResultCount}</span> · {confidenceMeta.label}
             </p>
           )}
         </div>
@@ -622,41 +639,44 @@ export default function HeroSmartSearch({
             </div>
 
             {previewProducts.length > 0 && (
-              <div className="p-3 border-b border-gray-100 bg-gradient-to-br from-primary-50/30 via-white to-secondary-50/30">
+              <div className="p-3 border-b border-gray-100 bg-gradient-to-br from-primary-50/40 via-white to-secondary-50/40">
                 <div className="flex items-center justify-between mb-2">
                   <p className="inline-flex items-center gap-1.5 text-xs font-semibold text-gray-600 uppercase tracking-wide">
                     <TrendingUp className="w-3.5 h-3.5 text-primary-500" aria-hidden />
                     Legjobb találatok
                   </p>
-                  <span className="text-[11px] text-gray-500">Gyors megnyitás</span>
+                  <span className="text-[11px] text-gray-500">{previewProducts.length} db</span>
                 </div>
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
-                  {previewProducts.map((p) => (
-                    <div
-                      key={p.id || p.name}
-                      role="button"
-                      tabIndex={0}
-                      onClick={() => handlePreviewProductClick(p)}
-                      onKeyDown={(e) => {
-                        if (e.key === 'Enter' || e.key === ' ') {
-                          e.preventDefault();
-                          handlePreviewProductClick(p);
-                        }
-                      }}
-                      className="text-left rounded-xl border border-gray-200 bg-white hover:bg-white hover:border-primary-300 hover:shadow-md transition-all p-2"
-                    >
-                      <div className="w-full h-16 rounded-lg bg-gray-100 overflow-hidden mb-2 flex items-center justify-center">
-                        {getProductImage(p) ? <img src={getProductImage(p)} alt="" className="w-full h-full object-cover" /> : <Package className="w-5 h-5 text-gray-400" aria-hidden />}
-                      </div>
-                      <p className="text-xs font-medium text-gray-800 truncate">{p.name}</p>
-                      {isPersonalMatch(p) && (
-                        <span className="inline-flex mt-1 px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 text-[11px] font-semibold">
-                          Neked ajánlott
-                        </span>
-                      )}
-                      <div className="mt-1 flex items-center justify-between">
-                        <p className="text-xs text-primary-600 font-semibold">{formatPrice(p.salePrice || p.price)}</p>
-                        <div className="flex items-center gap-1">
+                <div className="flex gap-2 overflow-x-auto pb-1 snap-x snap-mandatory">
+                  {previewProducts.map((p, index) => {
+                    const badge = getTopBadge(p, index);
+                    return (
+                      <div
+                        key={p.id || p.name}
+                        role="button"
+                        tabIndex={0}
+                        onClick={() => handlePreviewProductClick(p)}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter' || e.key === ' ') {
+                            e.preventDefault();
+                            handlePreviewProductClick(p);
+                          }
+                        }}
+                        className="min-w-[220px] sm:min-w-[240px] snap-start text-left rounded-xl border border-gray-200 bg-white hover:bg-white hover:border-primary-300 hover:shadow-lg transition-all p-2.5"
+                      >
+                        <div className="w-full h-24 rounded-lg bg-gray-100 overflow-hidden mb-2 flex items-center justify-center">
+                          {getProductImage(p) ? <img src={getProductImage(p)} alt="" className="w-full h-full object-cover" /> : <Package className="w-5 h-5 text-gray-400" aria-hidden />}
+                        </div>
+                        <div className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full border text-[11px] font-semibold ${badge.classes}`}>
+                          <Award className="w-3 h-3" aria-hidden />
+                          {badge.text}
+                        </div>
+                        <p className="text-xs font-medium text-gray-800 line-clamp-2 mt-1.5 min-h-[2.2rem]">{p.name}</p>
+                        <div className="mt-1.5 flex items-center justify-between">
+                          <p className="text-xs text-primary-600 font-semibold">{formatPrice(p.salePrice || p.price)}</p>
+                          <ChevronRight className="w-3.5 h-3.5 text-gray-400" aria-hidden />
+                        </div>
+                        <div className="mt-2 flex items-center gap-1.5">
                           <button
                             type="button"
                             onClick={(e) => {
@@ -671,11 +691,11 @@ export default function HeroSmartSearch({
                             <Plus className="w-3 h-3" aria-hidden />
                             Összevetés
                           </button>
-                          <ChevronRight className="w-3.5 h-3.5 text-gray-400" aria-hidden />
+                          <span className="text-[11px] text-gray-500">QuickView</span>
                         </div>
                       </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               </div>
             )}

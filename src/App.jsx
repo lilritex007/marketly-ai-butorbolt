@@ -1344,6 +1344,7 @@ const App = () => {
               onExplore={scrollToProductsSection}
               onTryAI={() => setActiveTab('visual-search')}
               products={SERVER_SEARCH_ONLY ? products : (searchIndexReady ? searchIndexRef.current : products)}
+              onHeroQuickView={(product) => handleProductView(product)}
               onHeroSearch={(query) => {
                 setActiveTab('shop');
                 handleServerSearch(query);

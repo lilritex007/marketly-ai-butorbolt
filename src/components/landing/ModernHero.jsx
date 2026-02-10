@@ -18,7 +18,8 @@ export const ModernHero = ({
   quickCategories = [],
   onQuickCategory,
   products = [],
-  onHeroSearch
+  onHeroSearch,
+  onHeroQuickView
 }) => {
   const mounted = true;
   const [heroVariant, setHeroVariant] = useState('A');
@@ -148,6 +149,7 @@ export const ModernHero = ({
               onSearch={onHeroSearch}
               onTryAI={onTryAI}
               variant={heroVariant}
+              onOpenProductQuickView={onHeroQuickView}
             />
           </div>
 
