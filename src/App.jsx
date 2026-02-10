@@ -1333,14 +1333,9 @@ const App = () => {
               />
             )}
             
-            <ModernHero 
+            <SimpleHero 
               onExplore={scrollToProductsSection}
               onTryAI={() => setActiveTab('visual-search')}
-              quickCategories={(categoryHierarchy?.mainCategories || []).slice(0, 6).map((c) => c.name)}
-              onQuickCategory={(name) => {
-                setActiveTab('shop');
-                handleCategoryChange(name);
-              }}
             />
             <TrustStrip />
             <AIFeaturesShowcase 
