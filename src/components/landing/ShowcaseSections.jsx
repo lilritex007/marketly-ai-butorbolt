@@ -51,46 +51,54 @@ export const SocialProof = () => {
   };
 
   return (
-    <section className="py-20 bg-gray-50 border-t border-gray-100" aria-labelledby="social-proof-heading">
-      <div className="w-full max-w-6xl mx-auto px-4 sm:px-6 lg:px-16">
-        <div className="text-center mb-12">
-          <div className="inline-flex items-center gap-2 mb-6 px-4 py-2 bg-white rounded-full shadow-sm">
-            <Users className="w-5 h-5 text-primary-500" aria-hidden />
-            <span className="text-xs font-bold text-primary-600 uppercase tracking-wider">Bizalom</span>
+    <section className="relative py-24 bg-[#0f1218] overflow-hidden" aria-labelledby="social-proof-heading">
+      <div className="absolute inset-0 opacity-25" aria-hidden>
+        <div className="absolute -top-32 left-1/2 -translate-x-1/2 w-[920px] h-[920px] rounded-full blur-[160px] bg-primary-500/60" />
+        <div className="absolute -bottom-40 right-0 w-[680px] h-[680px] rounded-full blur-[140px] bg-secondary-600/50" />
+      </div>
+
+      <div className="relative z-10 w-full max-w-6xl mx-auto px-4 sm:px-6 lg:px-16">
+        <div className="text-center mb-14">
+          <div className="inline-flex items-center gap-2 mb-6 px-4 py-2 bg-white/10 border border-white/15 rounded-full backdrop-blur-sm">
+            <Users className="w-5 h-5 text-primary-400" aria-hidden />
+            <span className="text-xs font-bold text-white/90 uppercase tracking-wider">Társadalmi bizonyíték</span>
           </div>
-          <div className="text-5xl sm:text-6xl lg:text-7xl font-bold tracking-tight bg-gradient-to-r from-primary-500 to-secondary-600 bg-clip-text text-transparent mb-3">
+          <h2 id="social-proof-heading" className="text-5xl sm:text-6xl lg:text-7xl font-extrabold tracking-tight text-white mb-4">
             {count.toLocaleString('hu-HU')}+
-          </div>
-          <p className="text-lg text-gray-500">
-            elégedett vásárló
+          </h2>
+          <p className="text-lg sm:text-xl text-white/80">
+            ember választotta már a Marketly-t
           </p>
         </div>
 
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-16">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-14">
           {trustBadges.map((badge, idx) => (
             <div
               key={idx}
-              className="group text-center p-6 rounded-xl bg-white border border-gray-200 shadow-sm hover:shadow-md hover:border-gray-300 hover:-translate-y-0.5 transition-all duration-200"
+              className="group relative rounded-2xl border border-white/15 bg-white/10 backdrop-blur-md p-6 shadow-[0_8px_28px_rgba(0,0,0,0.22)] hover:shadow-[0_16px_44px_rgba(0,0,0,0.32)] hover:-translate-y-1 transition-all duration-300"
             >
-              <div className={`w-12 h-12 mx-auto rounded-xl bg-gradient-to-br ${colorClasses[badge.color]} flex items-center justify-center mb-3`}>
-                <badge.icon className="w-6 h-6 text-white" aria-hidden />
+              <div className={`absolute inset-x-4 top-0 h-px bg-gradient-to-r ${colorClasses[badge.color]} opacity-80`} />
+              <div className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${colorClasses[badge.color]} flex items-center justify-center mb-4 shadow-lg`}>
+                <badge.icon className="w-7 h-7 text-white" aria-hidden />
               </div>
-              <h3 className="font-semibold text-gray-900 text-sm leading-tight">{badge.label}</h3>
+              <h3 className="font-semibold text-white text-base leading-tight">
+                {badge.label}
+              </h3>
             </div>
           ))}
         </div>
 
-        <div className="text-center">
-          <div className="flex justify-center gap-1.5 mb-3">
+        <div className="text-center rounded-2xl border border-white/15 bg-white/10 backdrop-blur-sm py-8 px-6">
+          <div className="flex justify-center gap-2 mb-4">
             {[...Array(5)].map((_, i) => (
               <Star key={i} className="w-7 h-7 fill-amber-400 text-amber-400" aria-hidden />
             ))}
           </div>
-          <p className="text-xl font-bold text-gray-900 mb-1">
+          <p className="text-2xl sm:text-3xl font-bold text-white mb-1">
             4.9 / 5.0 átlagos értékelés
           </p>
-          <p className="text-sm text-gray-500">
-            12,487 valós véleményből
+          <p className="text-sm sm:text-base text-white/75">
+            12,487 valós vélemény alapján
           </p>
         </div>
       </div>

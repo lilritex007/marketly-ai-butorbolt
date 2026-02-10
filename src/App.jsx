@@ -35,7 +35,6 @@ import LiveActivityStrip from './components/ux/LiveActivityStrip';
 // Landing Components  
 import { ModernHero, AIFeaturesShowcase } from './components/landing/ModernHero';
 import { SocialProof, LiveShowcase, InteractiveCTA } from './components/landing/ShowcaseSections';
-import TrustStrip from './components/landing/TrustStrip';
 import InspirationSection from './components/landing/InspirationSection';
 import NewArrivalsSection from './components/landing/NewArrivalsSection';
 import MostPopularSection from './components/landing/MostPopularSection';
@@ -1341,7 +1340,6 @@ const App = () => {
                 handleCategoryChange(name);
               }}
             />
-            <TrustStrip />
             <AIFeaturesShowcase 
               onFeatureClick={(feature) => {
                 if (feature.title.includes('Képfelismerés')) setActiveTab('visual-search');
