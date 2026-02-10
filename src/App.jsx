@@ -1345,10 +1345,15 @@ const App = () => {
               onTryAI={() => setActiveTab('visual-search')}
               products={SERVER_SEARCH_ONLY ? products : (searchIndexReady ? searchIndexRef.current : products)}
               onHeroQuickView={(product) => handleProductView(product)}
-              onHeroSearch={(query) => {
-                setActiveTab('shop');
+              onHeroSearch={(query, meta = {}) => {
+                if (!query?.trim()) return;
+                if (meta?.source !== 'instant') {
+                  setActiveTab('shop');
+                }
                 handleServerSearch(query);
-                setTimeout(() => scrollToProductsSectionRef.current?.(), 120);
+                if (meta?.source !== 'instant') {
+                  setTimeout(() => scrollToProductsSectionRef.current?.(), 120);
+                }
               }}
               quickCategories={(categoryHierarchy?.mainCategories || []).slice(0, 6).map((c) => c.name)}
               onQuickCategory={(name) => {
