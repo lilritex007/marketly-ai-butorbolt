@@ -535,6 +535,12 @@ export default function HeroSmartSearch({
   }, [trimmedQuery, variant]);
 
   useEffect(() => {
+    if (trimmedQuery.length >= 1) {
+      setIsOpen(true);
+    }
+  }, [trimmedQuery]);
+
+  useEffect(() => {
     if (!searchPulse) return undefined;
     const timer = setTimeout(() => setSearchPulse(false), 650);
     return () => clearTimeout(timer);
@@ -629,6 +635,31 @@ export default function HeroSmartSearch({
             <Sparkles className="w-3.5 h-3.5" aria-hidden />
             {isIndexBuilding ? 'AI motor tanul...' : 'AI motor aktív'}
           </span>
+        </div>
+
+        <div className="mb-3 rounded-xl border border-primary-200 bg-gradient-to-r from-primary-50 via-white to-secondary-50 p-2.5">
+          <div className="flex items-center justify-between gap-2 mb-2">
+            <p className="text-[11px] uppercase tracking-wide font-semibold text-primary-700">AI Command Deck</p>
+            <div className="flex items-center gap-1.5">
+              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+              <span className="w-2 h-2 rounded-full bg-secondary-500 animate-pulse [animation-delay:120ms]" />
+              <span className="w-2 h-2 rounded-full bg-primary-500 animate-pulse [animation-delay:240ms]" />
+            </div>
+          </div>
+          <div className="grid grid-cols-3 gap-2">
+            <div className="rounded-lg bg-white border border-primary-100 px-2 py-1.5">
+              <p className="text-[10px] uppercase text-gray-500 font-semibold">Találat</p>
+              <p className="text-xs font-bold text-gray-800">{actualResultCount ?? 0}</p>
+            </div>
+            <div className="rounded-lg bg-white border border-violet-100 px-2 py-1.5">
+              <p className="text-[10px] uppercase text-gray-500 font-semibold">Intent</p>
+              <p className="text-xs font-bold text-gray-800">{intentTimeline.length || 0}</p>
+            </div>
+            <div className="rounded-lg bg-white border border-emerald-100 px-2 py-1.5">
+              <p className="text-[10px] uppercase text-gray-500 font-semibold">Minőség</p>
+              <p className="text-xs font-bold text-gray-800">{confidenceMeta.label}</p>
+            </div>
+          </div>
         </div>
 
         <form onSubmit={handleSubmit} className="relative">
@@ -827,8 +858,8 @@ export default function HeroSmartSearch({
         )}
 
         {isOpen && (
-          <div className="mt-3 rounded-2xl border border-primary-200 bg-white overflow-hidden max-h-[66vh] sm:max-h-[60vh] overflow-y-auto">
-            <div className="sticky top-0 z-10 bg-white/95 backdrop-blur-sm border-b border-gray-100 px-3 py-2 flex items-center justify-between">
+          <div className="mt-3 rounded-2xl border border-primary-200 bg-white overflow-hidden max-h-[66vh] sm:max-h-[60vh] overflow-y-auto shadow-[0_12px_32px_rgba(15,23,42,0.12)]">
+            <div className="sticky top-0 z-10 bg-gradient-to-r from-primary-50 via-white to-secondary-50 backdrop-blur-sm border-b border-primary-100 px-3 py-2 flex items-center justify-between">
               <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Okos javaslatok</p>
               <button
                 type="button"
@@ -841,7 +872,7 @@ export default function HeroSmartSearch({
             </div>
 
             {displayedTopProducts.length > 0 && (
-              <div className="p-3 border-b border-gray-100 bg-gradient-to-br from-primary-100/55 via-white to-secondary-100/55">
+              <div className="p-3 border-b border-primary-100 bg-gradient-to-br from-primary-100/65 via-white to-secondary-100/65">
                 <div className="flex items-center justify-between mb-2">
                   <p className="inline-flex items-center gap-1.5 text-xs font-semibold text-gray-600 uppercase tracking-wide">
                     <TrendingUp className="w-3.5 h-3.5 text-primary-500" aria-hidden />
@@ -908,7 +939,7 @@ export default function HeroSmartSearch({
             )}
 
             {suggestions.length > 0 ? (
-              <div className="p-3 space-y-3">
+              <div className="p-3 space-y-3 bg-gradient-to-b from-white to-gray-50/40">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                   {suggestions.slice(0, 6).map((s, idx) => (
                     <button
