@@ -288,38 +288,44 @@ const FileLoaderBar = ({ onFileLoad, onUnasRefresh, isLoadingUnas, lastUpdated, 
 };
 
 const Features = () => (
-    <section className="py-20 bg-white border-t border-gray-100" aria-labelledby="features-heading">
+    <section className="py-12 sm:py-14 bg-white border-t border-gray-100" aria-labelledby="features-heading">
         <div className="w-full max-w-6xl mx-auto px-4 sm:px-6 lg:px-16">
             <h2 id="features-heading" className="sr-only">Szolgáltatások</h2>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div className="group relative overflow-hidden p-7 rounded-2xl bg-gradient-to-br from-white to-emerald-50/50 border border-emerald-100 shadow-[0_8px_24px_rgba(16,185,129,0.08)] hover:shadow-[0_14px_32px_rgba(16,185,129,0.14)] hover:-translate-y-1 transition-all duration-300">
-                    <div className="absolute inset-x-6 top-0 h-px bg-gradient-to-r from-emerald-300 via-emerald-400 to-emerald-300 opacity-70" />
-                    <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-emerald-500 to-emerald-600 text-white flex items-center justify-center shrink-0 mb-4 shadow-md">
-                        <Truck className="w-6 h-6" aria-hidden />
-                    </div>
-                    <div>
-                        <h3 className="font-bold text-gray-900 text-lg mb-1">Ingyenes szállítás</h3>
-                        <p className="text-sm text-gray-600">50.000 Ft felett minden rendelésnél</p>
-                    </div>
-                </div>
-                <div className="group relative overflow-hidden p-7 rounded-2xl bg-gradient-to-br from-white to-blue-50/50 border border-blue-100 shadow-[0_8px_24px_rgba(59,130,246,0.08)] hover:shadow-[0_14px_32px_rgba(59,130,246,0.14)] hover:-translate-y-1 transition-all duration-300">
-                    <div className="absolute inset-x-6 top-0 h-px bg-gradient-to-r from-blue-300 via-blue-400 to-blue-300 opacity-70" />
-                    <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-blue-500 to-blue-600 text-white flex items-center justify-center shrink-0 mb-4 shadow-md">
-                        <ShieldCheck className="w-6 h-6" aria-hidden />
-                    </div>
-                    <div>
-                        <h3 className="font-bold text-gray-900 text-lg mb-1">2 év garancia</h3>
-                        <p className="text-sm text-gray-600">Minden termékre teljes körűen</p>
+            <div className="flex flex-col lg:flex-row gap-4">
+                <div className="group relative flex-1 overflow-hidden p-5 rounded-2xl bg-gradient-to-r from-white to-emerald-50/50 border border-emerald-100 shadow-[0_6px_20px_rgba(16,185,129,0.08)] hover:shadow-[0_12px_28px_rgba(16,185,129,0.14)] hover:-translate-y-0.5 transition-all duration-300">
+                    <div className="absolute inset-y-4 left-0 w-px bg-gradient-to-b from-emerald-300 via-emerald-400 to-emerald-300 opacity-70" />
+                    <div className="flex items-center gap-4">
+                        <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-emerald-500 to-emerald-600 text-white flex items-center justify-center shrink-0 shadow-sm">
+                            <Truck className="w-5 h-5" aria-hidden />
+                        </div>
+                        <div className="min-w-0">
+                            <h3 className="font-bold text-gray-900 text-base mb-0.5">Ingyenes szállítás</h3>
+                            <p className="text-sm text-gray-600">50.000 Ft felett minden rendelésnél</p>
+                        </div>
                     </div>
                 </div>
-                <div className="group relative overflow-hidden p-7 rounded-2xl bg-gradient-to-br from-white to-primary-50/45 border border-primary-100 shadow-[0_8px_24px_rgba(255,138,0,0.08)] hover:shadow-[0_14px_32px_rgba(255,138,0,0.14)] hover:-translate-y-1 transition-all duration-300">
-                    <div className="absolute inset-x-6 top-0 h-px bg-gradient-to-r from-primary-300 via-primary-400 to-primary-300 opacity-70" />
-                    <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-primary-500 to-secondary-700 text-white flex items-center justify-center shrink-0 mb-4 shadow-md">
-                        <Phone className="w-6 h-6" aria-hidden />
+                <div className="group relative flex-1 overflow-hidden p-5 rounded-2xl bg-gradient-to-r from-white to-blue-50/50 border border-blue-100 shadow-[0_6px_20px_rgba(59,130,246,0.08)] hover:shadow-[0_12px_28px_rgba(59,130,246,0.14)] hover:-translate-y-0.5 transition-all duration-300">
+                    <div className="absolute inset-y-4 left-0 w-px bg-gradient-to-b from-blue-300 via-blue-400 to-blue-300 opacity-70" />
+                    <div className="flex items-center gap-4">
+                        <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 text-white flex items-center justify-center shrink-0 shadow-sm">
+                            <ShieldCheck className="w-5 h-5" aria-hidden />
+                        </div>
+                        <div className="min-w-0">
+                            <h3 className="font-bold text-gray-900 text-base mb-0.5">2 év garancia</h3>
+                            <p className="text-sm text-gray-600">Minden termékre teljes körűen</p>
+                        </div>
                     </div>
-                    <div>
-                        <h3 className="font-bold text-gray-900 text-lg mb-1">Ügyfélszolgálat</h3>
-                        <p className="text-sm text-gray-600">Szakértő segítség minden nap</p>
+                </div>
+                <div className="group relative flex-1 overflow-hidden p-5 rounded-2xl bg-gradient-to-r from-white to-primary-50/45 border border-primary-100 shadow-[0_6px_20px_rgba(255,138,0,0.08)] hover:shadow-[0_12px_28px_rgba(255,138,0,0.14)] hover:-translate-y-0.5 transition-all duration-300">
+                    <div className="absolute inset-y-4 left-0 w-px bg-gradient-to-b from-primary-300 via-primary-400 to-primary-300 opacity-70" />
+                    <div className="flex items-center gap-4">
+                        <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-primary-500 to-secondary-700 text-white flex items-center justify-center shrink-0 shadow-sm">
+                            <Phone className="w-5 h-5" aria-hidden />
+                        </div>
+                        <div className="min-w-0">
+                            <h3 className="font-bold text-gray-900 text-base mb-0.5">Ügyfélszolgálat</h3>
+                            <p className="text-sm text-gray-600">Szakértő segítség minden nap</p>
+                        </div>
                     </div>
                 </div>
             </div>
