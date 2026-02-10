@@ -100,8 +100,8 @@ export const ModernHero = ({
         <div className="absolute inset-x-0 bottom-0 h-[1px] bg-gradient-to-r from-transparent via-secondary-300 to-transparent opacity-60" />
       </div>
 
-      <div className="relative z-10 w-full max-w-6xl mx-auto px-4 sm:px-6 lg:px-10 py-16 sm:py-20 lg:py-24">
-        <div className="flex flex-col items-center text-center">
+      <div className="relative z-10 w-full max-w-6xl mx-auto px-4 sm:px-6 lg:px-10 py-16 sm:py-20 lg:py-24 overflow-x-hidden min-w-0">
+        <div className="flex flex-col items-center text-center w-full min-w-0 max-w-full">
           <div
             className={`inline-flex items-center gap-2.5 px-4 py-2 bg-white rounded-full border border-gray-200 shadow-sm mb-8 ${mounted ? 'hero-reveal' : 'opacity-0'}`}
             style={mounted ? { animationDelay: `${HERO_REVEAL_DELAY.badge}ms` } : undefined}
@@ -141,7 +141,7 @@ export const ModernHero = ({
           </p>
 
           <div
-            className={`${mounted ? 'hero-reveal' : 'opacity-0'}`}
+            className={`w-full min-w-0 max-w-full ${mounted ? 'hero-reveal' : 'opacity-0'}`}
             style={mounted ? { animationDelay: `${HERO_REVEAL_DELAY.sub + 80}ms` } : undefined}
           >
             <HeroSmartSearch

@@ -681,17 +681,22 @@ export default function HeroSmartSearch({
 
   return (
     <section
-      className="w-full max-w-full mx-auto mb-8 sm:mb-12 overflow-x-hidden min-w-0 box-border px-0 sm:px-0"
-      style={{ maxWidth: 'min(100%, 72rem)', paddingLeft: 'clamp(0.75rem, 4vw, 2rem)', paddingRight: 'clamp(0.75rem, 4vw, 2rem)' }}
+      className="w-full max-w-full mx-auto mb-8 sm:mb-12 overflow-x-hidden min-w-0 box-border"
+      style={{
+        width: '100%',
+        maxWidth: 'min(100%, 72rem)',
+        paddingLeft: 'clamp(0.5rem, 3vw, 2rem)',
+        paddingRight: 'clamp(0.5rem, 3vw, 2rem)',
+      }}
       aria-label="Találat Stúdió – AI kereső"
     >
-      <div className="relative rounded-2xl overflow-hidden border border-gray-200/90 bg-white/95 backdrop-blur-sm max-w-full min-w-0">
+      <div className="relative rounded-2xl overflow-hidden border border-gray-200/90 bg-white/95 backdrop-blur-sm w-full min-w-0 max-w-full">
         <div className="absolute inset-0 pointer-events-none overflow-hidden rounded-[inherit]" aria-hidden>
           <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary-400/40 to-transparent" />
           <div className="absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-secondary-400/30 to-transparent" />
         </div>
 
-        <div className="relative z-10 p-4 sm:p-5 md:p-6 lg:p-7">
+        <div className="relative z-10 p-4 sm:p-5 md:p-6 lg:p-7 min-w-0">
           {/* Fejléc – Inspiration + Hero trust stílus */}
           <header className="mb-5 sm:mb-6">
             <div className="flex flex-wrap items-center justify-between gap-3 sm:gap-4">
