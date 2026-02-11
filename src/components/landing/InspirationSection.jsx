@@ -204,7 +204,7 @@ function CollectionCard({ col, onPress, mobile }) {
             ÚJ
           </span>
         )}
-        <h3 className="text-base sm:text-xl font-bold text-white mb-0.5 sm:mb-1 line-clamp-1">{col.title}</h3>
+        <h3 className={`text-base sm:text-xl font-bold text-white mb-0.5 sm:mb-1 ${mobile ? 'line-clamp-2' : 'line-clamp-1'}`}>{col.title}</h3>
         <p className="text-xs sm:text-sm text-white/90 mb-2 sm:mb-3 line-clamp-2">{col.subtitle}</p>
         <span className="inline-flex items-center gap-2 text-white font-semibold text-sm">
           Böngészés <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform duration-200" aria-hidden />

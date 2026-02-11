@@ -36,10 +36,9 @@ import LiveActivityStrip from './components/ux/LiveActivityStrip';
 // Landing Components  
 import { ModernHero } from './components/landing/ModernHero';
 import AIModuleUnified from './components/landing/AIModuleUnified';
-import { LiveShowcase, InteractiveCTA } from './components/landing/ShowcaseSections';
+import { InteractiveCTA } from './components/landing/ShowcaseSections';
 import InspirationSection from './components/landing/InspirationSection';
-import NewArrivalsSection from './components/landing/NewArrivalsSection';
-import MostPopularSection from './components/landing/MostPopularSection';
+import ProductWorldsSection from './components/landing/ProductWorldsSection';
 // Footer eltávolítva - a fő UNAS shopnak már van saját láblécce
 
 // Product Components
@@ -1228,14 +1227,14 @@ const App = () => {
     return () => clearInterval(t);
   }, []);
 
-  // Featured pool for homepage modules (more variety than the first page)
+  // Featured pool for homepage modules (ProductWorldsSection: ~300 termék, backend adatok)
   useEffect(() => {
     if (!totalProductsCount || totalProductsCount <= 0) return;
     const key = `${totalProductsCount}-${lastUpdated || ''}`;
     if (featuredPoolKeyRef.current === key) return;
     featuredPoolKeyRef.current = key;
     let cancelled = false;
-    const limit = 120;
+    const limit = 100;
     const baseOffsets = [0];
     if (totalProductsCount > limit * 2) {
       baseOffsets.push(
@@ -1534,33 +1533,9 @@ const App = () => {
               />
             </FadeInOnScroll>
             
-            <FadeInOnScroll direction="up" className="section-perf">
-            <LiveShowcase 
-              products={featuredBase} 
-              onProductClick={handleProductView}
-              rotationTick={sectionRotateTick}
-            />
-            </FadeInOnScroll>
-
-
             {featuredBase.length > 0 && (
               <FadeInOnScroll direction="up" className="section-perf">
-                <NewArrivalsSection
-                  products={featuredBase}
-                  onProductClick={handleProductView}
-                  onToggleWishlist={toggleWishlist}
-                  wishlist={wishlist}
-                  onViewAll={scrollToProductsSection}
-                  onAddToCart={handleAddToCart}
-                  contextLabel={sectionContextLabel}
-                  rotationTick={sectionRotateTick}
-                />
-              </FadeInOnScroll>
-            )}
-
-            {featuredBase.length > 0 && (
-              <FadeInOnScroll direction="up" className="section-perf">
-                <MostPopularSection
+                <ProductWorldsSection
                   products={featuredBase}
                   onProductClick={handleProductView}
                   onToggleWishlist={toggleWishlist}
