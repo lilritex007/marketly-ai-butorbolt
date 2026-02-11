@@ -14,7 +14,6 @@ import { SmartBadges } from './components/ui/Badge';
 
 // AI Components
 import { AIShowcase, AIOnboarding } from './components/ai/AIShowcase';
-import AIDebugPanel from './components/debug/AIDebugPanel';
 // Lazy load heavier AI features for smaller initial bundle
 const AIChatAssistant = lazy(() => import('./components/ai/AIChatAssistant'));
 const AIRoomDesigner = lazy(() => import('./components/ai/AIRoomDesigner'));
@@ -23,7 +22,9 @@ const AIStyleQuiz = lazy(() => import('./components/ai/AIStyleQuiz'));
 // Category Components
 import CategorySwipe from './components/category/CategorySwipe';
 import CategoryPage from './components/category/CategoryPage';
+import CollectionPage from './components/collection/CollectionPage';
 import MainCategoriesSection from './components/category/MainCategoriesSection';
+import { getCollectionById } from './config/collections';
 import Navbar from './components/layout/Navbar';
 
 // UX Components
@@ -654,6 +655,7 @@ const App = () => {
   const [advancedFilters, setAdvancedFilters] = useState({});
   const [categoryHierarchy, setCategoryHierarchy] = useState({ mainCategories: [] });
   const [categoryStats, setCategoryStats] = useState(null);
+  const [selectedCollection, setSelectedCollection] = useState(null);
   const mainCategorySet = useMemo(() => {
     return new Set((categoryHierarchy?.mainCategories || []).map((c) => c.name));
   }, [categoryHierarchy]);
@@ -671,7 +673,6 @@ const App = () => {
   // AI Feature states
   const [showStyleQuiz, setShowStyleQuiz] = useState(false);
   const [showRoomDesigner, setShowRoomDesigner] = useState(false);
-  const [showAIDebug, setShowAIDebug] = useState(false);
   const [aiRecommendedProducts, setAiRecommendedProducts] = useState([]);
   const [aiRecommendationLabel, setAiRecommendationLabel] = useState('');
   const [showDeferredAI, setShowDeferredAI] = useState(false);
@@ -1015,6 +1016,7 @@ const App = () => {
   scrollToProductsSectionRef.current = scrollToProductsSection;
 
   const handleCategoryChange = useCallback((category) => {
+    setSelectedCollection(null);
     setCategoryFilter(category);
     setCategoryStats(null);
     setSearchQuery('');
@@ -1031,6 +1033,25 @@ const App = () => {
     setTimeout(scrollToProductsSection, 500);
   }, [scrollToProductsSection, clearAIRecommendations]);
 
+  const handleCollectionSelect = useCallback((collection) => {
+    setSelectedCollection(collection);
+    setCategoryFilter('Összes');
+    setSearchQuery('');
+    hasUserSearchedRef.current = false;
+    clearAIRecommendations();
+    setProducts([]);
+    setTotalProductsCount(0);
+    setHasMoreProducts(true);
+    setIsLoadingUnas(true);
+    setUnasError(null);
+    setActiveTab('shop');
+  }, []);
+
+  const handleCollectionBack = useCallback(() => {
+    setSelectedCollection(null);
+    handleCategoryChange('Összes');
+  }, [handleCategoryChange]);
+
   const loadUnasDataRef = useRef(loadUnasData);
   loadUnasDataRef.current = loadUnasData;
 
@@ -1040,7 +1061,34 @@ const App = () => {
   }, [SERVER_SEARCH_ONLY, searchIndexReady, searchIndexVersion]);
 
   const debouncedSearch = useDebounce(searchQuery, 400);
+
+  // Kollekció termékbetöltés – külön effect, amikor selectedCollection van
   useEffect(() => {
+    if (!selectedCollection) return;
+    const cats = selectedCollection.categories || [];
+    // Map collection categories to rawSegments (backend uses path first segment)
+    const categoryMainList = cats.length > 0
+      ? cats.flatMap((c) => {
+          const main = (categoryHierarchy?.mainCategories || []).find((m) => m.name === c);
+          return Array.isArray(main?.rawSegments) && main.rawSegments.length > 0 ? main.rawSegments : [c];
+        })
+      : undefined;
+    const limit = selectedCollection.isSale || selectedCollection.isNew ? 200 : INITIAL_PAGE;
+    loadUnasDataRef.current({
+      search: undefined,
+      category: '',
+      categoryMain: categoryMainList,
+      limit,
+      offset: 0
+    });
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      scrollToProductsSectionRef.current?.();
+    }));
+  }, [selectedCollection, categoryHierarchy]);
+
+  useEffect(() => {
+    // Kollekció nézetben ne futtassuk a normál kategória/keresés betöltést
+    if (selectedCollection) return;
     // Ha a keresőindex kész, a keresés lokálisan fut – ne írjuk felül a listát API kereséssel
     const useApiSearch = !canUseLocalSearch || !debouncedSearch.trim();
     const categoryMainList = getCategoryMainList(categoryFilter);
@@ -1056,7 +1104,7 @@ const App = () => {
       requestScrollToProductsRef.current = false;
       setTimeout(() => scrollToProductsSectionRef.current?.(), 120);
     }
-  }, [categoryFilter, debouncedSearch, canUseLocalSearch, getCategoryMainList]);
+  }, [categoryFilter, debouncedSearch, canUseLocalSearch, getCategoryMainList, selectedCollection]);
 
   useEffect(() => {
     const onHashChange = () => {
@@ -1215,6 +1263,24 @@ const App = () => {
     return result;
   }, [products, sortOption, advancedFilters, normalizedAdvancedFilters]);
 
+  // Kollekció-specifikus szűrés: isSale -> salePrice, styleKeywords -> name/description/params
+  const collectionFilteredProducts = useMemo(() => {
+    if (!selectedCollection) return filteredAndSortedProducts;
+    let list = [...filteredAndSortedProducts];
+    if (selectedCollection.isSale) {
+      list = list.filter((p) => p.salePrice != null && p.price > 0 && p.salePrice < p.price);
+    }
+    const keywords = selectedCollection.styleKeywords || [];
+    if (keywords.length > 0) {
+      const lower = keywords.map((k) => String(k).toLowerCase());
+      list = list.filter((p) => {
+        const text = `${p.name || ''} ${p.description || ''} ${p.params || ''}`.toLowerCase();
+        return lower.some((kw) => text.includes(kw));
+      });
+    }
+    return list;
+  }, [selectedCollection, filteredAndSortedProducts]);
+
   filteredLengthRef.current = filteredAndSortedProducts.length;
 
   const isSearchMode = searchQuery.trim().length >= 2 && canUseLocalSearch;
@@ -1247,6 +1313,25 @@ const App = () => {
       categoryMain: categoryMainList.length > 0 ? categoryMainList : undefined
     });
   }, [isLoadingMore, hasMoreProducts, products.length, searchQuery, categoryFilter, getCategoryMainList]);
+
+  const handleCollectionLoadMore = useCallback(() => {
+    if (!selectedCollection || isLoadingMore || !hasMoreProducts) return;
+    const cats = selectedCollection.categories || [];
+    const categoryMainList = cats.length > 0
+      ? cats.flatMap((c) => {
+          const main = (categoryHierarchy?.mainCategories || []).find((m) => m.name === c);
+          return Array.isArray(main?.rawSegments) && main.rawSegments.length > 0 ? main.rawSegments : [c];
+        })
+      : undefined;
+    loadUnasDataRef.current({
+      append: true,
+      limit: DISPLAY_BATCH,
+      offset: products.length,
+      search: undefined,
+      category: '',
+      categoryMain: categoryMainList
+    });
+  }, [selectedCollection, isLoadingMore, hasMoreProducts, products.length, categoryHierarchy]);
 
   // Categories with TOTAL counts (from hierarchy if available, fallback to loaded products)
   const categories = useMemo(() => {
@@ -1389,6 +1474,10 @@ const App = () => {
                   handleCategoryChange(name);
                   setTimeout(() => scrollToProductsSectionRef.current?.(), 400);
                 }}
+                onCollectionSelect={(col) => {
+                  handleCollectionSelect(col);
+                  setTimeout(() => scrollToProductsSectionRef.current?.(), 500);
+                }}
               />
             </FadeInOnScroll>
             
@@ -1459,8 +1548,22 @@ const App = () => {
               <Features />
             </FadeInOnScroll>
             
-            {/* Category Page View - shown when specific category selected */}
-            {categoryFilter && categoryFilter !== "Összes" && !isLoadingUnas ? (
+            {/* Collection Page – kollekció landing */}
+            {selectedCollection ? (
+              <CollectionPage
+                collection={selectedCollection}
+                products={collectionFilteredProducts}
+                onBack={handleCollectionBack}
+                onProductClick={handleProductView}
+                onWishlistToggle={toggleWishlist}
+                wishlist={wishlist}
+                onAskAI={() => setShowStyleQuiz(true)}
+                totalCount={totalProductsCount}
+                loadedCount={products.length}
+                onLoadMore={handleCollectionLoadMore}
+                isLoading={isLoadingUnas}
+              />
+            ) : categoryFilter && categoryFilter !== "Összes" && !isLoadingUnas ? (
               <CategoryPage
                 category={categoryFilter}
                 products={filteredAndSortedProducts}
@@ -1946,20 +2049,6 @@ const App = () => {
           return Promise.resolve();
         }}
       />
-
-      {/* AI Debug Panel */}
-      {showAIDebug && (
-        <AIDebugPanel onClose={() => setShowAIDebug(false)} />
-      )}
-
-      {/* AI Debug Trigger - kis gomb a bal alsó sarokban */}
-      <button
-        onClick={() => setShowAIDebug(true)}
-        className="fixed bottom-[calc(1.5rem+44px)] md:bottom-6 left-4 z-40 w-10 h-10 bg-orange-500 text-white rounded-full shadow-lg flex items-center justify-center hover:bg-orange-600 transition-colors text-xs font-bold"
-        title="AI Debug Panel"
-      >
-        🔧
-      </button>
 
       {/* Confetti Celebration */}
       <Confetti 
