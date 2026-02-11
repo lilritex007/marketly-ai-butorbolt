@@ -116,7 +116,7 @@ function FeatureCard({ feature, layout, onClick, reduceMotion }) {
         trackSectionEvent(SECTION_ID, 'click', feature.id);
         onClick?.(feature);
       }}
-      className={`group relative flex-shrink-0 w-[calc(50%-10px)] min-w-[calc(50%-10px)] h-[220px] rounded-xl border bg-gradient-to-br ${feature.border} ${feature.bg} text-left shadow-lg hover:shadow-xl hover:ring-2 hover:ring-primary-200/80 active:scale-[0.98] transition-all duration-200 snap-start focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-400 focus-visible:ring-offset-2 [transform-style:preserve-3d] hover:[transform:perspective(1000px)_rotateX(-2deg)_rotateY(2deg)_translateY(-4px)] motion-reduce:hover:[transform:translateY(-2px)] ${feature.isHighlighted ? 'ring-2 ring-amber-300/60' : ''} ${!isMobile ? 'hidden sm:block sm:w-auto sm:min-w-0 sm:h-[240px]' : ''}`}
+      className={`group relative flex-shrink-0 h-[220px] rounded-xl border bg-gradient-to-br ${feature.border} ${feature.bg} text-left shadow-lg hover:shadow-xl hover:ring-2 hover:ring-primary-200/80 active:scale-[0.98] transition-all duration-200 snap-start focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-400 focus-visible:ring-offset-2 [transform-style:preserve-3d] hover:[transform:perspective(1000px)_rotateX(-2deg)_rotateY(2deg)_translateY(-4px)] motion-reduce:hover:[transform:translateY(-2px)] ${feature.isHighlighted ? 'ring-2 ring-amber-300/60' : ''} ${isMobile ? 'w-full min-w-0' : 'hidden sm:block sm:w-auto sm:min-w-0 sm:h-[240px]'}`}
       aria-label={`${feature.title} – ${feature.subtitle}`}
     >
       <div className={`absolute left-0 bottom-0 w-full h-0.5 bg-gradient-to-r ${feature.accent}`} aria-hidden />
@@ -282,7 +282,7 @@ export default function AIModuleUnified({ onFeatureClick }) {
           {FEATURES.map((feature, idx) => (
             <div
               key={feature.id}
-              className={`flex-shrink-0 transition-all duration-500 ease-out ${(sectionInView || reduceMotion) ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}
+              className={`flex-shrink-0 w-[calc(50%-10px)] min-w-[calc(50%-10px)] transition-all duration-500 ease-out ${(sectionInView || reduceMotion) ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}
               style={!reduceMotion ? { transitionDelay: `${idx * 80}ms` } : undefined}
             >
               <FeatureCard
