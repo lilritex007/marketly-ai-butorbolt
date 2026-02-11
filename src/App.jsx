@@ -877,7 +877,7 @@ const App = () => {
 
   // API-first: kis lap, gyors first paint; soha nem töltünk 200k-t
   const loadUnasData = useCallback(async (options = {}) => {
-    const { silent = false, search = '', category = '', categoryMain, categories, append = false, limit = INITIAL_PAGE, offset = 0 } = options;
+    const { silent = false, search = '', category = '', categoryMain, categories, styleKeywords, append = false, limit = INITIAL_PAGE, offset = 0 } = options;
     
     if (!silent && !append) {
       setIsLoadingUnas(true);
@@ -899,7 +899,8 @@ const App = () => {
         ...(search && search.trim() && { search: search.trim() }),
         ...(categoriesList.length > 0 && { categories: categoriesList }),
         ...(categoriesList.length === 0 && categoryMainList.length > 0 && { categoryMain: categoryMainList }),
-        ...(categoriesList.length === 0 && categoryMainList.length === 0 && category && category !== 'Összes' && { category })
+        ...(categoriesList.length === 0 && categoryMainList.length === 0 && category && category !== 'Összes' && { category }),
+        ...(Array.isArray(styleKeywords) && styleKeywords.length > 0 && { styleKeywords })
       };
       const data = await fetchUnasProducts(params);
       const newProducts = (data.products || []).map(p => ({
@@ -1099,11 +1100,13 @@ const App = () => {
       categoriesList = undefined;
     }
     const limit = selectedCollection.isSale || selectedCollection.isNew ? 300 : INITIAL_PAGE;
+    const styleKw = selectedCollection.styleKeywords || [];
     loadUnasDataRef.current({
       search: undefined,
       category: '',
       categoryMain: categoryMainList,
       categories: categoriesList,
+      styleKeywords: styleKw.length > 0 ? styleKw : undefined,
       limit,
       offset: 0
     });
@@ -1370,6 +1373,7 @@ const App = () => {
         categoriesList = cats;
       }
     }
+    const styleKw = selectedCollection.styleKeywords || [];
     loadUnasDataRef.current({
       append: true,
       limit: DISPLAY_BATCH,
@@ -1377,7 +1381,8 @@ const App = () => {
       search: undefined,
       category: '',
       categoryMain: categoryMainList,
-      categories: categoriesList
+      categories: categoriesList,
+      styleKeywords: styleKw.length > 0 ? styleKw : undefined
     });
   }, [selectedCollection, isLoadingMore, hasMoreProducts, products.length, categoryHierarchy]);
 

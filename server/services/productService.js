@@ -26,6 +26,20 @@ const applyMainCategoryFilter = (query, params, categoryMain) => {
   return { query: nextQuery, params: [...params, ...list] };
 };
 
+/** Kollekció styleKeywords szűrés: termék illeszkedik ha BÁRMELY keyword megjelenik name/description/params-ban */
+const applyStyleKeywordsFilter = (query, params, styleKeywords) => {
+  if (!styleKeywords || !Array.isArray(styleKeywords) || styleKeywords.length === 0) return { query, params };
+  const keywords = styleKeywords.map((k) => String(k).trim().toLowerCase()).filter(Boolean);
+  if (keywords.length === 0) return { query, params };
+  const conditions = keywords.map(() => '(LOWER(name) LIKE ? OR LOWER(COALESCE(description,\'\')) LIKE ? OR LOWER(COALESCE(params,\'\')) LIKE ?)').join(' OR ');
+  const nextParams = [...params];
+  keywords.forEach((kw) => {
+    const p = `%${kw}%`;
+    nextParams.push(p, p, p);
+  });
+  return { query: `${query} AND (${conditions})`, params: nextParams };
+};
+
 /**
  * Get all products (with optional filtering)
  * When showInAI is true:
@@ -40,6 +54,7 @@ export function getProducts(filters = {}) {
       category,
       categories,
       categoryMain,
+      styleKeywords,
       showInAI,
       inStock,
       minPrice,
@@ -98,6 +113,12 @@ export function getProducts(filters = {}) {
 
     if (search) {
       const applied = applySearchTerms(query, params, search);
+      query = applied.query;
+      params.splice(0, params.length, ...applied.params);
+    }
+
+    if (styleKeywords && Array.isArray(styleKeywords) && styleKeywords.length > 0) {
+      const applied = applyStyleKeywordsFilter(query, params, styleKeywords);
       query = applied.query;
       params.splice(0, params.length, ...applied.params);
     }
@@ -320,7 +341,7 @@ export function deleteProduct(id) {
  */
 export function getProductCount(filters = {}) {
   try {
-    const { category, categories, categoryMain, showInAI, inStock, search } = filters;
+    const { category, categories, categoryMain, styleKeywords, showInAI, inStock, search } = filters;
 
     let query = 'SELECT COUNT(*) as count FROM products WHERE 1=1';
     const params = [];
@@ -358,6 +379,12 @@ export function getProductCount(filters = {}) {
       params.splice(0, params.length, ...applied.params);
     }
 
+    if (styleKeywords && Array.isArray(styleKeywords) && styleKeywords.length > 0) {
+      const applied = applyStyleKeywordsFilter(query, params, styleKeywords);
+      query = applied.query;
+      params.splice(0, params.length, ...applied.params);
+    }
+
     if (inStock !== undefined) {
       query += ' AND in_stock = ?';
       params.push(inStock ? 1 : 0);
@@ -377,7 +404,7 @@ export function getProductCount(filters = {}) {
  */
 export function getProductStats(filters = {}) {
   try {
-    const { category, categories, categoryMain, showInAI, inStock, search } = filters;
+    const { category, categories, categoryMain, styleKeywords, showInAI, inStock, search } = filters;
 
     let query = `
       SELECT
@@ -419,6 +446,12 @@ export function getProductStats(filters = {}) {
 
     if (search) {
       const applied = applySearchTerms(query, params, search);
+      query = applied.query;
+      params.splice(0, params.length, ...applied.params);
+    }
+
+    if (styleKeywords && Array.isArray(styleKeywords) && styleKeywords.length > 0) {
+      const applied = applyStyleKeywordsFilter(query, params, styleKeywords);
       query = applied.query;
       params.splice(0, params.length, ...applied.params);
     }

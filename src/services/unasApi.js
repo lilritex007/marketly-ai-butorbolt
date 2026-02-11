@@ -52,6 +52,9 @@ export const fetchUnasProducts = async (filters = {}) => {
       const mainValue = Array.isArray(filters.categoryMain) ? filters.categoryMain.join(',') : filters.categoryMain;
       params.set('categoryMain', mainValue);
     }
+    if (filters.styleKeywords && Array.isArray(filters.styleKeywords) && filters.styleKeywords.length > 0) {
+      params.set('styleKeywords', filters.styleKeywords.filter(Boolean).join(','));
+    }
     if (filters.search && String(filters.search).trim()) params.set('search', String(filters.search).trim());
 
     const url = `${API_BASE}/products?${params.toString()}`;

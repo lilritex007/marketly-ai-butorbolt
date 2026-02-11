@@ -1,4 +1,4 @@
-import React, { useRef, useEffect, useState } from "react";
+import React from "react";
 import { ArrowRight } from "lucide-react";
 import { COLLECTIONS } from "../../config/collections";
 
@@ -7,41 +7,12 @@ import { COLLECTIONS } from "../../config/collections";
  * Mobil: horizontal carousel, Desktop: grid
  */
 export default function InspirationSection({ onExplore, onCategorySelect, onCollectionSelect }) {
-  const scrollRef = useRef(null);
-  const [canScrollLeft, setCanScrollLeft] = useState(false);
-  const [canScrollRight, setCanScrollRight] = useState(true);
-
-  const updateScrollState = () => {
-    const el = scrollRef.current;
-    if (!el) return;
-    setCanScrollLeft(el.scrollLeft > 0);
-    setCanScrollRight(el.scrollLeft < el.scrollWidth - el.clientWidth - 2);
-  };
-
-  useEffect(() => {
-    const el = scrollRef.current;
-    if (!el) return;
-    updateScrollState();
-    el.addEventListener("scroll", updateScrollState);
-    window.addEventListener("resize", updateScrollState);
-    return () => {
-      el.removeEventListener("scroll", updateScrollState);
-      window.removeEventListener("resize", updateScrollState);
-    };
-  }, []);
-
   const handleClick = (col) => {
     if (onCollectionSelect) {
       onCollectionSelect(col);
       return;
     }
     onExplore?.();
-  };
-
-  const scroll = (dir) => {
-    const el = scrollRef.current;
-    if (!el) return;
-    el.scrollBy({ left: dir * 280, behavior: "smooth" });
   };
 
   return (
@@ -60,41 +31,17 @@ export default function InspirationSection({ onExplore, onCategorySelect, onColl
           </p>
         </div>
 
-        {/* Mobil: horizontal carousel */}
-        <div className="lg:hidden relative">
-          {canScrollLeft && (
-            <button
-              type="button"
-              onClick={() => scroll(-1)}
-              className="absolute left-0 top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full bg-white shadow-lg border border-gray-200 flex items-center justify-center text-gray-600 hover:bg-gray-50 -ml-2"
-              aria-label="Balra gördítés"
-            >
-              ‹
-            </button>
-          )}
-          {canScrollRight && (
-            <button
-              type="button"
-              onClick={() => scroll(1)}
-              className="absolute right-0 top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full bg-white shadow-lg border border-gray-200 flex items-center justify-center text-gray-600 hover:bg-gray-50 -mr-2"
-              aria-label="Jobbra gördítés"
-            >
-              ›
-            </button>
-          )}
-          <div
-            ref={scrollRef}
-            className="flex gap-4 overflow-x-auto snap-x snap-mandatory scrollbar-hide scroll-smooth pb-2 -mx-2 px-2"
-            style={{ scrollSnapType: "x mandatory", WebkitOverflowScrolling: "touch" }}
-          >
-            {COLLECTIONS.map((col) => (
-              <CollectionCard key={col.id} col={col} onPress={() => handleClick(col)} mobile />
-            ))}
-          </div>
+        {/* Mobil: 2x2 grid */}
+        <div className="lg:hidden grid grid-cols-2 gap-3 sm:gap-4">
+          {COLLECTIONS.map((col, idx) => (
+            <div key={col.id} className="animate-fade-in-up" style={{ animationDelay: `${Math.min(idx * 40, 300)}ms` }}>
+              <CollectionCard col={col} onPress={() => handleClick(col)} mobile aspect />
+            </div>
+          ))}
         </div>
 
-        {/* Desktop: grid */}
-        <div className="hidden lg:grid grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-5 lg:gap-6">
+        {/* Desktop: grid – 6 kártya egymás mellett */}
+        <div className="hidden lg:grid lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 min-[1600px]:grid-cols-6 gap-4 lg:gap-5 xl:gap-6">
           {COLLECTIONS.map((col, idx) => (
             <div key={col.id} className="animate-fade-in-up" style={{ animationDelay: `${Math.min(idx * 50, 400)}ms` }}>
               <CollectionCard col={col} onPress={() => handleClick(col)} />
@@ -117,14 +64,14 @@ export default function InspirationSection({ onExplore, onCategorySelect, onColl
   );
 }
 
-function CollectionCard({ col, onPress, mobile }) {
+function CollectionCard({ col, onPress, mobile, aspect }) {
   const Icon = col.icon;
   return (
     <button
       type="button"
       onClick={onPress}
-      className={`group relative rounded-xl overflow-hidden bg-gray-100 text-left shadow-md hover:shadow-xl hover:-translate-y-0.5 active:scale-[0.98] transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-400 focus-visible:ring-offset-2 flex-shrink-0 ${
-        mobile ? "w-[260px] h-[200px] snap-center" : "h-[220px] xl:h-[240px]"
+      className={`group relative rounded-xl overflow-hidden bg-gray-100 text-left shadow-md hover:shadow-xl hover:-translate-y-0.5 active:scale-[0.98] transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-400 focus-visible:ring-offset-2 w-full ${
+        aspect ? "aspect-[4/3]" : mobile ? "h-[200px]" : "h-[220px] xl:h-[240px]"
       }`}
       aria-label={`${col.title} – böngészés`}
     >

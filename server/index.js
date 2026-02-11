@@ -133,6 +133,7 @@ app.get('/api/products', async (req, res) => {
       category,
       categories,
       categoryMain,
+      styleKeywords,
       search,
       limit,
       offset = 0,
@@ -140,6 +141,7 @@ app.get('/api/products', async (req, res) => {
     } = req.query;
     const categoryMainList = categoryMain ? String(categoryMain).split(',').map(s => s.trim()).filter(Boolean) : undefined;
     const categoriesList = categories ? String(categories).split(',').map(s => s.trim()).filter(Boolean) : undefined;
+    const styleKeywordsList = styleKeywords ? String(styleKeywords).split(',').map(s => s.trim()).filter(Boolean) : undefined;
 
     // Auto-sync disabled for production cadence (nightly/manual sync only)
 
@@ -150,6 +152,7 @@ app.get('/api/products', async (req, res) => {
       category,
       categories: categoriesList,
       categoryMain: categoryMainList,
+      styleKeywords: styleKeywordsList,
       search,
       showInAI: true, // Only show products enabled for AI
       limit: limitNum,
@@ -173,6 +176,7 @@ app.get('/api/products', async (req, res) => {
       category,
       categories: categoriesList,
       categoryMain: categoryMainList,
+      styleKeywords: styleKeywordsList,
       search,
       showInAI: true
     });
@@ -200,13 +204,15 @@ app.get('/api/products', async (req, res) => {
  */
 app.get('/api/products/stats', async (req, res) => {
   try {
-    const { category, categories, categoryMain, search } = req.query;
+    const { category, categories, categoryMain, styleKeywords, search } = req.query;
     const categoryMainList = categoryMain ? String(categoryMain).split(',').map(s => s.trim()).filter(Boolean) : undefined;
     const categoriesList = categories ? String(categories).split(',').map(s => s.trim()).filter(Boolean) : undefined;
+    const styleKeywordsList = styleKeywords ? String(styleKeywords).split(',').map(s => s.trim()).filter(Boolean) : undefined;
     const stats = getProductStats({
       category,
       categories: categoriesList,
       categoryMain: categoryMainList,
+      styleKeywords: styleKeywordsList,
       search,
       showInAI: true
     });
