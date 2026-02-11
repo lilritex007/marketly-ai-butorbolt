@@ -90,23 +90,17 @@ export const ModernHero = ({
     }
   ];
 
-  const HERO_BG_IMAGE_DESKTOP = 'https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?w=1920&q=85';
-  const HERO_BG_IMAGE_MOBILE = 'https://images.unsplash.com/photo-1600585154340-be6161a56f0c?w=800&q=80';
+  const HERO_BG_IMAGE = 'https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?w=1920&q=85';
 
   return (
     <section
       className="relative min-h-screen flex items-center justify-center overflow-hidden bg-[#fcfcfb]"
       aria-label="Főoldal – AI bútorbolt"
     >
-      {/* Háttérkép ~20% halványan – mobil: más kép, jobb arány */}
+      {/* Háttérkép ~10% halványan – minden képernyőméreten (mobil, tablet, desktop) */}
       <div
-        className="absolute inset-0 bg-cover bg-center opacity-20 lg:hidden"
-        style={{ backgroundImage: `url(${HERO_BG_IMAGE_MOBILE})`, backgroundPosition: 'center center' }}
-        aria-hidden
-      />
-      <div
-        className="absolute inset-0 bg-cover bg-center opacity-20 hidden lg:block"
-        style={{ backgroundImage: `url(${HERO_BG_IMAGE_DESKTOP})` }}
+        className="absolute inset-0 bg-cover bg-center opacity-10"
+        style={{ backgroundImage: `url(${HERO_BG_IMAGE})` }}
         aria-hidden
       />
       <div className="absolute inset-0 bg-gradient-to-b from-white/92 via-white/75 to-primary-50/90" aria-hidden />
