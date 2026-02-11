@@ -681,7 +681,7 @@ export default function HeroSmartSearch({
 
   return (
     <section
-      className="w-full max-w-full mb-8 sm:mb-12 -mx-4 sm:mx-0 px-4 sm:px-0 min-w-0"
+      className="w-full max-w-full mb-8 sm:mb-12 -mx-4 sm:mx-0 px-2 sm:px-0 min-w-0"
       style={{ touchAction: 'pan-y' }}
       aria-label="AI Kereső"
     >
@@ -692,30 +692,36 @@ export default function HeroSmartSearch({
           <div className="absolute -bottom-16 -left-16 w-48 h-48 rounded-full bg-secondary-300/30 mix-blend-multiply filter blur-[60px]" />
         </div>
         <div className="relative z-10 px-4 sm:px-6 lg:px-8 py-5 sm:py-6 min-w-0">
-          {/* Fejléc – hatásos, gradient, Inspiration + AI ötvözete */}
-          <header className="mb-5 sm:mb-6 relative -mx-4 sm:-mx-6 lg:-mx-8 -mt-5 sm:-mt-6 px-4 sm:px-6 lg:px-8 pt-5 sm:pt-6 pb-6 overflow-hidden rounded-t-2xl">
-            <div className="absolute inset-0 bg-gradient-to-br from-primary-50/70 via-white to-secondary-50/50 pointer-events-none" aria-hidden />
-            <div className="absolute inset-0 bg-gradient-to-t from-transparent via-transparent to-white/60 pointer-events-none" aria-hidden />
-            <div className="relative z-10 flex flex-wrap items-center justify-between gap-4">
-              <div className="flex items-center gap-4 min-w-0 flex-1">
-                <span className="flex h-14 w-14 sm:h-16 sm:w-16 shrink-0 rounded-2xl bg-gradient-to-br from-primary-500 via-primary-600 to-secondary-600 text-white items-center justify-center shadow-[0_4px_16px_rgba(255,138,0,0.4)]">
-                  <Search className="w-7 h-7 sm:w-8 sm:h-8" aria-hidden />
+          {/* Fejléc – kidolgozott, hatásos */}
+          <header className="mb-5 sm:mb-6 relative -mx-4 sm:-mx-6 lg:-mx-8 -mt-5 sm:-mt-6 px-4 sm:px-6 lg:px-8 pt-6 sm:pt-7 pb-6 overflow-hidden rounded-t-2xl">
+            <div className="absolute inset-0 bg-gradient-to-br from-primary-50/90 via-white to-secondary-50/70 pointer-events-none" aria-hidden />
+            <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_60%_at_30%_20%,rgba(255,138,0,0.12),transparent_50%)] pointer-events-none" aria-hidden />
+            <div className="absolute inset-0 bg-[radial-gradient(ellipse_60%_50%_at_70%_80%,rgba(0,107,111,0.08),transparent_50%)] pointer-events-none" aria-hidden />
+            <div className="absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-primary-300/60 to-transparent" aria-hidden />
+            <div className="relative z-10 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-5">
+              <div className="flex items-start sm:items-center gap-4 min-w-0 flex-1">
+                <span className="flex h-16 w-16 sm:h-[72px] sm:w-[72px] shrink-0 rounded-2xl bg-gradient-to-br from-primary-500 via-primary-600 to-secondary-600 text-white items-center justify-center shadow-[0_6px_20px_rgba(255,138,0,0.45)] ring-2 ring-primary-300/30">
+                  <Search className="w-8 h-8 sm:w-9 sm:h-9" aria-hidden />
                 </span>
                 <div className="min-w-0">
-                  <h2 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold tracking-tight">
+                  <div className="inline-flex items-center gap-2 px-2.5 py-1 rounded-full bg-white/80 border border-primary-200/60 mb-2 shadow-sm">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse motion-reduce:animate-none" aria-hidden />
+                    <span className="text-[11px] font-bold uppercase tracking-wider text-primary-700">{isIndexBuilding ? 'Betöltés…' : 'Okos keresés'}</span>
+                  </div>
+                  <h2 className="text-2xl sm:text-3xl lg:text-4xl xl:text-[2.5rem] font-extrabold tracking-tight leading-tight">
                     <span className="bg-gradient-to-r from-primary-500 via-primary-600 to-secondary-600 bg-clip-text text-transparent">AI</span>
                     <span className="text-gray-900"> Kereső</span>
                   </h2>
-                  <p className="text-sm sm:text-base text-gray-600 mt-1 font-medium">
-                    Termék, stílus, ár – okos találatok a teljes katalógusban
+                  <p className="text-sm sm:text-base text-gray-600 mt-2 font-medium max-w-md">
+                    Termék, stílus, ár – <span className="text-gray-800 font-semibold">okos találatok</span> a teljes katalógusban
                   </p>
                 </div>
               </div>
-              <div className="flex items-center gap-3 shrink-0">
+              <div className="flex items-center gap-3 shrink-0 flex-shrink-0">
                 <button
                   type="button"
                   onClick={onTryAI}
-                  className="inline-flex items-center justify-center h-11 sm:h-12 px-4 rounded-xl bg-gradient-to-r from-secondary-500/20 to-secondary-600/25 text-secondary-700 hover:from-secondary-500/30 hover:to-secondary-600/35 border border-secondary-200/80 font-semibold shadow-sm transition-all touch-manipulation gap-2"
+                  className="inline-flex items-center justify-center h-12 sm:h-12 px-5 rounded-xl bg-white/90 border-2 border-secondary-200/80 text-secondary-700 hover:bg-secondary-50 hover:border-secondary-300 font-bold shadow-md hover:shadow-lg transition-all touch-manipulation gap-2.5"
                   title="Képből keresés"
                   aria-label="Képből keresés"
                 >
@@ -723,15 +729,15 @@ export default function HeroSmartSearch({
                   <span className="text-sm">Képből</span>
                 </button>
                 <span
-                  className={`inline-flex items-center justify-center h-11 w-11 sm:h-12 sm:w-12 rounded-xl ${isIndexBuilding ? 'bg-amber-100 border-amber-300/80 text-amber-700' : 'bg-emerald-100 border-emerald-300/80 text-emerald-700'} border shadow-sm`}
+                  className={`inline-flex items-center justify-center h-12 w-12 rounded-xl border-2 shadow-sm ${isIndexBuilding ? 'bg-amber-50 border-amber-300/80 text-amber-700' : 'bg-emerald-50 border-emerald-300/80 text-emerald-700'}`}
                   title={isIndexBuilding ? 'Index épül' : 'Index kész'}
                   aria-live="polite"
                 >
-                  <Sparkles className="w-5 h-5 sm:w-6 sm:h-6 shrink-0" aria-hidden />
+                  <Sparkles className="w-6 h-6 shrink-0" aria-hidden />
                 </span>
               </div>
             </div>
-            <div className="relative z-10 mt-4 h-0.5 rounded-full bg-gradient-to-r from-primary-400 via-primary-500 to-secondary-500 w-full max-w-xs opacity-80" aria-hidden />
+            <div className="relative z-10 mt-5 h-1 rounded-full bg-gradient-to-r from-primary-400 via-primary-500 to-secondary-500 max-w-sm opacity-90" aria-hidden />
           </header>
 
           {/* Keresési tartalom */}
