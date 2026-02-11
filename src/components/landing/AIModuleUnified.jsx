@@ -1,58 +1,218 @@
-import React from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Camera, MessageCircle, Move3d, Sparkles, Home, ArrowRight } from 'lucide-react';
+import { trackSectionEvent } from '../../services/userPreferencesService';
 
 const FEATURES = [
   {
     id: 'style-quiz',
     title: 'AI Stílus Quiz',
     subtitle: '5 kérdés a Style DNA-dhoz',
-    gradient: 'from-amber-500 via-orange-500 to-primary-600',
+    cta: 'Style DNA megismerése',
     icon: Sparkles,
     stat: null,
     statLabel: null,
-    isHighlighted: true
+    isHighlighted: true,
+    displayOrder: 0,
+    border: 'border-amber-200/80',
+    bg: 'from-amber-50/90 to-white',
+    accent: 'from-amber-400 via-amber-500 to-primary-500',
+    iconGradient: 'from-amber-500 to-orange-500',
+    text: 'text-amber-800'
   },
   {
     id: 'visual-search',
     title: 'Képfelismerés',
     subtitle: 'Fotózz és keress',
-    gradient: 'from-blue-500 via-primary-500 to-secondary-600',
+    cta: 'Keresés indítása',
     icon: Camera,
     stat: '99%',
-    statLabel: 'pontosság'
+    statLabel: 'pontosság',
+    isHighlighted: false,
+    displayOrder: 1,
+    border: 'border-sky-200/80',
+    bg: 'from-sky-50/90 to-white',
+    accent: 'from-sky-400 via-blue-500 to-indigo-500',
+    iconGradient: 'from-sky-500 to-blue-600',
+    text: 'text-sky-800'
   },
   {
     id: 'chat',
     title: 'AI Chat',
     subtitle: 'Személyes tanácsadó',
-    gradient: 'from-secondary-600 via-teal-600 to-emerald-700',
+    cta: 'Chat megnyitása',
     icon: MessageCircle,
     stat: '24/7',
-    statLabel: 'elérhető'
+    statLabel: 'elérhető',
+    isHighlighted: false,
+    displayOrder: 2,
+    border: 'border-secondary-200/80',
+    bg: 'from-secondary-50/90 to-white',
+    accent: 'from-secondary-400 via-teal-500 to-emerald-500',
+    iconGradient: 'from-secondary-500 to-secondary-600',
+    text: 'text-secondary-800'
   },
   {
     id: 'room-planner',
     title: 'Szobatervező',
     subtitle: 'Virtuális elhelyezés',
-    gradient: 'from-emerald-500 via-green-600 to-teal-700',
+    cta: 'Tervezés indítása',
     icon: Move3d,
     stat: 'AR',
-    statLabel: 'támogatás'
+    statLabel: 'támogatás',
+    isHighlighted: false,
+    displayOrder: 3,
+    border: 'border-emerald-200/80',
+    bg: 'from-emerald-50/90 to-white',
+    accent: 'from-emerald-400 via-green-500 to-teal-500',
+    iconGradient: 'from-emerald-500 to-green-600',
+    text: 'text-emerald-800'
   },
   {
     id: 'room-designer',
     title: 'AI Szoba Tervező',
     subtitle: 'Tervezd meg a tökéletes szobát',
-    gradient: 'from-indigo-600 via-violet-600 to-secondary-700',
+    cta: 'Szoba megtervezése',
     icon: Home,
     stat: null,
-    statLabel: null
+    statLabel: null,
+    isHighlighted: false,
+    displayOrder: 4,
+    border: 'border-indigo-200/80',
+    bg: 'from-indigo-50/90 to-white',
+    accent: 'from-indigo-400 via-violet-500 to-secondary-500',
+    iconGradient: 'from-indigo-500 to-violet-600',
+    text: 'text-indigo-800'
   }
-];
+].sort((a, b) => a.displayOrder - b.displayOrder);
+
+const AUTO_SCROLL_MS = 4000;
+const SECTION_ID = 'ai-module';
+
+function FeatureCard({ feature, layout, onClick }) {
+  const Icon = feature.icon;
+  const isMobile = layout === 'mobile';
+  const statPos = feature.isHighlighted && feature.stat ? 'top-4 left-4' : 'top-4 right-4 sm:top-5 sm:right-5';
+  const badgePos = 'top-4 right-4 sm:top-5 sm:right-5';
+
+  return (
+    <button
+      type="button"
+      onClick={() => {
+        trackSectionEvent(SECTION_ID, 'click', feature.id);
+        onClick?.(feature);
+      }}
+      className={`group relative flex-shrink-0 w-[calc(50%-10px)] min-w-[calc(50%-10px)] h-[220px] rounded-xl border bg-gradient-to-br ${feature.border} ${feature.bg} text-left shadow-md hover:shadow-xl hover:ring-2 hover:ring-primary-200/80 hover:-translate-y-0.5 active:scale-[0.98] transition-all duration-200 snap-start focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-400 focus-visible:ring-offset-2 ${feature.isHighlighted ? 'ring-2 ring-amber-300/60' : ''} ${!isMobile ? 'hidden sm:block sm:w-auto sm:min-w-0 sm:h-[240px]' : ''}`}
+      aria-label={`${feature.title} – ${feature.subtitle}`}
+    >
+      <div className={`absolute left-0 bottom-0 w-full h-0.5 bg-gradient-to-r ${feature.accent}`} aria-hidden />
+      <div className={`relative h-full flex flex-col ${isMobile ? 'p-4' : 'p-5'}`}>
+        <div className={`${isMobile ? 'w-10 h-10 mb-3' : 'w-11 h-11 mb-4'} rounded-xl bg-gradient-to-br ${feature.iconGradient} text-white flex items-center justify-center shadow-sm`}>
+          <Icon className={isMobile ? 'w-5 h-5' : 'w-6 h-6'} aria-hidden />
+        </div>
+        {feature.stat && (
+          <div className={`absolute ${statPos} text-right`}>
+            <div className={`${isMobile ? 'text-sm' : 'text-base'} font-bold ${feature.text}`}>{feature.stat}</div>
+            <div className={`${isMobile ? 'text-[10px]' : 'text-xs'} text-gray-500`}>{feature.statLabel}</div>
+          </div>
+        )}
+        {feature.isHighlighted && (
+          <span className={`absolute ${badgePos} px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 ${isMobile ? 'text-[10px]' : 'text-xs'} font-bold`}>
+            Próbáld először
+          </span>
+        )}
+        <h3 className={`${isMobile ? 'text-base' : 'text-lg'} font-bold ${feature.text} mb-0.5 sm:mb-1`}>{feature.title}</h3>
+        <p className={`${isMobile ? 'text-xs' : 'text-sm'} text-gray-600 mb-auto`}>{feature.subtitle}</p>
+        <span className={`inline-flex items-center gap-1.5 sm:gap-2 ${isMobile ? 'text-sm' : 'text-sm'} font-semibold ${feature.text} mt-2`}>
+          {feature.cta} <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" aria-hidden />
+        </span>
+      </div>
+    </button>
+  );
+}
 
 export default function AIModuleUnified({ onFeatureClick }) {
+  const scrollRef = useRef(null);
+  const [isPaused, setIsPaused] = useState(false);
+  const [cardWidth, setCardWidth] = useState(0);
+  const [activeIndex, setActiveIndex] = useState(0);
+  const [isScrolling, setIsScrolling] = useState(false);
+  const [reduceMotion, setReduceMotion] = useState(false);
+
+  useEffect(() => {
+    trackSectionEvent(SECTION_ID, 'impression');
+  }, []);
+
+  useEffect(() => {
+    const mq = window.matchMedia('(prefers-reduced-motion: reduce)');
+    setReduceMotion(mq.matches);
+    const fn = (e) => setReduceMotion(e.matches);
+    mq.addEventListener('change', fn);
+    return () => mq.removeEventListener('change', fn);
+  }, []);
+
   const handleClick = (feature) => {
     onFeatureClick?.(feature);
+  };
+
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    const updateWidth = () => {
+      const gap = 20;
+      const w = (el.offsetWidth - gap) / 2;
+      setCardWidth(w + gap);
+    };
+    updateWidth();
+    const ro = new ResizeObserver(updateWidth);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
+
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (!el || cardWidth <= 0) return;
+    const count = FEATURES.length;
+    const totalWidth = count * cardWidth;
+    const onScroll = () => {
+      const x = el.scrollLeft;
+      let idx = Math.round(x / cardWidth) % count;
+      if (idx < 0) idx += count;
+      setActiveIndex(idx);
+      if (x >= totalWidth - 10) el.scrollLeft = x - totalWidth;
+    };
+    el.addEventListener('scroll', onScroll, { passive: true });
+    return () => el.removeEventListener('scroll', onScroll);
+  }, [cardWidth]);
+
+  useEffect(() => {
+    if (reduceMotion || isPaused || !scrollRef.current || cardWidth <= 0) return;
+    const el = scrollRef.current;
+    const count = FEATURES.length;
+    const totalWidth = count * cardWidth;
+    const t = setInterval(() => {
+      const curr = el.scrollLeft;
+      const next = curr + cardWidth;
+      if (next >= totalWidth - 5) {
+        el.scrollTo({ left: 0, behavior: 'smooth' });
+      } else {
+        el.scrollTo({ left: next, behavior: 'smooth' });
+      }
+    }, AUTO_SCROLL_MS);
+    return () => clearInterval(t);
+  }, [reduceMotion, isPaused, cardWidth]);
+
+  const handleTouchStart = () => {
+    setIsPaused(true);
+    setIsScrolling(false);
+  };
+
+  const handleTouchEnd = () => {
+    setTimeout(() => setIsPaused(false), 3000);
+    setTimeout(() => setIsScrolling(false), 100);
+  };
+
+  const handleTouchMove = () => {
+    setIsScrolling(true);
   };
 
   return (
@@ -72,39 +232,81 @@ export default function AIModuleUnified({ onFeatureClick }) {
             Okos funkciók a tökéletes választáshoz
           </p>
         </div>
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-5">
+
+        {/* Mobil: scroll carousel, 2 kártya, auto-scroll */}
+        <div
+          ref={scrollRef}
+          onMouseEnter={() => setIsPaused(true)}
+          onMouseLeave={() => setIsPaused(false)}
+          onTouchStart={handleTouchStart}
+          onTouchEnd={handleTouchEnd}
+          onTouchMove={handleTouchMove}
+          className={`flex sm:hidden gap-5 overflow-x-auto overflow-y-hidden snap-x snap-mandatory scroll-smooth pb-2 -mx-4 pl-4 pr-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden ${isScrolling ? 'opacity-95' : ''}`}
+          style={{
+            WebkitOverflowScrolling: 'touch',
+            scrollSnapType: 'x mandatory',
+            scrollPaddingLeft: 16
+          }}
+        >
+          {[...FEATURES, ...FEATURES].map((feature, i) => (
+            <FeatureCard
+              key={`${feature.id}-${i}`}
+              feature={feature}
+              layout="mobile"
+              onClick={handleClick}
+            />
+          ))}
+        </div>
+
+        {/* Dot indicator – mobil */}
+        <div className="flex sm:hidden justify-center gap-1.5 mt-4">
+          {FEATURES.map((_, i) => (
+            <span
+              key={i}
+              className={`block w-2 h-2 rounded-full transition-colors ${i === activeIndex ? 'bg-primary-500' : 'bg-gray-300'}`}
+              aria-hidden
+            />
+          ))}
+        </div>
+
+        {/* Tablet + Desktop: grid */}
+        <div className="hidden sm:grid sm:grid-cols-3 lg:grid-cols-5 gap-5 mt-0">
           {FEATURES.map((feature) => {
             const Icon = feature.icon;
             return (
-              <button
-                key={feature.id}
-                type="button"
-                onClick={() => handleClick(feature)}
-                className={`group relative rounded-xl overflow-hidden bg-gray-100 h-[240px] text-left shadow-md hover:shadow-xl hover:-translate-y-0.5 active:scale-[0.98] transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-400 focus-visible:ring-offset-2 ${feature.isHighlighted ? 'ring-2 ring-primary-300/50 lg:col-span-2' : ''}`}
-                aria-label={`${feature.title} – ${feature.subtitle}`}
-              >
-                <div className={`absolute inset-0 bg-gradient-to-br ${feature.gradient}`} />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent" />
-                <div className="relative h-full flex flex-col justify-end p-4 sm:p-5">
-                  <Icon className="absolute top-4 right-4 sm:top-5 sm:right-5 w-10 h-10 sm:w-12 sm:h-12 text-white/80" aria-hidden />
-                  {feature.stat && (
-                    <div className="absolute top-4 left-4 sm:top-5 sm:left-5 text-right">
-                      <div className="text-sm sm:text-base font-bold text-white/95">{feature.stat}</div>
-                      <div className="text-[10px] sm:text-xs text-white/80">{feature.statLabel}</div>
-                    </div>
-                  )}
-                  {feature.isHighlighted && (
-                    <span className="absolute top-4 left-1/2 -translate-x-1/2 px-2 py-0.5 rounded-full bg-amber-400/95 text-amber-950 text-[10px] font-bold uppercase tracking-wide">
-                      Próbáld ki elsőként
-                    </span>
-                  )}
-                  <h3 className="text-lg sm:text-xl font-bold text-white mb-0.5 sm:mb-1">{feature.title}</h3>
-                  <p className="text-xs sm:text-sm text-white/90 mb-2 sm:mb-3">{feature.subtitle}</p>
-                  <span className="inline-flex items-center gap-2 text-white font-semibold text-xs sm:text-sm">
-                    Kipróbálom <ArrowRight className="w-3.5 h-3.5 sm:w-4 sm:h-4 group-hover:translate-x-1 transition-transform duration-200" aria-hidden />
-                  </span>
+            <button
+              key={feature.id}
+              type="button"
+              onClick={() => {
+                trackSectionEvent(SECTION_ID, 'click', feature.id);
+                handleClick(feature);
+              }}
+              className={`group relative rounded-xl border bg-gradient-to-br ${feature.border} ${feature.bg} h-[240px] text-left shadow-md hover:shadow-xl hover:ring-2 hover:ring-primary-200/80 hover:-translate-y-0.5 active:scale-[0.98] transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-400 focus-visible:ring-offset-2 overflow-hidden ${feature.isHighlighted ? 'ring-2 ring-amber-300/60 lg:col-span-2' : ''}`}
+              aria-label={`${feature.title} – ${feature.subtitle}`}
+            >
+              <div className={`absolute left-0 bottom-0 w-full h-0.5 bg-gradient-to-r ${feature.accent}`} aria-hidden />
+              <div className="relative h-full flex flex-col p-5">
+                <div className={`w-11 h-11 rounded-xl bg-gradient-to-br ${feature.iconGradient} text-white flex items-center justify-center mb-4 shadow-sm`}>
+                  <Icon className="w-6 h-6" aria-hidden />
                 </div>
-              </button>
+                {feature.stat && (
+                  <div className={`absolute top-5 ${feature.isHighlighted ? 'left-5' : 'right-5'} text-right`}>
+                    <div className={`text-base font-bold ${feature.text}`}>{feature.stat}</div>
+                    <div className="text-xs text-gray-500">{feature.statLabel}</div>
+                  </div>
+                )}
+                {feature.isHighlighted && (
+                  <span className="absolute top-5 right-5 px-2.5 py-1 rounded-full bg-amber-100 text-amber-800 text-xs font-bold">
+                    Próbáld először
+                  </span>
+                )}
+                <h3 className={`text-lg font-bold ${feature.text} mb-1`}>{feature.title}</h3>
+                <p className="text-sm text-gray-600 mb-auto">{feature.subtitle}</p>
+                <span className={`inline-flex items-center gap-2 text-sm font-semibold ${feature.text} mt-2`}>
+                  {feature.cta} <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" aria-hidden />
+                </span>
+              </div>
+            </button>
             );
           })}
         </div>

@@ -1365,17 +1365,19 @@ const App = () => {
                 handleCategoryChange(name);
               }}
             />
-            <AIModuleUnified
-              onFeatureClick={(feature) => {
-                if (feature.id === 'visual-search') setActiveTab('visual-search');
-                else if (feature.id === 'chat') {
-                  document.getElementById('mkt-butorbolt-chat')?.scrollIntoView({ behavior: 'smooth' });
-                }
-                else if (feature.id === 'room-planner') setActiveTab('room-planner');
-                else if (feature.id === 'style-quiz') setShowStyleQuiz(true);
-                else if (feature.id === 'room-designer') setShowRoomDesigner(true);
-              }}
-            />
+            <FadeInOnScroll direction="up" className="section-perf">
+              <AIModuleUnified
+                onFeatureClick={(feature) => {
+                  if (feature.id === 'visual-search') setActiveTab('visual-search');
+                  else if (feature.id === 'chat') {
+                    document.getElementById('mkt-butorbolt-chat')?.scrollIntoView({ behavior: 'smooth' });
+                  }
+                  else if (feature.id === 'room-planner') setActiveTab('room-planner');
+                  else if (feature.id === 'style-quiz') setShowStyleQuiz(true);
+                  else if (feature.id === 'room-designer') setShowRoomDesigner(true);
+                }}
+              />
+            </FadeInOnScroll>
 
             <FadeInOnScroll direction="up" className="section-perf section-gap-lg">
               <InspirationSection
