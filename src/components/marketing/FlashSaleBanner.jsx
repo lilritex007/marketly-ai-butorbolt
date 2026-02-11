@@ -13,10 +13,10 @@ function getTodayKey() {
 }
 
 const FLASH_OFFERS = [
-  { text: 'Akár 50% kedvezmény kiválasztott bútorokra', bg: 'from-red-600 via-orange-500 to-amber-500' },
-  { text: 'Kanapék, ágyak, szekrények – ma legolcsóbban', bg: 'from-rose-600 via-pink-500 to-amber-500' },
-  { text: 'Ingyenes szállítás 50.000 Ft felett', bg: 'from-emerald-600 via-teal-500 to-cyan-500' },
-  { text: 'Csak ma! Korlátozott idő – ne maradj le', bg: 'from-orange-600 via-red-500 to-rose-600' },
+  { title: '🔥 Flash Sale!', badge: '-50%', text: 'Akár 50% kedvezmény kiválasztott bútorokra', cta: 'Megnézem az akciókat', ctaShort: 'Megnézem', bg: 'from-red-600 via-orange-500 to-amber-500', ctaColor: 'text-red-600' },
+  { title: '🏷️ Megtakarítások', badge: 'OLCSÓBB', text: 'Kanapék, ágyak, szekrények – ma legolcsóbban', cta: 'Nézd meg a kedvezményeket', ctaShort: 'Nézd meg', bg: 'from-rose-600 via-pink-500 to-amber-500', ctaColor: 'text-rose-600' },
+  { title: '🚚 Ingyenes szállítás', badge: '50e+', text: 'Ingyenes szállítás 50.000 Ft felett', cta: 'Vásárlás most', ctaShort: 'Vásárolj', bg: 'from-emerald-600 via-teal-500 to-cyan-500', ctaColor: 'text-emerald-700' },
+  { title: '⏰ Csak ma!', badge: 'SIESS', text: 'Korlátozott idő – ne maradj le', cta: 'Nem hagyom ki', ctaShort: 'Nem hagyom ki', bg: 'from-orange-600 via-red-500 to-rose-600', ctaColor: 'text-orange-600' },
 ];
 
 const FlashSaleBanner = ({ 
@@ -30,8 +30,12 @@ const FlashSaleBanner = ({
   const [timeLeft, setTimeLeft] = useState(calculateTimeLeft());
   const [offerIndex, setOfferIndex] = useState(0);
   const currentOffer = FLASH_OFFERS[offerIndex];
-  const displaySubtitle = subtitle || currentOffer.text;
+  const displayTitle = currentOffer.title;
+  const displaySubtitle = currentOffer.text;
+  const displayCta = currentOffer.cta;
+  const displayCtaShort = currentOffer.ctaShort;
   const bgGradient = currentOffer.bg;
+  const ctaColor = currentOffer.ctaColor || 'text-red-600';
   const [isDismissed, setIsDismissed] = useState(() => {
     if (typeof sessionStorage === 'undefined') return false;
     return sessionStorage.getItem(FLASH_DISMISS_KEY) === getTodayKey();
@@ -103,9 +107,9 @@ const FlashSaleBanner = ({
             </div>
             <div>
               <div className="flex items-center gap-1.5">
-                <span className="font-black text-white text-base">{title}</span>
+                <span key={offerIndex} className="font-black text-white text-base animate-fade-in">{displayTitle}</span>
                 <span className="px-1.5 py-0.5 bg-yellow-400 text-yellow-900 text-[10px] font-black rounded animate-pulse">
-                  -50%
+                  {currentOffer.badge}
                 </span>
               </div>
             </div>
@@ -143,11 +147,11 @@ const FlashSaleBanner = ({
         <button
           type="button"
           onClick={onViewSale}
-          className="w-full min-h-[44px] flex items-center justify-center gap-2 px-4 py-3 bg-white text-red-600 font-bold text-sm rounded-lg shadow-lg active:scale-[0.98] transition-transform focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-orange-500"
-          aria-label="Akciók megtekintése"
+          className={`w-full min-h-[44px] flex items-center justify-center gap-2 px-4 py-3 bg-white ${ctaColor} font-bold text-sm rounded-lg shadow-lg active:scale-[0.98] transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-current`}
+          aria-label={displayCta}
         >
           <Zap className="w-4 h-4" aria-hidden />
-          Megnézem az akciókat
+          <span key={offerIndex} className="animate-fade-in">{displayCta}</span>
           <ArrowRight className="w-4 h-4" aria-hidden />
         </button>
       </div>
@@ -161,12 +165,12 @@ const FlashSaleBanner = ({
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <span className="font-black text-white text-lg lg:text-xl">{title}</span>
+              <span key={`title-${offerIndex}`} className="font-black text-white text-lg lg:text-xl animate-fade-in">{displayTitle}</span>
               <span className="px-2 py-0.5 bg-yellow-400 text-yellow-900 text-xs font-black rounded-md">
-                AKÁR -50%
+                {currentOffer.badge}
               </span>
             </div>
-            <p key={offerIndex} className="text-white/80 text-xs lg:text-sm animate-fade-in">{displaySubtitle}</p>
+            <p key={`sub-${offerIndex}`} className="text-white/80 text-xs lg:text-sm animate-fade-in">{displaySubtitle}</p>
           </div>
         </div>
 
@@ -196,11 +200,11 @@ const FlashSaleBanner = ({
           <button
             type="button"
             onClick={onViewSale}
-            className="min-h-[44px] flex items-center gap-2 px-5 lg:px-6 py-2.5 bg-white text-red-600 font-bold text-sm lg:text-base rounded-xl shadow-lg hover:shadow-xl hover:scale-[1.02] transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-orange-500"
-            aria-label="Akciók megtekintése"
+            className={`min-h-[44px] flex items-center gap-2 px-5 lg:px-6 py-2.5 bg-white ${ctaColor} font-bold text-sm lg:text-base rounded-xl shadow-lg hover:shadow-xl hover:scale-[1.02] transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-current`}
+            aria-label={displayCta}
           >
             <Zap className="w-4 h-4 lg:w-5 lg:h-5" aria-hidden />
-            Megnézem
+            <span key={offerIndex} className="animate-fade-in">{displayCtaShort}</span>
             <ArrowRight className="w-4 h-4 lg:w-5 lg:h-5" aria-hidden />
           </button>
           <button
