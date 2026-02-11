@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import {
-  Sparkles, Camera, Move3d, MessageCircle, ArrowRight,
+  Sparkles, Camera, ArrowRight,
   Package, Users, Star, Zap
 } from 'lucide-react';
 import { CountUp } from '../ui/CountUp';
@@ -243,83 +243,4 @@ export const ModernHero = ({
   );
 };
 
-/**
- * AI Features Showcase – wow kártyák, egyértelmű CTA
- */
-export const AIFeaturesShowcase = ({ onFeatureClick }) => {
-  const [activeFeature, setActiveFeature] = useState(0);
-  const [isHovering, setIsHovering] = useState(false);
-
-  const features = [
-    { icon: Camera, title: 'Képfelismerés', shortDesc: 'Fotózz és keress', color: 'from-blue-500 to-primary-500', bgColor: 'bg-blue-50', stat: '99%', statLabel: 'pontosság' },
-    { icon: MessageCircle, title: 'AI Chat', shortDesc: 'Személyes tanácsadó', color: 'from-secondary-600 to-secondary-700', bgColor: 'bg-secondary-50', stat: '24/7', statLabel: 'elérhető' },
-    { icon: Move3d, title: 'Szobatervező', shortDesc: 'Virtuális elhelyezés', color: 'from-emerald-500 to-green-600', bgColor: 'bg-emerald-50', stat: 'AR', statLabel: 'támogatás' }
-  ];
-
-  useEffect(() => {
-    if (isHovering) return;
-    const interval = setInterval(() => setActiveFeature((prev) => (prev + 1) % features.length), 4000);
-    return () => clearInterval(interval);
-  }, [isHovering, features.length]);
-
-  return (
-    <section className="py-20 bg-white border-t border-gray-100" aria-labelledby="ai-features-heading">
-      <div className="w-full max-w-8xl mx-auto px-4 sm:px-6 lg:px-16">
-        <div className="text-center mb-12">
-          <div className="inline-flex items-center gap-2 px-4 py-2 bg-primary-50 rounded-full mb-6">
-            <Sparkles className="w-5 h-5 text-primary-500" aria-hidden />
-            <span className="text-xs font-bold text-primary-600 uppercase tracking-wider">AI Powered</span>
-          </div>
-          <h2 id="ai-features-heading" className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 tracking-tight mb-3">
-            AI a <span className="bg-gradient-to-r from-primary-500 to-secondary-600 bg-clip-text text-transparent">szolgálatodban</span>
-          </h2>
-          <p className="text-base sm:text-lg text-gray-500 max-w-2xl mx-auto">Okos funkciók a tökéletes választáshoz</p>
-        </div>
-
-        <div
-          className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto"
-          onMouseEnter={() => setIsHovering(true)}
-          onMouseLeave={() => setIsHovering(false)}
-        >
-          {features.map((feature, idx) => (
-            <button
-              key={idx}
-              onClick={() => {
-                setActiveFeature(idx);
-                onFeatureClick?.(feature);
-              }}
-              className={`
-                relative text-left rounded-xl p-6 border transition-all duration-200
-                ${activeFeature === idx 
-                  ? 'bg-white border-primary-200 shadow-lg' 
-                  : 'bg-gray-50 border-gray-100 hover:border-gray-200 hover:shadow-md hover:-translate-y-0.5'
-                }
-                focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-400 focus-visible:ring-offset-2
-              `}
-            >
-              <div className="flex items-center justify-between mb-4">
-                <div className={`w-12 h-12 rounded-xl flex items-center justify-center transition-all duration-200 ${activeFeature === idx ? `bg-gradient-to-br ${feature.color} shadow-md` : 'bg-white border border-gray-200'}`}>
-                  <feature.icon className={`w-6 h-6 ${activeFeature === idx ? 'text-white' : 'text-gray-600'}`} aria-hidden />
-                </div>
-                <div className="text-right">
-                  <div className="text-base font-bold text-gray-900">{feature.stat}</div>
-                  <div className="text-xs text-gray-400">{feature.statLabel}</div>
-                </div>
-              </div>
-              <h3 className="font-semibold text-gray-900 text-lg mb-2">{feature.title}</h3>
-              <p className="text-sm text-gray-500 mb-3">{feature.shortDesc}</p>
-              <span className={`inline-flex items-center gap-1.5 text-sm font-medium transition-colors ${activeFeature === idx ? 'text-primary-600' : 'text-gray-400'}`}>
-                Kipróbálom <ArrowRight className="w-4 h-4" aria-hidden />
-              </span>
-              {activeFeature === idx && (
-                <div className={`absolute bottom-0 left-0 right-0 h-1 rounded-b-xl bg-gradient-to-r ${feature.color}`} />
-              )}
-            </button>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-};
-
-export default { ModernHero, AIFeaturesShowcase };
+export default { ModernHero };

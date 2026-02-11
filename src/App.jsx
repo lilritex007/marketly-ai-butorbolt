@@ -33,7 +33,8 @@ import LiveSocialProof from './components/ux/LiveSocialProof';
 import LiveActivityStrip from './components/ux/LiveActivityStrip';
 
 // Landing Components  
-import { ModernHero, AIFeaturesShowcase } from './components/landing/ModernHero';
+import { ModernHero } from './components/landing/ModernHero';
+import AIModuleUnified from './components/landing/AIModuleUnified';
 import { LiveShowcase, InteractiveCTA } from './components/landing/ShowcaseSections';
 import InspirationSection from './components/landing/InspirationSection';
 import NewArrivalsSection from './components/landing/NewArrivalsSection';
@@ -1364,49 +1365,17 @@ const App = () => {
                 handleCategoryChange(name);
               }}
             />
-            <AIFeaturesShowcase 
+            <AIModuleUnified
               onFeatureClick={(feature) => {
-                if (feature.title.includes('Képfelismerés')) setActiveTab('visual-search');
-                else if (feature.title.includes('Chat') || feature.title.includes('Asszisztens')) {
-                  const chat = document.getElementById('mkt-butorbolt-chat');
-                  chat?.scrollIntoView({ behavior: 'smooth' });
+                if (feature.id === 'visual-search') setActiveTab('visual-search');
+                else if (feature.id === 'chat') {
+                  document.getElementById('mkt-butorbolt-chat')?.scrollIntoView({ behavior: 'smooth' });
                 }
-                else if (feature.title.includes('Tervező')) setActiveTab('room-planner');
+                else if (feature.id === 'room-planner') setActiveTab('room-planner');
+                else if (feature.id === 'style-quiz') setShowStyleQuiz(true);
+                else if (feature.id === 'room-designer') setShowRoomDesigner(true);
               }}
             />
-            
-            {/* AI Szuper Funkciók */}
-            <section data-ai-features className="py-20 bg-white">
-              <div className="max-w-6xl mx-auto px-6">
-                <h2 className="text-3xl font-bold text-gray-900 text-center mb-12">
-                  AI Funkciók
-                </h2>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <button
-                    type="button"
-                    onClick={() => setShowStyleQuiz(true)}
-                    className="p-6 rounded-lg bg-white border border-gray-200 hover:shadow-md hover:-translate-y-1 transition-all duration-200 text-left"
-                  >
-                    <Sparkles className="w-8 h-8 text-primary-500 mb-4" aria-hidden />
-                    <h3 className="text-lg font-semibold text-gray-900 mb-2">AI Stílus Quiz</h3>
-                    <p className="text-sm text-gray-600">
-                      5 kérdés a Style DNA-dhoz
-                    </p>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setShowRoomDesigner(true)}
-                    className="p-6 rounded-lg bg-white border border-gray-200 hover:shadow-md hover:-translate-y-1 transition-all duration-200 text-left"
-                  >
-                    <Camera className="w-8 h-8 text-primary-500 mb-4" aria-hidden />
-                    <h3 className="text-lg font-semibold text-gray-900 mb-2">AI Szoba Tervező</h3>
-                    <p className="text-sm text-gray-600">
-                      Tervezd meg a tökéletes szobát
-                    </p>
-                  </button>
-                </div>
-              </div>
-            </section>
 
             <FadeInOnScroll direction="up" className="section-perf section-gap-lg">
               <InspirationSection
