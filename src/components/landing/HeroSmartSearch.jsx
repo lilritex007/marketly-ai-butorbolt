@@ -685,13 +685,13 @@ export default function HeroSmartSearch({
       style={{ width: '100%', maxWidth: 'min(100%, 72rem)', touchAction: 'pan-y' }}
       aria-label="AI Kereső"
     >
-      <div className="relative rounded-xl sm:rounded-2xl overflow-x-clip overflow-y-visible border-0 sm:border border-gray-200/90 bg-white/95 backdrop-blur-sm w-full min-w-0 max-w-full sm:mx-4 md:mx-6 lg:mx-8">
+      <div className="relative rounded-2xl sm:rounded-3xl overflow-x-clip overflow-y-visible border-2 border-primary-100/80 bg-white shadow-[0_8px_32px_rgba(0,0,0,0.08),0_0_0_1px_rgba(0,0,0,0.04),inset_0_1px_0_rgba(255,255,255,0.9)] w-full min-w-0 max-w-full sm:mx-4 md:mx-6 lg:mx-8">
         <div className="relative z-10 px-3 sm:px-6 md:px-8 lg:px-10 py-5 sm:py-6 md:py-7 min-w-0">
           {/* Márkahű felső + alsó színátmenetes border – a szekció belsejében */}
-          <div className="absolute inset-x-0 top-0 h-1 rounded-t-xl sm:rounded-t-2xl bg-gradient-to-r from-primary-500 via-secondary-500 to-primary-400 pointer-events-none" aria-hidden />
-          <div className="absolute inset-x-0 bottom-0 h-1 rounded-b-xl sm:rounded-b-2xl bg-gradient-to-r from-secondary-500 via-primary-500 to-secondary-400 pointer-events-none" aria-hidden />
+          <div className="absolute inset-x-0 top-0 h-1.5 rounded-t-2xl sm:rounded-t-3xl bg-gradient-to-r from-primary-500 via-secondary-500 to-primary-400 pointer-events-none" aria-hidden />
+          <div className="absolute inset-x-0 bottom-0 h-1.5 rounded-b-2xl sm:rounded-b-3xl bg-gradient-to-r from-secondary-500 via-primary-500 to-secondary-400 pointer-events-none" aria-hidden />
           {/* Fejléc – AI Kereső */}
-          <header className="mb-5 sm:mb-6 relative -mx-3 sm:-mx-6 md:-mx-8 lg:-mx-10 -mt-5 sm:-mt-6 md:-mt-7 px-4 sm:px-6 md:px-8 lg:px-10 pt-5 sm:pt-6 md:pt-7 pb-4 sm:pb-5 overflow-hidden rounded-t-[inherit]">
+          <header className="mb-4 sm:mb-5 relative -mx-3 sm:-mx-6 md:-mx-8 lg:-mx-10 -mt-5 sm:-mt-6 md:-mt-7 px-4 sm:px-6 md:px-8 lg:px-10 pt-5 sm:pt-6 md:pt-7 pb-4 sm:pb-5 overflow-hidden rounded-t-[inherit] border-b border-gray-100">
             {/* Félig színátmenetes háttér */}
             <div className="absolute inset-0 bg-gradient-to-b from-primary-50/80 via-primary-50/40 to-transparent pointer-events-none" aria-hidden />
             <div className="relative z-10 flex flex-wrap items-center justify-between gap-3 sm:gap-4">
@@ -732,6 +732,8 @@ export default function HeroSmartSearch({
             <div className="relative z-10 mt-4 h-1 rounded-full bg-gradient-to-r from-primary-500 via-primary-400 to-secondary-500 w-2/3 sm:w-1/2 max-w-xs opacity-90" aria-hidden />
           </header>
 
+          {/* Keresési tartalom – egyértelmű keretben */}
+          <div className="rounded-xl sm:rounded-2xl border border-gray-100 bg-gradient-to-b from-white to-gray-50/40 -mx-1 sm:-mx-2 px-3 sm:px-4 md:px-6 py-4 sm:py-5">
           {/* Keresősáv */}
           <form onSubmit={handleSubmit} className="space-y-3 sm:space-y-4">
             <div
@@ -1274,6 +1276,7 @@ export default function HeroSmartSearch({
             )}
           </div>
         )}
+          </div>
         </div>
       </div>
     </section>
