@@ -8,10 +8,12 @@ import {
 } from 'lucide-react';
 import { EnhancedProductCard } from '../product/EnhancedProductCard';
 import { getStockLevel } from '../../utils/helpers';
-import SectionHeader from './SectionHeader';
 import {
   getLikedProducts,
   getViewedProducts,
+  getPersonalizedRecommendations,
+  getSimilarProducts,
+  getPreferenceSignals,
   trackSectionEvent,
 } from '../../services/userPreferencesService';
 import ProductCarousel from '../ui/ProductCarousel';
@@ -46,17 +48,39 @@ function seededHash(str, seed) {
   return h / 4294967296;
 }
 
-/** Kedvencek: liked/viewed elöl (valós felhasználói adat), majd keverés, excludeIds hogy ne ismétlődjön */
+/** Kedvencek: személyre szabott (getPersonalizedRecommendations), liked + hasonlók, excludeIds */
 function buildFavoritesPool(products, seed, excludeIds = []) {
   if (!products.length) return [];
   const exclude = new Set(excludeIds);
-  const inStock = products.filter((p) => (p.inStock ?? p.in_stock ?? true) && !exclude.has(p.id));
   const likedIds = getLikedProducts();
-  const viewed = getViewedProducts(30);
+  const viewed = getViewedProducts(40);
   const viewedIds = new Set(viewed.map((p) => p.id));
-  const liked = inStock.filter((p) => likedIds.includes(p.id));
-  const viewedOnly = inStock.filter((p) => viewedIds.has(p.id) && !likedIds.includes(p.id));
-  const rest = inStock.filter((p) => !likedIds.includes(p.id) && !viewedIds.has(p.id));
+  const ids = new Set();
+  const result = [];
+  const inStock = (arr) => arr.filter((p) => (p.inStock ?? p.in_stock ?? true) && !exclude.has(p.id) && !ids.has(p.id));
+  const addUnique = (arr) => {
+    arr.forEach((p) => {
+      if (p?.id && !ids.has(p.id) && !exclude.has(p.id)) {
+        ids.add(p.id);
+        result.push(p);
+      }
+    });
+  };
+  addUnique(inStock(products.filter((p) => likedIds.includes(p.id))));
+  viewed.forEach((p) => {
+    const full = products.find((x) => x.id === p.id);
+    if (full && !ids.has(full.id)) addUnique([full]);
+  });
+  viewed.slice(0, 6).forEach((p) => {
+    const full = products.find((x) => x.id === p.id);
+    if (full && full.id) {
+      const similar = getSimilarProducts(full, products, 10);
+      addUnique(inStock(similar));
+    }
+  });
+  const personalized = getPersonalizedRecommendations(products, POOL_SIZE);
+  addUnique(inStock(personalized));
+  const rest = products.filter((p) => !ids.has(p.id) && !exclude.has(p.id) && (p.inStock ?? p.in_stock ?? true));
   const withSale = rest.filter((p) => p.salePrice && p.price > p.salePrice);
   const withoutSale = rest.filter((p) => !(p.salePrice && p.price > p.salePrice));
   const restSorted = [...withSale, ...withoutSale].sort((a, b) => {
@@ -64,8 +88,8 @@ function buildFavoritesPool(products, seed, excludeIds = []) {
     const hb = seededHash(String(b.id), seed);
     return ha - hb;
   });
-  const combined = [...liked, ...viewedOnly, ...restSorted];
-  return combined.slice(0, POOL_SIZE);
+  addUnique(restSorted);
+  return result.slice(0, POOL_SIZE);
 }
 
 /** Friss: updated_at DESC, max POOL_SIZE */
@@ -83,14 +107,16 @@ function buildNewArrivalsPool(products) {
   return sorted.slice(0, POOL_SIZE);
 }
 
-/** Popular: liked/viewed (valós adat) erős súllyal, akciós elöl, excludeIds a Friss-ből */
+/** Popular: getPersonalizedRecommendations blend + liked/viewed, akciós elöl, excludeIds */
 function buildPopularPool(products, excludeIds = []) {
   if (!products.length) return [];
   const exclude = new Set(excludeIds);
   const inStock = products.filter((p) => (p.inStock ?? p.in_stock ?? true) && !exclude.has(p.id));
   const likedIds = getLikedProducts();
-  const viewed = getViewedProducts(40);
+  const viewed = getViewedProducts(50);
   const viewedIds = viewed.map((p) => p.id);
+  const signals = getPreferenceSignals();
+  const personalized = getPersonalizedRecommendations(inStock, Math.floor(POOL_SIZE * 0.5));
   const withDiscount = [...inStock]
     .filter((p) => p.salePrice && p.price > p.salePrice)
     .sort((a, b) => (b.price - (b.salePrice || 0)) - (a.price - (a.salePrice || 0)));
@@ -99,12 +125,21 @@ function buildPopularPool(products, excludeIds = []) {
     .filter((p) => !ids.has(p.id))
     .sort((a, b) => (b.price || 0) - (a.price || 0));
   const combined = [...withDiscount, ...rest];
+  const categoryParts = (p) =>
+    (p.category || '')
+      .split('>')
+      .map((c) => c.trim().toLowerCase())
+      .filter(Boolean);
   return combined
     .sort((a, b) => {
       const stockA = getStockLevel(a) ?? 0;
       const stockB = getStockLevel(b) ?? 0;
-      const scoreA = (likedIds.includes(a.id) ? 8 : 0) + (viewedIds.includes(a.id) ? 4 : 0) + Math.min(stockA, 20) * 0.1;
-      const scoreB = (likedIds.includes(b.id) ? 8 : 0) + (viewedIds.includes(b.id) ? 4 : 0) + Math.min(stockB, 20) * 0.1;
+      let scoreA = (likedIds.includes(a.id) ? 10 : 0) + (viewedIds.includes(a.id) ? 5 : 0) + Math.min(stockA, 20) * 0.1;
+      let scoreB = (likedIds.includes(b.id) ? 10 : 0) + (viewedIds.includes(b.id) ? 5 : 0) + Math.min(stockB, 20) * 0.1;
+      categoryParts(a).forEach((cat) => { scoreA += (signals.categories?.[cat] || 0) * 0.5; });
+      categoryParts(b).forEach((cat) => { scoreB += (signals.categories?.[cat] || 0) * 0.5; });
+      if (personalized.some((p) => p.id === a.id)) scoreA += 3;
+      if (personalized.some((p) => p.id === b.id)) scoreB += 3;
       return scoreB - scoreA;
     })
     .slice(0, POOL_SIZE);
@@ -359,21 +394,21 @@ export default function ProductWorldsSection({
   return (
     <section
       ref={sectionRef}
-      className={`section-shell section-world section-world--${activeWorld} py-10 sm:py-12 lg:py-16 overflow-hidden`}
+      className={`section-shell section-world section-world--${activeWorld} py-12 sm:py-14 lg:py-20 overflow-hidden w-full`}
       aria-labelledby={`${activeWorld}-heading`}
       aria-label="Termék világok"
       role="region"
       data-section="product-worlds"
     >
-      <div className="w-full max-w-[2000px] mx-auto px-4 sm:px-6 lg:px-10 xl:px-16">
-        <div className="section-frame">
+      <div className="w-full max-w-[2000px] mx-auto px-0 sm:px-6 lg:px-10 xl:px-16">
+        <div className="section-frame mx-0 sm:mx-4 lg:mx-6 rounded-none sm:rounded-3xl lg:rounded-[28px] shadow-none sm:shadow-[0_20px_60px_rgba(15,23,42,0.08)]">
           {/* Tab bar – világváltó */}
           <div
-            className="flex justify-center mb-6 lg:mb-8"
+            className="flex justify-center mb-6 lg:mb-10 px-4 sm:px-0"
             role="tablist"
             aria-label="Válassz világot"
           >
-            <div className="flex w-full sm:w-auto sm:inline-flex rounded-2xl bg-white/90 border border-gray-200/80 shadow-sm p-1.5 gap-1">
+            <div className="flex w-full sm:w-auto sm:inline-flex rounded-2xl bg-white/95 border border-gray-200/90 shadow-lg shadow-gray-200/50 p-1.5 gap-1">
               {WORLDS.map((w) => (
                 <button
                   key={w.id}
@@ -398,31 +433,55 @@ export default function ProductWorldsSection({
             </div>
           </div>
 
-          <SectionHeader
-            id={`${activeWorld}-heading`}
-            title={currentWorld.title}
-            subtitle={currentWorld.subtitle}
-            Icon={currentWorld.Icon}
-            accentClass={currentWorld.accentClass}
-            eyebrow={currentWorld.eyebrow}
-            badge={badgeText}
-            contextLabel={contextLabel}
-            prominent
-            className={currentWorld.className}
-            meta={metaText}
-            helpText="Csak készleten lévő termékek"
-            actions={<div className="flex flex-wrap items-center gap-2">{renderActions()}</div>}
-          />
+          {/* Wow fejléc */}
+          <div className={`relative overflow-hidden px-4 sm:px-6 lg:px-8 py-8 sm:py-10 lg:py-12 rounded-2xl lg:rounded-3xl ${currentWorld.className}`}>
+            <div className="absolute inset-0 bg-gradient-to-br from-white/95 via-white/80 to-transparent pointer-events-none" />
+            <div className="relative z-10">
+              <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-6">
+                <div className="space-y-3">
+                  <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/90 backdrop-blur border border-gray-200/80 text-gray-700 text-sm font-bold tracking-wide shadow-sm">
+                    <span className="w-2 h-2 rounded-full bg-current opacity-60" />
+                    {currentWorld.eyebrow}
+                  </span>
+                  <h2
+                    id={`${activeWorld}-heading`}
+                    className={`text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-extrabold leading-tight tracking-tight bg-gradient-to-r ${currentWorld.accentClass} bg-clip-text text-transparent`}
+                  >
+                    {currentWorld.title}
+                  </h2>
+                  <p className="text-base sm:text-lg lg:text-xl text-gray-600 max-w-2xl font-medium">
+                    {currentWorld.subtitle}
+                  </p>
+                  <div className="flex flex-wrap items-center gap-3 pt-2">
+                    {badgeText && (
+                      <span className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-white/90 border border-gray-200/80 text-gray-700 text-sm font-semibold shadow-sm">
+                        <currentWorld.Icon className="w-4 h-4 text-current opacity-70" />
+                        {badgeText}
+                      </span>
+                    )}
+                    {contextLabel && (
+                      <span className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-white/90 border border-gray-200/80 text-gray-700 text-sm font-semibold shadow-sm">
+                        {contextLabel}
+                      </span>
+                    )}
+                    <span className="text-sm text-gray-500">{metaText}</span>
+                  </div>
+                </div>
+                <div className="flex flex-wrap items-center gap-2 shrink-0">{renderActions()}</div>
+              </div>
+            </div>
+            <div className={`absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r ${currentWorld.accentClass} opacity-40`} />
+          </div>
 
           <div
             id={`panel-${activeWorld}`}
             role="tabpanel"
             aria-labelledby={`tab-${activeWorld}`}
-            className="product-worlds-content transition-opacity duration-200"
+            className="product-worlds-content transition-opacity duration-200 mt-6 lg:mt-8 px-0 sm:px-2"
           >
             {visibleProducts.length > 0 ? (
               <ProductCarousel
-                className="mt-2"
+                className="mt-2 -mx-4 sm:mx-0 pl-4 sm:pl-0 pr-4 sm:pr-0"
                 autoScroll={false}
                 onInteractionChange={setIsInteracting}
               >

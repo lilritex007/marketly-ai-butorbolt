@@ -1535,7 +1535,8 @@ const App = () => {
             
             {featuredBase.length > 0 && (
               <FadeInOnScroll direction="up" className="section-perf">
-                <ProductWorldsSection
+                <div className="w-[100vw] relative left-1/2 -translate-x-1/2 sm:w-full sm:relative sm:left-auto sm:translate-x-0">
+                  <ProductWorldsSection
                   products={featuredBase}
                   onProductClick={handleProductView}
                   onToggleWishlist={toggleWishlist}
@@ -1545,6 +1546,7 @@ const App = () => {
                   contextLabel={sectionContextLabel}
                   rotationTick={sectionRotateTick}
                 />
+                </div>
               </FadeInOnScroll>
             )}
             
