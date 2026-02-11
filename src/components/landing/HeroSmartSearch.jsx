@@ -691,53 +691,52 @@ export default function HeroSmartSearch({
           <div className="absolute -top-20 -right-20 w-64 h-64 rounded-full bg-primary-200/40 mix-blend-multiply filter blur-[80px]" />
           <div className="absolute -bottom-16 -left-16 w-48 h-48 rounded-full bg-secondary-300/30 mix-blend-multiply filter blur-[60px]" />
         </div>
-        <div className="relative z-10 px-[1%] sm:px-6 lg:px-8 py-5 sm:py-6 min-w-0 max-w-full">
-          {/* Fejléc – erőteljes */}
-          <header className="mb-5 sm:mb-6 relative -mx-[1%] sm:-mx-6 lg:-mx-8 -mt-5 sm:-mt-6 px-[1%] sm:px-6 lg:px-8 pt-7 sm:pt-8 pb-7 overflow-hidden rounded-t-2xl border-b-2 border-primary-200/60">
-            <div className="absolute inset-0 bg-gradient-to-br from-primary-100/80 via-primary-50/50 to-secondary-100/70 pointer-events-none" aria-hidden />
-            <div className="absolute left-0 top-0 bottom-0 w-1.5 bg-gradient-to-b from-primary-500 via-secondary-500 to-primary-400 pointer-events-none" aria-hidden />
-            <div className="absolute inset-0 bg-[radial-gradient(ellipse_70%_50%_at_20%_30%,rgba(255,138,0,0.2),transparent_55%)] pointer-events-none" aria-hidden />
-            <div className="absolute inset-0 bg-[radial-gradient(ellipse_50%_40%_at_80%_70%,rgba(0,107,111,0.15),transparent_55%)] pointer-events-none" aria-hidden />
-            <div className="relative z-10 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-5">
-              <div className="flex items-start sm:items-center gap-5 min-w-0 flex-1">
-                <span className="flex h-20 w-20 sm:h-[80px] sm:w-[80px] shrink-0 rounded-2xl bg-gradient-to-br from-primary-500 via-primary-600 to-secondary-600 text-white items-center justify-center shadow-[0_8px_28px_rgba(255,138,0,0.5),0_0_0_1px_rgba(255,255,255,0.2)_inset]">
-                  <Search className="w-9 h-9 sm:w-10 sm:h-10" aria-hidden />
+        <div className="relative z-10 px-4 sm:px-6 lg:px-8 pt-0 pb-5 sm:pb-6 min-w-0 max-w-full">
+          {/* Fejléc – visszafogott */}
+          <header className="mb-4 sm:mb-5 relative -mx-4 sm:-mx-6 lg:-mx-8 mt-0 px-4 sm:px-6 lg:px-8 pt-5 pb-5 overflow-hidden rounded-t-2xl border-b border-primary-200/50">
+            <div className="absolute inset-0 bg-gradient-to-br from-primary-50/80 via-white to-secondary-50/50 pointer-events-none" aria-hidden />
+            <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-primary-500 via-secondary-500 to-primary-400 pointer-events-none" aria-hidden />
+            <div className="absolute inset-0 bg-[radial-gradient(ellipse_70%_50%_at_20%_30%,rgba(255,138,0,0.1),transparent_55%)] pointer-events-none" aria-hidden />
+            <div className="relative z-10 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+              <div className="flex items-center gap-3 sm:gap-4 min-w-0 flex-1">
+                <span className="flex h-12 w-12 sm:h-14 sm:w-14 shrink-0 rounded-xl bg-gradient-to-br from-primary-500 via-primary-600 to-secondary-600 text-white items-center justify-center shadow-[0_4px_12px_rgba(255,138,0,0.35)]">
+                  <Search className="w-6 h-6 sm:w-7 sm:h-7" aria-hidden />
                 </span>
                 <div className="min-w-0">
-                  <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/95 border-2 border-primary-300/70 mb-3 shadow-md">
-                    <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse motion-reduce:animate-none" aria-hidden />
-                    <span className="text-xs font-black uppercase tracking-widest text-primary-800">{isIndexBuilding ? 'Betöltés…' : 'Okos keresés'}</span>
+                  <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/90 border border-primary-200/70 mb-1.5 shadow-sm">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse motion-reduce:animate-none" aria-hidden />
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-primary-700">{isIndexBuilding ? 'Betöltés…' : 'Okos keresés'}</span>
                   </div>
-                  <h2 className="text-3xl sm:text-4xl lg:text-5xl xl:text-[3rem] font-black tracking-tight leading-[1.1]">
-                    <span className="bg-gradient-to-r from-primary-600 via-primary-500 to-secondary-600 bg-clip-text text-transparent drop-shadow-sm">AI</span>
+                  <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold tracking-tight leading-tight">
+                    <span className="bg-gradient-to-r from-primary-600 via-primary-500 to-secondary-600 bg-clip-text text-transparent">AI</span>
                     <span className="text-gray-900"> Kereső</span>
                   </h2>
-                  <p className="text-base sm:text-lg text-gray-700 mt-2.5 font-semibold max-w-lg">
-                    Termék, stílus, ár – <span className="text-primary-700 font-bold">okos találatok</span> a teljes katalógusban
+                  <p className="text-sm sm:text-base text-gray-600 mt-1 font-medium max-w-md">
+                    Termék, stílus, ár – <span className="text-gray-800 font-semibold">okos találatok</span> a teljes katalógusban
                   </p>
                 </div>
               </div>
-              <div className="flex items-center gap-3 shrink-0 flex-shrink-0">
+              <div className="flex items-center gap-2 shrink-0 flex-shrink-0">
                 <button
                   type="button"
                   onClick={onTryAI}
-                  className="inline-flex items-center justify-center h-12 sm:h-14 px-5 rounded-xl bg-white border-2 border-secondary-300 text-secondary-700 hover:bg-secondary-50 hover:border-secondary-400 font-black shadow-lg hover:shadow-xl transition-all touch-manipulation gap-2.5"
+                  className="inline-flex items-center justify-center h-10 sm:h-11 px-3.5 rounded-lg bg-white border border-secondary-300 text-secondary-700 hover:bg-secondary-50 hover:border-secondary-400 font-semibold shadow-sm hover:shadow transition-all touch-manipulation gap-2 text-sm"
                   title="Képből keresés"
                   aria-label="Képből keresés"
                 >
-                  <Camera className="w-6 h-6 shrink-0" aria-hidden />
-                  <span className="text-sm font-bold">Képből</span>
+                  <Camera className="w-5 h-5 shrink-0" aria-hidden />
+                  <span>Képből</span>
                 </button>
                 <span
-                  className={`inline-flex items-center justify-center h-12 w-12 rounded-xl border-2 shadow-md ${isIndexBuilding ? 'bg-amber-100 border-amber-400 text-amber-800' : 'bg-emerald-100 border-emerald-400 text-emerald-800'}`}
+                  className={`inline-flex items-center justify-center h-10 w-10 rounded-lg border shadow-sm ${isIndexBuilding ? 'bg-amber-100 border-amber-300 text-amber-800' : 'bg-emerald-100 border-emerald-300 text-emerald-800'}`}
                   title={isIndexBuilding ? 'Index épül' : 'Index kész'}
                   aria-live="polite"
                 >
-                  <Sparkles className="w-6 h-6 shrink-0" aria-hidden />
+                  <Sparkles className="w-5 h-5 shrink-0" aria-hidden />
                 </span>
               </div>
             </div>
-            <div className="relative z-10 mt-6 h-1.5 rounded-full bg-gradient-to-r from-primary-500 via-primary-600 to-secondary-600 w-full max-w-md" aria-hidden />
+            <div className="relative z-10 mt-4 h-0.5 rounded-full bg-gradient-to-r from-primary-400 via-primary-500 to-secondary-500 w-full max-w-sm opacity-70" aria-hidden />
           </header>
 
           {/* Keresési tartalom */}
