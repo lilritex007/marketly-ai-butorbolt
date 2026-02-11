@@ -1326,14 +1326,16 @@ const App = () => {
       <main id="mkt-butorbolt-main">
         {activeTab === 'shop' && (
           <>
-            {/* Flash Sale Banner */}
-            <FlashSaleBanner
-              endTime={flashSaleEndTime}
-              title="🔥 Flash Sale!"
-              subtitle="Csak ma! Akár 50% kedvezmény kiválasztott bútorokra"
-              onViewSale={scrollToProductsSection}
-              variant="banner"
-            />
+            {/* Flash Sale Banner – nem teljes szélesség, lekerekített, váltakozó ajánlatok */}
+            <div className="px-[2px] sm:px-2 lg:px-4">
+              <FlashSaleBanner
+                endTime={flashSaleEndTime}
+                title="🔥 Flash Sale!"
+                subtitle="Csak ma! Akár 50% kedvezmény kiválasztott bútorokra"
+                onViewSale={scrollToProductsSection}
+                variant="banner"
+              />
+            </div>
 
             {/* Free Shipping Progress - shows when cart has items */}
             {cartItems.length > 0 && (

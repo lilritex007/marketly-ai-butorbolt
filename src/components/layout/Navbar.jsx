@@ -10,11 +10,11 @@ const RECENT_CATEGORIES_MAX = 3;
 import { getCategoryIcon } from '../ui/Icons';
 
 const ANNOUNCEMENT_MESSAGES = [
-  { icon: Truck, text: 'Ingyenes szállítás 50e Ft felett', highlight: 'Ingyenes' },
-  { icon: Gift, text: '10% kód: ELSO10', highlight: 'ELSO10' },
-  { icon: Zap, text: 'AI ajánlatok – csak neked', highlight: 'AI' },
-  { icon: TrendingUp, text: '90.000+ termék', highlight: '90.000+' },
-  { icon: Star, text: '4.9★ – 10.000+ vásárló', highlight: '4.9★' },
+  { icon: Truck, text: 'Ingyenes szállítás 50.000 Ft felett', highlight: 'Ingyenes' },
+  { icon: Gift, text: 'Első rendelés: 10% kupon ELSO10', highlight: '10%' },
+  { icon: Zap, text: 'AI személyre szabott ajánlatok', highlight: 'AI' },
+  { icon: Star, text: '4,9★ · 10.000+ elégedett vásárló', highlight: '4,9★' },
+  { icon: TrendingUp, text: '90.000+ bútor egy helyen', highlight: '90.000+' },
 ];
 
 const POPULAR_CATEGORIES = [
@@ -274,7 +274,7 @@ export default function Navbar({
         className={`sticky top-0 z-50 transition-all duration-200 ${isScrolled ? 'bg-white/95 backdrop-blur-xl shadow-md border-b border-gray-200' : 'bg-white/90 backdrop-blur-md border-b border-gray-100'}`}
       >
         <div className="w-full max-w-[2000px] mx-auto px-3 sm:px-4 lg:px-10 xl:px-16 2xl:px-20">
-          <div className={`flex justify-between items-center transition-all duration-300 ${isScrolled ? 'h-16 sm:h-18 lg:h-20 xl:h-24' : 'h-18 sm:h-20 lg:h-24 xl:h-28'}`}>
+          <div className={`flex justify-between items-center transition-all duration-300 py-3 sm:py-2 lg:py-0 ${isScrolled ? 'min-h-[64px] sm:min-h-[72px] lg:min-h-[80px] xl:min-h-[96px]' : 'min-h-[76px] sm:min-h-[80px] lg:min-h-[96px] xl:min-h-[112px]'}`}>
             <div
               className="flex items-center cursor-pointer group"
               onClick={() => { setActiveTab('shop'); setTimeout(() => onScrollToShop?.(), 350); }}
@@ -481,12 +481,12 @@ export default function Navbar({
         </div>
       </nav>
 
-      <div className="bg-gradient-to-r from-primary-500 via-secondary-700 to-secondary-600 text-white py-2 sm:py-2.5 lg:py-3 px-3 sm:px-4 lg:px-6 text-center relative overflow-hidden">
-        <div className="absolute inset-0 opacity-20" style={{ backgroundImage: 'radial-gradient(circle, rgba(255,255,255,0.3) 1px, transparent 1px)', backgroundSize: '16px 16px' }} aria-hidden="true" />
-        <div className="relative flex items-center justify-center gap-2 sm:gap-3 min-h-[44px]">
+      <div className="bg-gradient-to-r from-primary-500/95 via-secondary-600 to-secondary-500/95 text-white py-1.5 sm:py-2 px-3 sm:px-4 lg:px-6 text-center relative overflow-hidden shadow-sm">
+        <div className="absolute inset-0 opacity-15" style={{ backgroundImage: 'radial-gradient(circle, rgba(255,255,255,0.4) 1px, transparent 1px)', backgroundSize: '12px 12px' }} aria-hidden="true" />
+        <div className="relative flex items-center justify-center gap-2 sm:gap-3 min-h-[36px] sm:min-h-[40px]">
           <div key={announcementIndex} className="flex items-center gap-2 sm:gap-3 animate-fade-in max-w-full" role="marquee" aria-live="polite">
-            <currentAnnouncement.icon className="w-4 h-4 sm:w-5 sm:h-5 shrink-0 text-white/90" aria-hidden />
-            <span className="text-sm sm:text-base lg:text-lg font-medium truncate">
+            <currentAnnouncement.icon className="w-4 h-4 shrink-0 text-white/90" aria-hidden />
+            <span className="text-xs sm:text-sm lg:text-base font-semibold truncate">
               {currentAnnouncement.text.split(currentAnnouncement.highlight).map((part, i, arr) => (
                 <React.Fragment key={i}>
                   {part}
@@ -501,15 +501,14 @@ export default function Navbar({
             ))}
           </div>
         </div>
-        {/* Progress bar: time until next message */}
-        <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-white/20" aria-hidden="true">
-          <div className="h-full bg-white/70 transition-[width] duration-150 ease-linear" style={{ width: `${announcementProgress}%` }} />
+        <div className="absolute bottom-0 left-0 right-0 h-px bg-white/25" aria-hidden="true">
+          <div className="h-full bg-white/80 transition-[width] duration-150 ease-linear" style={{ width: `${announcementProgress}%` }} />
         </div>
       </div>
 
       {isReturningUser && (
-        <div className="w-full flex justify-center px-4 sm:px-6 lg:px-10 pt-4 sm:pt-5">
-          <div className="inline-flex items-center justify-center gap-2 sm:gap-3 bg-gradient-to-r from-emerald-50 to-green-50 border border-emerald-200/60 rounded-full py-2 px-4 sm:px-6 lg:px-8 shadow-sm w-auto lg:min-w-[400px]">
+        <div className="w-full flex justify-center px-4 sm:px-6 lg:px-10 pt-2 pb-2">
+          <div className="inline-flex items-center justify-center gap-2 sm:gap-3 bg-gradient-to-r from-emerald-50 to-green-50 border border-emerald-200/60 rounded-full py-1.5 px-4 sm:px-6 lg:px-8 shadow-sm w-auto lg:min-w-[400px]">
             <div className="w-7 h-7 sm:w-8 sm:h-8 bg-gradient-to-br from-emerald-400 to-green-500 rounded-full flex items-center justify-center text-white text-sm shrink-0">👋</div>
             <p className="text-sm font-bold text-gray-900 whitespace-nowrap">Üdv újra{userName ? `, ${userName}` : ''}!</p>
             <span className="text-xs text-emerald-600 whitespace-nowrap hidden sm:inline">Örülünk, hogy visszatértél</span>

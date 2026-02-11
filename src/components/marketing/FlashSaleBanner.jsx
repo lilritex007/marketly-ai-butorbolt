@@ -12,15 +12,26 @@ function getTodayKey() {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 }
 
+const FLASH_OFFERS = [
+  { text: 'Akár 50% kedvezmény kiválasztott bútorokra', bg: 'from-red-600 via-orange-500 to-amber-500' },
+  { text: 'Kanapék, ágyak, szekrények – ma legolcsóbban', bg: 'from-rose-600 via-pink-500 to-amber-500' },
+  { text: 'Ingyenes szállítás 50.000 Ft felett', bg: 'from-emerald-600 via-teal-500 to-cyan-500' },
+  { text: 'Csak ma! Korlátozott idő – ne maradj le', bg: 'from-orange-600 via-red-500 to-rose-600' },
+];
+
 const FlashSaleBanner = ({ 
   endTime,
   title = 'Flash Sale',
-  subtitle = 'Akár 50% kedvezmény',
+  subtitle,
   onViewSale,
   onDismiss,
   variant = 'banner'
 }) => {
   const [timeLeft, setTimeLeft] = useState(calculateTimeLeft());
+  const [offerIndex, setOfferIndex] = useState(0);
+  const currentOffer = FLASH_OFFERS[offerIndex];
+  const displaySubtitle = subtitle || currentOffer.text;
+  const bgGradient = currentOffer.bg;
   const [isDismissed, setIsDismissed] = useState(() => {
     if (typeof sessionStorage === 'undefined') return false;
     return sessionStorage.getItem(FLASH_DISMISS_KEY) === getTodayKey();
@@ -50,6 +61,13 @@ const FlashSaleBanner = ({
     return () => clearInterval(timer);
   }, [endTime]);
 
+  useEffect(() => {
+    const offerTimer = setInterval(() => {
+      setOfferIndex((i) => (i + 1) % FLASH_OFFERS.length);
+    }, 4500);
+    return () => clearInterval(offerTimer);
+  }, []);
+
   const handleDismiss = () => {
     try {
       sessionStorage.setItem(FLASH_DISMISS_KEY, getTodayKey());
@@ -68,7 +86,7 @@ const FlashSaleBanner = ({
   const timeLeftProgress = Math.min(100, (remainingMs / TOTAL_SALE_MS) * 100);
 
   return (
-    <div className="relative bg-gradient-to-r from-red-600 via-orange-500 to-amber-500 overflow-hidden">
+    <div className={`relative bg-gradient-to-r ${bgGradient} overflow-hidden rounded-xl sm:rounded-2xl shadow-lg transition-colors duration-700`}>
       {/* Animated shine effect */}
       <div className="absolute inset-0 overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -skew-x-12 animate-[shimmer_3s_infinite]" 
@@ -148,7 +166,7 @@ const FlashSaleBanner = ({
                 AKÁR -50%
               </span>
             </div>
-            <p className="text-white/80 text-xs lg:text-sm">{subtitle}</p>
+            <p key={offerIndex} className="text-white/80 text-xs lg:text-sm animate-fade-in">{displaySubtitle}</p>
           </div>
         </div>
 
