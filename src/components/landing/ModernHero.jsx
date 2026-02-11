@@ -141,7 +141,7 @@ export const ModernHero = ({
           </p>
 
           <div
-            className={`w-full min-w-0 max-w-full ${mounted ? 'hero-reveal' : 'opacity-0'}`}
+            className={`w-full min-w-0 max-w-full -mx-4 sm:mx-0 ${mounted ? 'hero-reveal' : 'opacity-0'}`}
             style={mounted ? { animationDelay: `${HERO_REVEAL_DELAY.sub + 80}ms` } : undefined}
           >
             <HeroSmartSearch
