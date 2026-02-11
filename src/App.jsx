@@ -953,7 +953,7 @@ const App = () => {
   useEffect(() => {
     const id = setInterval(() => {
       setSectionRotateTick((t) => t + 1);
-    }, 30000);
+    }, 180000);
     return () => clearInterval(id);
   }, []);
 
@@ -1227,14 +1227,14 @@ const App = () => {
     return () => clearInterval(t);
   }, []);
 
-  // Featured pool for homepage modules (ProductWorldsSection: ~300 termék, backend adatok)
+  // Featured pool for homepage modules (ProductWorldsSection: ~450 termék, nagyobb merítés)
   useEffect(() => {
     if (!totalProductsCount || totalProductsCount <= 0) return;
     const key = `${totalProductsCount}-${lastUpdated || ''}`;
     if (featuredPoolKeyRef.current === key) return;
     featuredPoolKeyRef.current = key;
     let cancelled = false;
-    const limit = 100;
+    const limit = 150;
     const baseOffsets = [0];
     if (totalProductsCount > limit * 2) {
       baseOffsets.push(

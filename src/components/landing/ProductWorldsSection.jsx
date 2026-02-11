@@ -5,8 +5,6 @@ import {
   TrendingUp,
   ArrowRight,
   RefreshCw,
-  Sparkles,
-  Flame,
 } from 'lucide-react';
 import { EnhancedProductCard } from '../product/EnhancedProductCard';
 import { getStockLevel } from '../../utils/helpers';
@@ -18,8 +16,10 @@ import {
 } from '../../services/userPreferencesService';
 import ProductCarousel from '../ui/ProductCarousel';
 
-const POOL_SIZE = 300;
+const POOL_SIZE = 450;
 const PAGE_SIZE = 12;
+const DEDUPE_EXCLUDE_NEW = 50;
+const DEDUPE_EXCLUDE_POPULAR = 40;
 
 const toTimestamp = (value) => {
   if (!value) return 0;
@@ -46,19 +46,26 @@ function seededHash(str, seed) {
   return h / 4294967296;
 }
 
-/** Kategória-sokszínűség: keverés seed-del, akciósak preferálva */
-function buildFavoritesPool(products, seed) {
+/** Kedvencek: liked/viewed elöl (valós felhasználói adat), majd keverés, excludeIds hogy ne ismétlődjön */
+function buildFavoritesPool(products, seed, excludeIds = []) {
   if (!products.length) return [];
-  const inStock = products.filter((p) => p.inStock ?? p.in_stock ?? true);
-  const withSale = inStock.filter((p) => p.salePrice && p.price > p.salePrice);
-  const withoutSale = inStock.filter((p) => !(p.salePrice && p.price > p.salePrice));
-  const combined = [...withSale, ...withoutSale];
-  const shuffled = [...combined].sort((a, b) => {
+  const exclude = new Set(excludeIds);
+  const inStock = products.filter((p) => (p.inStock ?? p.in_stock ?? true) && !exclude.has(p.id));
+  const likedIds = getLikedProducts();
+  const viewed = getViewedProducts(30);
+  const viewedIds = new Set(viewed.map((p) => p.id));
+  const liked = inStock.filter((p) => likedIds.includes(p.id));
+  const viewedOnly = inStock.filter((p) => viewedIds.has(p.id) && !likedIds.includes(p.id));
+  const rest = inStock.filter((p) => !likedIds.includes(p.id) && !viewedIds.has(p.id));
+  const withSale = rest.filter((p) => p.salePrice && p.price > p.salePrice);
+  const withoutSale = rest.filter((p) => !(p.salePrice && p.price > p.salePrice));
+  const restSorted = [...withSale, ...withoutSale].sort((a, b) => {
     const ha = seededHash(String(a.id), seed);
     const hb = seededHash(String(b.id), seed);
     return ha - hb;
   });
-  return shuffled.slice(0, POOL_SIZE);
+  const combined = [...liked, ...viewedOnly, ...restSorted];
+  return combined.slice(0, POOL_SIZE);
 }
 
 /** Friss: updated_at DESC, max POOL_SIZE */
@@ -76,12 +83,13 @@ function buildNewArrivalsPool(products) {
   return sorted.slice(0, POOL_SIZE);
 }
 
-/** Popular: akciós elöl, majd ár, liked/viewed scoring */
-function buildPopularPool(products) {
+/** Popular: liked/viewed (valós adat) erős súllyal, akciós elöl, excludeIds a Friss-ből */
+function buildPopularPool(products, excludeIds = []) {
   if (!products.length) return [];
-  const inStock = products.filter((p) => p.inStock ?? p.in_stock ?? true);
+  const exclude = new Set(excludeIds);
+  const inStock = products.filter((p) => (p.inStock ?? p.in_stock ?? true) && !exclude.has(p.id));
   const likedIds = getLikedProducts();
-  const viewed = getViewedProducts(20);
+  const viewed = getViewedProducts(40);
   const viewedIds = viewed.map((p) => p.id);
   const withDiscount = [...inStock]
     .filter((p) => p.salePrice && p.price > p.salePrice)
@@ -95,8 +103,8 @@ function buildPopularPool(products) {
     .sort((a, b) => {
       const stockA = getStockLevel(a) ?? 0;
       const stockB = getStockLevel(b) ?? 0;
-      const scoreA = (likedIds.includes(a.id) ? 4 : 0) + (viewedIds.includes(a.id) ? 2 : 0) + Math.min(stockA, 20) * 0.1;
-      const scoreB = (likedIds.includes(b.id) ? 4 : 0) + (viewedIds.includes(b.id) ? 2 : 0) + Math.min(stockB, 20) * 0.1;
+      const scoreA = (likedIds.includes(a.id) ? 8 : 0) + (viewedIds.includes(a.id) ? 4 : 0) + Math.min(stockA, 20) * 0.1;
+      const scoreB = (likedIds.includes(b.id) ? 8 : 0) + (viewedIds.includes(b.id) ? 4 : 0) + Math.min(stockB, 20) * 0.1;
       return scoreB - scoreA;
     })
     .slice(0, POOL_SIZE);
@@ -152,7 +160,7 @@ export default function ProductWorldsSection({
   onViewAll,
   onAddToCart,
   contextLabel = '',
-  rotationTick = 0,
+  rotationTick,
 }) {
   const [activeWorld, setActiveWorld] = useState('favorites');
   const [favoritesSeed, setFavoritesSeed] = useState(() => Math.floor(Date.now() / 10000));
@@ -164,12 +172,27 @@ export default function ProductWorldsSection({
   const [isInView, setIsInView] = useState(true);
   const sectionRef = useRef(null);
 
-  const favoritesPool = useMemo(
-    () => buildFavoritesPool(products, favoritesSeed),
-    [products, favoritesSeed]
-  );
   const newArrivalsPool = useMemo(() => buildNewArrivalsPool(products), [products]);
-  const popularFull = useMemo(() => buildPopularPool(products), [products]);
+  const newExcludeIds = useMemo(
+    () => newArrivalsPool.slice(0, DEDUPE_EXCLUDE_NEW).map((p) => p.id),
+    [newArrivalsPool]
+  );
+  const popularFull = useMemo(
+    () => buildPopularPool(products, newExcludeIds),
+    [products, newExcludeIds]
+  );
+  const popularExcludeIds = useMemo(
+    () => popularFull.slice(0, DEDUPE_EXCLUDE_POPULAR).map((p) => p.id),
+    [popularFull]
+  );
+  const favoritesExcludeIds = useMemo(
+    () => [...newExcludeIds, ...popularExcludeIds],
+    [newExcludeIds, popularExcludeIds]
+  );
+  const favoritesPool = useMemo(
+    () => buildFavoritesPool(products, favoritesSeed, favoritesExcludeIds),
+    [products, favoritesSeed, favoritesExcludeIds]
+  );
   const popularWeekly = useMemo(() => popularFull.slice(0, Math.floor(POOL_SIZE / 2)), [popularFull]);
   const popularMonthly = useMemo(
     () =>
@@ -203,13 +226,6 @@ export default function ProductWorldsSection({
   useEffect(() => {
     trackSectionEvent('product-worlds', 'section_impression');
   }, []);
-
-  useEffect(() => {
-    if (!rotationTick || !isInView || isInteracting) return;
-    if (activeWorld === 'favorites') setFavoritesPage((p) => p + 1);
-    else if (activeWorld === 'new') setNewPage((p) => p + 1);
-    else setPopularPage((p) => p + 1);
-  }, [rotationTick, isInView, isInteracting, activeWorld]);
 
   useEffect(() => {
     if (typeof window === 'undefined' || !('IntersectionObserver' in window)) return;
@@ -357,7 +373,7 @@ export default function ProductWorldsSection({
             role="tablist"
             aria-label="Válassz világot"
           >
-            <div className="flex w-full sm:w-auto sm:inline-flex rounded-full bg-white/80 border border-gray-200 shadow-sm p-1 gap-1">
+            <div className="flex w-full sm:w-auto sm:inline-flex rounded-2xl bg-white/90 border border-gray-200/80 shadow-sm p-1.5 gap-1">
               {WORLDS.map((w) => (
                 <button
                   key={w.id}
@@ -405,7 +421,11 @@ export default function ProductWorldsSection({
             className="product-worlds-content transition-opacity duration-200"
           >
             {visibleProducts.length > 0 ? (
-              <ProductCarousel className="mt-2" onInteractionChange={setIsInteracting}>
+              <ProductCarousel
+                className="mt-2"
+                autoScroll={false}
+                onInteractionChange={setIsInteracting}
+              >
                 {visibleProducts.map((product, index) => {
                   const stockLevel = getStockLevel(product);
                   const highlightBadge =
@@ -437,33 +457,15 @@ export default function ProductWorldsSection({
             )}
 
             {visibleProducts.length > 0 && (
-              <div className="mt-5 flex flex-wrap items-center gap-2 text-xs text-gray-500">
+              <div className="mt-6 pt-4 border-t border-gray-100 flex flex-wrap items-center justify-center gap-3 text-xs text-gray-500">
                 {activeWorld === 'favorites' && (
-                  <>
-                    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white border border-rose-100 text-rose-700 font-semibold">
-                      <Heart className="w-3.5 h-3.5" />
-                      Közönségkedvenc
-                    </span>
-                    <span>Válogatás a backend adataiból. Frissítéskor új sorrend.</span>
-                  </>
+                  <span>Kedvenceid és megtekintéseid alapján személyre szabott válogatás.</span>
                 )}
                 {activeWorld === 'new' && (
-                  <>
-                    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white border border-primary-100 text-primary-700 font-semibold">
-                      <Sparkles className="w-3.5 h-3.5" />
-                      Frissítve
-                    </span>
-                    <span>Az újdonságok a legfrissebb termékekből válogatnak.</span>
-                  </>
+                  <span>Legfrissebb termékek a backend adataiból.</span>
                 )}
                 {activeWorld === 'popular' && (
-                  <>
-                    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white border border-amber-100 text-amber-700 font-semibold">
-                      <Flame className="w-3.5 h-3.5" />
-                      Most pörög
-                    </span>
-                    <span>Dinamikus válogatás a készleten lévő és akciós termékekből.</span>
-                  </>
+                  <span>Kedvelések, megtekintések és akciós ajánlatok alapján.</span>
                 )}
               </div>
             )}
