@@ -43,6 +43,11 @@ export const fetchUnasProducts = async (filters = {}) => {
       params.set('slim', filters.slim ? 'true' : 'false');
     }
     if (filters.category && filters.category !== 'Összes') params.set('category', filters.category);
+    if (filters.categories && Array.isArray(filters.categories) && filters.categories.length > 0) {
+      params.set('categories', filters.categories.filter(Boolean).join(','));
+    } else if (filters.categories && typeof filters.categories === 'string' && filters.categories.trim()) {
+      params.set('categories', filters.categories.trim());
+    }
     if (filters.categoryMain) {
       const mainValue = Array.isArray(filters.categoryMain) ? filters.categoryMain.join(',') : filters.categoryMain;
       params.set('categoryMain', mainValue);

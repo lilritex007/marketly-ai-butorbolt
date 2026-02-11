@@ -460,6 +460,18 @@
     }
   }
 
+  /* Kollekció oldal: mobil 2x2, desktop 6 oszlop, teljes szélesség */
+  #mkt-butorbolt-app .product-grid-collection {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.5rem;
+  }
+  @media (min-width: 1024px) {
+    #mkt-butorbolt-app .product-grid-collection {
+      grid-template-columns: repeat(6, 1fr);
+      gap: 1rem;
+    }
+  }
+
 /* Premium card surfaces */
 #mkt-butorbolt-app .card-premium {
   background: linear-gradient(180deg, rgba(255,255,255,0.98), rgba(248,250,252,0.98));

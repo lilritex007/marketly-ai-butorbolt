@@ -35,7 +35,6 @@ export default function InspirationSection({ onExplore, onCategorySelect, onColl
       onCollectionSelect(col);
       return;
     }
-    if (col.categoryHint && onCategorySelect) onCategorySelect(col.categoryHint);
     onExplore?.();
   };
 

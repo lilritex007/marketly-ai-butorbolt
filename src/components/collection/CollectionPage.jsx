@@ -51,6 +51,8 @@ const CollectionPage = ({
   onWishlistToggle,
   wishlist,
   onAskAI,
+  onNavigateToCategory,
+  allCategories = [],
   totalCount = 0,
   loadedCount = 0,
   onLoadMore,
@@ -59,11 +61,12 @@ const CollectionPage = ({
   const [sortOption, setSortOption] = useState('default');
   const [viewMode, setViewMode] = useState('grid');
   const [showFilters, setShowFilters] = useState(false);
+  const [activeCategoryFilter, setActiveCategoryFilter] = useState('');
   const loadMoreRef = useRef(null);
 
   const hasMoreToShow = totalCount > 0 && loadedCount < totalCount;
 
-  const displayedProducts = useMemo(() => {
+  const styleFilteredProducts = useMemo(() => {
     let list = [...products];
     if (collection.styleKeywords?.length > 0) {
       const keywords = collection.styleKeywords.map((k) => k.toLowerCase());
@@ -72,6 +75,21 @@ const CollectionPage = ({
         return keywords.some((kw) => searchStr.includes(kw));
       });
     }
+    return list;
+  }, [products, collection.styleKeywords]);
+
+  const inCollectionCategories = useMemo(() => {
+    const set = new Set();
+    styleFilteredProducts.forEach((p) => {
+      if (p.category && String(p.category).trim()) set.add(String(p.category).trim());
+    });
+    return Array.from(set).sort((a, b) => a.localeCompare(b, 'hu'));
+  }, [styleFilteredProducts]);
+
+  const displayedProducts = useMemo(() => {
+    let list = activeCategoryFilter
+      ? styleFilteredProducts.filter((p) => p.category === activeCategoryFilter)
+      : [...styleFilteredProducts];
     switch (sortOption) {
       case 'price-asc':
         list.sort((a, b) => (a.salePrice || a.price) - (b.salePrice || b.price));
@@ -91,7 +109,7 @@ const CollectionPage = ({
         break;
     }
     return list;
-  }, [products, sortOption, collection.styleKeywords]);
+  }, [styleFilteredProducts, activeCategoryFilter, sortOption]);
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -105,10 +123,10 @@ const CollectionPage = ({
   }, [hasMoreToShow, onLoadMore]);
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div id="products-section" className="min-h-screen bg-gray-50">
       <CollectionHero collection={collection} productCount={displayedProducts.length} onBack={onBack} />
 
-      <div className="w-full max-w-[2000px] mx-auto px-4 sm:px-6 lg:px-10 xl:px-16 py-8 sm:py-12">
+      <div className="w-full max-w-[2000px] mx-auto px-3 sm:px-4 lg:px-6 xl:px-8 py-8 sm:py-12">
         {/* AI banner */}
         <div className="bg-gradient-to-r from-primary-500 to-secondary-700 rounded-2xl p-4 sm:p-6 text-white mb-6">
           <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
@@ -127,6 +145,61 @@ const CollectionPage = ({
             </button>
           </div>
         </div>
+
+        {/* Kollekción belüli szűrés – terméktípus chipek */}
+        {inCollectionCategories.length > 0 && (
+          <div className="mb-6">
+            <p className="text-sm font-medium text-gray-600 mb-2">Szűrés a kollekción belül</p>
+            <div className="flex gap-2 overflow-x-auto scrollbar-hide pb-1 lg:flex-wrap lg:overflow-visible">
+              <button
+                type="button"
+                onClick={() => setActiveCategoryFilter('')}
+                className={`shrink-0 px-4 py-2 rounded-full text-sm font-medium transition-colors ${
+                  activeCategoryFilter === '' ? 'bg-primary-500 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                }`}
+              >
+                Összes
+              </button>
+              {inCollectionCategories.map((cat) => (
+                <button
+                  key={cat}
+                  type="button"
+                  onClick={() => setActiveCategoryFilter(cat)}
+                  className={`shrink-0 px-4 py-2 rounded-full text-sm font-medium transition-colors ${
+                    activeCategoryFilter === cat ? 'bg-primary-500 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  }`}
+                >
+                  {cat}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Böngéssz kategóriák szerint – kilépés a kollekcióból */}
+        {onNavigateToCategory && (collection.relatedCategories?.length > 0 || allCategories.length > 0) && (
+          <div className="mb-6 p-4 rounded-xl bg-gray-100/80 border border-gray-200">
+            <p className="text-sm font-medium text-gray-600 mb-3">Böngéssz kategóriák szerint</p>
+            <div className="flex flex-wrap gap-2">
+              {(collection.relatedCategories?.length > 0
+                ? collection.relatedCategories
+                : allCategories
+                    .filter((c) => (typeof c === 'string' ? c : c?.name) !== 'Összes')
+                    .slice(0, 8)
+                    .map((c) => (typeof c === 'string' ? c : c.name))
+              ).map((cat) => (
+                <button
+                  key={cat}
+                  type="button"
+                  onClick={() => onNavigateToCategory(cat)}
+                  className="px-4 py-2 rounded-lg bg-white border border-gray-200 text-sm font-medium text-gray-700 hover:border-primary-400 hover:text-primary-600 hover:bg-primary-50 transition-colors"
+                >
+                  {cat}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* Toolbar */}
         <div className="flex flex-wrap items-center justify-between gap-3 mb-6 pb-4 border-b border-gray-200">
@@ -183,7 +256,7 @@ const CollectionPage = ({
             </button>
           </div>
         ) : viewMode === 'grid' ? (
-          <div className="product-grid">
+          <div className="product-grid product-grid-collection">
             {displayedProducts.map((product, index) => (
               <EnhancedProductCard
                 key={product.id}

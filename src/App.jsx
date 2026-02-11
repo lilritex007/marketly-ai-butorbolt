@@ -877,7 +877,7 @@ const App = () => {
 
   // API-first: kis lap, gyors first paint; soha nem töltünk 200k-t
   const loadUnasData = useCallback(async (options = {}) => {
-    const { silent = false, search = '', category = '', categoryMain, append = false, limit = INITIAL_PAGE, offset = 0 } = options;
+    const { silent = false, search = '', category = '', categoryMain, categories, append = false, limit = INITIAL_PAGE, offset = 0 } = options;
     
     if (!silent && !append) {
       setIsLoadingUnas(true);
@@ -891,13 +891,15 @@ const App = () => {
         : (typeof categoryMain === 'string' && categoryMain.trim()
           ? [categoryMain.trim()]
           : getCategoryMainList(category));
+      const categoriesList = Array.isArray(categories) ? categories.filter(Boolean) : [];
       const params = {
         limit,
         offset,
         slim: false,
         ...(search && search.trim() && { search: search.trim() }),
-        ...(categoryMainList.length > 0 && { categoryMain: categoryMainList }),
-        ...(categoryMainList.length === 0 && category && category !== 'Összes' && { category })
+        ...(categoriesList.length > 0 && { categories: categoriesList }),
+        ...(categoriesList.length === 0 && categoryMainList.length > 0 && { categoryMain: categoryMainList }),
+        ...(categoriesList.length === 0 && categoryMainList.length === 0 && category && category !== 'Összes' && { category })
       };
       const data = await fetchUnasProducts(params);
       const newProducts = (data.products || []).map(p => ({
@@ -1062,28 +1064,54 @@ const App = () => {
 
   const debouncedSearch = useDebounce(searchQuery, 400);
 
-  // Kollekció termékbetöltés – külön effect, amikor selectedCollection van
+  // Kollekció termékbetöltés – valódi termékek: categoryMain ( fő kategória) vagy categories ( leaf kategóriák )
   useEffect(() => {
     if (!selectedCollection) return;
     const cats = selectedCollection.categories || [];
-    // Map collection categories to rawSegments (backend uses path first segment)
-    const categoryMainList = cats.length > 0
-      ? cats.flatMap((c) => {
-          const main = (categoryHierarchy?.mainCategories || []).find((m) => m.name === c);
-          return Array.isArray(main?.rawSegments) && main.rawSegments.length > 0 ? main.rawSegments : [c];
-        })
-      : undefined;
-    const limit = selectedCollection.isSale || selectedCollection.isNew ? 200 : INITIAL_PAGE;
+    const mains = categoryHierarchy?.mainCategories || [];
+    const mainNames = new Set(mains.map((m) => m.name));
+    let categoryMainList;
+    let categoriesList;
+    if (cats.length > 0) {
+      const leafNames = [];
+      const mainSegments = [];
+      for (const c of cats) {
+        if (mainNames.has(c)) {
+          const main = mains.find((m) => m.name === c);
+          if (Array.isArray(main?.rawSegments) && main.rawSegments.length > 0) {
+            mainSegments.push(...main.rawSegments);
+          }
+        } else {
+          leafNames.push(c);
+        }
+      }
+      if (leafNames.length > 0) {
+        categoriesList = leafNames;
+        categoryMainList = undefined;
+      } else if (mainSegments.length > 0) {
+        categoryMainList = [...new Set(mainSegments)];
+        categoriesList = undefined;
+      } else {
+        categoriesList = cats;
+      }
+    } else {
+      categoryMainList = undefined;
+      categoriesList = undefined;
+    }
+    const limit = selectedCollection.isSale || selectedCollection.isNew ? 300 : INITIAL_PAGE;
     loadUnasDataRef.current({
       search: undefined,
       category: '',
       categoryMain: categoryMainList,
+      categories: categoriesList,
       limit,
       offset: 0
     });
-    requestAnimationFrame(() => requestAnimationFrame(() => {
-      scrollToProductsSectionRef.current?.();
-    }));
+    setTimeout(() => {
+      requestAnimationFrame(() => requestAnimationFrame(() => {
+        scrollToProductsSectionRef.current?.();
+      }));
+    }, 100);
   }, [selectedCollection, categoryHierarchy]);
 
   useEffect(() => {
@@ -1317,19 +1345,39 @@ const App = () => {
   const handleCollectionLoadMore = useCallback(() => {
     if (!selectedCollection || isLoadingMore || !hasMoreProducts) return;
     const cats = selectedCollection.categories || [];
-    const categoryMainList = cats.length > 0
-      ? cats.flatMap((c) => {
-          const main = (categoryHierarchy?.mainCategories || []).find((m) => m.name === c);
-          return Array.isArray(main?.rawSegments) && main.rawSegments.length > 0 ? main.rawSegments : [c];
-        })
-      : undefined;
+    const mains = categoryHierarchy?.mainCategories || [];
+    const mainNames = new Set(mains.map((m) => m.name));
+    let categoryMainList;
+    let categoriesList;
+    if (cats.length > 0) {
+      const leafNames = [];
+      const mainSegments = [];
+      for (const c of cats) {
+        if (mainNames.has(c)) {
+          const main = mains.find((m) => m.name === c);
+          if (Array.isArray(main?.rawSegments) && main.rawSegments.length > 0) {
+            mainSegments.push(...main.rawSegments);
+          }
+        } else {
+          leafNames.push(c);
+        }
+      }
+      if (leafNames.length > 0) {
+        categoriesList = leafNames;
+      } else if (mainSegments.length > 0) {
+        categoryMainList = [...new Set(mainSegments)];
+      } else {
+        categoriesList = cats;
+      }
+    }
     loadUnasDataRef.current({
       append: true,
       limit: DISPLAY_BATCH,
       offset: products.length,
       search: undefined,
       category: '',
-      categoryMain: categoryMainList
+      categoryMain: categoryMainList,
+      categories: categoriesList
     });
   }, [selectedCollection, isLoadingMore, hasMoreProducts, products.length, categoryHierarchy]);
 
@@ -1558,6 +1606,8 @@ const App = () => {
                 onWishlistToggle={toggleWishlist}
                 wishlist={wishlist}
                 onAskAI={() => setShowStyleQuiz(true)}
+                onNavigateToCategory={handleCategoryChange}
+                allCategories={categories}
                 totalCount={totalProductsCount}
                 loadedCount={products.length}
                 onLoadMore={handleCollectionLoadMore}

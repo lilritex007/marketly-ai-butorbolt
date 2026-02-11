@@ -131,6 +131,7 @@ app.get('/api/products', async (req, res) => {
   try {
     const {
       category,
+      categories,
       categoryMain,
       search,
       limit,
@@ -138,6 +139,7 @@ app.get('/api/products', async (req, res) => {
       slim // If slim=true, return only essential fields (faster)
     } = req.query;
     const categoryMainList = categoryMain ? String(categoryMain).split(',').map(s => s.trim()).filter(Boolean) : undefined;
+    const categoriesList = categories ? String(categories).split(',').map(s => s.trim()).filter(Boolean) : undefined;
 
     // Auto-sync disabled for production cadence (nightly/manual sync only)
 
@@ -146,6 +148,7 @@ app.get('/api/products', async (req, res) => {
 
     let products = getProducts({
       category,
+      categories: categoriesList,
       categoryMain: categoryMainList,
       search,
       showInAI: true, // Only show products enabled for AI
@@ -168,6 +171,7 @@ app.get('/api/products', async (req, res) => {
 
     const total = getProductCount({
       category,
+      categories: categoriesList,
       categoryMain: categoryMainList,
       search,
       showInAI: true
@@ -196,10 +200,12 @@ app.get('/api/products', async (req, res) => {
  */
 app.get('/api/products/stats', async (req, res) => {
   try {
-    const { category, categoryMain, search } = req.query;
+    const { category, categories, categoryMain, search } = req.query;
     const categoryMainList = categoryMain ? String(categoryMain).split(',').map(s => s.trim()).filter(Boolean) : undefined;
+    const categoriesList = categories ? String(categories).split(',').map(s => s.trim()).filter(Boolean) : undefined;
     const stats = getProductStats({
       category,
+      categories: categoriesList,
       categoryMain: categoryMainList,
       search,
       showInAI: true

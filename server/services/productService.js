@@ -38,6 +38,7 @@ export function getProducts(filters = {}) {
   try {
     const {
       category,
+      categories,
       categoryMain,
       showInAI,
       inStock,
@@ -51,10 +52,14 @@ export function getProducts(filters = {}) {
     let query = 'SELECT * FROM products WHERE 1=1';
     const params = [];
 
-    if (categoryMain) {
+    if (categoryMain && (!categories || categories.length === 0)) {
       const appliedMain = applyMainCategoryFilter(query, params, categoryMain);
       query = appliedMain.query;
       params.splice(0, params.length, ...appliedMain.params);
+    } else if (Array.isArray(categories) && categories.length > 0) {
+      const placeholders = categories.map(() => '?').join(', ');
+      query += ` AND category IN (${placeholders})`;
+      params.push(...categories);
     } else if (category) {
       query += ' AND category = ?';
       params.push(category);
@@ -315,15 +320,19 @@ export function deleteProduct(id) {
  */
 export function getProductCount(filters = {}) {
   try {
-    const { category, categoryMain, showInAI, inStock, search } = filters;
+    const { category, categories, categoryMain, showInAI, inStock, search } = filters;
 
     let query = 'SELECT COUNT(*) as count FROM products WHERE 1=1';
     const params = [];
 
-    if (categoryMain) {
+    if (categoryMain && (!categories || categories.length === 0)) {
       const appliedMain = applyMainCategoryFilter(query, params, categoryMain);
       query = appliedMain.query;
       params.splice(0, params.length, ...appliedMain.params);
+    } else if (Array.isArray(categories) && categories.length > 0) {
+      const placeholders = categories.map(() => '?').join(', ');
+      query += ` AND category IN (${placeholders})`;
+      params.push(...categories);
     } else if (category) {
       query += ' AND category = ?';
       params.push(category);
@@ -368,7 +377,7 @@ export function getProductCount(filters = {}) {
  */
 export function getProductStats(filters = {}) {
   try {
-    const { category, categoryMain, showInAI, inStock, search } = filters;
+    const { category, categories, categoryMain, showInAI, inStock, search } = filters;
 
     let query = `
       SELECT
@@ -381,10 +390,14 @@ export function getProductStats(filters = {}) {
     `;
     const params = [];
 
-    if (categoryMain) {
+    if (categoryMain && (!categories || categories.length === 0)) {
       const appliedMain = applyMainCategoryFilter(query, params, categoryMain);
       query = appliedMain.query;
       params.splice(0, params.length, ...appliedMain.params);
+    } else if (Array.isArray(categories) && categories.length > 0) {
+      const placeholders = categories.map(() => '?').join(', ');
+      query += ` AND category IN (${placeholders})`;
+      params.push(...categories);
     } else if (category) {
       query += ' AND category = ?';
       params.push(category);
