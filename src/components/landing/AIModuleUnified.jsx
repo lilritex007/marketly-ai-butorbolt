@@ -101,7 +101,7 @@ function FeatureCard({ feature, layout, onClick }) {
         trackSectionEvent(SECTION_ID, 'click', feature.id);
         onClick?.(feature);
       }}
-      className={`group relative flex-shrink-0 w-[calc(50%-10px)] min-w-[calc(50%-10px)] h-[220px] rounded-xl border bg-gradient-to-br ${feature.border} ${feature.bg} text-left shadow-md hover:shadow-xl hover:ring-2 hover:ring-primary-200/80 hover:-translate-y-0.5 active:scale-[0.98] transition-all duration-200 snap-start focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-400 focus-visible:ring-offset-2 ${feature.isHighlighted ? 'ring-2 ring-amber-300/60' : ''} ${!isMobile ? 'hidden sm:block sm:w-auto sm:min-w-0 sm:h-[240px]' : ''}`}
+      className={`group relative flex-shrink-0 w-[calc(50%-10px)] min-w-[calc(50%-10px)] h-[220px] rounded-xl border bg-gradient-to-br ${feature.border} ${feature.bg} text-left shadow-lg hover:shadow-xl hover:ring-2 hover:ring-primary-200/80 hover:-translate-y-0.5 active:scale-[0.98] transition-all duration-200 snap-start focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-400 focus-visible:ring-offset-2 ${feature.isHighlighted ? 'ring-2 ring-amber-300/60' : ''} ${!isMobile ? 'hidden sm:block sm:w-auto sm:min-w-0 sm:h-[240px]' : ''}`}
       aria-label={`${feature.title} – ${feature.subtitle}`}
     >
       <div className={`absolute left-0 bottom-0 w-full h-0.5 bg-gradient-to-r ${feature.accent}`} aria-hidden />
@@ -175,10 +175,9 @@ export default function AIModuleUnified({ onFeatureClick }) {
     const totalWidth = count * cardWidth;
     const onScroll = () => {
       const x = el.scrollLeft;
-      let idx = Math.round(x / cardWidth) % count;
-      if (idx < 0) idx += count;
+      let idx = Math.min(count - 1, Math.round(x / cardWidth));
+      if (idx < 0) idx = 0;
       setActiveIndex(idx);
-      if (x >= totalWidth - 10) el.scrollLeft = x - totalWidth;
     };
     el.addEventListener('scroll', onScroll, { passive: true });
     return () => el.removeEventListener('scroll', onScroll);
@@ -192,7 +191,7 @@ export default function AIModuleUnified({ onFeatureClick }) {
     const t = setInterval(() => {
       const curr = el.scrollLeft;
       const next = curr + cardWidth;
-      if (next >= totalWidth - 5) {
+      if (next >= totalWidth - 20) {
         el.scrollTo({ left: 0, behavior: 'smooth' });
       } else {
         el.scrollTo({ left: next, behavior: 'smooth' });
@@ -217,10 +216,10 @@ export default function AIModuleUnified({ onFeatureClick }) {
 
   return (
     <section
-      className="py-20 bg-white border-t border-gray-100"
+      className="py-20 bg-gradient-to-b from-primary-50/40 via-white to-white border-t border-gray-100"
       aria-labelledby="ai-module-heading"
     >
-      <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-16">
+      <div className="w-full max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-12 xl:px-16">
         <div className="text-center mb-12">
           <h2
             id="ai-module-heading"
@@ -248,9 +247,9 @@ export default function AIModuleUnified({ onFeatureClick }) {
             scrollPaddingLeft: 16
           }}
         >
-          {[...FEATURES, ...FEATURES].map((feature, i) => (
+          {FEATURES.map((feature) => (
             <FeatureCard
-              key={`${feature.id}-${i}`}
+              key={feature.id}
               feature={feature}
               layout="mobile"
               onClick={handleClick}
@@ -269,8 +268,8 @@ export default function AIModuleUnified({ onFeatureClick }) {
           ))}
         </div>
 
-        {/* Tablet + Desktop: grid */}
-        <div className="hidden sm:grid sm:grid-cols-3 lg:grid-cols-5 gap-5 mt-0">
+        {/* Tablet + Desktop: 5 kártya egy sorban, egyforma méret */}
+        <div className="hidden sm:grid sm:grid-cols-2 lg:grid-cols-5 gap-4 lg:gap-5 mt-0">
           {FEATURES.map((feature) => {
             const Icon = feature.icon;
             return (
@@ -281,7 +280,7 @@ export default function AIModuleUnified({ onFeatureClick }) {
                 trackSectionEvent(SECTION_ID, 'click', feature.id);
                 handleClick(feature);
               }}
-              className={`group relative rounded-xl border bg-gradient-to-br ${feature.border} ${feature.bg} h-[240px] text-left shadow-md hover:shadow-xl hover:ring-2 hover:ring-primary-200/80 hover:-translate-y-0.5 active:scale-[0.98] transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-400 focus-visible:ring-offset-2 overflow-hidden ${feature.isHighlighted ? 'ring-2 ring-amber-300/60 lg:col-span-2' : ''}`}
+              className={`group relative rounded-xl border bg-gradient-to-br ${feature.border} ${feature.bg} h-[220px] lg:h-[240px] text-left shadow-lg hover:shadow-xl hover:ring-2 hover:ring-primary-200/80 hover:-translate-y-0.5 active:scale-[0.98] transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-400 focus-visible:ring-offset-2 overflow-hidden min-w-0 ${feature.isHighlighted ? 'ring-2 ring-amber-300/60' : ''}`}
               aria-label={`${feature.title} – ${feature.subtitle}`}
             >
               <div className={`absolute left-0 bottom-0 w-full h-0.5 bg-gradient-to-r ${feature.accent}`} aria-hidden />
