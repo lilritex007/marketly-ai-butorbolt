@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Camera, MessageCircle, Move3d, Sparkles, Home, ArrowRight } from 'lucide-react';
 import { trackSectionEvent } from '../../services/userPreferencesService';
+import { CountUp } from '../ui/Animations';
 
 const FEATURES = [
   {
@@ -88,10 +89,24 @@ const FEATURES = [
 const AUTO_SCROLL_MS = 4000;
 const SECTION_ID = 'ai-module';
 
-function FeatureCard({ feature, layout, onClick }) {
+function StatDisplay({ feature, isMobile, reduceMotion }) {
+  if (!feature.stat) return null;
+  const statPos = feature.isHighlighted ? 'top-4 left-4' : 'top-4 right-4 sm:top-5 sm:right-5';
+  const parsed = feature.stat === '99%' ? { num: 99, suffix: '%' } : feature.stat === '24/7' ? { num: 24, suffix: '/7' } : null;
+
+  return (
+    <div className={`absolute ${statPos} text-right`}>
+      <div className={`${isMobile ? 'text-sm' : 'text-base'} font-bold ${feature.text}`}>
+        {reduceMotion || !parsed ? feature.stat : <CountUp end={parsed.num} suffix={parsed.suffix} duration={1200} />}
+      </div>
+      <div className={`${isMobile ? 'text-[10px]' : 'text-xs'} text-gray-500`}>{feature.statLabel}</div>
+    </div>
+  );
+}
+
+function FeatureCard({ feature, layout, onClick, reduceMotion }) {
   const Icon = feature.icon;
   const isMobile = layout === 'mobile';
-  const statPos = feature.isHighlighted && feature.stat ? 'top-4 left-4' : 'top-4 right-4 sm:top-5 sm:right-5';
   const badgePos = 'top-4 right-4 sm:top-5 sm:right-5';
 
   return (
@@ -101,20 +116,15 @@ function FeatureCard({ feature, layout, onClick }) {
         trackSectionEvent(SECTION_ID, 'click', feature.id);
         onClick?.(feature);
       }}
-      className={`group relative flex-shrink-0 w-[calc(50%-10px)] min-w-[calc(50%-10px)] h-[220px] rounded-xl border bg-gradient-to-br ${feature.border} ${feature.bg} text-left shadow-lg hover:shadow-xl hover:ring-2 hover:ring-primary-200/80 hover:-translate-y-0.5 active:scale-[0.98] transition-all duration-200 snap-start focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-400 focus-visible:ring-offset-2 ${feature.isHighlighted ? 'ring-2 ring-amber-300/60' : ''} ${!isMobile ? 'hidden sm:block sm:w-auto sm:min-w-0 sm:h-[240px]' : ''}`}
+      className={`group relative flex-shrink-0 w-[calc(50%-10px)] min-w-[calc(50%-10px)] h-[220px] rounded-xl border bg-gradient-to-br ${feature.border} ${feature.bg} text-left shadow-lg hover:shadow-xl hover:ring-2 hover:ring-primary-200/80 active:scale-[0.98] transition-all duration-200 snap-start focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-400 focus-visible:ring-offset-2 [transform-style:preserve-3d] hover:[transform:perspective(1000px)_rotateX(-2deg)_rotateY(2deg)_translateY(-4px)] motion-reduce:hover:[transform:translateY(-2px)] ${feature.isHighlighted ? 'ring-2 ring-amber-300/60' : ''} ${!isMobile ? 'hidden sm:block sm:w-auto sm:min-w-0 sm:h-[240px]' : ''}`}
       aria-label={`${feature.title} – ${feature.subtitle}`}
     >
       <div className={`absolute left-0 bottom-0 w-full h-0.5 bg-gradient-to-r ${feature.accent}`} aria-hidden />
       <div className={`relative h-full flex flex-col ${isMobile ? 'p-4' : 'p-5'}`}>
-        <div className={`${isMobile ? 'w-10 h-10 mb-3' : 'w-11 h-11 mb-4'} rounded-xl bg-gradient-to-br ${feature.iconGradient} text-white flex items-center justify-center shadow-sm`}>
-          <Icon className={isMobile ? 'w-5 h-5' : 'w-6 h-6'} aria-hidden />
+        <div className={`${isMobile ? 'w-10 h-10 mb-3' : 'w-11 h-11 mb-4'} rounded-xl bg-gradient-to-br ${feature.iconGradient} text-white flex items-center justify-center shadow-sm transition-transform duration-200 group-hover:scale-110 group-hover:-translate-y-0.5`}>
+          <Icon className={`${isMobile ? 'w-5 h-5' : 'w-6 h-6'} transition-transform duration-200 group-hover:scale-105`} aria-hidden />
         </div>
-        {feature.stat && (
-          <div className={`absolute ${statPos} text-right`}>
-            <div className={`${isMobile ? 'text-sm' : 'text-base'} font-bold ${feature.text}`}>{feature.stat}</div>
-            <div className={`${isMobile ? 'text-[10px]' : 'text-xs'} text-gray-500`}>{feature.statLabel}</div>
-          </div>
-        )}
+        <StatDisplay feature={feature} isMobile={isMobile} reduceMotion={reduceMotion} />
         {feature.isHighlighted && (
           <span className={`absolute ${badgePos} px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 ${isMobile ? 'text-[10px]' : 'text-xs'} font-bold`}>
             Próbáld először
@@ -123,7 +133,7 @@ function FeatureCard({ feature, layout, onClick }) {
         <h3 className={`${isMobile ? 'text-base' : 'text-lg'} font-bold ${feature.text} mb-0.5 sm:mb-1`}>{feature.title}</h3>
         <p className={`${isMobile ? 'text-xs' : 'text-sm'} text-gray-600 mb-auto`}>{feature.subtitle}</p>
         <span className={`inline-flex items-center gap-1.5 sm:gap-2 ${isMobile ? 'text-sm' : 'text-sm'} font-semibold ${feature.text} mt-2`}>
-          {feature.cta} <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" aria-hidden />
+          {feature.cta} <ArrowRight className="w-4 h-4 group-hover:translate-x-1 group-hover:scale-110 transition-transform duration-200" aria-hidden />
         </span>
       </div>
     </button>
@@ -214,12 +224,34 @@ export default function AIModuleUnified({ onFeatureClick }) {
     setIsScrolling(true);
   };
 
+  const [sectionInView, setSectionInView] = useState(false);
+  const sectionRef = useRef(null);
+
+  useEffect(() => {
+    const el = sectionRef.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      ([e]) => e.isIntersecting && setSectionInView(true),
+      { threshold: 0.15 }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
   return (
     <section
-      className="py-20 bg-gradient-to-b from-primary-50/40 via-white to-white border-t border-gray-100"
+      ref={sectionRef}
+      className="relative py-20 overflow-hidden bg-gradient-to-b from-primary-50/40 via-white to-white border-t border-gray-100"
       aria-labelledby="ai-module-heading"
     >
-      <div className="w-full max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-12 xl:px-16">
+      {/* Gradient orbs háttér */}
+      <div className="pointer-events-none absolute inset-0">
+        <div className="absolute top-0 left-1/4 w-[400px] h-[400px] rounded-full bg-primary-200/50 mix-blend-multiply filter blur-[100px] animate-blob motion-reduce:animate-none" />
+        <div className="absolute top-1/2 right-0 w-[350px] h-[350px] rounded-full bg-secondary-300/40 mix-blend-multiply filter blur-[90px] animate-blob animation-delay-2000 motion-reduce:animate-none" />
+        <div className="absolute bottom-0 left-1/2 w-[300px] h-[300px] rounded-full bg-amber-200/40 mix-blend-multiply filter blur-[80px] animate-blob animation-delay-4000 motion-reduce:animate-none" />
+      </div>
+
+      <div className="relative z-10 w-full max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-12 xl:px-16">
         <div className="text-center mb-12">
           <h2
             id="ai-module-heading"
@@ -247,13 +279,19 @@ export default function AIModuleUnified({ onFeatureClick }) {
             scrollPaddingLeft: 16
           }}
         >
-          {FEATURES.map((feature) => (
-            <FeatureCard
+          {FEATURES.map((feature, idx) => (
+            <div
               key={feature.id}
-              feature={feature}
-              layout="mobile"
-              onClick={handleClick}
-            />
+              className={`flex-shrink-0 transition-all duration-500 ease-out ${(sectionInView || reduceMotion) ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}
+              style={!reduceMotion ? { transitionDelay: `${idx * 80}ms` } : undefined}
+            >
+              <FeatureCard
+                feature={feature}
+                layout="mobile"
+                onClick={handleClick}
+                reduceMotion={reduceMotion}
+              />
+            </div>
           ))}
         </div>
 
@@ -268,44 +306,58 @@ export default function AIModuleUnified({ onFeatureClick }) {
           ))}
         </div>
 
-        {/* Tablet + Desktop: 5 kártya egy sorban, egyforma méret */}
+        {/* Tablet + Desktop: 5 kártya egy sorban, staggered fade-in */}
         <div className="hidden sm:grid sm:grid-cols-2 lg:grid-cols-5 gap-4 lg:gap-5 mt-0">
-          {FEATURES.map((feature) => {
+          {FEATURES.map((feature, idx) => {
             const Icon = feature.icon;
+            const show = sectionInView || reduceMotion;
             return (
-            <button
+            <div
               key={feature.id}
-              type="button"
-              onClick={() => {
-                trackSectionEvent(SECTION_ID, 'click', feature.id);
-                handleClick(feature);
-              }}
-              className={`group relative rounded-xl border bg-gradient-to-br ${feature.border} ${feature.bg} h-[220px] lg:h-[240px] text-left shadow-lg hover:shadow-xl hover:ring-2 hover:ring-primary-200/80 hover:-translate-y-0.5 active:scale-[0.98] transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-400 focus-visible:ring-offset-2 overflow-hidden min-w-0 ${feature.isHighlighted ? 'ring-2 ring-amber-300/60' : ''}`}
-              aria-label={`${feature.title} – ${feature.subtitle}`}
+              className={`transition-all duration-500 ease-out ${show ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'}`}
+              style={!reduceMotion ? { transitionDelay: `${idx * 90}ms` } : undefined}
             >
-              <div className={`absolute left-0 bottom-0 w-full h-0.5 bg-gradient-to-r ${feature.accent}`} aria-hidden />
-              <div className="relative h-full flex flex-col p-5">
-                <div className={`w-11 h-11 rounded-xl bg-gradient-to-br ${feature.iconGradient} text-white flex items-center justify-center mb-4 shadow-sm`}>
-                  <Icon className="w-6 h-6" aria-hidden />
-                </div>
-                {feature.stat && (
-                  <div className={`absolute top-5 ${feature.isHighlighted ? 'left-5' : 'right-5'} text-right`}>
-                    <div className={`text-base font-bold ${feature.text}`}>{feature.stat}</div>
-                    <div className="text-xs text-gray-500">{feature.statLabel}</div>
+              <button
+                type="button"
+                onClick={() => {
+                  trackSectionEvent(SECTION_ID, 'click', feature.id);
+                  handleClick(feature);
+                }}
+                className={`group relative w-full rounded-xl border bg-gradient-to-br ${feature.border} ${feature.bg} h-[220px] lg:h-[240px] text-left shadow-lg hover:shadow-xl hover:ring-2 hover:ring-primary-200/80 active:scale-[0.98] transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-400 focus-visible:ring-offset-2 overflow-hidden min-w-0 [transform-style:preserve-3d] hover:[transform:perspective(1000px)_rotateX(-2deg)_rotateY(2deg)_translateY(-4px)] motion-reduce:hover:[transform:translateY(-2px)] ${feature.isHighlighted ? 'ring-2 ring-amber-300/60' : ''}`}
+                aria-label={`${feature.title} – ${feature.subtitle}`}
+              >
+                <div className={`absolute left-0 bottom-0 w-full h-0.5 bg-gradient-to-r ${feature.accent}`} aria-hidden />
+                <div className="relative h-full flex flex-col p-5">
+                  <div className={`w-11 h-11 rounded-xl bg-gradient-to-br ${feature.iconGradient} text-white flex items-center justify-center mb-4 shadow-sm transition-transform duration-200 group-hover:scale-110 group-hover:-translate-y-0.5`}>
+                    <Icon className="w-6 h-6 transition-transform duration-200 group-hover:scale-105" aria-hidden />
                   </div>
-                )}
-                {feature.isHighlighted && (
-                  <span className="absolute top-5 right-5 px-2.5 py-1 rounded-full bg-amber-100 text-amber-800 text-xs font-bold">
-                    Próbáld először
+                  {feature.stat && (
+                    <div className={`absolute top-5 ${feature.isHighlighted ? 'left-5' : 'right-5'} text-right`}>
+                      <div className={`text-base font-bold ${feature.text}`}>
+                        {reduceMotion ? feature.stat : feature.stat === '99%' ? (
+                          <CountUp end={99} suffix="%" duration={1200} />
+                        ) : feature.stat === '24/7' ? (
+                          <CountUp end={24} suffix="/7" duration={1200} />
+                        ) : (
+                          feature.stat
+                        )}
+                      </div>
+                      <div className="text-xs text-gray-500">{feature.statLabel}</div>
+                    </div>
+                  )}
+                  {feature.isHighlighted && (
+                    <span className="absolute top-5 right-5 px-2.5 py-1 rounded-full bg-amber-100 text-amber-800 text-xs font-bold">
+                      Próbáld először
+                    </span>
+                  )}
+                  <h3 className={`text-lg font-bold ${feature.text} mb-1`}>{feature.title}</h3>
+                  <p className="text-sm text-gray-600 mb-auto">{feature.subtitle}</p>
+                  <span className={`inline-flex items-center gap-2 text-sm font-semibold ${feature.text} mt-2`}>
+                    {feature.cta} <ArrowRight className="w-4 h-4 group-hover:translate-x-1 group-hover:scale-110 transition-transform duration-200" aria-hidden />
                   </span>
-                )}
-                <h3 className={`text-lg font-bold ${feature.text} mb-1`}>{feature.title}</h3>
-                <p className="text-sm text-gray-600 mb-auto">{feature.subtitle}</p>
-                <span className={`inline-flex items-center gap-2 text-sm font-semibold ${feature.text} mt-2`}>
-                  {feature.cta} <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" aria-hidden />
-                </span>
-              </div>
-            </button>
+                </div>
+              </button>
+            </div>
             );
           })}
         </div>
