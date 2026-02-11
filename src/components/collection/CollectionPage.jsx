@@ -10,6 +10,9 @@ const CollectionHero = ({ collection, productCount, onBack }) => {
   const Icon = collection.icon;
   return (
     <div className="relative overflow-hidden">
+      {collection.image && (
+        <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: `url(${collection.image})` }} aria-hidden />
+      )}
       <div className={`absolute inset-0 bg-gradient-to-br ${collection.gradient}`} />
       <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-black/20 to-transparent" />
       <div className="relative w-full max-w-[2000px] mx-auto px-4 sm:px-6 lg:px-10 xl:px-16 py-12 sm:py-20 lg:py-28 text-white">

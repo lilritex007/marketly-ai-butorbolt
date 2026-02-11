@@ -1,15 +1,20 @@
-import React, { useRef, useState } from "react";
+import React, { useRef, useState, useEffect } from "react";
 import { ArrowRight } from "lucide-react";
 import { COLLECTIONS } from "../../config/collections";
 
+const AUTO_SCROLL_MS = 4500;
+
 /**
  * Fedezd fel a stílusokat – kollekció kártyák
- * Mobil: 2x2 carousel (2 kártya látható, horizontal scroll), Desktop: 6 oszlopos grid
+ * Mobil: 2x2 carousel (2 kártya látható, horizontal scroll + auto-scroll), Desktop: 6 oszlopos grid
  */
 export default function InspirationSection({ onExplore, onCategorySelect, onCollectionSelect }) {
   const scrollRef = useRef(null);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(true);
+  const [cardWidth, setCardWidth] = useState(0);
+  const [isPaused, setIsPaused] = useState(false);
+  const [reduceMotion, setReduceMotion] = useState(false);
 
   const handleClick = (col) => {
     if (onCollectionSelect) {
@@ -26,7 +31,7 @@ export default function InspirationSection({ onExplore, onCategorySelect, onColl
     setCanScrollRight(el.scrollLeft < el.scrollWidth - el.clientWidth - 2);
   };
 
-  React.useEffect(() => {
+  useEffect(() => {
     const el = scrollRef.current;
     if (!el) return;
     updateScrollState();
@@ -38,11 +43,54 @@ export default function InspirationSection({ onExplore, onCategorySelect, onColl
     };
   }, []);
 
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    const updateWidth = () => {
+      const gap = 12;
+      const w = (el.offsetWidth - gap) / 2;
+      setCardWidth(w + gap);
+    };
+    updateWidth();
+    const ro = new ResizeObserver(updateWidth);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
+
+  useEffect(() => {
+    const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
+    setReduceMotion(mq.matches);
+    const fn = (e) => setReduceMotion(e.matches);
+    mq.addEventListener("change", fn);
+    return () => mq.removeEventListener("change", fn);
+  }, []);
+
+  useEffect(() => {
+    if (reduceMotion || isPaused || !scrollRef.current || cardWidth <= 0) return;
+    const el = scrollRef.current;
+    const count = COLLECTIONS.length;
+    const totalWidth = count * cardWidth;
+    const t = setInterval(() => {
+      const curr = el.scrollLeft;
+      const next = curr + cardWidth;
+      if (next >= totalWidth - 20) {
+        el.scrollTo({ left: 0, behavior: "smooth" });
+      } else {
+        el.scrollTo({ left: next, behavior: "smooth" });
+      }
+    }, AUTO_SCROLL_MS);
+    return () => clearInterval(t);
+  }, [reduceMotion, isPaused, cardWidth]);
+
   const scroll = (dir) => {
     const el = scrollRef.current;
     if (!el) return;
-    const cardW = el.offsetWidth / 2 + 8;
+    const cardW = cardWidth > 0 ? cardWidth : el.offsetWidth / 2 + 8;
     el.scrollBy({ left: dir * cardW, behavior: "smooth" });
+  };
+
+  const handleTouchEnd = () => {
+    setTimeout(() => setIsPaused(false), 3000);
   };
 
   return (
@@ -85,6 +133,11 @@ export default function InspirationSection({ onExplore, onCategorySelect, onColl
           )}
           <div
             ref={scrollRef}
+            onMouseEnter={() => setIsPaused(true)}
+            onMouseLeave={() => setIsPaused(false)}
+            onTouchStart={() => setIsPaused(true)}
+            onTouchEnd={handleTouchEnd}
+            onTouchMove={() => setIsPaused(true)}
             className="flex gap-3 overflow-x-auto overflow-y-hidden snap-x snap-mandatory scroll-smooth pb-2 pl-4 pr-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
             style={{ WebkitOverflowScrolling: "touch", scrollSnapType: "x mandatory" }}
           >
@@ -134,6 +187,9 @@ function CollectionCard({ col, onPress, mobile }) {
       }`}
       aria-label={`${col.title} – böngészés`}
     >
+      {col.image && (
+        <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: `url(${col.image})` }} aria-hidden />
+      )}
       <div className={`absolute inset-0 bg-gradient-to-br ${col.gradient}`} />
       <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent" />
       <div className="relative h-full flex flex-col justify-end p-4 sm:p-5">

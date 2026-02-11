@@ -90,11 +90,20 @@ export const ModernHero = ({
     }
   ];
 
+  const HERO_BG_IMAGE = 'https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?w=1920&q=85';
+
   return (
     <section
       className="relative min-h-screen flex items-center justify-center overflow-hidden bg-[#fcfcfb]"
       aria-label="Főoldal – AI bútorbolt"
     >
+      {/* Háttérkép gradiens mögött */}
+      <div
+        className="absolute inset-0 bg-cover bg-center"
+        style={{ backgroundImage: `url(${HERO_BG_IMAGE})` }}
+        aria-hidden
+      />
+      <div className="absolute inset-0 bg-gradient-to-b from-white/92 via-white/75 to-primary-50/90" aria-hidden />
       <div className="absolute inset-0 pointer-events-none" aria-hidden="true">
         <div className="absolute inset-x-0 top-0 h-[1px] bg-gradient-to-r from-transparent via-primary-300 to-transparent opacity-70" />
         <div className="absolute inset-x-0 bottom-0 h-[1px] bg-gradient-to-r from-transparent via-secondary-300 to-transparent opacity-60" />
