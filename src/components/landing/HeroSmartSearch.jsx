@@ -681,7 +681,7 @@ export default function HeroSmartSearch({
 
   return (
     <section
-      className="w-full max-w-full mb-8 sm:mb-12 -mx-4 sm:mx-0 px-2 sm:px-0 min-w-0"
+      className="w-full max-w-full mb-8 sm:mb-12 -mx-4 sm:mx-0 px-0 sm:px-0 min-w-0"
       style={{ touchAction: 'pan-y' }}
       aria-label="AI Kereső"
     >
@@ -691,9 +691,9 @@ export default function HeroSmartSearch({
           <div className="absolute -top-20 -right-20 w-64 h-64 rounded-full bg-primary-200/40 mix-blend-multiply filter blur-[80px]" />
           <div className="absolute -bottom-16 -left-16 w-48 h-48 rounded-full bg-secondary-300/30 mix-blend-multiply filter blur-[60px]" />
         </div>
-        <div className="relative z-10 px-4 sm:px-6 lg:px-8 py-5 sm:py-6 min-w-0">
+        <div className="relative z-10 px-[1%] sm:px-6 lg:px-8 py-5 sm:py-6 min-w-0 max-w-full">
           {/* Fejléc – erőteljes */}
-          <header className="mb-5 sm:mb-6 relative -mx-4 sm:-mx-6 lg:-mx-8 -mt-5 sm:-mt-6 px-4 sm:px-6 lg:px-8 pt-7 sm:pt-8 pb-7 overflow-hidden rounded-t-2xl border-b-2 border-primary-200/60">
+          <header className="mb-5 sm:mb-6 relative -mx-[1%] sm:-mx-6 lg:-mx-8 -mt-5 sm:-mt-6 px-[1%] sm:px-6 lg:px-8 pt-7 sm:pt-8 pb-7 overflow-hidden rounded-t-2xl border-b-2 border-primary-200/60">
             <div className="absolute inset-0 bg-gradient-to-br from-primary-100/80 via-primary-50/50 to-secondary-100/70 pointer-events-none" aria-hidden />
             <div className="absolute left-0 top-0 bottom-0 w-1.5 bg-gradient-to-b from-primary-500 via-secondary-500 to-primary-400 pointer-events-none" aria-hidden />
             <div className="absolute inset-0 bg-[radial-gradient(ellipse_70%_50%_at_20%_30%,rgba(255,138,0,0.2),transparent_55%)] pointer-events-none" aria-hidden />
