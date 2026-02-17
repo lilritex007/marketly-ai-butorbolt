@@ -21,6 +21,8 @@ A widget UNAS oldalon fut, így az UNAS által biztosított JavaScript API-k el�
 
 **Widget használat:** `addToUnasCart(product, quantity)` – [src/services/unasCartService.js](../src/services/unasCartService.js)
 
+**Hibaelhárítás:** Konzolban `window.__MARKETLY_DEBUG = true` → kosárhoz adáskor log: `cart_add ok: { unasId, qty }`. Ha `cart_add` nincs: iframe esetén a service a `parent`/`top` window-ban keresi.
+
 ---
 
 ## UNAS.getCart – kosár lekérdezés
