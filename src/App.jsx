@@ -2,6 +2,7 @@ import React, { useState, useEffect, useLayoutEffect, useRef, useMemo, useCallba
 import { ShoppingCart, Camera, MessageCircle, X, Send, Plus, Move, Trash2, Home, ZoomIn, ZoomOut, Upload, Settings, Link as LinkIcon, FileText, RefreshCw, AlertCircle, Database, Lock, Search, ChevronLeft, ChevronRight, Filter, Heart, ArrowDownUp, Info, Check, Star, Truck, ShieldCheck, Phone, ArrowRight, Mail, Eye, Sparkles, Lightbulb, Image as ImageIcon, MousePointer2, Menu, Bot, Moon, Sun, Clock, Gift, Zap, TrendingUp, Instagram, Facebook, MapPin, Sofa, Lamp, BedDouble, Armchair, Grid3X3, ExternalLink, Timer, ChevronDown } from 'lucide-react';
 // framer-motion removed due to Vite production build TDZ issues
 import { fetchUnasProducts, refreshUnasProducts, fetchCategories, fetchCategoryHierarchy, fetchSearchIndex, fetchProductStats, fetchUnasProductById } from './services/unasApi';
+import { addToUnasCart, isUnasCartAvailable } from './services/unasCartService';
 import { smartSearch } from './services/aiSearchService';
 import { trackProductView as trackProductViewPref, getPersonalizedRecommendations, getSimilarProducts } from './services/userPreferencesService';
 import { generateText, analyzeImage as analyzeImageAI } from './services/geminiService';
@@ -825,31 +826,35 @@ const App = () => {
   
   // Handle add to cart with confetti celebration
   const handleAddToCart = useCallback((product, quantity = 1) => {
+    const qty = Math.max(1, Math.floor(Number(quantity) || 1));
+
+    // UNAS kosárhoz adás (ha elérhető – widget UNAS oldalon fut)
+    const addedToUnas = addToUnasCart(product, qty);
+
     // Trigger confetti
     setShowConfetti(true);
-    
-    // Add to cart state
+
+    // Lokális state (widget megjelenítés + fallback ha nincs UNAS)
     setCartItems(prev => {
       const existing = prev.find(item => item.id === product.id);
       if (existing) {
-        return prev.map(item => 
-          item.id === product.id 
-            ? { ...item, quantity: (item.quantity || 1) + quantity }
+        return prev.map(item =>
+          item.id === product.id
+            ? { ...item, quantity: (item.quantity || 1) + qty }
             : item
         );
       }
-      return [...prev, { ...product, quantity }];
+      return [...prev, { ...product, quantity: qty }];
     });
-    
-    // Set recently added for notification
+
     setRecentlyAddedToCart(product);
     setTimeout(() => setRecentlyAddedToCart(null), 3000);
-    
-    // Show toast
-    toast.success(`${product.name} hozzáadva a kosárhoz!`);
-    
-    // In real app: Sync with backend
-    console.log('Added to cart:', product.name, 'x', quantity);
+
+    if (addedToUnas) {
+      toast.success(`${product.name} hozzáadva a kosárhoz!`);
+    } else {
+      toast.success(`${product.name} – nyisd meg a termék oldalt a kosárhoz adáshoz.`);
+    }
   }, [toast]);
   
   // Handle remove from cart
@@ -2145,10 +2150,10 @@ const App = () => {
         onRemove={handleRemoveFromCart}
         onUpdateQuantity={handleUpdateCartQuantity}
         onCheckout={() => {
-          window.open(`${WEBSHOP_DOMAIN}/checkout`, '_blank');
+          window.location.href = `${WEBSHOP_DOMAIN}/checkout`;
         }}
         onViewCart={() => {
-          window.open(`${WEBSHOP_DOMAIN}/cart`, '_blank');
+          window.location.href = `${WEBSHOP_DOMAIN}/cart`;
         }}
         recentlyAdded={recentlyAddedToCart}
         suggestedProducts={products.slice(0, 3)}
