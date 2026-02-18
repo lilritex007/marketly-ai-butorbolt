@@ -11,14 +11,16 @@ const CART_ADD_PREFIX = '';
 
 /**
  * UNAS termék ID formátum: VX__unas__{id}
- * Előny: unas_id, id, sku.
+ * Preferálja: unas_id, unas_ref, id, sku. Kiszűri az érvénytelen ID-kat (pl. unas-prod-*).
  */
 function toUnasProductId(product) {
-  const id = product?.unas_id ?? product?.id ?? product?.sku;
+  const id = product?.unas_id ?? product?.unas_ref ?? product?.id ?? product?.sku;
   if (!id) return null;
-  const str = String(id);
+  const str = String(id).trim();
+  // Érvénytelen ID-k (pl. CSV parser unas-prod-1): ne adjunk VX__unas__ prefixet
+  if (str.startsWith('unas-prod-') || str === '') return null;
   if (str.startsWith('VX__unas__')) return str;
-  return `VX__unas__${id}`;
+  return `VX__unas__${str}`;
 }
 
 /**
@@ -36,8 +38,32 @@ function getCartAdd() {
 }
 
 /**
+ * UNAS form keresése – kosár/termék form, ahova az input kerülhet
+ */
+function findUnasForm() {
+  if (typeof document === 'undefined') return null;
+  const doc = document;
+  const selectors = [
+    'form[action*="cart"]',
+    'form[id*="cart"]',
+    'form[name*="cart"]',
+    'form[action*="kosar"]',
+    'form#product_form',
+    'form.product-form'
+  ];
+  for (const sel of selectors) {
+    try {
+      const form = doc.querySelector(sel);
+      if (form) return form;
+    } catch (_) { /* invalid selector */ }
+  }
+  return null;
+}
+
+/**
  * Mennyiség input létrehozása a DOM-ban – a cart_add ezt keresi
  * Termék oldal: id="db_VX__unas__4102641", name="db", type="number"
+ * Ha van UNAS form, oda helyezzük az inputot.
  */
 function ensureQtyInput(unasId, qty) {
   const inputId = `db_${unasId}`;
@@ -51,7 +77,8 @@ function ensureQtyInput(unasId, qty) {
     input.setAttribute('data-min', '1');
     input.setAttribute('data-max', '999999');
     input.style.cssText = 'position:absolute;left:-9999px;width:1px;height:1px;opacity:0;pointer-events:none;';
-    document.body.appendChild(input);
+    const form = findUnasForm();
+    (form || document.body).appendChild(input);
   } else {
     input.value = String(qty);
   }
@@ -80,7 +107,7 @@ export function addToUnasCart(product, quantity = 1) {
     // 4 paraméter: productId, prefix ('' = termék oldal), null, quantity
     cartAdd(unasId, CART_ADD_PREFIX, null, qty);
     if (window.__MARKETLY_DEBUG) {
-      console.log('[unasCartService] cart_add ok:', { unasId, qty });
+      console.log('[unasCartService] cart_add called:', { unasId, qty }, `→ cart_add('${unasId}','',null,${qty})`);
     }
     return true;
   } catch (err) {

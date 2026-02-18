@@ -280,7 +280,7 @@ export function upsertProduct(product) {
 
   return stmt.run(
     product.id,
-    product.unas_id || product.id,
+    product.unas_ref || product.unas_id || product.id,
     product.name,
     product.price,
     product.category,

@@ -831,29 +831,31 @@ const App = () => {
     // UNAS kosárhoz adás (ha elérhető – widget UNAS oldalon fut)
     const addedToUnas = addToUnasCart(product, qty);
 
-    // Trigger confetti
-    setShowConfetti(true);
-
-    // Lokális state (widget megjelenítés + fallback ha nincs UNAS)
-    setCartItems(prev => {
-      const existing = prev.find(item => item.id === product.id);
-      if (existing) {
-        return prev.map(item =>
-          item.id === product.id
-            ? { ...item, quantity: (item.quantity || 1) + qty }
-            : item
-        );
-      }
-      return [...prev, { ...product, quantity: qty }];
-    });
-
-    setRecentlyAddedToCart(product);
-    setTimeout(() => setRecentlyAddedToCart(null), 3000);
-
     if (addedToUnas) {
+      setShowConfetti(true);
+      setCartItems(prev => {
+        const existing = prev.find(item => item.id === product.id);
+        if (existing) {
+          return prev.map(item =>
+            item.id === product.id ? { ...item, quantity: (item.quantity || 1) + qty } : item
+          );
+        }
+        return [...prev, { ...product, quantity: qty }];
+      });
+      setRecentlyAddedToCart(product);
+      setTimeout(() => setRecentlyAddedToCart(null), 3000);
       toast.success(`${product.name} hozzáadva a kosárhoz!`);
+      return;
+    }
+
+    // Fallback: cart_add nem működik → termék oldalra navigálás (ott egy kattintás = kosárba)
+    const productUrl = (product.link || product.url || '').trim();
+    const fullUrl = !productUrl || productUrl === '#' ? '' : productUrl.startsWith('http') ? productUrl : `${WEBSHOP_DOMAIN}${productUrl.startsWith('/') ? '' : '/'}${productUrl}`;
+    if (fullUrl && fullUrl !== WEBSHOP_DOMAIN && fullUrl !== WEBSHOP_DOMAIN + '/') {
+      toast.info('A termék oldalra navigálunk – ott egy kattintással hozzáadhatod a kosárhoz.');
+      window.location.href = fullUrl;
     } else {
-      toast.success(`${product.name} – nyisd meg a termék oldalt a kosárhoz adáshoz.`);
+      toast.warning('A termék link nem elérhető. Próbáld később.');
     }
   }, [toast]);
   

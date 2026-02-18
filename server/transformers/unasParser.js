@@ -208,8 +208,8 @@ function parseCSV(csvText) {
 function transformUnasProduct(unasProduct) {
   // UNAS API specific field mapping
   const getId = () => {
-    return unasProduct.Id || unasProduct.id || unasProduct.Sku || 
-           unasProduct.sku || `unas-${Date.now()}-${Math.random()}`;
+    return unasProduct.Id || unasProduct.id || unasProduct.Ref || unasProduct.ref ||
+           unasProduct.Sku || unasProduct.sku || `unas-${Date.now()}-${Math.random()}`;
   };
 
   const getName = () => {
@@ -439,8 +439,11 @@ function transformUnasProduct(unasProduct) {
     return true;
   };
 
+  const id = getId();
+  const ref = unasProduct.Ref || unasProduct.ref;
   return {
-    id: getId(),
+    id,
+    ...(ref ? { unas_ref: ref } : {}),
     name: getName(),
     price: getPrice(),
     category: getCategory(),

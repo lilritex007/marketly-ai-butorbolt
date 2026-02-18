@@ -164,6 +164,7 @@ app.get('/api/products', async (req, res) => {
     if (slim === 'true' || slim === '1') {
       products = products.map(p => ({
         id: p.id,
+        unas_id: p.unas_id ?? p.id,
         name: p.name,
         price: p.price,
         category: p.category,
