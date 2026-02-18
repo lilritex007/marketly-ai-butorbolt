@@ -539,10 +539,8 @@ export default function ProductWorldsSection({
                   return (
                     <div
                       key={product.id}
-                      className={`relative overflow-hidden rounded-xl transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl ring-1 ring-gray-200/80 hover:ring-gray-300`}
-                      style={{ transitionDelay: `${Math.min(index * 30, 300)}ms` }}
+                      className="relative overflow-hidden rounded-xl transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl ring-1 ring-gray-200/80 hover:ring-gray-300"
                     >
-                      <div className={`absolute top-0 left-0 right-0 h-2.5 sm:h-3 bg-gradient-to-r ${currentWorld.accentClass} opacity-90`} aria-hidden />
                       <EnhancedProductCard
                         product={product}
                         onToggleWishlist={onToggleWishlist}
@@ -555,6 +553,8 @@ export default function ProductWorldsSection({
                         showFeedback
                         size="default"
                         tone={currentWorld.tone}
+                        accentClass={currentWorld.accentClass}
+                        skipScrollAnimation
                       />
                     </div>
                   );

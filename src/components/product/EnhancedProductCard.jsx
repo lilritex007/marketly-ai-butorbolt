@@ -36,12 +36,14 @@ export const EnhancedProductCard = ({
   sectionId,
   showFeedback = true,
   size = 'default',
-  tone = 'default'
+  tone = 'default',
+  accentClass, // világ gradiens pl. 'from-pink-500 to-rose-600' – teljes kártyás megkülönböztetés
+  skipScrollAnimation = false, // Worlds: állandó megjelenés, ne villanjon fel
 }) => {
   const [isHovered, setIsHovered] = useState(false);
   const [imageLoaded, setImageLoaded] = useState(false);
   const [imageError, setImageError] = useState(false);
-  const [isVisible, setIsVisible] = useState(false);
+  const [isVisible, setIsVisible] = useState(skipScrollAnimation);
   const [notifySaved, setNotifySaved] = useState(false);
   const toneClasses = {
     default: 'lux-card',
@@ -84,22 +86,18 @@ export const EnhancedProductCard = ({
     : '';
   const optimizedProps = getOptimizedImageProps(mainImage, product.name, { responsive: true, lazy: false, quality: getAdaptiveQuality() });
 
-  // Intersection Observer for scroll animation - optimized
+  // Intersection Observer for scroll animation – kihagyva ha skipScrollAnimation (Worlds)
   useEffect(() => {
+    if (skipScrollAnimation) return;
     const element = cardRef.current;
     if (!element || !(element instanceof Element)) return;
 
-    // Use requestIdleCallback for non-critical animation
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {
-          // Minimal stagger, max 100ms
           const delay = Math.min((index % 4) * 25, 100);
-          if (delay > 0) {
-            setTimeout(() => setIsVisible(true), delay);
-          } else {
-            setIsVisible(true);
-          }
+          if (delay > 0) setTimeout(() => setIsVisible(true), delay);
+          else setIsVisible(true);
           observer.disconnect();
         }
       },
@@ -108,12 +106,11 @@ export const EnhancedProductCard = ({
 
     try {
       observer.observe(element);
-    } catch (err) {
-      // Silently ignore invalid targets to avoid breaking render
+    } catch {
       return;
     }
     return () => observer.disconnect();
-  }, [index]);
+  }, [index, skipScrollAnimation]);
 
   useEffect(() => {
     if (sectionId && isVisible && !impressionRef.current) {
@@ -142,6 +139,8 @@ export const EnhancedProductCard = ({
     setTimeout(() => setNotifySaved(false), 2000);
   };
 
+  const hasWorldAccent = accentClass && (tone === 'favorites' || tone === 'new' || tone === 'popular');
+
   return (
     <article 
       ref={cardRef}
@@ -159,6 +158,15 @@ export const EnhancedProductCard = ({
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
+      {/* Teljes kártyás világ megkülönböztetés – állandó, keret + finom háttérgradiens */}
+      {hasWorldAccent && (
+        <>
+          <div className={`absolute inset-0 bg-gradient-to-br ${accentClass} opacity-[0.06] z-0 pointer-events-none`} aria-hidden />
+          <div className={`absolute top-0 left-0 right-0 h-2.5 sm:h-3 bg-gradient-to-r ${accentClass} opacity-95 z-10 pointer-events-none`} aria-hidden />
+          <div className={`absolute top-0 bottom-0 left-0 w-2.5 sm:w-3 bg-gradient-to-b ${accentClass} opacity-95 z-10 pointer-events-none`} aria-hidden />
+          <div className={`absolute bottom-0 left-0 right-0 h-2 sm:h-2.5 bg-gradient-to-r ${accentClass} opacity-80 z-10 pointer-events-none`} aria-hidden />
+        </>
+      )}
       {/* Smart Badges - kisebb mobilon */}
       <div className="absolute top-2 sm:top-3 left-2 sm:left-3 z-20">
         <SmartBadges product={product} maxBadges={2} />
