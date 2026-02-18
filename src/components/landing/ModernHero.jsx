@@ -151,7 +151,9 @@ export const ModernHero = ({
             className={`relative w-full min-w-0 max-w-full -mx-4 sm:-mx-8 lg:-mx-14 xl:-mx-20 mb-6 sm:mb-8 ${mounted ? 'hero-reveal' : 'opacity-0'}`}
             style={mounted ? { animationDelay: `${HERO_REVEAL_DELAY.sub - 60}ms` } : undefined}
           >
-            <div className="pointer-events-none absolute inset-0 rounded-[30px] border border-white/70 bg-white/[0.04] backdrop-blur-[1px] shadow-[inset_0_1px_0_rgba(255,255,255,0.75)]" aria-hidden />
+            <div className="pointer-events-none absolute inset-0 rounded-[32px] border border-white/70 bg-white/[0.04] backdrop-blur-[1px] shadow-[inset_0_1px_0_rgba(255,255,255,0.75)]" aria-hidden />
+            <div className="pointer-events-none absolute inset-x-8 -top-10 h-24 bg-[radial-gradient(ellipse_at_center,rgba(255,138,0,0.22),transparent_65%)] blur-2xl" aria-hidden />
+            <div className="pointer-events-none absolute inset-x-12 -bottom-12 h-28 bg-[radial-gradient(ellipse_at_center,rgba(0,107,111,0.18),transparent_70%)] blur-2xl" aria-hidden />
             <HeroSmartSearch
               products={products}
               onSearch={onHeroSearch}

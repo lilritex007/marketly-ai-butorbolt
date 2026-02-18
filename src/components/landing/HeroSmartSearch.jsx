@@ -686,15 +686,19 @@ export default function HeroSmartSearch({
       aria-label="AI Kereső"
     >
       <div className="relative w-full max-w-none mx-auto">
-        <div className="pointer-events-none absolute inset-x-0 -top-12 h-40 bg-[radial-gradient(ellipse_at_center,rgba(255,138,0,0.22),transparent_65%)] blur-2xl" aria-hidden />
-        <div className="pointer-events-none absolute inset-x-0 -bottom-20 h-56 bg-[radial-gradient(ellipse_at_center,rgba(0,107,111,0.16),transparent_70%)] blur-3xl" aria-hidden />
+        <div className="pointer-events-none absolute inset-x-0 -top-16 h-44 bg-[radial-gradient(ellipse_at_center,rgba(255,138,0,0.26),transparent_65%)] blur-2xl" aria-hidden />
+        <div className="pointer-events-none absolute inset-x-0 -bottom-24 h-60 bg-[radial-gradient(ellipse_at_center,rgba(0,107,111,0.2),transparent_70%)] blur-3xl" aria-hidden />
+        <div className="pointer-events-none absolute -left-8 top-8 h-28 w-28 rounded-full bg-primary-300/35 blur-2xl" aria-hidden />
+        <div className="pointer-events-none absolute -right-10 top-10 h-32 w-32 rounded-full bg-secondary-300/30 blur-2xl" aria-hidden />
 
-        <div className="relative rounded-none sm:rounded-[36px] overflow-hidden border-y border-primary-200/70 sm:border bg-white/95 backdrop-blur-xl shadow-[0_28px_70px_-34px_rgba(15,23,42,0.45),0_0_0_1px_rgba(255,138,0,0.14),inset_0_1px_0_rgba(255,255,255,0.95)]">
+        <div className="relative rounded-none sm:rounded-[38px] p-[1px] bg-gradient-to-r from-primary-300/80 via-secondary-300/60 to-primary-200/70 shadow-[0_36px_88px_-38px_rgba(15,23,42,0.5)]">
+        <div className="relative rounded-none sm:rounded-[37px] overflow-hidden border-y border-white/80 sm:border bg-white/95 backdrop-blur-xl shadow-[inset_0_1px_0_rgba(255,255,255,0.95)]">
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_12%_14%,rgba(255,138,0,0.16),transparent_44%),radial-gradient(circle_at_86%_28%,rgba(0,107,111,0.14),transparent_46%),linear-gradient(150deg,rgba(255,255,255,0.97)_0%,rgba(255,250,245,0.95)_54%,rgba(243,252,251,0.94)_100%)] pointer-events-none" aria-hidden />
+          <div className="absolute inset-0 opacity-[0.16] bg-[linear-gradient(120deg,transparent_0%,rgba(255,255,255,0.85)_35%,transparent_65%)] animate-[pulse_5s_ease-in-out_infinite]" aria-hidden />
 
           <div className="relative z-10 px-4 py-4 sm:p-6 lg:px-8 lg:py-7">
             <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
-              <span className="inline-flex items-center gap-2 rounded-full border border-primary-300/70 bg-white px-3 py-1.5 text-[11px] font-extrabold uppercase tracking-[0.16em] text-primary-800 shadow-sm">
+              <span className="inline-flex items-center gap-2 rounded-full border border-primary-300/70 bg-white/90 px-3 py-1.5 text-[11px] font-extrabold uppercase tracking-[0.16em] text-primary-800 shadow-[0_4px_14px_rgba(255,138,0,0.15)]">
                 <Sparkles className="h-3.5 w-3.5 text-primary-600" aria-hidden />
                 Next Search Stage
               </span>
@@ -705,10 +709,11 @@ export default function HeroSmartSearch({
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-4">
-              <div className={`rounded-[22px] sm:rounded-[28px] border-2 border-primary-200/80 bg-white p-3 sm:p-4 shadow-[inset_0_0_0_1px_rgba(0,107,111,0.08),0_18px_34px_-24px_rgba(15,23,42,0.35)] transition-all duration-200 focus-within:ring-4 focus-within:ring-primary-300/25 ${searchPulse ? 'ring-4 ring-emerald-300/35' : ''}`}>
+              <div className={`relative rounded-[22px] sm:rounded-[28px] border-2 border-primary-200/80 bg-white p-3 sm:p-4 shadow-[inset_0_0_0_1px_rgba(0,107,111,0.08),0_18px_34px_-24px_rgba(15,23,42,0.35)] transition-all duration-200 focus-within:ring-4 focus-within:ring-primary-300/25 ${searchPulse ? 'ring-4 ring-emerald-300/35' : ''}`}>
+                <div className="pointer-events-none absolute inset-x-6 top-0 h-[1px] bg-gradient-to-r from-transparent via-primary-300/70 to-transparent" aria-hidden />
                 <div className="flex flex-col gap-3 lg:flex-row lg:items-center">
                   <div className="flex min-w-0 flex-1 items-center gap-3 sm:gap-4">
-                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-primary-500 via-primary-600 to-secondary-600 text-white shadow-[0_10px_24px_rgba(255,138,0,0.36)] sm:h-12 sm:w-12">
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-primary-500 via-primary-600 to-secondary-600 text-white shadow-[0_10px_24px_rgba(255,138,0,0.36)] ring-1 ring-white/80 sm:h-12 sm:w-12">
                       <Search className="h-5 w-5 sm:h-6 sm:w-6" aria-hidden />
                     </div>
                     <div className="min-w-0 flex-1">
@@ -773,7 +778,7 @@ export default function HeroSmartSearch({
 
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <div className="flex flex-wrap items-center gap-2">
-                  <span className="inline-flex items-center gap-1.5 rounded-full border border-primary-200 bg-white px-2.5 py-1 text-xs font-semibold text-primary-800">
+                  <span className="inline-flex items-center gap-1.5 rounded-full border border-primary-200 bg-white px-2.5 py-1 text-xs font-semibold text-primary-800 shadow-sm">
                     <Wand2 className="h-3.5 w-3.5 text-primary-600" aria-hidden />
                     AI mód
                   </span>
@@ -783,7 +788,7 @@ export default function HeroSmartSearch({
                   </span>
                 </div>
                 {actualResultCount != null && trimmedQuery.length >= 2 && (
-                  <span className="inline-flex items-center gap-2 rounded-full border border-primary-200 bg-primary-50/80 px-3 py-1 text-sm font-bold text-primary-700 tabular-nums">
+                  <span className="inline-flex items-center gap-2 rounded-full border border-primary-200 bg-primary-50/90 px-3 py-1 text-sm font-bold text-primary-700 tabular-nums shadow-sm">
                     <span className="h-2 w-2 rounded-full bg-primary-500" aria-hidden />
                     {actualResultCount} találat
                   </span>
@@ -798,7 +803,7 @@ export default function HeroSmartSearch({
                       key={`hero-chip-${text}`}
                       type="button"
                       onClick={() => applySuggestion(text, { submit: true, source: 'hero-chip' })}
-                      className="whitespace-nowrap inline-flex items-center gap-1.5 rounded-full border border-primary-200 bg-white/95 px-3 py-1.5 text-xs font-semibold text-gray-700 shadow-sm transition-all hover:-translate-y-0.5 hover:border-primary-300 hover:text-primary-700 hover:shadow-md sm:text-sm"
+                      className="whitespace-nowrap inline-flex items-center gap-1.5 rounded-full border border-primary-200 bg-white/95 px-3 py-1.5 text-xs font-semibold text-gray-700 shadow-sm transition-all hover:-translate-y-0.5 hover:border-primary-300 hover:text-primary-700 hover:shadow-[0_10px_18px_-10px_rgba(255,138,0,0.45)] sm:text-sm"
                     >
                       <Sparkles className="h-3.5 w-3.5 text-primary-500" aria-hidden />
                       {text}
@@ -822,6 +827,7 @@ export default function HeroSmartSearch({
               </div>
             </form>
           </div>
+        </div>
         </div>
 
         {/* Tartalom – szűrők, találatok, stb. */}
