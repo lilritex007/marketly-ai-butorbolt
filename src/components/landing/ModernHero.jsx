@@ -103,7 +103,11 @@ export const ModernHero = ({
         style={{ backgroundImage: `url(${HERO_BG_IMAGE})` }}
         aria-hidden
       />
-      <div className="absolute inset-0 bg-gradient-to-b from-white/92 via-white/75 to-primary-50/90" aria-hidden />
+      <div className="absolute inset-0 bg-gradient-to-b from-white/90 via-white/72 to-primary-50/90" aria-hidden />
+      <div className="pointer-events-none absolute inset-0" aria-hidden>
+        <div className="absolute left-1/2 top-[30%] h-[520px] w-[min(1100px,92vw)] -translate-x-1/2 -translate-y-1/2 bg-[radial-gradient(ellipse_at_center,rgba(255,138,0,0.24),transparent_62%)] blur-2xl" />
+        <div className="absolute left-1/2 top-[34%] h-[420px] w-[min(860px,84vw)] -translate-x-1/2 -translate-y-1/2 bg-[radial-gradient(ellipse_at_center,rgba(0,107,111,0.16),transparent_70%)] blur-xl" />
+      </div>
       <div className="absolute inset-0 pointer-events-none" aria-hidden="true">
         <div className="absolute inset-x-0 top-0 h-[1px] bg-gradient-to-r from-transparent via-primary-300 to-transparent opacity-70" />
         <div className="absolute inset-x-0 bottom-0 h-[1px] bg-gradient-to-r from-transparent via-secondary-300 to-transparent opacity-60" />
@@ -121,7 +125,7 @@ export const ModernHero = ({
             </span>
           </div>
 
-          <h1 className="mb-7 sm:mb-8 lg:mb-10">
+          <h1 className="mb-6 sm:mb-7 lg:mb-8">
             <span
               className={`block text-[2.3rem] sm:text-5xl lg:text-6xl font-extrabold text-gray-900 leading-[1.03] ${mounted ? 'hero-reveal' : 'opacity-0'}`}
               style={mounted ? { animationDelay: `${HERO_REVEAL_DELAY.line1}ms`, letterSpacing: '-0.03em' } : { letterSpacing: '-0.03em' }}
@@ -137,16 +141,17 @@ export const ModernHero = ({
           </h1>
 
           <div
-            className={`mx-auto h-1.5 w-28 rounded-full bg-gradient-to-r from-primary-500 to-secondary-700 mb-6 sm:mb-8 ${mounted ? 'hero-reveal' : 'opacity-0'}`}
+            className={`mx-auto h-1.5 w-28 rounded-full bg-gradient-to-r from-primary-500 to-secondary-700 mb-5 sm:mb-6 ${mounted ? 'hero-reveal' : 'opacity-0'}`}
             style={mounted ? { animationDelay: `${HERO_REVEAL_DELAY.line2 + 40}ms` } : undefined}
             aria-hidden
           />
 
           {/* Központi hero search – azonnal a headline után */}
           <div
-            className={`w-full min-w-0 max-w-full -mx-4 sm:-mx-6 lg:-mx-10 mb-8 sm:mb-10 ${mounted ? 'hero-reveal' : 'opacity-0'}`}
+            className={`relative w-full min-w-0 max-w-full -mx-4 sm:-mx-6 lg:-mx-10 mb-6 sm:mb-8 ${mounted ? 'hero-reveal' : 'opacity-0'}`}
             style={mounted ? { animationDelay: `${HERO_REVEAL_DELAY.sub - 60}ms` } : undefined}
           >
+            <div className="pointer-events-none absolute inset-0 rounded-[30px] border border-white/70 bg-white/[0.04] backdrop-blur-[1px] shadow-[inset_0_1px_0_rgba(255,255,255,0.75)]" aria-hidden />
             <HeroSmartSearch
               products={products}
               onSearch={onHeroSearch}
@@ -157,14 +162,14 @@ export const ModernHero = ({
           </div>
 
           <p
-            className={`text-base sm:text-lg text-gray-600 max-w-2xl mx-auto mb-8 sm:mb-10 ${mounted ? 'hero-reveal' : 'opacity-0'}`}
+            className={`text-sm sm:text-base text-gray-600/95 max-w-xl mx-auto mb-8 sm:mb-9 ${mounted ? 'hero-reveal' : 'opacity-0'}`}
             style={mounted ? { animationDelay: `${HERO_REVEAL_DELAY.sub}ms`, lineHeight: '1.6' } : { lineHeight: '1.6' }}
           >
             {heroCopy.sub}
           </p>
 
           <div
-            className={`flex flex-col sm:flex-row gap-4 justify-center items-stretch sm:items-center mb-8 sm:mb-10 ${mounted ? 'hero-reveal' : 'opacity-0'}`}
+            className={`flex flex-col sm:flex-row gap-4 justify-center items-stretch sm:items-center mb-7 sm:mb-9 ${mounted ? 'hero-reveal' : 'opacity-0'}`}
             style={mounted ? { animationDelay: `${HERO_REVEAL_DELAY.cta + 120}ms` } : undefined}
           >
             <button
@@ -173,7 +178,7 @@ export const ModernHero = ({
                 trackSectionEvent(`hero-variant-${heroVariant}`, 'click', 'cta-primary');
                 onTryAI?.();
               }}
-              className="group relative w-full sm:w-auto min-h-[48px] px-8 py-4 bg-gradient-to-r from-primary-500 to-secondary-700 text-white rounded-2xl font-semibold text-base shadow-[0_12px_30px_rgba(255,138,0,0.35)] hover:shadow-[0_16px_36px_rgba(255,138,0,0.45)] hover:-translate-y-0.5 active:scale-[0.98] transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-300 focus-visible:ring-offset-2 flex items-center justify-center gap-2"
+              className="group relative w-full sm:w-auto min-h-[48px] px-8 py-4 bg-gradient-to-r from-primary-500 to-secondary-700 text-white rounded-2xl font-semibold text-base shadow-[0_10px_26px_rgba(255,138,0,0.32)] hover:shadow-[0_14px_34px_rgba(255,138,0,0.42)] hover:-translate-y-0.5 active:scale-[0.98] transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-300 focus-visible:ring-offset-2 flex items-center justify-center gap-2"
               aria-label="Kezdj AI tervezéssel"
             >
               <span className="px-2.5 py-1 rounded-full bg-white/20 text-[11px] font-bold uppercase tracking-wide">{heroCopy.ctaBadge}</span>
@@ -195,7 +200,7 @@ export const ModernHero = ({
             </button>
           </div>
 
-          <div className={`flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-sm text-gray-600 mb-10 ${mounted ? 'hero-reveal' : 'opacity-0'}`} style={mounted ? { animationDelay: `${HERO_REVEAL_DELAY.cta + 70}ms` } : undefined}>
+          <div className={`flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-sm text-gray-600 mb-9 ${mounted ? 'hero-reveal' : 'opacity-0'}`} style={mounted ? { animationDelay: `${HERO_REVEAL_DELAY.cta + 70}ms` } : undefined}>
             <span className="inline-flex items-center gap-1.5"><Star className="w-4 h-4 text-amber-500" aria-hidden /> 4.9/5 vásárlói értékelés</span>
             <span className="inline-flex items-center gap-1.5"><Users className="w-4 h-4 text-primary-500" aria-hidden /> 50K+ elégedett vásárló</span>
             <span className="inline-flex items-center gap-1.5"><Zap className="w-4 h-4 text-secondary-700" aria-hidden /> 24/7 AI támogatás</span>
