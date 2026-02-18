@@ -1,6 +1,7 @@
 import React, { useMemo, useState, useEffect, useRef } from 'react';
-import { Home, ChevronRight, Filter, LayoutGrid, Rows3, SlidersHorizontal, Sparkles, ShoppingCart } from 'lucide-react';
+import { Home, ChevronRight, Filter, LayoutGrid, Rows3, SlidersHorizontal, Sparkles, ShoppingCart, ThumbsUp, ThumbsDown } from 'lucide-react';
 import { EnhancedProductCard } from '../product/EnhancedProductCard';
+import { toggleLikeProduct, toggleDislikeProduct, isProductLiked, isProductDisliked } from '../../services/userPreferencesService';
 import { ProductGridSkeleton } from '../ui/Skeleton';
 
 /**
@@ -37,6 +38,84 @@ const CollectionHero = ({ collection, productCount, onBack }) => {
               <span className="font-semibold">{productCount.toLocaleString('hu-HU')}</span> termék
             </p>
           </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+/**
+ * Collection compact card - mint főoldal: like/dislike, ár formázás
+ */
+const CollectionCompactCard = ({ product, onProductClick, onWishlistToggle, onAddToCart, wishlist }) => {
+  const [feedbackState, setFeedbackState] = useState(() => ({
+    liked: isProductLiked(product?.id),
+    disliked: isProductDisliked(product?.id)
+  }));
+  const displayPrice = product.salePrice || product.price;
+  const hasDiscount = product.salePrice && product.price > product.salePrice;
+  const discountPct = hasDiscount ? Math.round(((product.price - product.salePrice) / product.price) * 100) : 0;
+
+  useEffect(() => {
+    if (product?.id) setFeedbackState({ liked: isProductLiked(product.id), disliked: isProductDisliked(product.id) });
+  }, [product?.id]);
+
+  return (
+    <div className="flex gap-2 sm:gap-3 p-2.5 sm:p-3 bg-white rounded-xl border border-gray-100 hover:shadow-md transition-shadow touch-manipulation">
+      <img
+        src={product.images?.[0] || product.image || '/placeholder.png'}
+        alt={product.name}
+        className="w-16 h-16 sm:w-20 sm:h-20 object-contain rounded-lg bg-gray-50 shrink-0 cursor-pointer"
+        onClick={() => onProductClick?.(product)}
+      />
+      <div className="flex-1 min-w-0">
+        <p className="text-xs text-primary-500 font-medium mb-0.5 truncate">{product.category}</p>
+        <h4 className="text-xs sm:text-sm font-semibold text-gray-900 line-clamp-2 cursor-pointer hover:text-primary-500 leading-tight" onClick={() => onProductClick?.(product)}>
+          {product.name}
+        </h4>
+        <div className="mt-1.5 sm:mt-2 text-center">
+          {hasDiscount ? (
+            <>
+              <span className="text-xs text-red-500 line-through block">{product.price.toLocaleString('hu-HU')} Ft</span>
+              <span className="text-sm font-bold text-red-600">{displayPrice.toLocaleString('hu-HU')} Ft</span>
+              <span className="inline-block mt-0.5 px-1.5 py-0.5 rounded bg-red-100 text-red-600 text-[10px] font-bold">-{discountPct}%</span>
+            </>
+          ) : (
+            <span className="text-sm sm:text-base font-bold text-gray-900">{displayPrice.toLocaleString('hu-HU')} Ft</span>
+          )}
+        </div>
+        <div className="flex justify-center items-center gap-1 sm:gap-2 mt-2 flex-wrap">
+          <button
+            type="button"
+            onClick={(e) => { e.stopPropagation(); setFeedbackState(toggleLikeProduct(product)); }}
+            className={`min-w-[36px] min-h-[36px] p-1.5 flex items-center justify-center rounded-full transition-colors ${feedbackState.liked ? 'bg-green-500 text-white' : 'bg-green-50 text-green-600 hover:bg-green-100'}`}
+            aria-label="Tetszik"
+          >
+            <ThumbsUp className="w-4 h-4" />
+          </button>
+          <button
+            type="button"
+            onClick={(e) => { e.stopPropagation(); setFeedbackState(toggleDislikeProduct(product)); }}
+            className={`min-w-[36px] min-h-[36px] p-1.5 flex items-center justify-center rounded-full transition-colors ${feedbackState.disliked ? 'bg-red-500 text-white' : 'bg-red-50 text-red-500 hover:bg-red-100'}`}
+            aria-label="Nem tetszik"
+          >
+            <ThumbsDown className="w-4 h-4" />
+          </button>
+          {(product.inStock ?? product.in_stock) !== false && onAddToCart && (
+            <button
+              onClick={(e) => { e.stopPropagation(); onAddToCart(product, 1); }}
+              className="min-w-[36px] min-h-[36px] p-1.5 flex items-center justify-center rounded-lg bg-emerald-500 text-white hover:bg-emerald-600 transition-colors touch-manipulation"
+              title="Kosárba"
+            >
+              <ShoppingCart className="w-4 h-4" />
+            </button>
+          )}
+          <button
+            onClick={() => onWishlistToggle?.(product.id)}
+            className={`min-w-[36px] min-h-[36px] p-1.5 flex items-center justify-center rounded-lg transition-colors ${wishlist?.includes(product.id) ? 'bg-red-100 text-red-500' : 'hover:bg-gray-100 text-gray-400'}`}
+          >
+            ♥
+          </button>
         </div>
       </div>
     </div>
@@ -277,42 +356,14 @@ const CollectionPage = ({
         ) : (
           <div className="space-y-2 sm:space-y-3">
             {displayedProducts.map((product) => (
-              <div key={product.id} className="flex gap-2 sm:gap-3 p-2.5 sm:p-3 bg-white rounded-xl border border-gray-100 hover:shadow-md transition-shadow touch-manipulation">
-                <img
-                  src={product.images?.[0] || product.image || '/placeholder.png'}
-                  alt={product.name}
-                  className="w-16 h-16 sm:w-20 sm:h-20 object-contain rounded-lg bg-gray-50 shrink-0 cursor-pointer"
-                  onClick={() => onProductClick?.(product)}
-                />
-                <div className="flex-1 min-w-0">
-                  <p className="text-xs text-primary-500 font-medium mb-0.5 truncate">{product.category}</p>
-                  <h4 className="text-xs sm:text-sm font-semibold text-gray-900 line-clamp-2 cursor-pointer hover:text-primary-500 leading-tight" onClick={() => onProductClick?.(product)}>
-                    {product.name}
-                  </h4>
-                  <div className="flex items-center justify-between mt-1.5 sm:mt-2 gap-2">
-                    <span className="text-sm sm:text-base font-bold text-gray-900">
-                      {(product.salePrice || product.price).toLocaleString('hu-HU')} Ft
-                    </span>
-                    <div className="flex gap-1 shrink-0">
-                      {(product.inStock ?? product.in_stock) !== false && onAddToCart && (
-                        <button
-                          onClick={(e) => { e.stopPropagation(); onAddToCart(product, 1); }}
-                          className="min-w-[44px] min-h-[44px] p-2 flex items-center justify-center rounded-lg bg-emerald-500 text-white hover:bg-emerald-600 active:bg-emerald-700 transition-colors touch-manipulation"
-                          title="Kosárba"
-                        >
-                          <ShoppingCart className="w-4 h-4" />
-                        </button>
-                      )}
-                      <button
-                        onClick={() => onWishlistToggle?.(product.id)}
-                        className={`min-w-[44px] min-h-[44px] p-2 flex items-center justify-center rounded-lg transition-colors touch-manipulation ${wishlist?.includes(product.id) ? 'bg-red-100 text-red-500' : 'hover:bg-gray-100 text-gray-400'}`}
-                      >
-                        ♥
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </div>
+              <CollectionCompactCard
+                key={product.id}
+                product={product}
+                onProductClick={onProductClick}
+                onWishlistToggle={onWishlistToggle}
+                onAddToCart={onAddToCart}
+                wishlist={wishlist}
+              />
             ))}
           </div>
         )}

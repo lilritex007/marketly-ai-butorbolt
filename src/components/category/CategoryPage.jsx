@@ -1,6 +1,6 @@
 import React, { useMemo, useState, useEffect, useRef, useCallback } from 'react';
 import { 
-  ArrowLeft, TrendingUp, Package, Tag, Sparkles, ShoppingCart,
+  ArrowLeft, TrendingUp, Package, Tag, Sparkles, ShoppingCart, ThumbsUp, ThumbsDown,
   ChevronRight, Filter, Grid3X3, List, Star, Home,
   ArrowUpDown, SlidersHorizontal, X, Check, LayoutGrid,
   Rows3, Plus, GitCompare, ChevronDown, ChevronUp, BookOpen,
@@ -8,7 +8,7 @@ import {
 } from 'lucide-react';
 import { getCategoryIcon } from '../ui/Icons';
 import { EnhancedProductCard } from '../product/EnhancedProductCard';
-import { getLikedProducts, getViewedProducts } from '../../services/userPreferencesService';
+import { getLikedProducts, getViewedProducts, toggleLikeProduct, toggleDislikeProduct, isProductLiked, isProductDisliked } from '../../services/userPreferencesService';
 
 const PRESET_STORAGE_KEY = 'mkt_category_presets';
 
@@ -475,12 +475,20 @@ const FeaturedProducts = ({ products, onProductClick, onWishlistToggle, wishlist
 };
 
 /**
- * Compact Product Card
+ * Compact Product Card - mint EnhancedProductCard: like/dislike, ár formázás
  */
 const CompactProductCard = ({ product, onQuickView, onToggleWishlist, isWishlisted, onAddToCart, onCompare, isComparing }) => {
+  const [feedbackState, setFeedbackState] = useState(() => ({
+    liked: isProductLiked(product?.id),
+    disliked: isProductDisliked(product?.id)
+  }));
+  useEffect(() => {
+    if (product?.id) setFeedbackState({ liked: isProductLiked(product.id), disliked: isProductDisliked(product.id) });
+  }, [product?.id]);
   const displayPrice = product.salePrice || product.price;
   const hasDiscount = product.salePrice && product.price > product.salePrice;
-  
+  const discountPct = hasDiscount ? Math.round(((product.price - product.salePrice) / product.price) * 100) : 0;
+
   return (
     <div className="flex gap-2 sm:gap-3 p-2.5 sm:p-3 bg-white rounded-xl border border-gray-100 hover:shadow-md transition-shadow tap-scale touch-manipulation">
       <img 
@@ -497,40 +505,57 @@ const CompactProductCard = ({ product, onQuickView, onToggleWishlist, isWishlist
         >
           {product.name}
         </h4>
-        <div className="flex items-center justify-between mt-1.5 sm:mt-2 gap-2">
-          <div className="min-w-0">
-            {hasDiscount && (
-              <span className="text-xs text-gray-400 line-through mr-1 block sm:inline">
-                {product.price.toLocaleString('hu-HU')} Ft
-              </span>
-            )}
-            <span className={`text-sm sm:text-base font-bold ${hasDiscount ? 'text-red-600' : 'text-gray-900'}`}>
-              {displayPrice.toLocaleString('hu-HU')} Ft
-            </span>
-          </div>
-          <div className="flex gap-1 shrink-0">
-            {(product.inStock ?? product.in_stock) !== false && onAddToCart && (
-              <button
-                onClick={(e) => { e.stopPropagation(); onAddToCart(product, 1); }}
-                className="min-w-[44px] min-h-[44px] p-2 flex items-center justify-center rounded-lg bg-emerald-500 text-white hover:bg-emerald-600 active:bg-emerald-700 transition-colors touch-manipulation"
-                title="Kosárba"
-              >
-                <ShoppingCart className="w-4 h-4" />
-              </button>
-            )}
+        {/* Ár - eredeti piros+áthúzott, akció % */}
+        <div className="mt-1.5 sm:mt-2 text-center">
+          {hasDiscount ? (
+            <>
+              <span className="text-xs text-red-500 line-through block">{product.price.toLocaleString('hu-HU')} Ft</span>
+              <span className="text-sm font-bold text-red-600">{displayPrice.toLocaleString('hu-HU')} Ft</span>
+              <span className="inline-block mt-0.5 px-1.5 py-0.5 rounded bg-red-100 text-red-600 text-[10px] font-bold">-{discountPct}%</span>
+            </>
+          ) : (
+            <span className="text-sm sm:text-base font-bold text-gray-900">{displayPrice.toLocaleString('hu-HU')} Ft</span>
+          )}
+        </div>
+        {/* Like/Dislike + CTA gombok - középre */}
+        <div className="flex justify-center items-center gap-1 sm:gap-2 mt-2 flex-wrap">
+          <button
+            type="button"
+            onClick={(e) => { e.stopPropagation(); setFeedbackState(toggleLikeProduct(product)); }}
+            className={`min-w-[36px] min-h-[36px] p-1.5 flex items-center justify-center rounded-full transition-colors ${feedbackState.liked ? 'bg-green-500 text-white' : 'bg-green-50 text-green-600 hover:bg-green-100'}`}
+            aria-label="Tetszik"
+          >
+            <ThumbsUp className="w-4 h-4" />
+          </button>
+          <button
+            type="button"
+            onClick={(e) => { e.stopPropagation(); setFeedbackState(toggleDislikeProduct(product)); }}
+            className={`min-w-[36px] min-h-[36px] p-1.5 flex items-center justify-center rounded-full transition-colors ${feedbackState.disliked ? 'bg-red-500 text-white' : 'bg-red-50 text-red-500 hover:bg-red-100'}`}
+            aria-label="Nem tetszik"
+          >
+            <ThumbsDown className="w-4 h-4" />
+          </button>
+          {(product.inStock ?? product.in_stock) !== false && onAddToCart && (
             <button
-              onClick={() => onCompare?.(product)}
-              className={`min-w-[44px] min-h-[44px] p-2 flex items-center justify-center rounded-lg transition-colors touch-manipulation ${isComparing ? 'bg-primary-100 text-primary-500' : 'hover:bg-gray-100 text-gray-400'}`}
+              onClick={(e) => { e.stopPropagation(); onAddToCart(product, 1); }}
+              className="min-w-[36px] min-h-[36px] p-1.5 flex items-center justify-center rounded-lg bg-emerald-500 text-white hover:bg-emerald-600 transition-colors touch-manipulation"
+              title="Kosárba"
             >
-              <GitCompare className="w-4 h-4" />
+              <ShoppingCart className="w-4 h-4" />
             </button>
-            <button
-              onClick={() => onToggleWishlist(product.id)}
-              className={`min-w-[44px] min-h-[44px] p-2 flex items-center justify-center rounded-lg transition-colors touch-manipulation ${isWishlisted ? 'bg-red-100 text-red-500' : 'hover:bg-gray-100 text-gray-400'}`}
-            >
-              <Star className={`w-4 h-4 ${isWishlisted ? 'fill-current' : ''}`} />
-            </button>
-          </div>
+          )}
+          <button
+            onClick={() => onCompare?.(product)}
+            className={`min-w-[36px] min-h-[36px] p-1.5 flex items-center justify-center rounded-lg transition-colors ${isComparing ? 'bg-primary-100 text-primary-500' : 'hover:bg-gray-100 text-gray-400'}`}
+          >
+            <GitCompare className="w-4 h-4" />
+          </button>
+          <button
+            onClick={() => onToggleWishlist(product.id)}
+            className={`min-w-[36px] min-h-[36px] p-1.5 flex items-center justify-center rounded-lg transition-colors ${isWishlisted ? 'bg-red-100 text-red-500' : 'hover:bg-gray-100 text-gray-400'}`}
+          >
+            <Star className={`w-4 h-4 ${isWishlisted ? 'fill-current' : ''}`} />
+          </button>
         </div>
       </div>
     </div>

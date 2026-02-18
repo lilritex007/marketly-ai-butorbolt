@@ -34,7 +34,7 @@ export const EnhancedProductCard = ({
   highlightBadge,
   recommendationReasons = [],
   sectionId,
-  showFeedback = false,
+  showFeedback = true,
   size = 'default',
   tone = 'default'
 }) => {
@@ -292,16 +292,25 @@ export const EnhancedProductCard = ({
           {product.name}
         </h3>
         
-        {/* Ár */}
-        <div className="pt-2 border-t border-gray-100">
-          {discount > 0 && (
-            <span className="text-xs sm:text-sm text-gray-400 line-through block">
-              {formatPrice(product.price)}
+        {/* Ár - középre, eredeti ár piros+áthúzott fölötte, akció % */}
+        <div className="pt-2 border-t border-gray-100 text-center">
+          {discount > 0 ? (
+            <>
+              <span className="text-sm sm:text-base text-red-500 line-through block">
+                {formatPrice(product.price)}
+              </span>
+              <span className="text-red-600 font-black text-lg sm:text-xl lg:text-2xl block">
+                {formatPrice(displayPrice)}
+              </span>
+              <span className="inline-block mt-1 px-2 py-0.5 rounded-full bg-red-100 text-red-600 text-xs font-bold">
+                -{discount}%
+              </span>
+            </>
+          ) : (
+            <span className="text-lg sm:text-xl lg:text-2xl font-black text-gray-900">
+              {formatPrice(displayPrice)}
             </span>
           )}
-          <span className={`text-lg sm:text-xl lg:text-2xl font-black ${discount > 0 ? 'text-red-600' : 'text-gray-900'}`}>
-            {formatPrice(displayPrice)}
-          </span>
         </div>
         
         {/* Tetszik / Nem tetszik - ikonok csak, középre, a CTA gombok fölé */}
