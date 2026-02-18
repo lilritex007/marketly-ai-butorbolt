@@ -407,13 +407,13 @@ export default function ProductWorldsSection({
       data-section="product-worlds"
     >
       <div className="w-full max-w-[2000px] mx-auto px-4 sm:px-6 lg:px-10 xl:px-16">
-        {/* Tab bar – erőteljes, statement */}
+        {/* Tab bar – erőteljes, statement, animált alulvonal */}
         <div
-          className="flex justify-center mb-8 lg:mb-12"
+          className="flex justify-center mb-6 sm:mb-8 lg:mb-12 px-4"
           role="tablist"
           aria-label="Válassz világot"
         >
-          <div className="flex w-full sm:w-auto sm:inline-flex rounded-2xl bg-white/90 backdrop-blur-sm border-2 border-gray-200/80 shadow-xl shadow-gray-300/40 p-2 gap-1">
+          <div className="relative flex w-full max-w-md sm:w-auto sm:inline-flex rounded-2xl bg-white/95 backdrop-blur-sm border-2 border-gray-200/80 shadow-xl shadow-gray-300/40 p-1.5 sm:p-2 gap-1">
             {WORLDS.map((w) => (
               <button
                 key={w.id}
@@ -423,59 +423,62 @@ export default function ProductWorldsSection({
                 aria-controls={`panel-${w.id}`}
                 id={`tab-${w.id}`}
                 onClick={() => setActiveWorld(w.id)}
-                className={`flex-1 sm:flex-initial inline-flex items-center justify-center gap-2 px-4 sm:px-6 py-3 sm:py-3.5 rounded-xl text-sm sm:text-base font-bold transition-all duration-300 min-h-[48px] ${
+                className={`flex-1 sm:flex-initial inline-flex items-center justify-center gap-1.5 sm:gap-2 px-3 sm:px-5 lg:px-6 py-2.5 sm:py-3 rounded-xl text-xs sm:text-sm lg:text-base font-bold transition-all duration-300 min-h-[44px] sm:min-h-[48px] whitespace-nowrap ${
                   activeWorld === w.id
-                    ? `bg-gradient-to-r ${w.accentClass} text-white shadow-lg scale-[1.02]`
-                    : 'text-gray-700 hover:bg-gray-100 hover:scale-[1.01]'
+                    ? `bg-gradient-to-r ${w.accentClass} text-white shadow-lg`
+                    : 'text-gray-700 hover:bg-gray-100'
                 }`}
               >
-                <w.Icon className="w-5 h-5 sm:w-6 sm:h-6 shrink-0" aria-hidden />
-                <span>
-                  {w.id === 'favorites' ? 'Kedvencek' : w.id === 'new' ? 'Friss' : 'Legnépszerűbb'}
-                </span>
+                <w.Icon className="w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6 shrink-0" aria-hidden />
+                <span className="truncate">{w.id === 'favorites' ? 'Kedvencek' : w.id === 'new' ? 'Friss' : 'Legnépszerűbb'}</span>
               </button>
             ))}
+            {/* Decorative: subtle glow under active tab */}
+            <div className={`absolute bottom-1.5 left-1.5 right-1.5 h-0.5 rounded-full bg-gradient-to-r ${currentWorld.accentClass} opacity-20 pointer-events-none transition-opacity duration-300`} aria-hidden />
           </div>
         </div>
 
-        {/* Hero fejléc – full-bleed, dramatikus */}
-        <div className={`relative overflow-hidden px-4 sm:px-6 lg:px-10 py-10 sm:py-12 lg:py-16 rounded-2xl lg:rounded-3xl border-2 ${currentWorld.className} transition-all duration-500`}>
+        {/* Hero fejléc – full-bleed, dramatikus, dekoratív accent */}
+        <div className={`relative overflow-hidden px-4 sm:px-6 lg:px-10 py-8 sm:py-10 lg:py-14 rounded-2xl lg:rounded-3xl border-2 ${currentWorld.className} transition-all duration-500`}>
           <div className="absolute inset-0 bg-gradient-to-br from-white/90 via-white/70 to-transparent pointer-events-none" />
+          {/* WoW: dekoratív geometria a sarokban */}
+          <div className={`absolute -top-8 -right-8 w-32 h-32 sm:w-40 sm:h-40 rounded-full bg-gradient-to-br ${currentWorld.accentClass} opacity-[0.07] blur-2xl pointer-events-none`} aria-hidden />
+          <div className="absolute bottom-4 left-4 w-16 h-16 rounded-full border-2 border-gray-200/50 pointer-events-none" aria-hidden />
           <div className="relative z-10">
-            <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-6">
-              <div className="space-y-4">
-                <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/95 backdrop-blur border-2 border-gray-200/90 text-gray-800 text-sm font-black tracking-wide shadow-md uppercase">
-                  <span className={`w-2.5 h-2.5 rounded-full bg-gradient-to-r ${currentWorld.accentClass}`} />
-                  {currentWorld.eyebrow}
+            <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-4 sm:gap-6">
+              <div className="space-y-3 sm:space-y-4 min-w-0">
+                <span className="inline-flex items-center gap-2 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full bg-white/95 backdrop-blur border-2 border-gray-200/90 text-gray-800 text-xs sm:text-sm font-black tracking-wide shadow-md uppercase">
+                  <span className={`w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full bg-gradient-to-r ${currentWorld.accentClass} shrink-0`} />
+                  <span className="truncate">{currentWorld.eyebrow}</span>
                 </span>
                 <h2
                   id={`${activeWorld}-heading`}
-                  className={`text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-black leading-[1.1] tracking-tight text-gray-900`}
+                  className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-black leading-[1.15] tracking-tight text-gray-900 break-words"
                 >
                   {currentWorld.title}
                 </h2>
-                <p className="text-lg sm:text-xl lg:text-2xl text-gray-600 max-w-2xl font-semibold">
+                <p className="text-base sm:text-lg lg:text-xl xl:text-2xl text-gray-600 max-w-2xl font-semibold">
                   {currentWorld.subtitle}
                 </p>
-                <div className="flex flex-wrap items-center gap-3 pt-2">
+                <div className="flex flex-wrap items-center gap-2 sm:gap-3 pt-1 sm:pt-2">
                   {badgeText && (
-                    <span className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white/95 border-2 border-gray-200/90 text-gray-800 text-sm font-bold shadow-sm">
-                      <currentWorld.Icon className="w-5 h-5 opacity-80" />
+                    <span className="inline-flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 rounded-xl bg-white/95 border-2 border-gray-200/90 text-gray-800 text-xs sm:text-sm font-bold shadow-sm">
+                      <currentWorld.Icon className="w-4 h-4 sm:w-5 sm:h-5 opacity-80 shrink-0" />
                       {badgeText}
                     </span>
                   )}
                   {contextLabel && (
-                    <span className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white/95 border-2 border-gray-200/90 text-gray-800 text-sm font-bold shadow-sm">
+                    <span className="inline-flex items-center gap-2 px-3 sm:px-4 py-1.5 sm:py-2 rounded-xl bg-white/95 border-2 border-gray-200/90 text-gray-800 text-xs sm:text-sm font-bold shadow-sm max-w-[160px] sm:max-w-none truncate">
                       {contextLabel}
                     </span>
                   )}
-                  <span className="text-sm font-medium text-gray-500">{metaText}</span>
+                  <span className="text-xs sm:text-sm font-medium text-gray-500 truncate">{metaText}</span>
                 </div>
               </div>
               <div className="flex flex-wrap items-center gap-2 shrink-0">{renderActions()}</div>
             </div>
           </div>
-          <div className={`absolute bottom-0 left-0 right-0 h-1.5 bg-gradient-to-r ${currentWorld.accentClass} opacity-60`} />
+          <div className={`absolute bottom-0 left-0 right-0 h-1 sm:h-1.5 bg-gradient-to-r ${currentWorld.accentClass} opacity-60 transition-all duration-500`} />
         </div>
 
         <div

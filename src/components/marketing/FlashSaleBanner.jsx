@@ -130,28 +130,32 @@ const FlashSaleBanner = ({
 
   return (
     <div
-      className={`relative bg-gradient-to-r ${bgGradient} overflow-hidden rounded-xl sm:rounded-2xl shadow-lg transition-colors duration-700`}
+      className={`relative bg-gradient-to-r ${bgGradient} overflow-hidden rounded-xl sm:rounded-2xl shadow-xl transition-all duration-500`}
       onTouchStart={handleTouchStart}
       onTouchEnd={handleTouchEnd}
     >
       {/* Animated shine effect */}
-      <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -skew-x-12 animate-[shimmer_3s_infinite]" 
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/15 to-transparent -skew-x-12 animate-[shimmer_3s_infinite]" 
           style={{ animation: 'shimmer 3s infinite', transform: 'translateX(-100%)' }} />
       </div>
 
+      {/* Decorative: subtle floating orbs */}
+      <div className="absolute top-1/4 right-1/4 w-24 h-24 rounded-full bg-white/5 blur-2xl pointer-events-none" aria-hidden />
+      <div className="absolute bottom-1/3 left-1/4 w-16 h-16 rounded-full bg-white/10 blur-xl pointer-events-none" aria-hidden />
+
       {/* Mobile Layout - Stacked, centered */}
-      <div className="sm:hidden relative px-3 py-3 pb-12">
+      <div className="sm:hidden relative px-4 py-4 pb-14 min-h-[200px]">
         {/* Top row: Icon + Title + Dismiss */}
-        <div className="flex items-center justify-between mb-2">
-          <div className="flex items-center gap-2">
+        <div className="flex items-center justify-between gap-2 mb-2">
+          <div className="flex items-center gap-2 min-w-0 flex-1">
             <div className="w-8 h-8 bg-white/20 backdrop-blur-sm rounded-lg flex items-center justify-center">
               <Flame className="w-5 h-5 text-white animate-pulse" />
             </div>
-            <div>
-              <div className="flex items-center gap-1.5">
-                <span key={offerIndex} className="font-black text-white text-base animate-fade-in">{displayTitle}</span>
-                <span className="px-1.5 py-0.5 bg-yellow-400 text-yellow-900 text-[10px] font-black rounded animate-pulse">
+            <div className="min-w-0 flex-1">
+              <div className="flex items-center gap-1.5 flex-wrap">
+                <span key={offerIndex} className="font-black text-white text-sm sm:text-base flash-offer-enter inline-block">{displayTitle}</span>
+                <span className="px-1.5 py-0.5 bg-yellow-400 text-yellow-900 text-[10px] font-black rounded animate-pulse shrink-0">
                   {currentOffer.badge}
                 </span>
               </div>
@@ -200,20 +204,20 @@ const FlashSaleBanner = ({
       </div>
 
       {/* Desktop Layout - Single row, all visible */}
-      <div className="hidden sm:flex relative items-center justify-between gap-4 lg:gap-6 px-4 lg:px-8 py-2.5 lg:py-3 pb-12 max-w-[1800px] mx-auto">
+      <div className="hidden sm:flex relative items-center justify-between gap-3 sm:gap-4 lg:gap-6 px-4 sm:px-6 lg:px-8 py-3 sm:py-3.5 lg:py-4 pb-14 max-w-[1800px] mx-auto">
         {/* Left: Icon + Title + Badge */}
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 min-w-0 flex-shrink">
           <div className="w-10 h-10 lg:w-11 lg:h-11 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center">
             <Flame className="w-6 h-6 lg:w-7 lg:h-7 text-white animate-pulse" />
           </div>
-          <div>
-            <div className="flex items-center gap-2">
-              <span key={`title-${offerIndex}`} className="font-black text-white text-lg lg:text-xl animate-fade-in">{displayTitle}</span>
-              <span className="px-2 py-0.5 bg-yellow-400 text-yellow-900 text-xs font-black rounded-md">
+          <div className="min-w-0">
+            <div className="flex items-center gap-2 flex-wrap">
+              <span key={`title-${offerIndex}`} className="font-black text-white text-base sm:text-lg lg:text-xl flash-offer-enter">{displayTitle}</span>
+              <span className="px-2 py-0.5 bg-yellow-400 text-yellow-900 text-xs font-black rounded-md shrink-0">
                 {currentOffer.badge}
               </span>
             </div>
-            <p key={`sub-${offerIndex}`} className="text-white/80 text-xs lg:text-sm animate-fade-in">{displaySubtitle}</p>
+            <p key={`sub-${offerIndex}`} className="text-white/80 text-xs lg:text-sm flash-offer-enter line-clamp-2 mt-0.5">{displaySubtitle}</p>
           </div>
         </div>
 
@@ -305,6 +309,13 @@ const FlashSaleBanner = ({
         @keyframes shimmer {
           0% { transform: translateX(-100%) skewX(-12deg); }
           100% { transform: translateX(200%) skewX(-12deg); }
+        }
+        @keyframes flash-slide-in {
+          from { opacity: 0; transform: translateX(12px); }
+          to { opacity: 1; transform: translateX(0); }
+        }
+        .flash-offer-enter {
+          animation: flash-slide-in 0.35s ease-out forwards;
         }
       `}</style>
     </div>
