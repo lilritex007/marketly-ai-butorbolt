@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { Zap, Clock, ArrowRight, X, Flame } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { Zap, Clock, ArrowRight, X, Flame, ChevronLeft, ChevronRight } from 'lucide-react';
 
 /**
  * FlashSaleBanner - Impactful, urgent sale banner
@@ -29,6 +29,8 @@ const FlashSaleBanner = ({
 }) => {
   const [timeLeft, setTimeLeft] = useState(calculateTimeLeft());
   const [offerIndex, setOfferIndex] = useState(0);
+  const [isPaused, setIsPaused] = useState(false);
+  const touchStartX = useRef(0);
   const currentOffer = FLASH_OFFERS[offerIndex];
   const displayTitle = currentOffer.title;
   const displaySubtitle = currentOffer.text;
@@ -66,11 +68,48 @@ const FlashSaleBanner = ({
   }, [endTime]);
 
   useEffect(() => {
+    if (isPaused) return;
     const offerTimer = setInterval(() => {
       setOfferIndex((i) => (i + 1) % FLASH_OFFERS.length);
     }, 4500);
     return () => clearInterval(offerTimer);
-  }, []);
+  }, [isPaused]);
+
+  const goToOffer = (idx) => {
+    setOfferIndex(idx);
+    setIsPaused(true);
+    setTimeout(() => setIsPaused(false), 3000);
+  };
+
+  const handleTouchStart = (e) => {
+    touchStartX.current = e.touches?.[0]?.clientX ?? e.clientX;
+    setIsPaused(true);
+  };
+
+  const handleTouchEnd = (e) => {
+    const endX = e.changedTouches?.[0]?.clientX ?? e.clientX;
+    const diff = touchStartX.current - endX;
+    if (Math.abs(diff) > 50) {
+      if (diff > 0) {
+        setOfferIndex((i) => (i + 1) % FLASH_OFFERS.length);
+      } else {
+        setOfferIndex((i) => (i - 1 + FLASH_OFFERS.length) % FLASH_OFFERS.length);
+      }
+    }
+    setTimeout(() => setIsPaused(false), 3000);
+  };
+
+  const handlePrev = () => {
+    setOfferIndex((i) => (i - 1 + FLASH_OFFERS.length) % FLASH_OFFERS.length);
+    setIsPaused(true);
+    setTimeout(() => setIsPaused(false), 3000);
+  };
+
+  const handleNext = () => {
+    setOfferIndex((i) => (i + 1) % FLASH_OFFERS.length);
+    setIsPaused(true);
+    setTimeout(() => setIsPaused(false), 3000);
+  };
 
   const handleDismiss = () => {
     try {
@@ -90,7 +129,11 @@ const FlashSaleBanner = ({
   const timeLeftProgress = Math.min(100, (remainingMs / TOTAL_SALE_MS) * 100);
 
   return (
-    <div className={`relative bg-gradient-to-r ${bgGradient} overflow-hidden rounded-xl sm:rounded-2xl shadow-lg transition-colors duration-700`}>
+    <div
+      className={`relative bg-gradient-to-r ${bgGradient} overflow-hidden rounded-xl sm:rounded-2xl shadow-lg transition-colors duration-700`}
+      onTouchStart={handleTouchStart}
+      onTouchEnd={handleTouchEnd}
+    >
       {/* Animated shine effect */}
       <div className="absolute inset-0 overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -skew-x-12 animate-[shimmer_3s_infinite]" 
@@ -98,7 +141,7 @@ const FlashSaleBanner = ({
       </div>
 
       {/* Mobile Layout - Stacked, centered */}
-      <div className="sm:hidden relative px-3 py-3">
+      <div className="sm:hidden relative px-3 py-3 pb-12">
         {/* Top row: Icon + Title + Dismiss */}
         <div className="flex items-center justify-between mb-2">
           <div className="flex items-center gap-2">
@@ -157,7 +200,7 @@ const FlashSaleBanner = ({
       </div>
 
       {/* Desktop Layout - Single row, all visible */}
-      <div className="hidden sm:flex relative items-center justify-between gap-4 lg:gap-6 px-4 lg:px-8 py-2.5 lg:py-3 max-w-[1800px] mx-auto">
+      <div className="hidden sm:flex relative items-center justify-between gap-4 lg:gap-6 px-4 lg:px-8 py-2.5 lg:py-3 pb-12 max-w-[1800px] mx-auto">
         {/* Left: Icon + Title + Badge */}
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 lg:w-11 lg:h-11 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center">
@@ -217,6 +260,41 @@ const FlashSaleBanner = ({
           </button>
         </div>
       </div>
+
+      {/* Dots – pozíció indikátor, kattintható */}
+      <div className="absolute bottom-8 left-0 right-0 flex justify-center gap-1.5 z-10" role="tablist" aria-label="Ajánlat váltása">
+        {FLASH_OFFERS.map((_, i) => (
+          <button
+            key={i}
+            type="button"
+            role="tab"
+            aria-selected={offerIndex === i}
+            onClick={() => goToOffer(i)}
+            className={`w-2.5 h-2.5 rounded-full transition-all duration-200 min-w-[10px] min-h-[10px] focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-transparent ${
+              offerIndex === i ? 'bg-white scale-110' : 'bg-white/50 hover:bg-white/70'
+            }`}
+            aria-label={`Ajánlat ${i + 1}`}
+          />
+        ))}
+      </div>
+
+      {/* Desktop: nyilak */}
+      <button
+        type="button"
+        onClick={handlePrev}
+        className="hidden sm:flex absolute left-2 top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full bg-white/20 hover:bg-white/30 backdrop-blur-sm items-center justify-center text-white transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-white/50"
+        aria-label="Előző ajánlat"
+      >
+        <ChevronLeft className="w-5 h-5" />
+      </button>
+      <button
+        type="button"
+        onClick={handleNext}
+        className="hidden sm:flex absolute right-2 top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full bg-white/20 hover:bg-white/30 backdrop-blur-sm items-center justify-center text-white transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-white/50"
+        aria-label="Következő ajánlat"
+      >
+        <ChevronRight className="w-5 h-5" />
+      </button>
 
       {/* Time-left progress bar – shrinks as countdown runs out */}
       <div className="absolute bottom-0 left-0 right-0 h-1 bg-black/20" aria-hidden="true">
