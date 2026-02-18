@@ -103,10 +103,10 @@ export const ModernHero = ({
         style={{ backgroundImage: `url(${HERO_BG_IMAGE})` }}
         aria-hidden
       />
-      <div className="absolute inset-0 bg-gradient-to-b from-slate-950/20 via-white/72 to-primary-50/90" aria-hidden />
+      <div className="absolute inset-0 bg-gradient-to-b from-white/90 via-white/72 to-primary-50/90" aria-hidden />
       <div className="pointer-events-none absolute inset-0" aria-hidden>
-        <div className="absolute left-1/2 top-[30%] h-[520px] w-[min(1100px,92vw)] -translate-x-1/2 -translate-y-1/2 bg-[radial-gradient(ellipse_at_center,rgba(56,189,248,0.26),transparent_62%)] blur-2xl" />
-        <div className="absolute left-1/2 top-[34%] h-[420px] w-[min(860px,84vw)] -translate-x-1/2 -translate-y-1/2 bg-[radial-gradient(ellipse_at_center,rgba(139,92,246,0.2),transparent_70%)] blur-xl" />
+        <div className="absolute left-1/2 top-[30%] h-[520px] w-[min(1100px,92vw)] -translate-x-1/2 -translate-y-1/2 bg-[radial-gradient(ellipse_at_center,rgba(255,138,0,0.24),transparent_62%)] blur-2xl" />
+        <div className="absolute left-1/2 top-[34%] h-[420px] w-[min(860px,84vw)] -translate-x-1/2 -translate-y-1/2 bg-[radial-gradient(ellipse_at_center,rgba(0,107,111,0.16),transparent_70%)] blur-xl" />
       </div>
       <div className="absolute inset-0 pointer-events-none" aria-hidden="true">
         <div className="absolute inset-x-0 top-0 h-[1px] bg-gradient-to-r from-transparent via-primary-300 to-transparent opacity-70" />
@@ -151,7 +151,7 @@ export const ModernHero = ({
             className={`relative w-full min-w-0 max-w-full -mx-4 sm:-mx-8 lg:-mx-14 xl:-mx-20 mb-6 sm:mb-8 ${mounted ? 'hero-reveal' : 'opacity-0'}`}
             style={mounted ? { animationDelay: `${HERO_REVEAL_DELAY.sub - 60}ms` } : undefined}
           >
-            <div className="pointer-events-none absolute inset-0 rounded-[30px] border border-cyan-300/30 bg-slate-950/[0.08] backdrop-blur-[1px] shadow-[inset_0_1px_0_rgba(255,255,255,0.42)]" aria-hidden />
+            <div className="pointer-events-none absolute inset-0 rounded-[30px] border border-white/70 bg-white/[0.04] backdrop-blur-[1px] shadow-[inset_0_1px_0_rgba(255,255,255,0.75)]" aria-hidden />
             <HeroSmartSearch
               products={products}
               onSearch={onHeroSearch}

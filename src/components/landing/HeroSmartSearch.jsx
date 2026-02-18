@@ -308,7 +308,7 @@ export default function HeroSmartSearch({
       if (trimmedQuery.length >= 2 && t.includes(trimmedQuery.toLowerCase())) {
         badge = { label: 'Pontos egyezés', classes: 'bg-emerald-50 text-emerald-700 border-emerald-200' };
       } else if (Array.isArray(intent?.styles) && intent.styles.some((s) => t.includes(String(s).toLowerCase()))) {
-        badge = { label: 'Stílus egyezés', classes: 'bg-violet-50 text-violet-700 border-violet-200' };
+        badge = { label: 'Stílus egyezés', classes: 'bg-secondary-50 text-secondary-700 border-secondary-200' };
       } else if (Array.isArray(intent?.colors) && intent.colors.some((c) => t.includes(String(c).toLowerCase()))) {
         badge = { label: 'Szín egyezés', classes: 'bg-sky-50 text-sky-700 border-sky-200' };
       } else if (t.includes('alatt') || t.includes('akció')) {
@@ -686,30 +686,30 @@ export default function HeroSmartSearch({
       aria-label="AI Kereső"
     >
       <div className="relative w-full max-w-none mx-auto">
-        <div className="pointer-events-none absolute inset-x-0 -top-14 h-44 bg-[radial-gradient(ellipse_at_center,rgba(56,189,248,0.35),transparent_62%)] blur-2xl" aria-hidden />
-        <div className="pointer-events-none absolute inset-x-0 -bottom-16 h-52 bg-[radial-gradient(ellipse_at_center,rgba(139,92,246,0.32),transparent_66%)] blur-3xl" aria-hidden />
-        {/* Futuristic search cockpit */}
-        <div className="relative rounded-none sm:rounded-[34px] overflow-hidden border-y border-cyan-300/30 sm:border bg-slate-950/86 backdrop-blur-xl shadow-[0_36px_90px_-30px_rgba(2,6,23,0.9),0_0_0_1px_rgba(103,232,249,0.24),inset_0_1px_0_rgba(255,255,255,0.06)] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_45px_110px_-30px_rgba(2,6,23,0.95),0_0_0_1px_rgba(129,140,248,0.32),inset_0_1px_0_rgba(255,255,255,0.1)]">
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_14%_18%,rgba(56,189,248,0.24),transparent_44%),radial-gradient(circle_at_86%_24%,rgba(139,92,246,0.24),transparent_46%),linear-gradient(135deg,rgba(8,12,28,0.94)_0%,rgba(6,22,37,0.9)_48%,rgba(19,17,44,0.9)_100%)] pointer-events-none" aria-hidden />
-          <div className="absolute inset-x-0 top-0 h-[1px] bg-gradient-to-r from-transparent via-cyan-200/50 to-transparent" aria-hidden />
+        <div className="pointer-events-none absolute inset-x-0 -top-14 h-44 bg-[radial-gradient(ellipse_at_center,rgba(255,138,0,0.28),transparent_62%)] blur-2xl" aria-hidden />
+        <div className="pointer-events-none absolute inset-x-0 -bottom-16 h-52 bg-[radial-gradient(ellipse_at_center,rgba(0,107,111,0.24),transparent_66%)] blur-3xl" aria-hidden />
+        {/* Brand-alapú premium search stage */}
+        <div className="relative rounded-none sm:rounded-[34px] overflow-hidden border-y border-primary-200/70 sm:border bg-white/92 backdrop-blur-xl shadow-[0_34px_84px_-34px_rgba(15,23,42,0.45),0_0_0_1px_rgba(255,138,0,0.18),inset_0_1px_0_rgba(255,255,255,0.9)] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_42px_94px_-34px_rgba(15,23,42,0.5),0_0_0_1px_rgba(0,107,111,0.25),inset_0_1px_0_rgba(255,255,255,0.95)]">
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_14%_18%,rgba(255,138,0,0.2),transparent_44%),radial-gradient(circle_at_86%_24%,rgba(0,107,111,0.18),transparent_46%),linear-gradient(135deg,rgba(255,255,255,0.97)_0%,rgba(255,249,243,0.95)_52%,rgba(240,253,250,0.94)_100%)] pointer-events-none" aria-hidden />
+          <div className="absolute inset-x-0 top-0 h-[1px] bg-gradient-to-r from-transparent via-primary-300/70 to-transparent" aria-hidden />
 
           <div className="relative z-10 px-4 py-4 sm:p-6 lg:px-8 lg:py-6">
             <div className="mb-4 sm:mb-5 flex flex-wrap items-center justify-between gap-2">
-              <div className="inline-flex items-center gap-2 rounded-full border border-cyan-300/40 bg-cyan-400/10 px-3 py-1.5 shadow-[0_0_0_1px_rgba(34,211,238,0.12)]">
-                <Sparkles className="h-3.5 w-3.5 text-cyan-300" aria-hidden />
-                <span className="text-[11px] font-extrabold tracking-[0.18em] text-cyan-100 uppercase">Neural Search Core</span>
+              <div className="inline-flex items-center gap-2 rounded-full border border-primary-300/70 bg-primary-50 px-3 py-1.5 shadow-sm">
+                <Sparkles className="h-3.5 w-3.5 text-primary-600" aria-hidden />
+                <span className="text-[11px] font-extrabold tracking-[0.18em] text-primary-800 uppercase">AI Kereső Központ</span>
               </div>
-              <div className={`inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-[11px] font-bold uppercase tracking-[0.14em] border ${isIndexBuilding ? 'bg-amber-400/15 text-amber-100 border-amber-300/40' : 'bg-emerald-400/15 text-emerald-100 border-emerald-300/40'}`}>
-                <span className={`h-1.5 w-1.5 rounded-full ${isIndexBuilding ? 'bg-amber-300 animate-pulse' : 'bg-emerald-300'}`} aria-hidden />
-                {isIndexBuilding ? 'Rendszer tanul' : 'Rendszer online'}
+              <div className={`inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-[11px] font-bold uppercase tracking-[0.14em] border ${isIndexBuilding ? 'bg-amber-50 text-amber-800 border-amber-300/70' : 'bg-emerald-50 text-emerald-800 border-emerald-300/70'}`}>
+                <span className={`h-1.5 w-1.5 rounded-full ${isIndexBuilding ? 'bg-amber-500 animate-pulse' : 'bg-emerald-500'}`} aria-hidden />
+                {isIndexBuilding ? 'Index épül' : 'Kereső online'}
               </div>
             </div>
             <form onSubmit={handleSubmit} className="space-y-4 lg:space-y-3">
               <div
-                className={`relative flex flex-col sm:flex-row gap-3 sm:gap-4 rounded-2xl sm:rounded-full bg-slate-900/75 border-2 border-cyan-300/25 p-3 sm:p-3.5 lg:p-2.5 transition-all duration-200 shadow-[inset_0_0_0_1px_rgba(34,211,238,0.16),0_16px_35px_-20px_rgba(2,6,23,0.85)] focus-within:shadow-[inset_0_0_0_1px_rgba(56,189,248,0.4),0_22px_45px_-20px_rgba(2,6,23,0.95)] focus-within:ring-4 focus-within:ring-cyan-300/25 ${searchPulse ? 'ring-4 ring-violet-300/35' : ''}`}
+                className={`relative flex flex-col sm:flex-row gap-3 sm:gap-4 rounded-2xl sm:rounded-full bg-white border-2 border-primary-200/80 p-3 sm:p-3.5 lg:p-2.5 transition-all duration-200 shadow-[inset_0_0_0_1px_rgba(0,107,111,0.1),0_16px_35px_-20px_rgba(15,23,42,0.32)] focus-within:shadow-[inset_0_0_0_1px_rgba(255,138,0,0.32),0_22px_45px_-20px_rgba(15,23,42,0.4)] focus-within:ring-4 focus-within:ring-primary-300/25 ${searchPulse ? 'ring-4 ring-emerald-300/35' : ''}`}
               >
                 <div className="flex-1 flex items-center gap-3 sm:gap-4 min-w-0 flex-shrink">
-                  <div className="flex h-10 w-10 sm:h-12 sm:w-12 shrink-0 rounded-xl bg-gradient-to-br from-cyan-500 via-sky-500 to-violet-600 text-white items-center justify-center shadow-[0_10px_24px_rgba(56,189,248,0.45)]">
+                  <div className="flex h-10 w-10 sm:h-12 sm:w-12 shrink-0 rounded-xl bg-gradient-to-br from-primary-500 via-primary-600 to-secondary-600 text-white items-center justify-center shadow-[0_10px_24px_rgba(255,138,0,0.38)]">
                     <Search className="w-5 h-5 sm:w-6 sm:h-6" aria-hidden />
                   </div>
                   <div className="flex-1 min-w-0">
@@ -719,12 +719,12 @@ export default function HeroSmartSearch({
                       onChange={(e) => setQuery(e.target.value)}
                       onFocus={() => setIsOpen(true)}
                       placeholder="Mit keresel? Pl. bézs kanapé 100e alatt, skandináv komód..."
-                      className="w-full min-h-[48px] sm:min-h-[58px] lg:min-h-[50px] bg-transparent outline-none text-lg sm:text-[1.38rem] lg:text-[1.2rem] xl:text-[1.35rem] text-slate-50 placeholder:text-slate-400 font-semibold tracking-[-0.01em]"
+                      className="w-full min-h-[48px] sm:min-h-[58px] lg:min-h-[50px] bg-transparent outline-none text-lg sm:text-[1.38rem] lg:text-[1.2rem] xl:text-[1.35rem] text-gray-900 placeholder:text-gray-500 font-semibold tracking-[-0.01em]"
                       aria-label="Keresés a teljes katalógusban"
                       autoComplete="off"
                     />
-                    <p className="text-xs sm:text-sm text-slate-300/90 mt-1 sm:mt-1.5">
-                      {isIndexBuilding ? 'Neural index szinkronizálás…' : 'Természetes prompt: termék + stílus + tér + költség'}
+                    <p className="text-xs sm:text-sm text-gray-600 mt-1 sm:mt-1.5">
+                      {isIndexBuilding ? 'Intelligens index szinkronizálás…' : 'Természetes prompt: termék + stílus + tér + költség'}
                     </p>
                   </div>
                 </div>
@@ -732,7 +732,7 @@ export default function HeroSmartSearch({
                   <button
                     type="button"
                     onClick={() => setShowQuickFilterPanel((prev) => !prev)}
-                    className={`min-h-[48px] sm:min-h-[56px] lg:min-h-[46px] px-4 sm:px-5 rounded-xl sm:rounded-full border text-sm font-semibold inline-flex items-center justify-center gap-2 transition-all touch-manipulation ${showQuickFilterPanel ? 'border-cyan-300 bg-cyan-400/15 text-cyan-50' : 'border-slate-500/50 bg-slate-900/80 text-slate-100 hover:border-cyan-300/60 hover:bg-cyan-400/10'}`}
+                    className={`min-h-[48px] sm:min-h-[56px] lg:min-h-[46px] px-4 sm:px-5 rounded-xl sm:rounded-full border text-sm font-semibold inline-flex items-center justify-center gap-2 transition-all touch-manipulation ${showQuickFilterPanel ? 'border-primary-400 bg-primary-50 text-primary-800' : 'border-gray-200 bg-white text-gray-700 hover:border-primary-200 hover:bg-primary-50/60'}`}
                     title="Gyors szűrők"
                     aria-expanded={showQuickFilterPanel}
                   >
@@ -741,7 +741,7 @@ export default function HeroSmartSearch({
                   </button>
                   <button
                     type="submit"
-                    className="min-h-[48px] sm:min-h-[56px] lg:min-h-[46px] px-5 sm:px-8 lg:px-6 rounded-xl sm:rounded-full bg-gradient-to-r from-cyan-500 via-sky-500 to-violet-600 text-white text-base lg:text-sm font-bold shadow-[0_10px_28px_rgba(56,189,248,0.45)] hover:shadow-[0_14px_36px_rgba(56,189,248,0.58)] hover:-translate-y-0.5 active:scale-[0.98] transition-all inline-flex items-center justify-center gap-2 touch-manipulation"
+                    className="min-h-[48px] sm:min-h-[56px] lg:min-h-[46px] px-5 sm:px-8 lg:px-6 rounded-xl sm:rounded-full bg-gradient-to-r from-primary-500 via-primary-600 to-secondary-600 text-white text-base lg:text-sm font-bold shadow-[0_10px_28px_rgba(255,138,0,0.42)] hover:shadow-[0_14px_36px_rgba(255,138,0,0.5)] hover:-translate-y-0.5 active:scale-[0.98] transition-all inline-flex items-center justify-center gap-2 touch-manipulation"
                     aria-busy={isSearching}
                   >
                     {isSearching ? (
@@ -758,36 +758,36 @@ export default function HeroSmartSearch({
                   <button
                     type="button"
                     onClick={onTryAI}
-                    className="inline-flex items-center gap-2 px-3 py-2 rounded-full border border-violet-300/45 bg-violet-400/10 text-violet-100 hover:bg-violet-400/20 font-semibold text-sm transition-colors"
+                    className="inline-flex items-center gap-2 px-3 py-2 rounded-full border border-secondary-200/70 bg-secondary-50/70 text-secondary-800 hover:bg-secondary-100 font-semibold text-sm transition-colors"
                     title="Képből keresés"
                     aria-label="Képből keresés"
                   >
                     <Camera className="w-4 h-4" aria-hidden />
                     <span>Képből keresés</span>
                   </button>
-                  <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-slate-900/80 border border-cyan-300/30 text-cyan-100">
-                    <Wand2 className="w-3.5 h-3.5 text-cyan-300" aria-hidden />
-                    Neural mode
+                  <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-white border border-primary-200 text-primary-800">
+                    <Wand2 className="w-3.5 h-3.5 text-primary-600" aria-hidden />
+                    AI mód
                   </span>
                 </div>
                 {actualResultCount != null && trimmedQuery.length >= 2 && (
-                  <span className="inline-flex items-center gap-2 rounded-full border border-cyan-300/35 bg-cyan-400/10 px-3 py-1 text-sm font-bold text-cyan-100 tabular-nums">
-                    <span className="h-2 w-2 rounded-full bg-cyan-300" aria-hidden />
+                  <span className="inline-flex items-center gap-2 rounded-full border border-primary-200 bg-primary-50/80 px-3 py-1 text-sm font-bold text-primary-700 tabular-nums">
+                    <span className="h-2 w-2 rounded-full bg-primary-500" aria-hidden />
                     {actualResultCount} találat
                   </span>
                 )}
               </div>
               <div className="pt-1">
-                <p className="mb-2 text-[11px] font-extrabold uppercase tracking-[0.14em] text-slate-300">Quick vectors</p>
+                <p className="mb-2 text-[11px] font-extrabold uppercase tracking-[0.14em] text-gray-500">Gyors indítás</p>
                 <div className="flex gap-2 overflow-x-auto pb-1 [scrollbar-width:thin] [&::-webkit-scrollbar]:h-1.5">
                   {dynamicQuickSuggestions.slice(0, 4).map((text) => (
                     <button
                       key={`hero-chip-${text}`}
                       type="button"
                       onClick={() => applySuggestion(text, { submit: true, source: 'hero-chip' })}
-                      className="whitespace-nowrap inline-flex items-center gap-1.5 rounded-full border border-slate-500/45 bg-slate-900/70 px-3 py-1.5 text-xs sm:text-sm font-semibold text-slate-100 shadow-sm transition-all hover:-translate-y-0.5 hover:border-cyan-300/60 hover:text-cyan-100 hover:shadow-md"
+                      className="whitespace-nowrap inline-flex items-center gap-1.5 rounded-full border border-primary-200 bg-white/90 px-3 py-1.5 text-xs sm:text-sm font-semibold text-gray-700 shadow-sm transition-all hover:-translate-y-0.5 hover:border-primary-300 hover:text-primary-700 hover:shadow-md"
                     >
-                      <Sparkles className="h-3.5 w-3.5 text-cyan-300" aria-hidden />
+                      <Sparkles className="h-3.5 w-3.5 text-primary-500" aria-hidden />
                       {text}
                     </button>
                   ))}
@@ -801,16 +801,16 @@ export default function HeroSmartSearch({
         <div className="relative z-10 mt-4 sm:mt-5 min-w-0 max-w-full">
           <div className="space-y-4 sm:space-y-5 lg:grid lg:grid-cols-12 lg:gap-4 lg:space-y-0">
           {showQuickFilterPanel && (
-            <div className="mt-3 lg:mt-0 rounded-xl border border-cyan-300/25 bg-gradient-to-br from-slate-950/90 via-slate-900/85 to-slate-900/92 px-4 py-4 relative overflow-hidden w-full lg:col-span-6">
-              <div className="absolute left-0 bottom-0 w-full h-0.5 bg-gradient-to-r from-cyan-300 via-violet-400 to-sky-400" aria-hidden />
-              <p className="text-sm font-bold text-cyan-100 flex items-center gap-2.5 mb-3">
-                <span className="w-9 h-9 rounded-xl bg-gradient-to-br from-cyan-500 to-violet-600 text-white flex items-center justify-center shadow-sm"><Filter className="w-5 h-5" aria-hidden /></span>
+            <div className="mt-3 lg:mt-0 rounded-xl border border-primary-200/80 bg-gradient-to-br from-primary-50/70 via-white to-secondary-50/55 px-4 py-4 relative overflow-hidden w-full lg:col-span-6">
+              <div className="absolute left-0 bottom-0 w-full h-0.5 bg-gradient-to-r from-primary-400 via-primary-500 to-secondary-500" aria-hidden />
+              <p className="text-sm font-bold text-primary-800 flex items-center gap-2.5 mb-3">
+                <span className="w-9 h-9 rounded-xl bg-gradient-to-br from-primary-500 to-secondary-600 text-white flex items-center justify-center shadow-sm"><Filter className="w-5 h-5" aria-hidden /></span>
                 Gyors szűrők
               </p>
               <div className="space-y-3">
                 {Object.entries(QUICK_FILTER_PRESETS).map(([group, values]) => (
                   <div key={group} className="flex flex-wrap items-center gap-2">
-                    <span className="text-xs font-bold uppercase tracking-wide text-slate-400 min-w-14">
+                    <span className="text-xs font-bold uppercase tracking-wide text-gray-500 min-w-14">
                       {group}
                     </span>
                     {values.map((value) => (
@@ -818,7 +818,7 @@ export default function HeroSmartSearch({
                         key={`${group}-${value}`}
                         type="button"
                         onClick={() => applyQuickFilterToken(value)}
-                        className="px-3 py-2 rounded-lg border border-slate-500/40 bg-slate-900/70 text-cyan-100 text-sm font-medium hover:bg-cyan-500/15 hover:border-cyan-300/40 transition-colors touch-manipulation min-h-[40px]"
+                        className="px-3 py-2 rounded-lg border border-primary-200/80 bg-white text-primary-800 text-sm font-medium hover:bg-primary-50 hover:border-primary-300 transition-colors touch-manipulation min-h-[40px]"
                       >
                         {value}
                       </button>
@@ -827,7 +827,7 @@ export default function HeroSmartSearch({
                 ))}
                 {preferredCategories.length > 0 && (
                   <div className="flex flex-wrap items-center gap-2 pt-1">
-                    <span className="text-xs font-semibold uppercase tracking-wide text-slate-400 min-w-14">
+                    <span className="text-xs font-semibold uppercase tracking-wide text-gray-500 min-w-14">
                       Neked
                     </span>
                     {preferredCategories.slice(0, 3).map((value) => (
@@ -835,7 +835,7 @@ export default function HeroSmartSearch({
                         key={`fav-${value}`}
                         type="button"
                         onClick={() => applyQuickFilterToken(value)}
-                        className="px-3 py-2 rounded-lg border border-violet-300/40 bg-violet-500/10 text-violet-100 text-sm font-medium hover:bg-violet-500/20 transition-colors touch-manipulation min-h-[40px]"
+                        className="px-3 py-2 rounded-lg border border-secondary-200 bg-secondary-50/70 text-secondary-800 text-sm font-medium hover:bg-secondary-100 transition-colors touch-manipulation min-h-[40px]"
                       >
                         {value}
                       </button>
@@ -847,20 +847,20 @@ export default function HeroSmartSearch({
           )}
 
           {/* Pontosság – trust card, AI modul stílus */}
-          <div className="rounded-xl border border-emerald-300/30 bg-gradient-to-br from-slate-950/90 via-slate-900/82 to-slate-900/95 px-4 py-3.5 relative overflow-hidden w-full shadow-sm lg:col-span-6" role="status" aria-live="polite">
-            <div className="absolute left-0 bottom-0 w-full h-0.5 bg-gradient-to-r from-emerald-300 via-cyan-300 to-violet-400" aria-hidden />
+          <div className="rounded-xl border border-emerald-200/80 bg-gradient-to-br from-emerald-50/80 via-white to-secondary-50/45 px-4 py-3.5 relative overflow-hidden w-full shadow-sm lg:col-span-6" role="status" aria-live="polite">
+            <div className="absolute left-0 bottom-0 w-full h-0.5 bg-gradient-to-r from-emerald-400 via-secondary-500 to-primary-500" aria-hidden />
             <div className="flex items-center justify-between gap-2 mb-2">
-              <span className="text-sm font-bold text-emerald-100 flex items-center gap-2.5">
-                <span className="w-9 h-9 rounded-xl bg-gradient-to-br from-emerald-500 to-cyan-500 text-white flex items-center justify-center shadow-sm"><Award className="w-5 h-5" aria-hidden /></span>
+              <span className="text-sm font-bold text-emerald-800 flex items-center gap-2.5">
+                <span className="w-9 h-9 rounded-xl bg-gradient-to-br from-emerald-500 to-secondary-600 text-white flex items-center justify-center shadow-sm"><Award className="w-5 h-5" aria-hidden /></span>
                 Találatok
               </span>
-              <span className={`text-base font-bold text-emerald-100 tabular-nums transition-transform duration-300 ${resultCountPulse ? 'scale-110' : 'scale-100'}`}>{actualResultCount ?? 0}</span>
+              <span className={`text-base font-bold text-emerald-900 tabular-nums transition-transform duration-300 ${resultCountPulse ? 'scale-110' : 'scale-100'}`}>{actualResultCount ?? 0}</span>
             </div>
-            <div className="h-2 rounded-full bg-slate-700/70 overflow-hidden">
+            <div className="h-2 rounded-full bg-emerald-100 overflow-hidden">
               <div className={`h-full rounded-full transition-all duration-300 ${confidenceMeta.tone}`} style={{ width: `${confidenceScore}%` }} />
             </div>
             {actualResultCount != null && (
-              <p className="mt-1.5 text-xs text-emerald-200/90">{confidenceMeta.label}</p>
+              <p className="mt-1.5 text-xs text-emerald-700/90">{confidenceMeta.label}</p>
             )}
           </div>
 
@@ -869,7 +869,7 @@ export default function HeroSmartSearch({
               <button
                 type="button"
                 onClick={() => triggerFullSearch(trimmedQuery, 'submit')}
-                className="w-full min-h-[48px] rounded-xl bg-gradient-to-r from-cyan-500 via-sky-500 to-violet-600 text-white font-bold text-base shadow-[0_8px_22px_rgba(56,189,248,0.4)] hover:shadow-[0_12px_28px_rgba(56,189,248,0.52)] hover:-translate-y-0.5 active:scale-[0.98] transition-all duration-200 touch-manipulation"
+                className="w-full min-h-[48px] rounded-xl bg-gradient-to-r from-primary-500 via-primary-600 to-secondary-600 text-white font-bold text-base shadow-[0_8px_22px_rgba(255,138,0,0.35)] hover:shadow-[0_12px_28px_rgba(255,138,0,0.45)] hover:-translate-y-0.5 active:scale-[0.98] transition-all duration-200 touch-manipulation"
               >
                 Összes találat megnyitása ({actualResultCount ?? 0})
               </button>
@@ -877,10 +877,10 @@ export default function HeroSmartSearch({
           )}
 
           {activeFilters.length > 0 && (
-            <div className="mt-3 sm:mt-4 lg:mt-0 flex flex-wrap gap-2 rounded-xl border border-sky-300/30 bg-gradient-to-br from-slate-950/90 via-slate-900/82 to-slate-900/95 px-4 py-3.5 relative overflow-hidden w-full shadow-sm lg:col-span-6">
-              <div className="absolute left-0 bottom-0 w-full h-0.5 bg-gradient-to-r from-sky-300 via-cyan-300 to-violet-400" aria-hidden />
-              <span className="w-full flex items-center gap-2.5 mb-2 text-sm font-bold text-sky-100">
-                <span className="w-9 h-9 rounded-xl bg-gradient-to-br from-sky-500 to-violet-600 text-white flex items-center justify-center shadow-sm"><SlidersHorizontal className="w-5 h-5" aria-hidden /></span>
+            <div className="mt-3 sm:mt-4 lg:mt-0 flex flex-wrap gap-2 rounded-xl border border-sky-200/80 bg-gradient-to-br from-sky-50/80 via-white to-secondary-50/50 px-4 py-3.5 relative overflow-hidden w-full shadow-sm lg:col-span-6">
+              <div className="absolute left-0 bottom-0 w-full h-0.5 bg-gradient-to-r from-sky-400 via-blue-500 to-secondary-500" aria-hidden />
+              <span className="w-full flex items-center gap-2.5 mb-2 text-sm font-bold text-sky-800">
+                <span className="w-9 h-9 rounded-xl bg-gradient-to-br from-sky-500 to-secondary-600 text-white flex items-center justify-center shadow-sm"><SlidersHorizontal className="w-5 h-5" aria-hidden /></span>
                 Aktív szűrők
               </span>
               {activeFilters.map((f) => (
@@ -888,7 +888,7 @@ export default function HeroSmartSearch({
                   key={f.id}
                   type="button"
                   onClick={() => removeFilter(f)}
-                  className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-slate-900/70 border border-slate-500/40 text-sky-100 text-sm font-medium hover:bg-sky-500/15 transition-colors touch-manipulation min-h-[40px]"
+                  className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-white border border-sky-200/80 text-sky-800 text-sm font-medium hover:bg-sky-50 transition-colors touch-manipulation min-h-[40px]"
                 >
                   {f.label}: {f.value}
                   <X className="w-3 h-3" aria-hidden />
@@ -897,7 +897,7 @@ export default function HeroSmartSearch({
               <button
                 type="button"
                 onClick={clearAllFilters}
-                className="px-3 py-2 rounded-lg border border-slate-500/40 bg-slate-900/70 text-slate-100 text-sm font-medium hover:bg-slate-800 touch-manipulation min-h-[40px]"
+                className="px-3 py-2 rounded-lg border border-gray-200 bg-white text-gray-700 text-sm font-medium hover:bg-gray-50 touch-manipulation min-h-[40px]"
               >
                 Szűrők törlése
               </button>
@@ -905,14 +905,14 @@ export default function HeroSmartSearch({
           )}
 
           {trimmedQuery.length >= 2 && (
-            <div className="mt-3 sm:mt-4 lg:mt-0 flex flex-wrap items-center gap-2 rounded-xl border border-violet-300/30 bg-gradient-to-br from-slate-950/90 via-slate-900/82 to-slate-900/95 px-4 py-3.5 relative overflow-hidden w-full shadow-sm lg:col-span-6">
-              <div className="absolute left-0 bottom-0 w-full h-0.5 bg-gradient-to-r from-violet-300 via-fuchsia-300 to-cyan-300" aria-hidden />
+            <div className="mt-3 sm:mt-4 lg:mt-0 flex flex-wrap items-center gap-2 rounded-xl border border-secondary-200/80 bg-gradient-to-br from-secondary-50/80 via-white to-primary-50/45 px-4 py-3.5 relative overflow-hidden w-full shadow-sm lg:col-span-6">
+              <div className="absolute left-0 bottom-0 w-full h-0.5 bg-gradient-to-r from-secondary-400 via-teal-500 to-primary-500" aria-hidden />
               <button
                 type="button"
                 onClick={() => setShowRewriteOptions((prev) => !prev)}
-                className="inline-flex items-center gap-2.5 px-3 py-2 rounded-lg bg-gradient-to-r from-violet-500/20 to-cyan-500/20 text-violet-100 text-sm font-bold border border-violet-300/40 hover:from-violet-500/35 hover:to-cyan-500/35 transition-colors touch-manipulation min-h-[40px]"
+                className="inline-flex items-center gap-2.5 px-3 py-2 rounded-lg bg-gradient-to-r from-secondary-500/20 to-teal-500/20 text-secondary-800 text-sm font-bold border border-secondary-200/80 hover:from-secondary-500/30 hover:to-teal-500/30 transition-colors touch-manipulation min-h-[40px]"
               >
-                <span className="w-9 h-9 rounded-xl bg-gradient-to-br from-violet-500 to-cyan-500 text-white flex items-center justify-center shrink-0 shadow-sm"><BrainCircuit className="w-5 h-5" aria-hidden /></span>
+                <span className="w-9 h-9 rounded-xl bg-gradient-to-br from-secondary-500 to-secondary-600 text-white flex items-center justify-center shrink-0 shadow-sm"><BrainCircuit className="w-5 h-5" aria-hidden /></span>
                 AI átfogalmazás
               </button>
               {showRewriteOptions && rewriteSuggestionsWithQuality.slice(0, 3).map((item) => (
@@ -920,7 +920,7 @@ export default function HeroSmartSearch({
                   key={item.text}
                   type="button"
                   onClick={() => applyRewrite(item.text)}
-                  className="px-3 py-2 rounded-lg border border-violet-300/35 bg-slate-900/70 text-violet-100 text-sm hover:bg-violet-500/15 transition-colors inline-flex items-center gap-1.5 touch-manipulation min-h-[40px]"
+                  className="px-3 py-2 rounded-lg border border-secondary-200 bg-white text-secondary-800 text-sm hover:bg-secondary-50/80 transition-colors inline-flex items-center gap-1.5 touch-manipulation min-h-[40px]"
                 >
                   <span>{item.text}</span>
                   <span className={`px-1.5 py-0.5 rounded-md border text-[10px] font-medium ${item.quality.classes}`}>
@@ -932,17 +932,17 @@ export default function HeroSmartSearch({
           )}
 
           {intentTimeline.length > 0 && (
-            <div className="mt-3 sm:mt-4 lg:mt-0 rounded-xl border border-indigo-300/30 bg-gradient-to-br from-slate-950/90 via-slate-900/82 to-slate-900/95 px-4 py-3.5 relative overflow-hidden w-full shadow-sm lg:col-span-6">
-              <div className="absolute left-0 bottom-0 w-full h-0.5 bg-gradient-to-r from-indigo-300 via-violet-300 to-cyan-300" aria-hidden />
-              <p className="text-sm font-bold text-indigo-100 flex items-center gap-2.5 mb-2">
-                <span className="w-9 h-9 rounded-xl bg-gradient-to-br from-indigo-500 to-cyan-500 text-white flex items-center justify-center shadow-sm"><Lightbulb className="w-5 h-5" aria-hidden /></span>
+            <div className="mt-3 sm:mt-4 lg:mt-0 rounded-xl border border-indigo-200/80 bg-gradient-to-br from-indigo-50/80 via-white to-secondary-50/45 px-4 py-3.5 relative overflow-hidden w-full shadow-sm lg:col-span-6">
+              <div className="absolute left-0 bottom-0 w-full h-0.5 bg-gradient-to-r from-indigo-400 via-secondary-500 to-primary-500" aria-hidden />
+              <p className="text-sm font-bold text-indigo-800 flex items-center gap-2.5 mb-2">
+                <span className="w-9 h-9 rounded-xl bg-gradient-to-br from-indigo-500 to-secondary-600 text-white flex items-center justify-center shadow-sm"><Lightbulb className="w-5 h-5" aria-hidden /></span>
                 AI értelmezés
               </p>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                 {intentTimeline.map((step, idx) => (
-                  <div key={`${step.title}-${idx}`} className={`rounded-lg border px-3 py-2 bg-slate-900/70 border-slate-500/35`}>
-                    <p className="text-xs font-semibold uppercase tracking-wide opacity-90 text-slate-300">{step.title}</p>
-                    <p className="text-sm font-semibold mt-0.5 text-white">{step.value}</p>
+                  <div key={`${step.title}-${idx}`} className="rounded-lg border px-3 py-2 bg-white border-indigo-200/70">
+                    <p className="text-xs font-semibold uppercase tracking-wide opacity-90 text-indigo-700">{step.title}</p>
+                    <p className="text-sm font-semibold mt-0.5 text-indigo-900">{step.value}</p>
                   </div>
                 ))}
               </div>
@@ -950,24 +950,24 @@ export default function HeroSmartSearch({
           )}
 
           {(historyGrouped.today.length > 0 || historyGrouped.earlier.length > 0) && (
-            <div className="mt-3 sm:mt-4 lg:mt-0 rounded-xl border border-slate-400/35 bg-gradient-to-br from-slate-950/90 via-slate-900/82 to-slate-900/95 px-4 py-3.5 relative overflow-hidden w-full shadow-sm lg:col-span-12">
-              <div className="absolute left-0 bottom-0 w-full h-0.5 bg-gradient-to-r from-slate-300/70 via-cyan-300/80 to-violet-300/80" aria-hidden />
-              <p className="text-sm font-bold text-slate-100 flex items-center gap-2.5 mb-2">
-                <span className="w-9 h-9 rounded-xl bg-gradient-to-br from-slate-500 to-cyan-500 text-white flex items-center justify-center shadow-sm"><RotateCcw className="w-5 h-5" aria-hidden /></span>
+            <div className="mt-3 sm:mt-4 lg:mt-0 rounded-xl border border-gray-200/90 bg-gradient-to-br from-gray-50 to-white px-4 py-3.5 relative overflow-hidden w-full shadow-sm lg:col-span-12">
+              <div className="absolute left-0 bottom-0 w-full h-0.5 bg-gradient-to-r from-gray-300 via-gray-400 to-primary-400" aria-hidden />
+              <p className="text-sm font-bold text-gray-800 flex items-center gap-2.5 mb-2">
+                <span className="w-9 h-9 rounded-xl bg-gradient-to-br from-gray-500 to-gray-600 text-white flex items-center justify-center shadow-sm"><RotateCcw className="w-5 h-5" aria-hidden /></span>
                 Előzmények
               </p>
               {historyGrouped.today.length > 0 && (
                 <div className="mb-2">
-                  <p className="text-xs font-bold uppercase tracking-wide text-slate-300 mb-1.5">Ma</p>
+                  <p className="text-xs font-bold uppercase tracking-wide text-gray-500 mb-1.5">Ma</p>
                   <div className="flex flex-wrap gap-2">
                     {historyGrouped.today.slice(0, 4).map((item) => {
                       const q = item.q || item;
                       return (
-                        <span key={`today-${q}`} className="inline-flex items-center gap-1 rounded-lg border border-slate-500/40 bg-slate-900/80 overflow-hidden min-h-[40px]">
+                        <span key={`today-${q}`} className="inline-flex items-center gap-1 rounded-lg border border-gray-200 bg-white overflow-hidden min-h-[40px]">
                           <button
                             type="button"
                             onClick={() => applySuggestion(q, { submit: true, source: 'history' })}
-                            className="px-3 py-2 text-left text-slate-100 text-sm font-medium hover:bg-cyan-500/15 hover:text-cyan-100 flex-1 min-w-0 truncate max-w-[180px] sm:max-w-none touch-manipulation"
+                            className="px-3 py-2 text-left text-gray-700 text-sm font-medium hover:bg-primary-50 hover:text-primary-800 flex-1 min-w-0 truncate max-w-[180px] sm:max-w-none touch-manipulation"
                           >
                             <RotateCcw className="w-3 h-3 shrink-0 inline mr-1.5 align-middle" aria-hidden />
                             <span className="truncate">{q}</span>
@@ -975,7 +975,7 @@ export default function HeroSmartSearch({
                           <button
                             type="button"
                             onClick={(e) => { e.stopPropagation(); removeFromHistory(q); }}
-                            className="p-2 text-slate-400 hover:text-slate-100 hover:bg-slate-800 shrink-0 touch-manipulation"
+                            className="p-2 text-gray-400 hover:text-gray-700 hover:bg-gray-100 shrink-0 touch-manipulation"
                             aria-label={`${q} törlése`}
                           >
                             <X className="w-3.5 h-3.5" aria-hidden />
@@ -988,16 +988,16 @@ export default function HeroSmartSearch({
               )}
               {historyGrouped.earlier.length > 0 && (
                 <div>
-                  <p className="text-xs font-bold uppercase tracking-wide text-slate-300 mb-1.5">Korábbi</p>
+                  <p className="text-xs font-bold uppercase tracking-wide text-gray-500 mb-1.5">Korábbi</p>
                   <div className="flex flex-wrap gap-2">
                     {historyGrouped.earlier.slice(0, 4).map((item) => {
                       const q = item.q || item;
                       return (
-                        <span key={`earlier-${q}`} className="inline-flex items-center gap-1 rounded-lg border border-slate-500/40 bg-slate-900/80 overflow-hidden min-h-[40px]">
+                        <span key={`earlier-${q}`} className="inline-flex items-center gap-1 rounded-lg border border-gray-200 bg-white overflow-hidden min-h-[40px]">
                           <button
                             type="button"
                             onClick={() => applySuggestion(q, { submit: true, source: 'history' })}
-                            className="px-3 py-2 text-left text-slate-100 text-sm font-medium hover:bg-cyan-500/15 hover:text-cyan-100 flex-1 min-w-0 truncate max-w-[180px] sm:max-w-none touch-manipulation"
+                            className="px-3 py-2 text-left text-gray-700 text-sm font-medium hover:bg-primary-50 hover:text-primary-800 flex-1 min-w-0 truncate max-w-[180px] sm:max-w-none touch-manipulation"
                           >
                             <RotateCcw className="w-3 h-3 shrink-0 inline mr-1.5 align-middle" aria-hidden />
                             <span className="truncate">{q}</span>
@@ -1005,7 +1005,7 @@ export default function HeroSmartSearch({
                           <button
                             type="button"
                             onClick={(e) => { e.stopPropagation(); removeFromHistory(q); }}
-                            className="p-2 text-slate-400 hover:text-slate-100 hover:bg-slate-800 shrink-0 touch-manipulation"
+                            className="p-2 text-gray-400 hover:text-gray-700 hover:bg-gray-100 shrink-0 touch-manipulation"
                             aria-label={`${q} törlése`}
                           >
                             <X className="w-3.5 h-3.5" aria-hidden />
@@ -1020,30 +1020,30 @@ export default function HeroSmartSearch({
           )}
 
         {didSearch && !isOpen && (
-          <div className="mt-3 inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-emerald-400/15 text-emerald-100 text-sm font-semibold border border-emerald-300/40 lg:col-span-12">
-            <CheckCircle2 className="w-4 h-4 text-emerald-300" aria-hidden />
+          <div className="mt-3 inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-emerald-50 text-emerald-800 text-sm font-semibold border border-emerald-200/80 lg:col-span-12">
+            <CheckCircle2 className="w-4 h-4 text-emerald-600" aria-hidden />
             Keresés elindítva
           </div>
         )}
 
         {isOpen && (
           <div
-            className="mt-4 lg:mt-0 rounded-xl sm:rounded-2xl border border-cyan-300/30 bg-slate-950/92 overflow-hidden max-h-[70vh] sm:max-h-[65vh] overflow-y-auto overflow-x-hidden shadow-lg max-w-full min-w-0 w-full lg:col-span-12"
+            className="mt-4 lg:mt-0 rounded-xl sm:rounded-2xl border border-primary-200 bg-white overflow-hidden max-h-[70vh] sm:max-h-[65vh] overflow-y-auto overflow-x-hidden shadow-lg max-w-full min-w-0 w-full lg:col-span-12"
             style={{ WebkitOverflowScrolling: 'touch', touchAction: 'pan-y' }}
             onScroll={() => {
               setPreviewProduct(null);
               setPreviewAnchor(null);
             }}
           >
-            <div className="sticky top-0 z-10 bg-gradient-to-r from-slate-900 via-slate-900/90 to-slate-950 border-b border-cyan-300/30 rounded-t-xl px-4 py-3 flex items-center justify-between min-h-[52px]">
-              <p className="text-base font-bold text-cyan-100 flex items-center gap-2.5">
-                <span className="w-9 h-9 rounded-xl bg-gradient-to-br from-cyan-500 to-violet-600 text-white flex items-center justify-center shadow-sm"><TrendingUp className="w-5 h-5" aria-hidden /></span>
+            <div className="sticky top-0 z-10 bg-gradient-to-r from-primary-50/60 to-white border-b border-primary-100 rounded-t-xl px-4 py-3 flex items-center justify-between min-h-[52px]">
+              <p className="text-base font-bold text-gray-800 flex items-center gap-2.5">
+                <span className="w-9 h-9 rounded-xl bg-gradient-to-br from-primary-500 to-secondary-600 text-white flex items-center justify-center shadow-sm"><TrendingUp className="w-5 h-5" aria-hidden /></span>
                 Javaslatok és találatok
               </p>
               <button
                 type="button"
                 onClick={() => setIsOpen(false)}
-                className="p-2.5 rounded-xl text-slate-300 hover:text-white hover:bg-slate-800 active:bg-slate-700 transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center touch-manipulation"
+                className="p-2.5 rounded-xl text-gray-500 hover:text-gray-800 hover:bg-gray-100 active:bg-gray-200 transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center touch-manipulation"
                 aria-label="Keresőpanel bezárása"
               >
                 <X className="w-5 h-5" />
@@ -1051,13 +1051,13 @@ export default function HeroSmartSearch({
             </div>
 
             {displayedTopProducts.length > 0 && (
-              <div className="px-4 py-4 border-b border-cyan-300/20 bg-gradient-to-b from-slate-900/70 to-slate-950/90 w-full">
+              <div className="px-4 py-4 border-b border-primary-100/80 bg-gradient-to-b from-primary-50/40 to-white w-full">
                 <div className="flex items-center justify-between mb-3">
-                  <p className="inline-flex items-center gap-2 text-base font-bold text-cyan-100">
-                    <TrendingUp className="w-5 h-5 text-cyan-300" aria-hidden />
+                  <p className="inline-flex items-center gap-2 text-base font-bold text-gray-800">
+                    <TrendingUp className="w-5 h-5 text-primary-600" aria-hidden />
                     {trimmedQuery.length < 2 ? 'Ajánlott indulásnak' : 'Legjobb találatok'}
                   </p>
-                  <span className="text-sm text-slate-300 tabular-nums">{displayedTopProducts.length} db</span>
+                  <span className="text-sm text-gray-500 tabular-nums">{displayedTopProducts.length} db</span>
                 </div>
                 <div className="flex gap-3 overflow-x-auto pb-2 -mx-1 px-1 snap-x snap-mandatory [scrollbar-width:thin] [&::-webkit-scrollbar]:h-1.5">
                   {displayedTopProducts.map((p, index) => {
@@ -1084,13 +1084,13 @@ export default function HeroSmartSearch({
                             handlePreviewProductClick(p);
                           }
                         }}
-                        className="min-w-[140px] xs:min-w-[160px] sm:min-w-[200px] lg:min-w-[220px] snap-start text-left rounded-xl border border-cyan-300/25 bg-slate-900/85 hover:border-cyan-300/45 hover:shadow-lg transition-all p-3 touch-manipulation active:scale-[0.98]"
+                        className="min-w-[140px] xs:min-w-[160px] sm:min-w-[200px] lg:min-w-[220px] snap-start text-left rounded-xl border-2 border-primary-100 bg-white hover:border-primary-300 hover:shadow-lg transition-all p-3 touch-manipulation active:scale-[0.98]"
                         style={hoverCard.id === String(p.id || p.name)
                           ? { transform: `perspective(900px) rotateX(${hoverCard.rx}deg) rotateY(${hoverCard.ry}deg) translateY(-2px)` }
                           : undefined}
                       >
                         <div
-                          className="relative w-full h-24 sm:h-28 rounded-lg bg-slate-800 overflow-hidden mb-2 flex items-center justify-center"
+                          className="relative w-full h-24 sm:h-28 rounded-lg bg-gray-100 overflow-hidden mb-2 flex items-center justify-center"
                           onMouseEnter={(e) => {
                             const rect = e.currentTarget.getBoundingClientRect();
                             setPreviewProduct(p);
@@ -1115,16 +1115,16 @@ export default function HeroSmartSearch({
                             }
                           }}
                         >
-                          {getProductImage(p) ? <img src={getProductImage(p)} alt="" className="w-full h-full object-cover" loading="lazy" /> : <Package className="w-5 h-5 text-slate-500" aria-hidden />}
+                          {getProductImage(p) ? <img src={getProductImage(p)} alt="" className="w-full h-full object-cover" loading="lazy" /> : <Package className="w-5 h-5 text-gray-400" aria-hidden />}
                         </div>
                         <div className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full border text-xs font-semibold ${badge.classes}`}>
                           <Award className="w-3.5 h-3.5" aria-hidden />
                           {badge.text}
                         </div>
-                        <p className="text-sm font-medium text-slate-100 line-clamp-2 mt-1.5 min-h-[2.2rem]">{p.name}</p>
+                        <p className="text-sm font-medium text-gray-800 line-clamp-2 mt-1.5 min-h-[2.2rem]">{p.name}</p>
                         <div className="mt-1.5 flex items-center justify-between">
                           <p className="text-base sm:text-lg text-primary-600 font-semibold">{formatPrice(p.salePrice || p.price)}</p>
-                          <ChevronRight className="w-3.5 h-3.5 text-slate-400" aria-hidden />
+                          <ChevronRight className="w-3.5 h-3.5 text-gray-400" aria-hidden />
                         </div>
                         <div className="mt-2 flex items-center gap-1.5">
                           <button
@@ -1135,13 +1135,13 @@ export default function HeroSmartSearch({
                             }}
                             className={`inline-flex items-center gap-1 px-2 py-1 rounded-md text-[11px] border transition-colors ${compareProducts.some((cp) => String(cp.id) === String(p.id))
                               ? 'border-primary-300 bg-primary-50 text-primary-700'
-                              : 'border-slate-500/45 bg-slate-900 text-slate-200 hover:bg-slate-800'
+                              : 'border-gray-200 bg-white text-gray-600 hover:bg-gray-50'
                               }`}
                           >
                             <Plus className="w-3.5 h-3.5" aria-hidden />
                             Összevetés
                           </button>
-                          <span className="text-xs text-cyan-300 font-medium">QuickView</span>
+                          <span className="text-xs text-primary-600 font-medium">QuickView</span>
                         </div>
                       </div>
                     );
@@ -1151,28 +1151,28 @@ export default function HeroSmartSearch({
             )}
 
             {suggestions.length > 0 ? (
-              <div className="px-4 py-4 space-y-4 bg-gradient-to-b from-slate-900/65 to-slate-950/90 w-full">
+              <div className="px-4 py-4 space-y-4 bg-gradient-to-b from-secondary-50/40 to-white w-full">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                   {suggestions.slice(0, 6).map((s, idx) => (
                     <button
                       key={idx}
                       type="button"
                       onClick={() => applySuggestion(s.text || s.query || '', { submit: true, source: 'suggestion' })}
-                      className="text-left px-4 py-3 rounded-xl border border-violet-300/35 bg-slate-900/75 hover:border-cyan-300/45 hover:bg-cyan-500/10 transition-colors min-h-[48px] touch-manipulation"
+                      className="text-left px-4 py-3 rounded-xl border-2 border-secondary-200/80 bg-white hover:border-secondary-400 hover:bg-secondary-50/80 transition-colors min-h-[48px] touch-manipulation"
                     >
-                      <p className="text-base font-semibold text-slate-100 truncate">{s.text || s.query}</p>
+                      <p className="text-base font-semibold text-gray-800 truncate">{s.text || s.query}</p>
                     </button>
                   ))}
                 </div>
                 <div>
-                  <p className="text-sm font-bold text-violet-100 mb-2">Gyorstalálatok</p>
+                  <p className="text-sm font-bold text-secondary-800/90 mb-2">Gyorstalálatok</p>
                   <div className="flex flex-wrap gap-2 mb-2">
                     {quickHitSuggestions.slice(0, 6).map((item) => (
                       <button
                         key={`dyn-${item.text}`}
                         type="button"
                         onClick={() => applySuggestion(item.text, { submit: true, source: 'quick-hit' })}
-                        className="px-3 py-2 rounded-lg border border-violet-300/35 bg-slate-900/75 text-violet-100 text-sm font-semibold hover:bg-violet-500/15 hover:border-cyan-300/45 transition-colors inline-flex items-center gap-1.5 touch-manipulation min-h-[40px]"
+                        className="px-3 py-2 rounded-lg border-2 border-secondary-200 bg-secondary-50 text-secondary-800 text-sm font-semibold hover:bg-secondary-100 hover:border-secondary-300 transition-colors inline-flex items-center gap-1.5 touch-manipulation min-h-[40px]"
                       >
                         <span>{item.text}</span>
                         <span className={`px-1.5 py-0.5 rounded-md border text-[10px] font-medium ${item.badge.classes}`}>{item.badge.label}</span>
@@ -1188,7 +1188,7 @@ export default function HeroSmartSearch({
                             key={`journey-inline-${q}`}
                             type="button"
                             onClick={() => applySuggestion(q, { submit: true, source: 'journey' })}
-                            className="px-2.5 py-1 rounded-full border border-slate-500/40 bg-slate-900 text-slate-200 text-[11px] hover:bg-slate-800 transition-colors"
+                            className="px-2.5 py-1 rounded-full border border-gray-200 bg-white text-gray-600 text-[11px] hover:bg-gray-50 transition-colors"
                           >
                             Gyors újrafuttatás: {q}
                           </button>
@@ -1199,14 +1199,14 @@ export default function HeroSmartSearch({
                 </div>
               </div>
             ) : (
-              <div className="px-3 sm:px-4 py-3 sm:py-4 space-y-3 w-full bg-slate-950/90">
+              <div className="px-3 sm:px-4 py-3 sm:py-4 space-y-3 w-full">
                 <div className="flex flex-wrap gap-2">
                   {quickHitSuggestions.map((item) => (
                     <button
                       key={item.text}
                       type="button"
                       onClick={() => applySuggestion(item.text, { submit: true, source: 'quick-hit' })}
-                      className="px-3 py-2 rounded-lg border border-slate-500/45 bg-slate-900 text-slate-100 text-sm font-medium hover:bg-slate-800 hover:border-cyan-300/40 transition-colors inline-flex items-center gap-1.5"
+                      className="px-3 py-2 rounded-lg border border-gray-200 bg-white text-gray-700 text-sm font-medium hover:bg-gray-50 hover:border-gray-300 transition-colors inline-flex items-center gap-1.5"
                     >
                       <span>{item.text}</span>
                       <span className={`px-1.5 py-0.5 rounded-md border text-[10px] font-medium ${item.badge.classes}`}>{item.badge.label}</span>
@@ -1214,15 +1214,15 @@ export default function HeroSmartSearch({
                   ))}
                 </div>
                 {hasNoResults && rescueSuggestions.length > 0 && (
-                  <div className="rounded-xl border border-cyan-300/35 bg-gradient-to-br from-slate-900/95 to-slate-950 px-4 py-3">
-                    <p className="text-base font-semibold text-slate-100 mb-2">Nincs találat. Próbáld inkább:</p>
+                  <div className="rounded-xl border-2 border-primary-200 bg-gradient-to-br from-primary-50/80 to-white px-4 py-3">
+                    <p className="text-base font-semibold text-gray-700 mb-2">Nincs találat. Próbáld inkább:</p>
                     <div className="flex flex-wrap gap-2">
                       {rescueSuggestions.map((q) => (
                         <button
                           key={q}
                           type="button"
                           onClick={() => applySuggestion(q, { submit: true, source: 'rescue' })}
-                          className="px-3 py-2 rounded-lg border border-cyan-300/35 bg-slate-900 text-cyan-100 text-sm font-semibold hover:bg-cyan-500/15 transition-colors"
+                          className="px-3 py-2 rounded-lg border-2 border-primary-200 bg-white text-primary-800 text-sm font-semibold hover:bg-primary-100 transition-colors"
                         >
                           {q}
                         </button>
@@ -1231,7 +1231,7 @@ export default function HeroSmartSearch({
                     <button
                       type="button"
                       onClick={onTryAI}
-                      className="mt-3 inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-violet-600 to-cyan-500 text-white text-sm font-semibold hover:brightness-110 transition-colors"
+                      className="mt-3 inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-secondary-600 text-white text-sm font-semibold hover:bg-secondary-700 transition-colors"
                     >
                       <Camera className="w-4 h-4" aria-hidden />
                       Képalapú keresés
@@ -1242,16 +1242,16 @@ export default function HeroSmartSearch({
             )}
 
             {compareProducts.length > 0 && (
-              <div className="sticky bottom-0 z-10 border-t border-cyan-300/30 bg-gradient-to-b from-slate-900/95 to-slate-950 px-4 py-3 rounded-b-xl backdrop-blur-sm">
+              <div className="sticky bottom-0 z-10 border-t-2 border-secondary-200/90 bg-gradient-to-b from-secondary-50/95 to-secondary-50 px-4 py-3 rounded-b-xl backdrop-blur-sm">
                 <div className="flex flex-wrap items-center gap-2">
-                  <p className="text-base font-bold text-cyan-100">Összevető tálca</p>
+                  <p className="text-base font-bold text-secondary-900">Összevető tálca</p>
                   {compareProducts.map((p) => (
-                    <span key={`cmp-${p.id}`} className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-slate-800 text-slate-100 text-sm font-medium">
+                    <span key={`cmp-${p.id}`} className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-gray-100 text-gray-800 text-sm font-medium">
                       {p.name}
                       <button
                         type="button"
                         onClick={() => toggleCompareProduct(p)}
-                        className="p-1 rounded-lg hover:bg-slate-700 transition-colors"
+                        className="p-1 rounded-lg hover:bg-gray-200 transition-colors"
                         aria-label="Termék eltávolítása összevetésből"
                       >
                         <X className="w-3.5 h-3.5" aria-hidden />
@@ -1262,7 +1262,7 @@ export default function HeroSmartSearch({
                     type="button"
                     onClick={runCompareSearch}
                     disabled={compareProducts.length < 2}
-                    className="ml-auto min-h-[44px] px-4 py-2 rounded-xl bg-gradient-to-r from-cyan-500 to-violet-600 text-white text-sm font-bold shadow-md disabled:opacity-50 disabled:cursor-not-allowed hover:shadow-lg active:scale-[0.98] transition-all"
+                    className="ml-auto min-h-[44px] px-4 py-2 rounded-xl bg-gradient-to-r from-primary-500 to-secondary-600 text-white text-sm font-bold shadow-md disabled:opacity-50 disabled:cursor-not-allowed hover:shadow-lg active:scale-[0.98] transition-all"
                   >
                     Összehasonlítás
                   </button>
@@ -1273,23 +1273,23 @@ export default function HeroSmartSearch({
             {/* Előnézet tooltip (hover / long-press) */}
             {previewProduct && previewAnchor && (
               <div
-                className="fixed z-[100] rounded-xl border border-cyan-300/35 bg-slate-900/95 shadow-xl p-3 w-[200px] sm:w-[220px] pointer-events-none"
+                className="fixed z-[100] rounded-xl border-2 border-primary-200 bg-white shadow-xl p-3 w-[200px] sm:w-[220px] pointer-events-none"
                 style={{
                   left: Math.max(8, Math.min(previewAnchor.left, typeof window !== 'undefined' ? window.innerWidth - 220 : previewAnchor.left)),
                   top: previewAnchor.top - 8,
                   transform: 'translateY(-100%)',
                 }}
               >
-                <div className="h-24 rounded-lg bg-slate-800 overflow-hidden mb-2 flex items-center justify-center">
+                <div className="h-24 rounded-lg bg-gray-100 overflow-hidden mb-2 flex items-center justify-center">
                   {getProductImage(previewProduct) ? (
                     <img src={getProductImage(previewProduct)} alt="" className="w-full h-full object-cover" loading="lazy" />
                   ) : (
-                    <Package className="w-8 h-8 text-slate-500" aria-hidden />
+                    <Package className="w-8 h-8 text-gray-400" aria-hidden />
                   )}
                 </div>
-                <p className="text-sm font-semibold text-slate-100 line-clamp-2">{previewProduct.name}</p>
-                <p className="text-base sm:text-lg text-cyan-300 font-semibold mt-1">{formatPrice(previewProduct.salePrice || previewProduct.price)}</p>
-                <p className="text-xs text-slate-300 mt-0.5">Kattints a részletekhez</p>
+                <p className="text-sm font-semibold text-gray-900 line-clamp-2">{previewProduct.name}</p>
+                <p className="text-base sm:text-lg text-primary-600 font-semibold mt-1">{formatPrice(previewProduct.salePrice || previewProduct.price)}</p>
+                <p className="text-xs text-gray-500 mt-0.5">Kattints a részletekhez</p>
               </div>
             )}
           </div>
