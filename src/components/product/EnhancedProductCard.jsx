@@ -140,10 +140,15 @@ export const EnhancedProductCard = ({
   };
 
   const hasWorldAccent = accentClass && (tone === 'favorites' || tone === 'new' || tone === 'popular');
-  const worldAccentStyle = hasWorldAccent && {
-    favorites: { borderTopColor: 'rgba(244,63,94,0.5)', borderLeftColor: 'rgba(244,63,94,0.5)', boxShadow: '0 1px 3px rgba(0,0,0,0.1), 0 0 0 1px rgba(244,63,94,0.12)' },
-    new: { borderTopColor: 'rgba(99,102,241,0.5)', borderLeftColor: 'rgba(99,102,241,0.5)', boxShadow: '0 1px 3px rgba(0,0,0,0.1), 0 0 0 1px rgba(99,102,241,0.12)' },
-    popular: { borderTopColor: 'rgba(251,191,36,0.5)', borderLeftColor: 'rgba(251,191,36,0.5)', boxShadow: '0 1px 3px rgba(0,0,0,0.1), 0 0 0 1px rgba(251,191,36,0.12)' },
+  const worldGlow = hasWorldAccent && {
+    favorites: 'radial-gradient(ellipse 120% 120% at 0% 0%, rgba(244,63,94,0.12) 0%, transparent 55%)',
+    new: 'radial-gradient(ellipse 120% 120% at 0% 0%, rgba(99,102,241,0.12) 0%, transparent 55%)',
+    popular: 'radial-gradient(ellipse 120% 120% at 0% 0%, rgba(251,191,36,0.12) 0%, transparent 55%)',
+  }[tone];
+  const worldCorner = hasWorldAccent && {
+    favorites: 'linear-gradient(135deg, rgba(244,63,94,0.35) 0%, transparent 45%)',
+    new: 'linear-gradient(135deg, rgba(99,102,241,0.35) 0%, transparent 45%)',
+    popular: 'linear-gradient(135deg, rgba(251,191,36,0.35) 0%, transparent 45%)',
   }[tone];
 
   return (
@@ -153,18 +158,23 @@ export const EnhancedProductCard = ({
         group relative rounded-lg overflow-hidden bg-white border border-gray-200 shadow-sm
         hover:shadow-md hover:border-gray-300 hover:-translate-y-0.5 active:scale-[0.99]
         h-full flex flex-col touch-manipulation
-        ${hasWorldAccent ? 'border-t-2 border-l-2' : 'shadow-sm'}
         ${toneClasses[tone] || ''}
         ${isVisible ? 'opacity-100' : 'opacity-0 translate-y-3'}
         transition-all duration-200
       `}
-      style={{ 
-        willChange: isVisible ? 'auto' : 'opacity, transform',
-        ...(worldAccentStyle || {})
-      }}
+      style={{ willChange: isVisible ? 'auto' : 'opacity, transform' }}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
+      {/* Világ dizájn – sarok fény, hajtott sarok, felső sáv */}
+      {hasWorldAccent && (
+        <>
+          <div className="absolute inset-0 z-0 pointer-events-none" style={{ background: worldGlow }} aria-hidden />
+          <div className="absolute top-0 left-0 w-16 h-16 z-10 pointer-events-none" style={{ background: worldCorner, clipPath: 'polygon(0 0, 100% 0, 0 100%)' }} aria-hidden />
+          <div className={`absolute top-0 left-0 right-0 h-1.5 sm:h-2 bg-gradient-to-r ${accentClass} z-10 pointer-events-none`} aria-hidden />
+          <div className={`absolute top-0 left-0 h-8 sm:h-10 w-px sm:w-0.5 bg-gradient-to-b ${accentClass} z-10 pointer-events-none`} aria-hidden />
+        </>
+      )}
       {/* Smart Badges - kisebb mobilon */}
       <div className="absolute top-2 sm:top-3 left-2 sm:left-3 z-20">
         <SmartBadges product={product} maxBadges={2} />
