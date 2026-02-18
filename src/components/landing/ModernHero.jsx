@@ -137,21 +137,15 @@ export const ModernHero = ({
           </h1>
 
           <div
-            className={`mx-auto h-1.5 w-28 rounded-full bg-gradient-to-r from-primary-500 to-secondary-700 mb-8 ${mounted ? 'hero-reveal' : 'opacity-0'}`}
+            className={`mx-auto h-1.5 w-28 rounded-full bg-gradient-to-r from-primary-500 to-secondary-700 mb-6 sm:mb-8 ${mounted ? 'hero-reveal' : 'opacity-0'}`}
             style={mounted ? { animationDelay: `${HERO_REVEAL_DELAY.line2 + 40}ms` } : undefined}
             aria-hidden
           />
 
-          <p
-            className={`text-base sm:text-lg lg:text-2xl text-gray-600 max-w-3xl mx-auto mb-10 sm:mb-12 ${mounted ? 'hero-reveal' : 'opacity-0'}`}
-            style={mounted ? { animationDelay: `${HERO_REVEAL_DELAY.sub}ms`, lineHeight: '1.6' } : { lineHeight: '1.6' }}
-          >
-            {heroCopy.sub}
-          </p>
-
+          {/* Központi hero search – azonnal a headline után */}
           <div
-            className={`w-full min-w-0 max-w-full -mx-4 sm:-mx-6 lg:-mx-10 ${mounted ? 'hero-reveal' : 'opacity-0'}`}
-            style={mounted ? { animationDelay: `${HERO_REVEAL_DELAY.sub + 80}ms` } : undefined}
+            className={`w-full min-w-0 max-w-full -mx-4 sm:-mx-6 lg:-mx-10 mb-8 sm:mb-10 ${mounted ? 'hero-reveal' : 'opacity-0'}`}
+            style={mounted ? { animationDelay: `${HERO_REVEAL_DELAY.sub - 60}ms` } : undefined}
           >
             <HeroSmartSearch
               products={products}
@@ -161,6 +155,13 @@ export const ModernHero = ({
               onOpenProductQuickView={onHeroQuickView}
             />
           </div>
+
+          <p
+            className={`text-base sm:text-lg text-gray-600 max-w-2xl mx-auto mb-8 sm:mb-10 ${mounted ? 'hero-reveal' : 'opacity-0'}`}
+            style={mounted ? { animationDelay: `${HERO_REVEAL_DELAY.sub}ms`, lineHeight: '1.6' } : { lineHeight: '1.6' }}
+          >
+            {heroCopy.sub}
+          </p>
 
           <div
             className={`flex flex-col sm:flex-row gap-4 justify-center items-stretch sm:items-center mb-8 sm:mb-10 ${mounted ? 'hero-reveal' : 'opacity-0'}`}

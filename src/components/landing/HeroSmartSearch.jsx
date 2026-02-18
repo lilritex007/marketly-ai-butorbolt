@@ -21,9 +21,9 @@ const SEARCH_DEBOUNCE_MS = 180;
 const LONG_PRESS_MS = 450;
 
 const QUICK_FILTER_PRESETS = {
-  ar: ['80e alatt', '120e alatt', '180e alatt'],
-  stilus: ['modern', 'skandináv', 'minimalista'],
-  helyiseg: ['nappaliba', 'hálószobába', 'előszobába']
+  Ár: ['80e alatt', '120e alatt', '180e alatt'],
+  Stílus: ['modern', 'skandináv', 'minimalista'],
+  Helyiség: ['nappaliba', 'hálószobába', 'előszobába']
 };
 const PROACTIVE_QUICK = getProactiveSuggestions().map((item) => item.query);
 
@@ -681,103 +681,57 @@ export default function HeroSmartSearch({
 
   return (
     <section
-      className="mb-8 sm:mb-12 min-w-0 w-full max-w-full p-[2px]"
+      className="mb-8 sm:mb-12 min-w-0 w-full max-w-full"
       style={{ touchAction: 'pan-y' }}
       aria-label="AI Kereső"
     >
-      <div className="relative w-full max-w-none mx-auto rounded-2xl overflow-x-clip overflow-y-visible border border-gray-200/90 bg-white shadow-[0_8px_32px_rgba(0,0,0,0.08),0_0_0_1px_rgba(0,0,0,0.04)]">
-        {/* Gradient orbs – AI modul stílus */}
-        <div className="pointer-events-none absolute inset-0 overflow-hidden rounded-2xl">
-          <div className="absolute -top-20 -right-20 w-64 h-64 rounded-full bg-primary-200/40 mix-blend-multiply filter blur-[80px]" />
-          <div className="absolute -bottom-16 -left-16 w-48 h-48 rounded-full bg-secondary-300/30 mix-blend-multiply filter blur-[60px]" />
-        </div>
-        {/* Fejléc – külön szekció, teljes modul szélesség */}
-        <header className="relative z-10 w-full mb-4 sm:mb-5 overflow-hidden rounded-t-2xl">
-          <div className="absolute inset-0 bg-gradient-to-b from-primary-100 via-primary-50/95 to-white pointer-events-none" aria-hidden />
-          <div className="absolute left-0 top-0 bottom-0 w-1.5 bg-gradient-to-b from-primary-500 via-secondary-500 to-primary-400/50 pointer-events-none" aria-hidden />
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_50%_at_15%_30%,rgba(255,138,0,0.2),transparent_55%)] pointer-events-none" aria-hidden />
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_50%_40%_at_85%_70%,rgba(0,107,111,0.15),transparent_55%)] pointer-events-none" aria-hidden />
-          <div className="absolute inset-x-0 bottom-0 h-8 bg-gradient-to-t from-white to-transparent pointer-events-none" aria-hidden />
-          <div className="relative z-10 px-4 sm:px-6 lg:px-8 py-3 sm:py-4">
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-4">
-              <div className="flex items-center gap-3 sm:gap-4 min-w-0 flex-1">
-                <span className="flex h-10 w-10 sm:h-12 sm:w-12 shrink-0 rounded-lg bg-gradient-to-br from-primary-500 via-primary-600 to-secondary-600 text-white items-center justify-center shadow-[0_4px_12px_rgba(255,138,0,0.4)]">
-                  <Search className="w-6 h-6 sm:w-7 sm:h-7" aria-hidden />
-                </span>
-                <div className="min-w-0 flex-1">
-                  <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/90 border border-primary-300/70 shadow-sm mb-1">
-                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse motion-reduce:animate-none" aria-hidden />
-                    <span className="text-[10px] font-bold uppercase tracking-wider text-primary-700">{isIndexBuilding ? 'Betöltés…' : 'Okos keresés'}</span>
-                  </div>
-                  <h2 className="text-xl sm:text-2xl lg:text-3xl font-extrabold tracking-tight leading-tight">
-                    <span className="bg-gradient-to-r from-primary-600 via-primary-500 to-secondary-600 bg-clip-text text-transparent">AI</span>
-                    <span className="text-gray-900"> Kereső</span>
-                  </h2>
-                  <p className="text-xs sm:text-sm text-gray-600 mt-0.5 font-medium max-w-md line-clamp-1 sm:line-clamp-none">
-                    Termék, stílus, ár – <span className="text-primary-700 font-semibold">okos találatok</span>
-                  </p>
-                </div>
-              </div>
-              <div className="flex items-center justify-center sm:justify-end gap-2 shrink-0 flex-shrink-0">
-                <span
-                  className={`inline-flex items-center justify-center h-10 w-10 sm:h-11 sm:w-11 rounded-lg border shadow-sm ${isIndexBuilding ? 'bg-amber-100 border-amber-300 text-amber-800' : 'bg-emerald-100 border-emerald-300 text-emerald-800'}`}
-                  title={isIndexBuilding ? 'Index épül' : 'Index kész'}
-                  aria-live="polite"
-                >
-                  <Sparkles className="w-5 h-5 shrink-0" aria-hidden />
-                </span>
-                <button
-                  type="button"
-                  onClick={onTryAI}
-                  className="inline-flex items-center justify-center h-10 sm:h-11 px-4 rounded-lg bg-white border border-secondary-300 text-secondary-700 hover:bg-secondary-50 hover:border-secondary-400 font-semibold shadow-sm text-sm touch-manipulation gap-2"
-                  title="Képből keresés"
-                  aria-label="Képből keresés"
-                >
-                  <Camera className="w-5 h-5 shrink-0" aria-hidden />
-                  <span>Képből</span>
-                </button>
-              </div>
-            </div>
-          </div>
-        </header>
+      <div className="relative w-full max-w-4xl mx-auto">
+        {/* Központi hero search – nagy, hangsúlyos */}
+        <div className="relative rounded-2xl sm:rounded-3xl overflow-hidden bg-white shadow-[0_0_0_1px_rgba(0,0,0,0.06),0_20px_50px_-12px_rgba(0,0,0,0.25),0_0_0_1px_rgba(255,138,0,0.1)] hover:shadow-[0_0_0_1px_rgba(0,0,0,0.08),0_25px_60px_-15px_rgba(0,0,0,0.3),0_0_0_1px_rgba(255,138,0,0.15)] transition-shadow duration-300">
+          <div className="absolute inset-0 bg-gradient-to-br from-primary-50/30 via-white to-secondary-50/20 pointer-events-none" aria-hidden />
+          <div className="absolute left-0 top-0 bottom-0 w-1 sm:w-1.5 bg-gradient-to-b from-primary-500 via-secondary-500 to-primary-400/50 pointer-events-none rounded-l-2xl" aria-hidden />
+          <div className="absolute -top-24 -right-24 w-72 h-72 rounded-full bg-primary-200/40 blur-[80px] pointer-events-none" aria-hidden />
+          <div className="absolute -bottom-16 -left-16 w-56 h-56 rounded-full bg-secondary-200/30 blur-[60px] pointer-events-none" aria-hidden />
 
-        {/* Keresési tartalom – saját padding */}
-        <div className="relative z-10 px-4 sm:px-6 lg:px-8 pb-5 sm:pb-6 pt-0 min-w-0 max-w-full">
-          {/* Keresési tartalom */}
-          <div className="space-y-4 sm:space-y-5">
-          <form onSubmit={handleSubmit} className="space-y-3 sm:space-y-4">
-            <div
-              className={`rounded-xl border bg-gradient-to-br from-primary-50/50 to-white p-2.5 sm:p-3 transition-all duration-200 focus-within:from-primary-50/80 focus-within:ring-2 focus-within:ring-primary-300/50 focus-within:border-primary-300 ${searchPulse ? 'ring-2 ring-emerald-300/60 border-emerald-300' : 'border-primary-200/80'}`}
-            >
-              {/* Mobilon: keresősáv teljes szélesség, alatta Szűrők + Keresés gombok */}
-              <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
-                <div className="flex-1 flex items-center gap-3 rounded-lg bg-white/95 border border-gray-200/90 shadow-sm px-3.5 py-3 sm:py-3.5 min-h-[48px] min-w-0 w-full">
-                  <Search className="w-5 h-5 text-primary-500 shrink-0" aria-hidden />
-                  <input
-                    type="search"
-                    value={query}
-                    onChange={(e) => setQuery(e.target.value)}
-                    onFocus={() => setIsOpen(true)}
-                    placeholder="Termék, stílus, ár... pl. bézs kanapé 100e alatt"
-                    className="flex-1 min-w-0 bg-transparent outline-none text-base sm:text-lg text-gray-900 placeholder:text-gray-500"
-                    aria-label="Keresés a teljes katalógusban"
-                    autoComplete="off"
-                  />
+          <div className="relative z-10 p-4 sm:p-6 lg:p-8">
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div
+                className={`flex flex-col sm:flex-row gap-3 sm:gap-4 rounded-xl sm:rounded-2xl bg-white/95 border-2 border-gray-200/90 p-3 sm:p-4 transition-all duration-200 focus-within:border-primary-400 focus-within:ring-4 focus-within:ring-primary-300/50 focus-within:shadow-[0_0_0_4px_rgba(255,138,0,0.15)] ${searchPulse ? 'ring-4 ring-emerald-300/50 border-emerald-300' : ''}`}
+              >
+                <div className="flex-1 flex items-center gap-3 sm:gap-4 min-w-0 flex-shrink">
+                  <div className="flex h-10 w-10 sm:h-12 sm:w-12 shrink-0 rounded-xl bg-gradient-to-br from-primary-500 to-secondary-600 text-white items-center justify-center shadow-lg">
+                    <Search className="w-5 h-5 sm:w-6 sm:h-6" aria-hidden />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <input
+                      type="search"
+                      value={query}
+                      onChange={(e) => setQuery(e.target.value)}
+                      onFocus={() => setIsOpen(true)}
+                      placeholder="Mit keresel? Pl. bézs kanapé 100e alatt, skandináv komód..."
+                      className="w-full min-h-[48px] sm:min-h-[56px] bg-transparent outline-none text-lg sm:text-xl lg:text-2xl text-gray-900 placeholder:text-gray-500 font-medium"
+                      aria-label="Keresés a teljes katalógusban"
+                      autoComplete="off"
+                    />
+                    <p className="text-xs sm:text-sm text-gray-500 mt-1 sm:mt-1.5">
+                      {isIndexBuilding ? 'Keresés betöltése…' : 'AI okos keresés – termék, stílus, ár'}
+                    </p>
+                  </div>
                 </div>
-                <div className="flex gap-2 sm:gap-3 flex-shrink-0 w-full sm:w-auto">
+                <div className="flex gap-2 sm:gap-3 flex-shrink-0">
                   <button
                     type="button"
                     onClick={() => setShowQuickFilterPanel((prev) => !prev)}
-                    className={`w-[30%] sm:w-auto min-h-[48px] px-3 sm:px-4 rounded-xl border text-sm font-semibold inline-flex items-center justify-center gap-2 transition-all duration-150 touch-manipulation active:scale-[0.98] ${showQuickFilterPanel ? 'border-primary-400 bg-primary-50 text-primary-800 shadow-sm' : 'border-gray-200 bg-white text-gray-700 hover:bg-primary-50/50 hover:border-primary-200'}`}
+                    className={`min-h-[48px] sm:min-h-[56px] px-4 sm:px-5 rounded-xl border-2 text-sm font-semibold inline-flex items-center justify-center gap-2 transition-all touch-manipulation ${showQuickFilterPanel ? 'border-primary-400 bg-primary-50 text-primary-800' : 'border-gray-200 bg-white text-gray-700 hover:border-primary-200 hover:bg-primary-50/50'}`}
                     title="Gyors szűrők"
                     aria-expanded={showQuickFilterPanel}
                   >
                     <Filter className="w-5 h-5 shrink-0" aria-hidden />
-                    <span>Szűrők</span>
+                    <span className="hidden sm:inline">Szűrők</span>
                   </button>
                   <button
                     type="submit"
-                    className="w-[70%] sm:w-auto min-h-[48px] px-4 sm:px-5 rounded-xl bg-gradient-to-r from-primary-500 to-secondary-600 text-white text-sm font-bold shadow-[0_4px_14px_rgba(255,138,0,0.35)] hover:shadow-[0_6px_20px_rgba(255,138,0,0.4)] hover:-translate-y-0.5 active:scale-[0.98] transition-all duration-150 inline-flex items-center justify-center gap-2 touch-manipulation"
+                    className="min-h-[48px] sm:min-h-[56px] px-5 sm:px-8 rounded-xl bg-gradient-to-r from-primary-500 to-secondary-600 text-white text-base font-bold shadow-[0_4px_20px_rgba(255,138,0,0.4)] hover:shadow-[0_6px_28px_rgba(255,138,0,0.5)] hover:-translate-y-0.5 active:scale-[0.98] transition-all inline-flex items-center justify-center gap-2 touch-manipulation"
                     aria-busy={isSearching}
                   >
                     {isSearching ? (
@@ -789,7 +743,36 @@ export default function HeroSmartSearch({
                   </button>
                 </div>
               </div>
-            </div>
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={onTryAI}
+                    className="inline-flex items-center gap-2 px-3 py-2 rounded-lg text-secondary-700 hover:bg-secondary-50 font-medium text-sm transition-colors"
+                    title="Képből keresés"
+                    aria-label="Képből keresés"
+                  >
+                    <Camera className="w-4 h-4" aria-hidden />
+                    <span>Képből keresés</span>
+                  </button>
+                  <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold ${isIndexBuilding ? 'bg-amber-100 text-amber-800' : 'bg-emerald-100 text-emerald-800'}`}>
+                    <span className={`w-1.5 h-1.5 rounded-full ${isIndexBuilding ? 'bg-amber-500 animate-pulse' : 'bg-emerald-500'}`} aria-hidden />
+                    {isIndexBuilding ? 'Betöltés…' : 'AI kész'}
+                  </span>
+                </div>
+                {actualResultCount != null && trimmedQuery.length >= 2 && (
+                  <span className="text-sm font-bold text-primary-700 tabular-nums">
+                    {actualResultCount} találat
+                  </span>
+                )}
+              </div>
+            </form>
+          </div>
+        </div>
+
+        {/* Tartalom – szűrők, találatok, stb. */}
+        <div className="relative z-10 mt-4 sm:mt-5 min-w-0 max-w-full">
+          <div className="space-y-4 sm:space-y-5">
           {showQuickFilterPanel && (
             <div className="mt-3 rounded-xl border border-amber-200/80 bg-gradient-to-br from-amber-50/90 to-white px-4 py-4 relative overflow-hidden w-full">
               <div className="absolute left-0 bottom-0 w-full h-0.5 bg-gradient-to-r from-amber-400 via-amber-500 to-primary-500" aria-hidden />
@@ -835,7 +818,6 @@ export default function HeroSmartSearch({
               </div>
             </div>
           )}
-          </form>
 
           {/* Pontosság – trust card, AI modul stílus */}
           <div className="rounded-xl border border-emerald-200/80 bg-gradient-to-br from-emerald-50/90 to-white px-4 py-3.5 relative overflow-hidden w-full shadow-sm" role="status" aria-live="polite">
