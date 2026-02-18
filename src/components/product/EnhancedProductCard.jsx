@@ -52,12 +52,12 @@ export const EnhancedProductCard = ({
   };
   const sizeClasses = {
     default: {
-      image: 'p-3 sm:p-4 lg:p-5',
-      content: 'p-4 sm:p-5 lg:p-6'
+      image: 'p-2 sm:p-3 md:p-4 lg:p-5',
+      content: 'p-3 sm:p-4 md:p-5 lg:p-6'
     },
     compact: {
-      image: 'p-2.5 sm:p-3 lg:p-3.5',
-      content: 'p-3 sm:p-4 lg:p-4'
+      image: 'p-2 sm:p-2.5 md:p-3 lg:p-3.5',
+      content: 'p-2.5 sm:p-3 md:p-4 lg:p-4'
     }
   };
   const sizeConfig = sizeClasses[size] || sizeClasses.default;
@@ -145,8 +145,8 @@ export const EnhancedProductCard = ({
       ref={cardRef}
       className={`
         group relative rounded-lg overflow-hidden bg-white border border-gray-200 shadow-sm
-        hover:shadow-md hover:border-gray-300 hover:-translate-y-0.5
-        h-full flex flex-col
+        hover:shadow-md hover:border-gray-300 hover:-translate-y-0.5 active:scale-[0.99]
+        h-full flex flex-col touch-manipulation
         ${toneClasses[tone] || ''}
         ${isVisible ? 'opacity-100' : 'opacity-0 translate-y-3'}
         transition-all duration-200
@@ -157,8 +157,8 @@ export const EnhancedProductCard = ({
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      {/* Smart Badges */}
-      <div className="absolute top-2.5 sm:top-3 left-2.5 sm:left-3 z-20">
+      {/* Smart Badges - kisebb mobilon */}
+      <div className="absolute top-2 sm:top-3 left-2 sm:left-3 z-20">
         <SmartBadges product={product} maxBadges={2} />
         {highlightBadge && (
           <span className="mt-1.5 inline-flex items-center px-2 py-1 rounded-full text-[10px] font-bold bg-red-100 text-red-700">
@@ -167,16 +167,16 @@ export const EnhancedProductCard = ({
         )}
       </div>
 
-      {/* Wishlist Button */}
+      {/* Wishlist Button - min 44px touch target mobilon */}
       <button 
         onClick={(e) => { 
           e.stopPropagation(); 
           onToggleWishlist?.(product.id); 
         }} 
         className={`
-          absolute top-3 sm:top-4 right-3 sm:right-4 z-20
-          w-10 h-10 sm:w-11 sm:h-11 lg:w-12 lg:h-12 flex items-center justify-center 
-          rounded-full shadow-md tap-scale
+          absolute top-2 sm:top-3 right-2 sm:right-4 z-20
+          min-w-[44px] min-h-[44px] w-10 h-10 sm:w-11 sm:h-11 lg:w-12 lg:h-12 flex items-center justify-center 
+          rounded-full shadow-md tap-scale touch-manipulation
           ${isWishlisted 
             ? 'bg-red-500 text-white' 
             : 'bg-white/95 text-gray-500 hover:text-red-500'
@@ -251,8 +251,8 @@ export const EnhancedProductCard = ({
           </div>
         )}
         
-        {/* Stock badge */}
-        <div className="absolute bottom-2 sm:bottom-2.5 left-2 sm:left-2.5">
+        {/* Stock badge - kompakt mobilon */}
+        <div className="absolute bottom-1.5 sm:bottom-2.5 left-1.5 sm:left-2.5">
           <StockBadge inStock={inStock} size="sm" />
         </div>
         
@@ -276,56 +276,59 @@ export const EnhancedProductCard = ({
 
       {/* Content Section - UNIFIED TYPOGRAPHY */}
       <div className={`${sizeConfig.content} flex flex-col flex-1`}>
-        {/* Category - small readable (14px) */}
-        <span className="text-sm font-semibold text-primary-600 uppercase tracking-wide mb-1.5 truncate">
+        {/* Category - kompakt mobilon */}
+        <span className="text-xs sm:text-sm font-semibold text-primary-600 uppercase tracking-wide mb-1 truncate">
           {product.category}
         </span>
         
-        {/* Product Name - body to large (16-20px) */}
+        {/* Product Name - konverzió: rövid, olvasható, kattintható */}
         <h3 
           onClick={handleQuickView} 
-          className="text-base sm:text-lg lg:text-xl font-bold text-gray-900 line-clamp-2 leading-snug cursor-pointer hover:text-primary-600 transition-colors mb-3" 
+          className="text-sm sm:text-base lg:text-lg font-bold text-gray-900 line-clamp-2 leading-snug cursor-pointer hover:text-primary-600 active:text-primary-700 transition-colors mb-2 sm:mb-3 touch-manipulation" 
           title={product.name}
         >
           {product.name}
         </h3>
         
-        {/* Price Section */}
-        <div className="mt-auto pt-3 lg:pt-4 border-t border-gray-100">
-          <div className="flex justify-between items-center gap-3">
+        {/* Price Section - konverzióra optimalizált, Kosárba elsődleges */}
+        <div className="mt-auto pt-2 sm:pt-3 lg:pt-4 border-t border-gray-100">
+          {/* Ár - jól látható, kompakt mobilon */}
+          <div className="flex items-baseline justify-between gap-2 mb-2 sm:mb-0 sm:flex-row sm:items-center">
             <div className="min-w-0">
               {discount > 0 && (
-                <span className="text-sm sm:text-base text-gray-400 line-through block">
+                <span className="text-xs sm:text-sm text-gray-400 line-through block">
                   {formatPrice(product.price)}
                 </span>
               )}
-              <span className={`text-xl sm:text-2xl lg:text-2xl font-black ${discount > 0 ? 'text-red-600' : 'text-gray-900'}`}>
+              <span className={`text-lg sm:text-xl lg:text-2xl font-black ${discount > 0 ? 'text-red-600' : 'text-gray-900'}`}>
                 {formatPrice(displayPrice)}
               </span>
             </div>
             
-            <div className="flex items-center gap-2 shrink-0">
-              {/* Add to Cart Button */}
+            {/* CTA gombok - mobilon Kosárba szélesebb, touch-manipulation */}
+            <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
+              {/* Kosárba - elsődleges CTA, zöld, mobilon szöveggel */}
               {inStock && onAddToCart && (
                 <button
                   onClick={(e) => {
                     e.stopPropagation();
                     onAddToCart(product, 1);
                   }}
-                  className="w-11 h-11 sm:w-12 sm:h-12 lg:w-14 lg:h-14 flex items-center justify-center bg-primary-500 text-white rounded-xl hover:bg-primary-600 transition-all tap-scale focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-400 focus-visible:ring-offset-2"
+                  className="min-h-[44px] min-w-[44px] sm:min-w-0 flex-1 sm:flex-initial flex items-center justify-center gap-1.5 sm:gap-0 px-3 sm:px-0 py-2 sm:py-0 bg-emerald-500 text-white rounded-xl hover:bg-emerald-600 active:bg-emerald-700 transition-all tap-scale touch-manipulation focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:ring-offset-2"
                   aria-label="Kosárba"
                   title="Kosárba"
                 >
-                  <ShoppingCart className="w-5 h-5 sm:w-6 sm:h-6" />
+                  <ShoppingCart className="w-4 h-4 sm:w-5 sm:h-5 shrink-0" />
+                  <span className="text-xs sm:text-sm font-bold sm:sr-only">Kosárba</span>
                 </button>
               )}
-              {/* Quick View Button */}
+              {/* Megnézem - másodlagos */}
               <button 
                 onClick={(e) => { 
                   e.stopPropagation(); 
                   handleQuickView(); 
                 }} 
-                className="w-11 h-11 sm:w-12 sm:h-12 lg:w-14 lg:h-14 flex items-center justify-center bg-primary-500 text-white rounded-xl hover:bg-primary-600 transition-all tap-scale focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-400 focus-visible:ring-offset-2"
+                className="min-h-[44px] min-w-[44px] w-11 h-11 sm:w-12 sm:h-12 lg:w-14 lg:h-14 flex items-center justify-center bg-primary-500 text-white rounded-xl hover:bg-primary-600 active:bg-primary-700 transition-all tap-scale touch-manipulation focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-400 focus-visible:ring-offset-2"
                 aria-label="Részletek"
               >
                 <Eye className="w-5 h-5 sm:w-6 sm:h-6" />

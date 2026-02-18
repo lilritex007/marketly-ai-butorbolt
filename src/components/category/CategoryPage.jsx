@@ -482,37 +482,37 @@ const CompactProductCard = ({ product, onQuickView, onToggleWishlist, isWishlist
   const hasDiscount = product.salePrice && product.price > product.salePrice;
   
   return (
-    <div className="flex gap-3 p-3 bg-white rounded-xl border border-gray-100 hover:shadow-md transition-shadow tap-scale">
+    <div className="flex gap-2 sm:gap-3 p-2.5 sm:p-3 bg-white rounded-xl border border-gray-100 hover:shadow-md transition-shadow tap-scale touch-manipulation">
       <img 
         src={product.images?.[0] || '/placeholder.png'}
         alt={product.name}
-        className="w-20 h-20 object-contain rounded-lg bg-gray-50 shrink-0 cursor-pointer"
+        className="w-16 h-16 sm:w-20 sm:h-20 object-contain rounded-lg bg-gray-50 shrink-0 cursor-pointer"
         onClick={() => onQuickView(product)}
       />
       <div className="flex-1 min-w-0">
-        <p className="text-xs text-primary-500 font-medium mb-1">{product.category}</p>
+        <p className="text-xs text-primary-500 font-medium mb-0.5 truncate">{product.category}</p>
         <h4 
-          className="text-sm font-semibold text-gray-900 line-clamp-2 cursor-pointer hover:text-primary-500"
+          className="text-xs sm:text-sm font-semibold text-gray-900 line-clamp-2 cursor-pointer hover:text-primary-500 leading-tight"
           onClick={() => onQuickView(product)}
         >
           {product.name}
         </h4>
-        <div className="flex items-center justify-between mt-2">
-          <div>
+        <div className="flex items-center justify-between mt-1.5 sm:mt-2 gap-2">
+          <div className="min-w-0">
             {hasDiscount && (
-              <span className="text-xs text-gray-400 line-through mr-2">
+              <span className="text-xs text-gray-400 line-through mr-1 block sm:inline">
                 {product.price.toLocaleString('hu-HU')} Ft
               </span>
             )}
-            <span className={`font-bold ${hasDiscount ? 'text-red-600' : 'text-gray-900'}`}>
+            <span className={`text-sm sm:text-base font-bold ${hasDiscount ? 'text-red-600' : 'text-gray-900'}`}>
               {displayPrice.toLocaleString('hu-HU')} Ft
             </span>
           </div>
-          <div className="flex gap-1">
+          <div className="flex gap-1 shrink-0">
             {(product.inStock ?? product.in_stock) !== false && onAddToCart && (
               <button
                 onClick={(e) => { e.stopPropagation(); onAddToCart(product, 1); }}
-                className="p-1.5 rounded-lg bg-primary-500 text-white hover:bg-primary-600 transition-colors"
+                className="min-w-[44px] min-h-[44px] p-2 flex items-center justify-center rounded-lg bg-emerald-500 text-white hover:bg-emerald-600 active:bg-emerald-700 transition-colors touch-manipulation"
                 title="Kosárba"
               >
                 <ShoppingCart className="w-4 h-4" />
@@ -520,13 +520,13 @@ const CompactProductCard = ({ product, onQuickView, onToggleWishlist, isWishlist
             )}
             <button
               onClick={() => onCompare?.(product)}
-              className={`p-1.5 rounded-lg transition-colors ${isComparing ? 'bg-primary-100 text-primary-500' : 'hover:bg-gray-100 text-gray-400'}`}
+              className={`min-w-[44px] min-h-[44px] p-2 flex items-center justify-center rounded-lg transition-colors touch-manipulation ${isComparing ? 'bg-primary-100 text-primary-500' : 'hover:bg-gray-100 text-gray-400'}`}
             >
               <GitCompare className="w-4 h-4" />
             </button>
             <button
               onClick={() => onToggleWishlist(product.id)}
-              className={`p-1.5 rounded-lg transition-colors ${isWishlisted ? 'bg-red-100 text-red-500' : 'hover:bg-gray-100 text-gray-400'}`}
+              className={`min-w-[44px] min-h-[44px] p-2 flex items-center justify-center rounded-lg transition-colors touch-manipulation ${isWishlisted ? 'bg-red-100 text-red-500' : 'hover:bg-gray-100 text-gray-400'}`}
             >
               <Star className={`w-4 h-4 ${isWishlisted ? 'fill-current' : ''}`} />
             </button>

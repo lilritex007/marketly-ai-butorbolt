@@ -9,6 +9,7 @@ export const RecentlyViewed = ({
   onToggleWishlist, 
   wishlist, 
   onQuickView,
+  onAddToCart,
   maxItems = 4 
 }) => {
   const [recentProducts, setRecentProducts] = useState([]);
@@ -62,6 +63,7 @@ export const RecentlyViewed = ({
               onToggleWishlist={onToggleWishlist}
               isWishlisted={wishlist.includes(product.id)}
               onQuickView={onQuickView}
+              onAddToCart={onAddToCart}
               showBadges={false}
             />
           ))}

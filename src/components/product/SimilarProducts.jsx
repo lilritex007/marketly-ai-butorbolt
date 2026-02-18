@@ -20,6 +20,7 @@ export const SimilarProducts = ({
   onToggleWishlist, 
   wishlist = [], 
   onQuickView,
+  onAddToCart,
   maxResults = 4 
 }) => {
   const [similarProducts, setSimilarProducts] = useState([]);
@@ -155,6 +156,7 @@ Csak az indoklást írd meg, ne a termékneveket!`;
                   onToggleWishlist={onToggleWishlist}
                   isWishlisted={wishlist.includes(product.id)}
                   onQuickView={onQuickView}
+                  onAddToCart={onAddToCart}
                   showBadges={false}
                   index={index}
                 />

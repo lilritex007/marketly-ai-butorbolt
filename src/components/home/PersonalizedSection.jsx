@@ -29,6 +29,7 @@ const PersonalizedSection = ({
   onProductClick, 
   onToggleWishlist, 
   wishlist = [],
+  onAddToCart,
   contextLabel = '',
   cartItems = []
 }) => {
@@ -551,6 +552,7 @@ const PersonalizedSection = ({
                   onToggleWishlist={onToggleWishlist}
                   isWishlisted={wishlist.includes(product.id)}
                   onQuickView={onProductClick}
+                  onAddToCart={onAddToCart}
                   index={index}
                   highlightBadge={highlightBadge}
                   recommendationReasons={buildRecommendationReasons(product)}

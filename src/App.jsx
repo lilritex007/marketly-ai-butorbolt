@@ -1528,6 +1528,7 @@ const App = () => {
                 onProductClick={handleProductView}
                 onToggleWishlist={toggleWishlist}
                 wishlist={wishlist}
+                onAddToCart={handleAddToCart}
                 contextLabel={sectionContextLabel}
               />
             )}
@@ -1872,6 +1873,7 @@ const App = () => {
                         onToggleWishlist={toggleWishlist} 
                         isWishlisted={wishlist.includes(product.id)} 
                         onQuickView={handleProductView}
+                        onAddToCart={handleAddToCart}
                         index={index}
                       />
                     ))}
@@ -1916,6 +1918,7 @@ const App = () => {
               onToggleWishlist={toggleWishlist}
               wishlist={wishlist}
               onQuickView={handleProductView}
+              onAddToCart={handleAddToCart}
             />
             
             {/* Final CTA */}
@@ -1945,6 +1948,7 @@ const App = () => {
           onToggleWishlist={toggleWishlist}
           wishlist={wishlist}
           onQuickView={handleProductView}
+          onAddToCart={handleAddToCart}
         />
       )}
       

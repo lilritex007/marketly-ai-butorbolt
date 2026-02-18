@@ -412,11 +412,17 @@
     }
   }
 
-  /* Product grid - small gaps for rounded corners to show */
+  /* Product grid - mobil optimalizált: 2 oszlop, touch-friendly gap */
   .product-grid {
     display: grid;
-    gap: 0.5rem;  /* 8px - enough for rounded corners */
+    gap: 0.5rem;  /* 8px mobil - kompakt de kattintható */
     grid-template-columns: repeat(2, 1fr);
+  }
+  
+  @media (min-width: 375px) {
+    .product-grid {
+      gap: 0.625rem;  /* 10px - kicsit több légzés */
+    }
   }
   
   @media (min-width: 640px) {
@@ -460,10 +466,15 @@
     }
   }
 
-  /* Kollekció oldal: mobil 2x2, desktop 6 oszlop, teljes szélesség */
+  /* Kollekció oldal: mobil 2x2 kompakt, desktop 6 oszlop */
   #mkt-butorbolt-app .product-grid-collection {
     grid-template-columns: repeat(2, 1fr);
     gap: 0.5rem;
+  }
+  @media (min-width: 375px) {
+    #mkt-butorbolt-app .product-grid-collection {
+      gap: 0.625rem;
+    }
   }
   @media (min-width: 1024px) {
     #mkt-butorbolt-app .product-grid-collection {

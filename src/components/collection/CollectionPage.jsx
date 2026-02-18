@@ -275,29 +275,29 @@ const CollectionPage = ({
             ))}
           </div>
         ) : (
-          <div className="space-y-3">
+          <div className="space-y-2 sm:space-y-3">
             {displayedProducts.map((product) => (
-              <div key={product.id} className="flex gap-3 p-3 bg-white rounded-xl border border-gray-100 hover:shadow-md transition-shadow">
+              <div key={product.id} className="flex gap-2 sm:gap-3 p-2.5 sm:p-3 bg-white rounded-xl border border-gray-100 hover:shadow-md transition-shadow touch-manipulation">
                 <img
                   src={product.images?.[0] || product.image || '/placeholder.png'}
                   alt={product.name}
-                  className="w-20 h-20 object-contain rounded-lg bg-gray-50 shrink-0 cursor-pointer"
+                  className="w-16 h-16 sm:w-20 sm:h-20 object-contain rounded-lg bg-gray-50 shrink-0 cursor-pointer"
                   onClick={() => onProductClick?.(product)}
                 />
                 <div className="flex-1 min-w-0">
-                  <p className="text-xs text-primary-500 font-medium mb-1">{product.category}</p>
-                  <h4 className="text-sm font-semibold text-gray-900 line-clamp-2 cursor-pointer hover:text-primary-500" onClick={() => onProductClick?.(product)}>
+                  <p className="text-xs text-primary-500 font-medium mb-0.5 truncate">{product.category}</p>
+                  <h4 className="text-xs sm:text-sm font-semibold text-gray-900 line-clamp-2 cursor-pointer hover:text-primary-500 leading-tight" onClick={() => onProductClick?.(product)}>
                     {product.name}
                   </h4>
-                  <div className="flex items-center justify-between mt-2">
-                    <span className="font-bold text-gray-900">
+                  <div className="flex items-center justify-between mt-1.5 sm:mt-2 gap-2">
+                    <span className="text-sm sm:text-base font-bold text-gray-900">
                       {(product.salePrice || product.price).toLocaleString('hu-HU')} Ft
                     </span>
-                    <div className="flex gap-1">
+                    <div className="flex gap-1 shrink-0">
                       {(product.inStock ?? product.in_stock) !== false && onAddToCart && (
                         <button
                           onClick={(e) => { e.stopPropagation(); onAddToCart(product, 1); }}
-                          className="p-1.5 rounded-lg bg-primary-500 text-white hover:bg-primary-600 transition-colors"
+                          className="min-w-[44px] min-h-[44px] p-2 flex items-center justify-center rounded-lg bg-emerald-500 text-white hover:bg-emerald-600 active:bg-emerald-700 transition-colors touch-manipulation"
                           title="Kosárba"
                         >
                           <ShoppingCart className="w-4 h-4" />
@@ -305,7 +305,7 @@ const CollectionPage = ({
                       )}
                       <button
                         onClick={() => onWishlistToggle?.(product.id)}
-                        className={`p-1.5 rounded-lg ${wishlist?.includes(product.id) ? 'bg-red-100 text-red-500' : 'hover:bg-gray-100 text-gray-400'}`}
+                        className={`min-w-[44px] min-h-[44px] p-2 flex items-center justify-center rounded-lg transition-colors touch-manipulation ${wishlist?.includes(product.id) ? 'bg-red-100 text-red-500' : 'hover:bg-gray-100 text-gray-400'}`}
                       >
                         ♥
                       </button>
