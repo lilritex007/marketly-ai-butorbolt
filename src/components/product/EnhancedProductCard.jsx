@@ -140,12 +140,11 @@ export const EnhancedProductCard = ({
   };
 
   const hasWorldAccent = accentClass && (tone === 'favorites' || tone === 'new' || tone === 'popular');
-  const worldAccentStyles = {
-    favorites: { border: 'border-t border-l border-rose-200/60', shadow: 'shadow-[0_1px_3px_0_rgba(0,0,0,0.1),0_0_0_1px_rgba(244,63,94,0.08)]' },
-    new: { border: 'border-t border-l border-indigo-200/60', shadow: 'shadow-[0_1px_3px_0_rgba(0,0,0,0.1),0_0_0_1px_rgba(99,102,241,0.08)]' },
-    popular: { border: 'border-t border-l border-amber-200/60', shadow: 'shadow-[0_1px_3px_0_rgba(0,0,0,0.1),0_0_0_1px_rgba(251,191,36,0.08)]' },
-  };
-  const accentStyle = hasWorldAccent ? worldAccentStyles[tone] : null;
+  const worldAccentStyle = hasWorldAccent && {
+    favorites: { borderTopColor: 'rgba(244,63,94,0.5)', borderLeftColor: 'rgba(244,63,94,0.5)', boxShadow: '0 1px 3px rgba(0,0,0,0.1), 0 0 0 1px rgba(244,63,94,0.12)' },
+    new: { borderTopColor: 'rgba(99,102,241,0.5)', borderLeftColor: 'rgba(99,102,241,0.5)', boxShadow: '0 1px 3px rgba(0,0,0,0.1), 0 0 0 1px rgba(99,102,241,0.12)' },
+    popular: { borderTopColor: 'rgba(251,191,36,0.5)', borderLeftColor: 'rgba(251,191,36,0.5)', boxShadow: '0 1px 3px rgba(0,0,0,0.1), 0 0 0 1px rgba(251,191,36,0.12)' },
+  }[tone];
 
   return (
     <article 
@@ -154,13 +153,14 @@ export const EnhancedProductCard = ({
         group relative rounded-lg overflow-hidden bg-white border border-gray-200 shadow-sm
         hover:shadow-md hover:border-gray-300 hover:-translate-y-0.5 active:scale-[0.99]
         h-full flex flex-col touch-manipulation
+        ${hasWorldAccent ? 'border-t-2 border-l-2' : 'shadow-sm'}
         ${toneClasses[tone] || ''}
-        ${accentStyle ? `${accentStyle.border} ${accentStyle.shadow}` : ''}
         ${isVisible ? 'opacity-100' : 'opacity-0 translate-y-3'}
         transition-all duration-200
       `}
       style={{ 
-        willChange: isVisible ? 'auto' : 'opacity, transform'
+        willChange: isVisible ? 'auto' : 'opacity, transform',
+        ...(worldAccentStyle || {})
       }}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
