@@ -140,6 +140,12 @@ export const EnhancedProductCard = ({
   };
 
   const hasWorldAccent = accentClass && (tone === 'favorites' || tone === 'new' || tone === 'popular');
+  const worldAccentStyles = {
+    favorites: { border: 'border-t border-l border-rose-200/60', shadow: 'shadow-[0_1px_3px_0_rgba(0,0,0,0.1),0_0_0_1px_rgba(244,63,94,0.08)]' },
+    new: { border: 'border-t border-l border-indigo-200/60', shadow: 'shadow-[0_1px_3px_0_rgba(0,0,0,0.1),0_0_0_1px_rgba(99,102,241,0.08)]' },
+    popular: { border: 'border-t border-l border-amber-200/60', shadow: 'shadow-[0_1px_3px_0_rgba(0,0,0,0.1),0_0_0_1px_rgba(251,191,36,0.08)]' },
+  };
+  const accentStyle = hasWorldAccent ? worldAccentStyles[tone] : null;
 
   return (
     <article 
@@ -149,6 +155,7 @@ export const EnhancedProductCard = ({
         hover:shadow-md hover:border-gray-300 hover:-translate-y-0.5 active:scale-[0.99]
         h-full flex flex-col touch-manipulation
         ${toneClasses[tone] || ''}
+        ${accentStyle ? `${accentStyle.border} ${accentStyle.shadow}` : ''}
         ${isVisible ? 'opacity-100' : 'opacity-0 translate-y-3'}
         transition-all duration-200
       `}
@@ -158,15 +165,6 @@ export const EnhancedProductCard = ({
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      {/* Teljes kártyás világ megkülönböztetés – állandó, keret + finom háttérgradiens */}
-      {hasWorldAccent && (
-        <>
-          <div className={`absolute inset-0 bg-gradient-to-br ${accentClass} opacity-[0.06] z-0 pointer-events-none`} aria-hidden />
-          <div className={`absolute top-0 left-0 right-0 h-2.5 sm:h-3 bg-gradient-to-r ${accentClass} opacity-95 z-10 pointer-events-none`} aria-hidden />
-          <div className={`absolute top-0 bottom-0 left-0 w-2.5 sm:w-3 bg-gradient-to-b ${accentClass} opacity-95 z-10 pointer-events-none`} aria-hidden />
-          <div className={`absolute bottom-0 left-0 right-0 h-2 sm:h-2.5 bg-gradient-to-r ${accentClass} opacity-80 z-10 pointer-events-none`} aria-hidden />
-        </>
-      )}
       {/* Smart Badges - kisebb mobilon */}
       <div className="absolute top-2 sm:top-3 left-2 sm:left-3 z-20">
         <SmartBadges product={product} maxBadges={2} />
