@@ -145,7 +145,7 @@ const FlashSaleBanner = ({
       <div className="absolute bottom-1/3 left-1/4 w-16 h-16 rounded-full bg-white/10 blur-xl pointer-events-none" aria-hidden />
 
       {/* Mobile Layout - Stacked, centered */}
-      <div className="sm:hidden relative px-4 py-4 pb-14 min-h-[200px]">
+      <div className="sm:hidden relative px-4 py-4 pb-20 min-h-[200px]">
         {/* Top row: Icon + Title + Dismiss */}
         <div className="flex items-center justify-between gap-2 mb-2">
           <div className="flex items-center gap-2 min-w-0 flex-1">
@@ -204,7 +204,7 @@ const FlashSaleBanner = ({
       </div>
 
       {/* Desktop Layout - Single row, all visible */}
-      <div className="hidden sm:flex relative items-center justify-between gap-3 sm:gap-4 lg:gap-6 px-4 sm:px-6 lg:px-8 py-3 sm:py-3.5 lg:py-4 pb-14 max-w-[1800px] mx-auto">
+      <div className="hidden sm:flex relative items-center justify-between gap-3 sm:gap-4 lg:gap-6 px-4 sm:px-6 lg:px-8 py-3 sm:py-3.5 lg:py-4 pb-20 max-w-[1800px] mx-auto">
         {/* Left: Icon + Title + Badge */}
         <div className="flex items-center gap-3 min-w-0 flex-shrink">
           <div className="w-10 h-10 lg:w-11 lg:h-11 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center">
@@ -265,8 +265,8 @@ const FlashSaleBanner = ({
         </div>
       </div>
 
-      {/* Dots – pozíció indikátor, kattintható */}
-      <div className="absolute bottom-8 left-0 right-0 flex justify-center gap-1.5 z-10" role="tablist" aria-label="Ajánlat váltása">
+      {/* Dots – progress bar fölött, nagyobb, jól látható */}
+      <div className="absolute bottom-10 left-0 right-0 flex justify-center gap-2 z-10" role="tablist" aria-label="Ajánlat váltása">
         {FLASH_OFFERS.map((_, i) => (
           <button
             key={i}
@@ -274,8 +274,8 @@ const FlashSaleBanner = ({
             role="tab"
             aria-selected={offerIndex === i}
             onClick={() => goToOffer(i)}
-            className={`w-2.5 h-2.5 rounded-full transition-all duration-200 min-w-[10px] min-h-[10px] focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-transparent ${
-              offerIndex === i ? 'bg-white scale-110' : 'bg-white/50 hover:bg-white/70'
+            className={`w-3 h-3 rounded-full transition-all duration-200 min-w-[12px] min-h-[12px] focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-gray-600 ${
+              offerIndex === i ? 'bg-white scale-125 shadow-lg' : 'bg-white/50 hover:bg-white/80'
             }`}
             aria-label={`Ajánlat ${i + 1}`}
           />

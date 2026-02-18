@@ -16,7 +16,8 @@ const ProductCarousel = ({
   intervalMs = 5200,
   stepFraction = 1,
   className = '',
-  onInteractionChange
+  onInteractionChange,
+  cardSize = 'default',
 }) => {
   const containerRef = useRef(null);
   const [paused, setPaused] = useState(false);
@@ -96,7 +97,7 @@ const ProductCarousel = ({
         {React.Children.map(children, (child, index) => (
           <div
             key={index}
-            className="min-w-[170px] sm:min-w-[200px] lg:min-w-[calc((100%-80px)/6)] snap-start"
+            className={`snap-start ${cardSize === 'large' ? 'min-w-[220px] sm:min-w-[260px] lg:min-w-[calc((100%-80px)/5)]' : 'min-w-[170px] sm:min-w-[200px] lg:min-w-[calc((100%-80px)/6)]'}`}
           >
             {child}
           </div>

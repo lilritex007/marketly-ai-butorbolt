@@ -292,22 +292,22 @@ export const EnhancedProductCard = ({
           {product.name}
         </h3>
         
-        {/* Ár - kompakt, középre, minden férjen rá a kártyára */}
-        <div className="pt-2 border-t border-gray-100 text-center space-y-0.5 min-w-0">
+        {/* Ár - nagy, szembetűnő; eredeti áthúzva pirosan, kedvezmény % */}
+        <div className="pt-2 sm:pt-3 border-t border-gray-100 text-center space-y-1 min-w-0">
           {discount > 0 ? (
             <>
-              <span className="text-[11px] sm:text-xs text-red-500 line-through block truncate">
+              <span className="text-xs sm:text-sm text-red-600 line-through block font-semibold">
                 {formatPrice(product.price)}
               </span>
-              <span className="text-sm sm:text-base font-black text-red-600 block truncate">
+              <span className="text-base sm:text-lg lg:text-xl font-black text-red-600 block">
                 {formatPrice(displayPrice)}
               </span>
-              <span className="inline-block px-1.5 py-0.5 rounded bg-red-100 text-red-600 text-[10px] font-bold">
+              <span className="inline-block px-2 py-1 rounded-md bg-red-100 text-red-700 text-xs sm:text-sm font-black">
                 -{discount}%
               </span>
             </>
           ) : (
-            <span className="text-sm sm:text-base font-black text-gray-900 block truncate">
+            <span className="text-base sm:text-lg lg:text-xl font-black text-gray-900 block">
               {formatPrice(displayPrice)}
             </span>
           )}

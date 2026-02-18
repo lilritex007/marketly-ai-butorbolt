@@ -206,6 +206,22 @@ export default function ProductWorldsSection({
   const [isInteracting, setIsInteracting] = useState(false);
   const [isInView, setIsInView] = useState(true);
   const sectionRef = useRef(null);
+  const tabSwipeRef = useRef(null);
+  const tabSwipeStartX = useRef(0);
+
+  const handleTabSwipeStart = (e) => {
+    tabSwipeStartX.current = e.touches?.[0]?.clientX ?? 0;
+  };
+
+  const handleTabSwipeEnd = (e) => {
+    const endX = e.changedTouches?.[0]?.clientX ?? 0;
+    const diff = tabSwipeStartX.current - endX;
+    if (Math.abs(diff) > 60) {
+      const idx = WORLDS.findIndex((w) => w.id === activeWorld);
+      if (diff > 0 && idx < WORLDS.length - 1) setActiveWorld(WORLDS[idx + 1].id);
+      else if (diff < 0 && idx > 0) setActiveWorld(WORLDS[idx - 1].id);
+    }
+  };
 
   const newArrivalsPool = useMemo(() => buildNewArrivalsPool(products), [products]);
   const newExcludeIds = useMemo(
@@ -392,9 +408,9 @@ export default function ProductWorldsSection({
       : currentWorld.badge;
 
   const sectionBgClass = {
-    favorites: 'bg-gradient-to-br from-rose-50 via-white to-rose-50/50',
-    new: 'bg-gradient-to-br from-primary-50/80 via-white to-secondary-50/60',
-    popular: 'bg-gradient-to-br from-amber-50 via-white to-orange-50/50',
+    favorites: 'bg-gradient-to-br from-rose-100/60 via-white to-pink-100/50',
+    new: 'bg-gradient-to-br from-primary-100/50 via-white to-secondary-100/40',
+    popular: 'bg-gradient-to-br from-amber-100/60 via-white to-orange-100/50',
   }[activeWorld];
 
   return (
@@ -407,13 +423,13 @@ export default function ProductWorldsSection({
       data-section="product-worlds"
     >
       <div className="w-full max-w-[2000px] mx-auto px-4 sm:px-6 lg:px-10 xl:px-16">
-        {/* Tab bar – erőteljes, statement, animált alulvonal */}
+        {/* Tab bar – széles, nincs alulvonal */}
         <div
-          className="flex justify-center mb-6 sm:mb-8 lg:mb-12 px-4"
+          className="flex justify-center mb-6 sm:mb-8 lg:mb-12 px-2 sm:px-4"
           role="tablist"
           aria-label="Válassz világot"
         >
-          <div className="relative flex w-full max-w-md sm:w-auto sm:inline-flex rounded-2xl bg-white/95 backdrop-blur-sm border-2 border-gray-200/80 shadow-xl shadow-gray-300/40 p-1.5 sm:p-2 gap-1">
+          <div className="flex w-full max-w-2xl sm:w-auto sm:inline-flex rounded-2xl bg-white/95 backdrop-blur-sm border-2 border-gray-200/80 shadow-xl shadow-gray-300/40 p-2 sm:p-2.5 gap-2">
             {WORLDS.map((w) => (
               <button
                 key={w.id}
@@ -423,27 +439,25 @@ export default function ProductWorldsSection({
                 aria-controls={`panel-${w.id}`}
                 id={`tab-${w.id}`}
                 onClick={() => setActiveWorld(w.id)}
-                className={`flex-1 sm:flex-initial inline-flex items-center justify-center gap-1.5 sm:gap-2 px-3 sm:px-5 lg:px-6 py-2.5 sm:py-3 rounded-xl text-xs sm:text-sm lg:text-base font-bold transition-all duration-300 min-h-[44px] sm:min-h-[48px] whitespace-nowrap ${
+                className={`flex-1 sm:flex-initial inline-flex items-center justify-center gap-2 px-4 sm:px-6 lg:px-8 py-3 sm:py-3.5 rounded-xl text-sm sm:text-base font-bold transition-all duration-300 min-h-[48px] sm:min-h-[52px] whitespace-nowrap ${
                   activeWorld === w.id
                     ? `bg-gradient-to-r ${w.accentClass} text-white shadow-lg`
                     : 'text-gray-700 hover:bg-gray-100'
                 }`}
               >
-                <w.Icon className="w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6 shrink-0" aria-hidden />
+                <w.Icon className="w-5 h-5 sm:w-6 sm:h-6 shrink-0" aria-hidden />
                 <span className="truncate">{w.id === 'favorites' ? 'Kedvencek' : w.id === 'new' ? 'Friss' : 'Legnépszerűbb'}</span>
               </button>
             ))}
-            {/* Decorative: subtle glow under active tab */}
-            <div className={`absolute bottom-1.5 left-1.5 right-1.5 h-0.5 rounded-full bg-gradient-to-r ${currentWorld.accentClass} opacity-20 pointer-events-none transition-opacity duration-300`} aria-hidden />
           </div>
         </div>
 
-        {/* Hero fejléc – full-bleed, dramatikus, dekoratív accent */}
+        {/* Hero fejléc – full-bleed, dramatikus, erősebb színek */}
         <div className={`relative overflow-hidden px-4 sm:px-6 lg:px-10 py-8 sm:py-10 lg:py-14 rounded-2xl lg:rounded-3xl border-2 ${currentWorld.className} transition-all duration-500`}>
-          <div className="absolute inset-0 bg-gradient-to-br from-white/90 via-white/70 to-transparent pointer-events-none" />
-          {/* WoW: dekoratív geometria a sarokban */}
-          <div className={`absolute -top-8 -right-8 w-32 h-32 sm:w-40 sm:h-40 rounded-full bg-gradient-to-br ${currentWorld.accentClass} opacity-[0.07] blur-2xl pointer-events-none`} aria-hidden />
-          <div className="absolute bottom-4 left-4 w-16 h-16 rounded-full border-2 border-gray-200/50 pointer-events-none" aria-hidden />
+          <div className="absolute inset-0 bg-gradient-to-br from-white/85 via-white/60 to-transparent pointer-events-none" />
+          {/* WoW: erősebb dekoratív gradient a sarkokban */}
+          <div className={`absolute -top-12 -right-12 w-48 h-48 sm:w-64 sm:h-64 rounded-full bg-gradient-to-br ${currentWorld.accentClass} opacity-[0.12] blur-3xl pointer-events-none`} aria-hidden />
+          <div className={`absolute -bottom-8 -left-8 w-32 h-32 sm:w-40 sm:h-40 rounded-full bg-gradient-to-tr ${currentWorld.accentClass} opacity-[0.08] blur-2xl pointer-events-none`} aria-hidden />
           <div className="relative z-10">
             <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-4 sm:gap-6">
               <div className="space-y-3 sm:space-y-4 min-w-0">
@@ -478,21 +492,24 @@ export default function ProductWorldsSection({
               <div className="flex flex-wrap items-center gap-2 shrink-0">{renderActions()}</div>
             </div>
           </div>
-          <div className={`absolute bottom-0 left-0 right-0 h-1 sm:h-1.5 bg-gradient-to-r ${currentWorld.accentClass} opacity-60 transition-all duration-500`} />
         </div>
 
         <div
+          ref={tabSwipeRef}
           id={`panel-${activeWorld}`}
           role="tabpanel"
           aria-labelledby={`tab-${activeWorld}`}
-          className="product-worlds-content mt-8 lg:mt-10 px-0 sm:px-2 transition-opacity duration-300"
+          className="product-worlds-content mt-8 lg:mt-10 px-0 sm:px-2 transition-opacity duration-300 touch-pan-y"
           key={activeWorld}
+          onTouchStart={handleTabSwipeStart}
+          onTouchEnd={handleTabSwipeEnd}
         >
             {visibleProducts.length > 0 ? (
               <ProductCarousel
                 className="mt-2 -mx-4 sm:mx-0 pl-4 sm:pl-0 pr-4 sm:pr-0"
                 autoScroll={false}
                 onInteractionChange={setIsInteracting}
+                cardSize="large"
               >
                 {visibleProducts.map((product, index) => {
                   const stockLevel = getStockLevel(product);
@@ -501,9 +518,10 @@ export default function ProductWorldsSection({
                   return (
                     <div
                       key={product.id}
-                      className="transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl rounded-xl"
+                      className={`relative overflow-hidden rounded-xl transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl ring-1 ring-gray-200/80 hover:ring-gray-300`}
                       style={{ transitionDelay: `${Math.min(index * 30, 300)}ms` }}
                     >
+                      <div className={`absolute top-0 left-0 right-0 h-1 bg-gradient-to-r ${currentWorld.accentClass} opacity-50`} aria-hidden />
                       <EnhancedProductCard
                         product={product}
                         onToggleWishlist={onToggleWishlist}
@@ -514,7 +532,7 @@ export default function ProductWorldsSection({
                         highlightBadge={highlightBadge}
                         sectionId={currentWorld.sectionId}
                         showFeedback
-                        size="compact"
+                        size="default"
                         tone={currentWorld.tone}
                       />
                     </div>
