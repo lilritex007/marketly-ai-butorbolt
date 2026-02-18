@@ -142,12 +142,12 @@ export const EnhancedProductCard = ({
   const hasWorldAccent = accentClass && (tone === 'favorites' || tone === 'new' || tone === 'popular');
   const worldGlow = hasWorldAccent && {
     favorites: 'radial-gradient(ellipse 120% 120% at 0% 0%, rgba(244,63,94,0.12) 0%, transparent 55%)',
-    new: 'radial-gradient(ellipse 120% 120% at 0% 0%, rgba(99,102,241,0.12) 0%, transparent 55%)',
+    new: 'radial-gradient(ellipse 120% 120% at 0% 0%, rgba(139,92,246,0.12) 0%, transparent 55%)',
     popular: 'radial-gradient(ellipse 120% 120% at 0% 0%, rgba(251,191,36,0.12) 0%, transparent 55%)',
   }[tone];
   const worldCorner = hasWorldAccent && {
     favorites: 'linear-gradient(135deg, rgba(244,63,94,0.35) 0%, transparent 45%)',
-    new: 'linear-gradient(135deg, rgba(99,102,241,0.35) 0%, transparent 45%)',
+    new: 'linear-gradient(135deg, rgba(139,92,246,0.35) 0%, transparent 45%)',
     popular: 'linear-gradient(135deg, rgba(251,191,36,0.35) 0%, transparent 45%)',
   }[tone];
 

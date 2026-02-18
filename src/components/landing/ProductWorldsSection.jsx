@@ -19,10 +19,10 @@ import {
 } from '../../services/userPreferencesService';
 import ProductCarousel from '../ui/ProductCarousel';
 
-const POOL_SIZE = 450;
-const PAGE_SIZE = 12;
-const DEDUPE_EXCLUDE_NEW = 50;
-const DEDUPE_EXCLUDE_POPULAR = 40;
+const POOL_SIZE = 600;
+const PAGE_SIZE = 18;
+const DEDUPE_EXCLUDE_NEW = 40;
+const DEDUPE_EXCLUDE_POPULAR = 30;
 
 const toTimestamp = (value) => {
   if (!value) return 0;
@@ -84,7 +84,23 @@ function buildFavoritesPool(products, seed, excludeIds = []) {
   const rest = products.filter((p) => !ids.has(p.id) && !exclude.has(p.id) && (p.inStock ?? p.in_stock ?? true));
   const withSale = rest.filter((p) => p.salePrice && p.price > p.salePrice);
   const withoutSale = rest.filter((p) => !(p.salePrice && p.price > p.salePrice));
-  const restSorted = [...withSale, ...withoutSale].sort((a, b) => {
+  const restCombined = [...withSale, ...withoutSale];
+  const byCategory = new Map();
+  restCombined.forEach((p) => {
+    const cat = (p.category || '').split('>')[0] || 'other';
+    if (!byCategory.has(cat)) byCategory.set(cat, []);
+    byCategory.get(cat).push(p);
+  });
+  const restSorted = [];
+  const catArrays = Array.from(byCategory.values());
+  let idx = 0;
+  while (restSorted.length < restCombined.length) {
+    for (const arr of catArrays) {
+      if (idx < arr.length) restSorted.push(arr[idx]);
+    }
+    idx++;
+  }
+  restSorted.sort((a, b) => {
     const ha = seededHash(String(a.id), seed);
     const hb = seededHash(String(b.id), seed);
     return ha - hb;
@@ -93,19 +109,40 @@ function buildFavoritesPool(products, seed, excludeIds = []) {
   return result.slice(0, POOL_SIZE);
 }
 
-/** Friss: updated_at DESC, max POOL_SIZE */
+/** Friss: updated_at DESC, kategória-szerinti változatosság, max POOL_SIZE */
 function buildNewArrivalsPool(products) {
   if (!products.length) return [];
   const inStock = products.filter((p) => p.inStock ?? p.in_stock ?? true);
-  const sorted = [...inStock].sort((a, b) => {
+  const byCategory = new Map();
+  inStock.forEach((p) => {
+    const cat = (p.category || '').split('>')[0] || 'other';
+    if (!byCategory.has(cat)) byCategory.set(cat, []);
+    byCategory.get(cat).push(p);
+  });
+  const sortByDate = (a, b) => {
     const timeA = toTimestamp(a.updated_at || a.updatedAt || a.created_at || a.createdAt || a.last_synced_at);
     const timeB = toTimestamp(b.updated_at || b.updatedAt || b.created_at || b.createdAt || b.last_synced_at);
     if (timeA !== timeB) return timeB - timeA;
     const idA = typeof a.id === 'number' ? a.id : parseInt(String(a.id).replace(/\D/g, ''), 10) || 0;
     const idB = typeof b.id === 'number' ? b.id : parseInt(String(b.id).replace(/\D/g, ''), 10) || 0;
     return idB - idA;
-  });
-  return sorted.slice(0, POOL_SIZE);
+  };
+  Array.from(byCategory.values()).forEach((arr) => arr.sort(sortByDate));
+  const result = [];
+  const catArrays = Array.from(byCategory.values());
+  let idx = 0;
+  while (result.length < POOL_SIZE) {
+    let added = 0;
+    for (const arr of catArrays) {
+      if (idx < arr.length && result.length < POOL_SIZE) {
+        result.push(arr[idx]);
+        added++;
+      }
+    }
+    if (added === 0) break;
+    idx++;
+  }
+  return result;
 }
 
 /** Popular: getPersonalizedRecommendations blend + liked/viewed, akciós elöl, excludeIds */
@@ -122,28 +159,42 @@ function buildPopularPool(products, excludeIds = []) {
     .filter((p) => p.salePrice && p.price > p.salePrice)
     .sort((a, b) => (b.price - (b.salePrice || 0)) - (a.price - (a.salePrice || 0)));
   const ids = new Set(withDiscount.map((p) => p.id));
-  const rest = [...inStock]
-    .filter((p) => !ids.has(p.id))
-    .sort((a, b) => (b.price || 0) - (a.price || 0));
-  const combined = [...withDiscount, ...rest];
+  const rest = inStock.filter((p) => !ids.has(p.id));
+  const restByCat = new Map();
+  rest.forEach((p) => {
+    const cat = (p.category || '').split('>')[0] || 'other';
+    if (!restByCat.has(cat)) restByCat.set(cat, []);
+    restByCat.get(cat).push(p);
+  });
   const categoryParts = (p) =>
     (p.category || '')
       .split('>')
       .map((c) => c.trim().toLowerCase())
       .filter(Boolean);
-  return combined
-    .sort((a, b) => {
-      const stockA = getStockLevel(a) ?? 0;
-      const stockB = getStockLevel(b) ?? 0;
-      let scoreA = (likedIds.includes(a.id) ? 10 : 0) + (viewedIds.includes(a.id) ? 5 : 0) + Math.min(stockA, 20) * 0.1;
-      let scoreB = (likedIds.includes(b.id) ? 10 : 0) + (viewedIds.includes(b.id) ? 5 : 0) + Math.min(stockB, 20) * 0.1;
-      categoryParts(a).forEach((cat) => { scoreA += (signals.categories?.[cat] || 0) * 0.5; });
-      categoryParts(b).forEach((cat) => { scoreB += (signals.categories?.[cat] || 0) * 0.5; });
-      if (personalized.some((p) => p.id === a.id)) scoreA += 3;
-      if (personalized.some((p) => p.id === b.id)) scoreB += 3;
-      return scoreB - scoreA;
-    })
-    .slice(0, POOL_SIZE);
+  const scoreSort = (a, b) => {
+    const stockA = getStockLevel(a) ?? 0;
+    const stockB = getStockLevel(b) ?? 0;
+    let scoreA = (likedIds.includes(a.id) ? 10 : 0) + (viewedIds.includes(a.id) ? 5 : 0) + Math.min(stockA, 20) * 0.1;
+    let scoreB = (likedIds.includes(b.id) ? 10 : 0) + (viewedIds.includes(b.id) ? 5 : 0) + Math.min(stockB, 20) * 0.1;
+    categoryParts(a).forEach((cat) => { scoreA += (signals.categories?.[cat] || 0) * 0.5; });
+    categoryParts(b).forEach((cat) => { scoreB += (signals.categories?.[cat] || 0) * 0.5; });
+    if (personalized.some((p) => p.id === a.id)) scoreA += 3;
+    if (personalized.some((p) => p.id === b.id)) scoreB += 3;
+    return scoreB - scoreA;
+  };
+  Array.from(restByCat.values()).forEach((arr) => arr.sort(scoreSort));
+  const restInterleaved = [];
+  const catArrs = Array.from(restByCat.values());
+  let i = 0;
+  while (restInterleaved.length < rest.length) {
+    let added = 0;
+    for (const arr of catArrs) {
+      if (i < arr.length) { restInterleaved.push(arr[i]); added++; }
+    }
+    if (added === 0) break;
+    i++;
+  }
+  return [...withDiscount, ...restInterleaved].slice(0, POOL_SIZE);
 }
 
 const WORLDS = [
@@ -165,10 +216,10 @@ const WORLDS = [
     title: 'Friss beérkezés',
     subtitle: 'A legújabb termékeink, folyamatosan frissítve',
     Icon: Package,
-    accentClass: 'from-primary-500 to-secondary-600',
+    accentClass: 'from-violet-500 to-purple-600',
     eyebrow: 'Újdonság',
     badge: 'Újdonságok',
-    className: 'border border-primary-100 shadow-sm section-header-hero section-header-hero--new',
+    className: 'border border-violet-100 shadow-sm section-header-hero section-header-hero--new',
     tone: 'new',
     sectionId: 'new-arrivals',
     metaLabel: 'Összesen',
@@ -321,9 +372,7 @@ export default function ProductWorldsSection({
       return (
         <button
           type="button"
-          onClick={() => {
-            setFavoritesSeed((s) => s + 1);
-          }}
+          onClick={() => setFavoritesSeed((s) => s + 1)}
           className="inline-flex items-center gap-2 px-3 py-2 rounded-lg text-rose-700 bg-rose-50 border border-rose-100 hover:bg-rose-100 transition-colors text-sm font-semibold min-h-[44px]"
         >
           <RefreshCw className="w-4 h-4" />
@@ -337,7 +386,7 @@ export default function ProductWorldsSection({
           <button
             type="button"
             onClick={() => setNewPage((p) => p + 1)}
-            className="inline-flex items-center gap-2 px-3 py-2 rounded-lg text-primary-700 bg-primary-50 border border-primary-100 hover:bg-primary-100 transition-colors text-sm font-semibold min-h-[44px]"
+            className="inline-flex items-center gap-2 px-3 py-2 rounded-lg text-violet-700 bg-violet-50 border border-violet-100 hover:bg-violet-100 transition-colors text-sm font-semibold min-h-[44px]"
           >
             <RefreshCw className="w-4 h-4" />
             Következő
@@ -346,7 +395,7 @@ export default function ProductWorldsSection({
             <button
               type="button"
               onClick={onViewAll}
-              className="inline-flex items-center gap-2 text-primary-600 font-semibold hover:text-primary-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-400 rounded-lg px-3 py-2 min-h-[44px]"
+              className="inline-flex items-center gap-2 text-violet-600 font-semibold hover:text-violet-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-400 rounded-lg px-3 py-2 min-h-[44px]"
             >
               Összes megtekintése <ArrowRight className="w-4 h-4" />
             </button>
@@ -410,7 +459,7 @@ export default function ProductWorldsSection({
 
   const sectionBgClass = {
     favorites: 'bg-gradient-to-br from-rose-100/60 via-white to-pink-100/50',
-    new: 'bg-gradient-to-br from-primary-100/50 via-white to-secondary-100/40',
+    new: 'bg-gradient-to-br from-violet-100/50 via-white to-purple-100/40',
     popular: 'bg-gradient-to-br from-amber-100/60 via-white to-orange-100/50',
   }[activeWorld];
 

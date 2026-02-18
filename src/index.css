@@ -681,7 +681,7 @@
 }
 
 .section-header-hero--popular { --hero-a: 251, 191, 36; --hero-b: 249, 115, 22; }
-.section-header-hero--new { --hero-a: 99, 102, 241; --hero-b: 139, 92, 246; }
+.section-header-hero--new { --hero-a: 139, 92, 246; --hero-b: 147, 51, 234; }
 .section-header-hero--personal { --hero-a: 139, 92, 246; --hero-b: 59, 130, 246; }
 .section-header-hero--favorites { --hero-a: 244, 63, 94; --hero-b: 251, 113, 133; }
 
@@ -721,7 +721,7 @@
 }
 
 .lux-card--popular { --lux-accent: 251, 191, 36; }
-.lux-card--new { --lux-accent: 99, 102, 241; }
+.lux-card--new { --lux-accent: 139, 92, 246; }
 .lux-card--personal { --lux-accent: 139, 92, 246; }
 .lux-card--favorites { --lux-accent: 244, 63, 94; }
 
