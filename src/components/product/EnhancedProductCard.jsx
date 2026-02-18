@@ -304,51 +304,23 @@ export const EnhancedProductCard = ({
           </span>
         </div>
         
-        {/* CTA gombok - kártya alján, középre */}
-        <div className="mt-3 sm:mt-4 flex justify-center items-center gap-2 sm:gap-3">
-          {inStock && onAddToCart && (
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                onAddToCart(product, 1);
-              }}
-              className="min-h-[44px] min-w-[44px] flex items-center justify-center gap-1.5 px-4 py-2.5 bg-emerald-500 text-white rounded-xl hover:bg-emerald-600 active:bg-emerald-700 transition-all tap-scale touch-manipulation focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:ring-offset-2"
-              aria-label="Kosárba"
-              title="Kosárba"
-            >
-              <ShoppingCart className="w-4 h-4 sm:w-5 sm:h-5 shrink-0" />
-              <span className="text-xs sm:text-sm font-bold sm:sr-only">Kosárba</span>
-            </button>
-          )}
-          <button 
-            onClick={(e) => { 
-              e.stopPropagation(); 
-              handleQuickView(); 
-            }} 
-            className="min-h-[44px] min-w-[44px] flex items-center justify-center gap-1.5 px-4 py-2.5 bg-primary-500 text-white rounded-xl hover:bg-primary-600 active:bg-primary-700 transition-all tap-scale touch-manipulation focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-400 focus-visible:ring-offset-2"
-            aria-label="Részletek"
-          >
-            <Eye className="w-4 h-4 sm:w-5 sm:h-5 shrink-0" />
-            <span className="text-xs sm:text-sm font-bold sm:sr-only">Megnézem</span>
-          </button>
-        </div>
-
+        {/* Tetszik / Nem tetszik - ikonok csak, középre, a CTA gombok fölé */}
         {showFeedback && (
-          <div className="mt-3 flex items-center gap-2">
+          <div className="mt-3 flex justify-center items-center gap-2">
             <button
               type="button"
               onClick={(e) => {
                 e.stopPropagation();
                 setFeedbackState(toggleLikeProduct(product));
               }}
-              className={`px-3 py-1.5 rounded-full text-xs font-semibold border flex items-center gap-1 transition-colors ${
+              className={`min-w-[44px] min-h-[44px] flex items-center justify-center rounded-full transition-colors tap-scale touch-manipulation ${
                 feedbackState.liked
-                  ? 'bg-green-600 text-white border-green-600'
-                  : 'bg-green-50 text-green-700 border-green-100 hover:bg-green-100'
+                  ? 'bg-green-500 text-white'
+                  : 'bg-green-50 text-green-600 hover:bg-green-100'
               }`}
+              aria-label={feedbackState.liked ? 'Tetszik (eltávolítás)' : 'Tetszik'}
             >
-              <ThumbsUp className="w-3.5 h-3.5" />
-              {feedbackState.liked ? 'Tetszik · mentve' : 'Tetszik'}
+              <ThumbsUp className="w-5 h-5" />
             </button>
             <button
               type="button"
@@ -356,17 +328,47 @@ export const EnhancedProductCard = ({
                 e.stopPropagation();
                 setFeedbackState(toggleDislikeProduct(product));
               }}
-              className={`px-3 py-1.5 rounded-full text-xs font-semibold border flex items-center gap-1 transition-colors ${
+              className={`min-w-[44px] min-h-[44px] flex items-center justify-center rounded-full transition-colors tap-scale touch-manipulation ${
                 feedbackState.disliked
-                  ? 'bg-gray-900 text-white border-gray-900'
-                  : 'bg-gray-50 text-gray-700 border-gray-200 hover:bg-gray-100'
+                  ? 'bg-red-500 text-white'
+                  : 'bg-red-50 text-red-500 hover:bg-red-100'
               }`}
+              aria-label={feedbackState.disliked ? 'Nem tetszik (eltávolítás)' : 'Nem tetszik'}
             >
-              <ThumbsDown className="w-3.5 h-3.5" />
-              {feedbackState.disliked ? 'Nem tetszik · mentve' : 'Nem tetszik'}
+              <ThumbsDown className="w-5 h-5" />
             </button>
           </div>
         )}
+        
+        {/* CTA gombok - Kosárba szöveggel desktopon, View csak ikon mobilon */}
+        <div className="mt-3 sm:mt-4 flex justify-center items-center gap-2 sm:gap-3">
+          {inStock && onAddToCart && (
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                onAddToCart(product, 1);
+              }}
+              className="min-h-[44px] min-w-[44px] flex items-center justify-center gap-1.5 px-3 sm:px-4 py-2.5 bg-emerald-500 text-white rounded-xl hover:bg-emerald-600 active:bg-emerald-700 transition-all tap-scale touch-manipulation focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:ring-offset-2"
+              aria-label="Kosárba"
+              title="Kosárba"
+            >
+              <ShoppingCart className="w-4 h-4 sm:w-5 sm:h-5 shrink-0" />
+              <span className="text-xs sm:text-sm font-bold">Kosárba</span>
+            </button>
+          )}
+          <button 
+            onClick={(e) => { 
+              e.stopPropagation(); 
+              handleQuickView(); 
+            }} 
+            className="min-h-[44px] min-w-[44px] flex items-center justify-center p-2.5 sm:px-4 sm:py-2.5 bg-primary-500 text-white rounded-xl hover:bg-primary-600 active:bg-primary-700 transition-all tap-scale touch-manipulation focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-400 focus-visible:ring-offset-2"
+            aria-label="Megnézem"
+            title="Megnézem"
+          >
+            <Eye className="w-4 h-4 sm:w-5 sm:h-5" />
+            <span className="hidden sm:inline text-sm font-bold ml-1.5">Megnézem</span>
+          </button>
+        </div>
       </div>
     </article>
   );
