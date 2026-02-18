@@ -24,25 +24,31 @@ function toUnasProductId(product) {
 }
 
 /**
- * cart_add keresése – lehet iframe-ben, parent vagy top window-ban
+ * cart_add és a hozzá tartozó window – lehet iframe-ben, parent vagy top window-ban.
+ * Fontos: az inputot UGYANABBA a documentba kell tenni, ahol a cart_add fut (pl. parent),
+ * mert a cart_add document.getElementById()-ot használ a saját documentján.
  */
-function getCartAdd() {
+function getCartAddContext() {
   if (typeof window === 'undefined') return null;
   const wins = [window, window.parent, window.top].filter(Boolean);
   for (const w of wins) {
     try {
-      if (typeof w.cart_add === 'function') return w.cart_add;
+      if (typeof w.cart_add === 'function') return { cartAdd: w.cart_add, win: w };
     } catch (_) { /* cross-origin */ }
   }
   return null;
 }
 
+function getCartAdd() {
+  const ctx = getCartAddContext();
+  return ctx ? ctx.cartAdd : null;
+}
+
 /**
  * UNAS form keresése – kosár/termék form, ahova az input kerülhet
  */
-function findUnasForm() {
-  if (typeof document === 'undefined') return null;
-  const doc = document;
+function findUnasForm(doc) {
+  if (!doc) return null;
   const selectors = [
     'form[action*="cart"]',
     'form[id*="cart"]',
@@ -61,15 +67,15 @@ function findUnasForm() {
 }
 
 /**
- * Mennyiség input létrehozása a DOM-ban – a cart_add ezt keresi
- * Termék oldal: id="db_VX__unas__4102641", name="db", type="number"
- * Ha van UNAS form, oda helyezzük az inputot.
+ * Mennyiség input létrehozása – a cart_add UGYANABBAN a documentban keresi!
+ * Ha iframe-ben futunk, a cart_add a parent/top-ban van → az inputot is oda kell tenni.
  */
-function ensureQtyInput(unasId, qty) {
+function ensureQtyInput(unasId, qty, targetDoc) {
+  if (!targetDoc) return null;
   const inputId = `db_${unasId}`;
-  let input = document.getElementById(inputId);
+  let input = targetDoc.getElementById(inputId);
   if (!input) {
-    input = document.createElement('input');
+    input = targetDoc.createElement('input');
     input.type = 'number';
     input.name = 'db';
     input.id = inputId;
@@ -77,8 +83,8 @@ function ensureQtyInput(unasId, qty) {
     input.setAttribute('data-min', '1');
     input.setAttribute('data-max', '999999');
     input.style.cssText = 'position:absolute;left:-9999px;width:1px;height:1px;opacity:0;pointer-events:none;';
-    const form = findUnasForm();
-    (form || document.body).appendChild(input);
+    const form = findUnasForm(targetDoc);
+    (form || targetDoc.body).appendChild(input);
   } else {
     input.value = String(qty);
   }
@@ -93,8 +99,8 @@ function ensureQtyInput(unasId, qty) {
  */
 export function addToUnasCart(product, quantity = 1) {
   if (typeof window === 'undefined') return false;
-  const cartAdd = getCartAdd();
-  if (typeof cartAdd !== 'function') return false;
+  const ctx = getCartAddContext();
+  if (!ctx || typeof ctx.cartAdd !== 'function') return false;
 
   const unasId = toUnasProductId(product);
   if (!unasId) return false;
@@ -102,10 +108,17 @@ export function addToUnasCart(product, quantity = 1) {
   const qty = Math.max(1, Math.floor(Number(quantity) || 1));
 
   try {
-    // Mennyiség input – a cart_add ezt keresi (termék oldal mintája)
-    ensureQtyInput(unasId, qty);
+    // Mennyiség input – a cart_add UGYANABBAN a documentban keresi (pl. parent/top)
+    let targetDoc;
+    try {
+      targetDoc = ctx.win.document;
+    } catch (_) {
+      targetDoc = typeof document !== 'undefined' ? document : null;
+    }
+    if (!targetDoc) return false;
+    ensureQtyInput(unasId, qty, targetDoc);
     // 4 paraméter: productId, prefix ('' = termék oldal), null, quantity
-    cartAdd(unasId, CART_ADD_PREFIX, null, qty);
+    ctx.cartAdd(unasId, CART_ADD_PREFIX, null, qty);
     if (window.__MARKETLY_DEBUG) {
       console.log('[unasCartService] cart_add called:', { unasId, qty }, `→ cart_add('${unasId}','',null,${qty})`);
     }
