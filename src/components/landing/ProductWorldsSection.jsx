@@ -106,7 +106,12 @@ function buildFavoritesPool(products, seed, excludeIds = []) {
     return ha - hb;
   });
   addUnique(restSorted);
-  return result.slice(0, POOL_SIZE);
+  const final = result.slice(0, POOL_SIZE);
+  return final.sort((a, b) => {
+    const ha = seededHash(String(a.id), seed + 1);
+    const hb = seededHash(String(b.id), seed + 1);
+    return ha - hb;
+  });
 }
 
 /** Friss: updated_at DESC, kategória-szerinti változatosság, max POOL_SIZE */
@@ -310,6 +315,10 @@ export default function ProductWorldsSection({
     const start = (favoritesPage * PAGE_SIZE) % Math.max(1, favoritesPool.length);
     return sliceWrap(favoritesPool, start, PAGE_SIZE);
   }, [favoritesPool, favoritesPage]);
+
+  useEffect(() => {
+    setFavoritesPage(0);
+  }, [favoritesSeed]);
 
   const newVisible = useMemo(() => {
     const start = (newPage * PAGE_SIZE) % Math.max(1, newArrivalsPool.length);
@@ -575,6 +584,7 @@ export default function ProductWorldsSection({
         >
             {visibleProducts.length > 0 ? (
               <ProductCarousel
+                key={`${activeWorld}-${activeWorld === 'favorites' ? favoritesSeed : activeWorld === 'new' ? newPage : popularPage}`}
                 className="mt-2 -mx-4 sm:mx-0 pl-4 sm:pl-0 pr-4 sm:pr-0"
                 autoScroll={false}
                 onInteractionChange={setIsInteracting}
