@@ -806,6 +806,20 @@ export default function HeroSmartSearch({
                   ))}
                 </div>
               </div>
+
+              <div className="flex flex-wrap items-center justify-between gap-2 border-t border-primary-100/80 pt-3">
+                <div className="inline-flex items-center gap-2 rounded-full border border-gray-200 bg-white px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.12em] text-gray-600">
+                  <kbd className="rounded border border-gray-300 bg-gray-50 px-1.5 py-0.5 text-[10px] font-bold text-gray-700">Enter</kbd>
+                  Keresés
+                  <span className="text-gray-300">•</span>
+                  <kbd className="rounded border border-gray-300 bg-gray-50 px-1.5 py-0.5 text-[10px] font-bold text-gray-700">Esc</kbd>
+                  Bezárás
+                </div>
+                <div className="inline-flex items-center gap-2 rounded-full border border-secondary-200 bg-secondary-50/70 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.12em] text-secondary-800">
+                  <Sparkles className="h-3.5 w-3.5 text-secondary-600" aria-hidden />
+                  {actualResultCount != null && trimmedQuery.length >= 2 ? `${confidenceMeta.label}` : 'Adaptív AI ajánlás'}
+                </div>
+              </div>
             </form>
           </div>
         </div>
@@ -1052,19 +1066,34 @@ export default function HeroSmartSearch({
               setPreviewAnchor(null);
             }}
           >
-            <div className="sticky top-0 z-10 bg-gradient-to-r from-primary-50/60 to-white border-b border-primary-100 rounded-t-xl px-4 py-3 flex items-center justify-between min-h-[52px]">
-              <p className="text-base font-bold text-gray-800 flex items-center gap-2.5">
-                <span className="w-9 h-9 rounded-xl bg-gradient-to-br from-primary-500 to-secondary-600 text-white flex items-center justify-center shadow-sm"><TrendingUp className="w-5 h-5" aria-hidden /></span>
-                Javaslatok és találatok
-              </p>
-              <button
-                type="button"
-                onClick={() => setIsOpen(false)}
-                className="p-2.5 rounded-xl text-gray-500 hover:text-gray-800 hover:bg-gray-100 active:bg-gray-200 transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center touch-manipulation"
-                aria-label="Keresőpanel bezárása"
-              >
-                <X className="w-5 h-5" />
-              </button>
+            <div className="sticky top-0 z-10 bg-gradient-to-r from-primary-50/70 via-white to-secondary-50/60 border-b border-primary-100 rounded-t-xl px-4 py-3 min-h-[52px]">
+              <div className="flex items-center justify-between gap-3">
+                <p className="text-base font-bold text-gray-800 flex items-center gap-2.5">
+                  <span className="w-9 h-9 rounded-xl bg-gradient-to-br from-primary-500 to-secondary-600 text-white flex items-center justify-center shadow-sm"><TrendingUp className="w-5 h-5" aria-hidden /></span>
+                  Javaslatok és találatok
+                </p>
+                <button
+                  type="button"
+                  onClick={() => setIsOpen(false)}
+                  className="p-2.5 rounded-xl text-gray-500 hover:text-gray-800 hover:bg-gray-100 active:bg-gray-200 transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center touch-manipulation"
+                  aria-label="Keresőpanel bezárása"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+              <div className="mt-2 flex flex-wrap items-center gap-2">
+                <span className="inline-flex items-center gap-1.5 rounded-full border border-primary-200 bg-white px-2.5 py-1 text-[11px] font-semibold text-primary-700">
+                  Live
+                </span>
+                <span className="inline-flex items-center gap-1.5 rounded-full border border-secondary-200 bg-white px-2.5 py-1 text-[11px] font-semibold text-secondary-700">
+                  {displayedTopProducts.length} top termék
+                </span>
+                {trimmedQuery.length >= 2 && actualResultCount != null && (
+                  <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-1 text-[11px] font-semibold text-emerald-700">
+                    {actualResultCount} releváns
+                  </span>
+                )}
+              </div>
             </div>
 
             {displayedTopProducts.length > 0 && (
