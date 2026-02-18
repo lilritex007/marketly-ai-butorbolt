@@ -113,7 +113,7 @@ export const ModernHero = ({
         <div className="absolute inset-x-0 bottom-0 h-[1px] bg-gradient-to-r from-transparent via-secondary-300 to-transparent opacity-60" />
       </div>
 
-      <div className="relative z-10 w-full max-w-6xl mx-auto px-4 sm:px-6 lg:px-10 py-16 sm:py-20 lg:py-24 overflow-x-hidden min-w-0">
+      <div className="relative z-10 w-full max-w-[1500px] mx-auto px-4 sm:px-6 lg:px-10 py-16 sm:py-20 lg:py-24 overflow-x-hidden min-w-0">
         <div className="flex flex-col items-center text-center w-full min-w-0 max-w-full">
           <div
             className={`inline-flex items-center gap-2.5 px-4 py-2 bg-white rounded-full border border-gray-200 shadow-sm mb-8 ${mounted ? 'hero-reveal' : 'opacity-0'}`}
@@ -148,7 +148,7 @@ export const ModernHero = ({
 
           {/* Központi hero search – azonnal a headline után */}
           <div
-            className={`relative w-full min-w-0 max-w-full -mx-4 sm:-mx-6 lg:-mx-10 mb-6 sm:mb-8 ${mounted ? 'hero-reveal' : 'opacity-0'}`}
+            className={`relative w-full min-w-0 max-w-full -mx-4 sm:-mx-8 lg:-mx-14 xl:-mx-20 mb-6 sm:mb-8 ${mounted ? 'hero-reveal' : 'opacity-0'}`}
             style={mounted ? { animationDelay: `${HERO_REVEAL_DELAY.sub - 60}ms` } : undefined}
           >
             <div className="pointer-events-none absolute inset-0 rounded-[30px] border border-white/70 bg-white/[0.04] backdrop-blur-[1px] shadow-[inset_0_1px_0_rgba(255,255,255,0.75)]" aria-hidden />
