@@ -2,7 +2,7 @@ import React, { useState, useEffect, useLayoutEffect, useRef, useMemo, useCallba
 import { ShoppingCart, Camera, MessageCircle, X, Send, Plus, Move, Trash2, Home, ZoomIn, ZoomOut, Upload, Settings, Link as LinkIcon, FileText, RefreshCw, AlertCircle, Database, Lock, Search, ChevronLeft, ChevronRight, Filter, Heart, ArrowDownUp, Info, Check, Star, Truck, ShieldCheck, Phone, ArrowRight, Mail, Eye, Sparkles, Lightbulb, Image as ImageIcon, MousePointer2, Menu, Bot, Moon, Sun, Clock, Gift, Zap, TrendingUp, Instagram, Facebook, MapPin, Sofa, Lamp, BedDouble, Armchair, Grid3X3, ExternalLink, Timer, ChevronDown } from 'lucide-react';
 // framer-motion removed due to Vite production build TDZ issues
 import { fetchUnasProducts, refreshUnasProducts, fetchCategories, fetchCategoryHierarchy, fetchSearchIndex, fetchProductStats, fetchUnasProductById } from './services/unasApi';
-import { addToUnasCart, isUnasCartAvailable, getUnasCart, transformUnasCartToItems } from './services/unasCartService';
+import { addToUnasCart } from './services/unasCartService';
 import { smartSearch } from './services/aiSearchService';
 import { trackProductView as trackProductViewPref, getPersonalizedRecommendations, getSimilarProducts } from './services/userPreferencesService';
 import { generateText, analyzeImage as analyzeImageAI } from './services/geminiService';
@@ -77,8 +77,6 @@ import FlashSaleBanner from './components/marketing/FlashSaleBanner';
 import DeliveryEstimator from './components/product/DeliveryEstimator';
 import StockUrgency from './components/product/StockUrgency';
 import ProductShare from './components/product/ProductShare';
-import FloatingCartPreview from './components/cart/FloatingCartPreview';
-import FreeShippingProgress from './components/cart/FreeShippingProgress';
 import QuickActionsBar from './components/product/QuickActionsBar';
 import ProductTabs from './components/product/ProductTabs';
 import SmartBundle from './components/product/SmartBundle';
@@ -695,8 +693,6 @@ const App = () => {
   
   // Phase 2 UX states
   const [showWishlistDrawer, setShowWishlistDrawer] = useState(false);
-  const [cartItems, setCartItems] = useState([]);
-  const [recentlyAddedToCart, setRecentlyAddedToCart] = useState(null);
   const [featuredPool, setFeaturedPool] = useState([]);
   const featuredPoolKeyRef = useRef('');
   
@@ -824,14 +820,6 @@ const App = () => {
     }
   };
   
-  // UNAS kosár szinkron: getUnasCart → setCartItems
-  const syncUnasCart = useCallback(() => {
-    if (!isUnasCartAvailable()) return;
-    getUnasCart((result) => {
-      setCartItems(transformUnasCartToItems(result));
-    });
-  }, []);
-
   // Handle add to cart with confetti celebration
   const handleAddToCart = useCallback((product, quantity = 1) => {
     try {
@@ -842,11 +830,7 @@ const App = () => {
 
       if (addedToUnas) {
         setShowConfetti(true);
-        setRecentlyAddedToCart(product);
-        setTimeout(() => setRecentlyAddedToCart(null), 3000);
         toast.success(`${product.name} hozzáadva a kosárhoz!`);
-        // UNAS kosár szinkron: késleltetve (hogy az UNAS frissüljön)
-        setTimeout(syncUnasCart, 400);
         return;
       }
 
@@ -863,29 +847,7 @@ const App = () => {
       console.warn('[handleAddToCart]', err);
       toast.error(err?.message || 'A kosárhoz adás sikertelen. Próbáld a termék oldalán.');
     }
-  }, [toast, syncUnasCart]);
-  
-  // Handle remove from cart
-  const handleRemoveFromCart = useCallback((productId) => {
-    setCartItems(prev => prev.filter(item => item.id !== productId));
-    toast.info('Eltávolítva a kosárból');
   }, [toast]);
-  
-  // Handle update cart quantity
-  const handleUpdateCartQuantity = useCallback((productId, quantity) => {
-    if (quantity <= 0) {
-      handleRemoveFromCart(productId);
-      return;
-    }
-    setCartItems(prev => prev.map(item => 
-      item.id === productId ? { ...item, quantity } : item
-    ));
-  }, [handleRemoveFromCart]);
-
-  // UNAS kosár kezdeti betöltés (ha elérhető)
-  useEffect(() => {
-    if (isUnasCartAvailable()) syncUnasCart();
-  }, [syncUnasCart]);
   
   // Server-side search state
   const [serverSearchQuery, setServerSearchQuery] = useState('');
@@ -1492,15 +1454,6 @@ const App = () => {
               />
             </div>
 
-            {/* Free Shipping Progress - shows when cart has items */}
-            {cartItems.length > 0 && (
-              <FreeShippingProgress
-                currentTotal={cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0)}
-                threshold={30000}
-                variant="banner"
-              />
-            )}
-            
             <ModernHero 
               onExplore={scrollToProductsSection}
               onTryAI={() => setActiveTab('visual-search')}
@@ -1576,7 +1529,6 @@ const App = () => {
                 onToggleWishlist={toggleWishlist}
                 wishlist={wishlist}
                 contextLabel={sectionContextLabel}
-                cartItems={cartItems}
               />
             )}
 
@@ -2155,22 +2107,6 @@ const App = () => {
         onClearAll={() => {
           wishlist.forEach(id => toggleWishlist(id));
         }}
-      />
-
-      {/* Floating Cart Preview */}
-      <FloatingCartPreview
-        cartItems={cartItems}
-        onRemove={handleRemoveFromCart}
-        onUpdateQuantity={handleUpdateCartQuantity}
-        readOnly={isUnasCartAvailable()}
-        onCheckout={() => {
-          window.location.href = `${WEBSHOP_DOMAIN}/checkout`;
-        }}
-        onViewCart={() => {
-          window.location.href = `${WEBSHOP_DOMAIN}/cart`;
-        }}
-        recentlyAdded={recentlyAddedToCart}
-        suggestedProducts={products.slice(0, 3)}
       />
 
       {/* Trust Badges Footer Section */}

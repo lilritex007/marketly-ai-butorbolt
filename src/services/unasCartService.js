@@ -1,10 +1,9 @@
 /**
- * UNAS Cart Service – kosárhoz adás és kosár lekérdezés
- * A widget UNAS oldalon fut, így window.cart_add és UNAS.getCart elérhető.
+ * UNAS Cart Service – kosárhoz adás (cart_add)
+ * A widget UNAS oldalon fut, a termékek a fő UNAS kosárba kerülnek.
  *
  * cart_add(productId, prefix, null, quantity) – termék oldalon 4 paraméter
  * A cart_add a mennyiség inputot keresi: id="db_{prefix}{productId}" vagy id="db_{productId}"
- * UNAS.getCart(callback, { lang: 'hu' }) – kosár tartalom
  */
 
 const CART_ADD_PREFIX = '';
@@ -176,66 +175,4 @@ export function addToUnasCart(product, quantity = 1) {
     }
     return false;
   }
-}
-
-/**
- * Ellenőrzi, hogy az UNAS kosár API elérhető-e.
- */
-export function isUnasCartAvailable() {
-  return typeof getCartAdd() === 'function';
-}
-
-/**
- * UNAS kontextus – getCart lehet iframe-ben, parent vagy top window-ban.
- */
-function getUnasContext() {
-  if (typeof window === 'undefined') return null;
-  const wins = [window, window.parent, window.top].filter(Boolean);
-  for (const w of wins) {
-    try {
-      if (w.UNAS && typeof w.UNAS.getCart === 'function') return w.UNAS;
-    } catch (_) { /* cross-origin */ }
-  }
-  return null;
-}
-
-/**
- * Kosár tartalom lekérdezése (UNAS.getCart).
- * @param {function} callback - (result) => void, result: { sum, items }
- * @param {object} opts - { lang: 'hu' }
- */
-export function getUnasCart(callback, opts = {}) {
-  if (typeof window === 'undefined') return;
-  const UNAS = getUnasContext();
-  if (!UNAS || typeof UNAS.getCart !== 'function') {
-    if (callback) callback({ sum: 0, items: [] });
-    return;
-  }
-  try {
-    UNAS.getCart(callback, { lang: opts.lang || 'hu' });
-  } catch (err) {
-    if (process.env.NODE_ENV === 'development') {
-      console.warn('[unasCartService] getCart error:', err);
-    }
-    if (callback) callback({ sum: 0, items: [] });
-  }
-}
-
-/**
- * UNAS getCart válasz átalakítása FloatingCartPreview formátumra.
- * @param {object} result - { sum, items } UNAS.getCart callback param
- * @returns {Array} cartItems: { id, name, price, quantity, images }
- */
-export function transformUnasCartToItems(result) {
-  const items = result?.items;
-  if (!Array.isArray(items)) return [];
-  return items
-    .filter((item) => item.id != null || item.sku)
-    .map((item, idx) => ({
-      id: String(item.id ?? item.sku ?? `item-${idx}`),
-      name: item.name || 'Termék',
-      price: item.prices?.price_gross ?? item.prices?.price ?? 0,
-      quantity: Number(item.qty) || 1,
-      images: []
-    }));
 }
