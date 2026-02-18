@@ -686,88 +686,100 @@ export default function HeroSmartSearch({
       aria-label="AI Kereső"
     >
       <div className="relative w-full max-w-none mx-auto">
-        <div className="pointer-events-none absolute inset-x-0 -top-14 h-44 bg-[radial-gradient(ellipse_at_center,rgba(255,138,0,0.28),transparent_62%)] blur-2xl" aria-hidden />
-        <div className="pointer-events-none absolute inset-x-0 -bottom-16 h-52 bg-[radial-gradient(ellipse_at_center,rgba(0,107,111,0.24),transparent_66%)] blur-3xl" aria-hidden />
-        {/* Brand-alapú premium search stage */}
-        <div className="relative rounded-none sm:rounded-[34px] overflow-hidden border-y border-primary-200/70 sm:border bg-white/92 backdrop-blur-xl shadow-[0_34px_84px_-34px_rgba(15,23,42,0.45),0_0_0_1px_rgba(255,138,0,0.18),inset_0_1px_0_rgba(255,255,255,0.9)] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_42px_94px_-34px_rgba(15,23,42,0.5),0_0_0_1px_rgba(0,107,111,0.25),inset_0_1px_0_rgba(255,255,255,0.95)]">
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_14%_18%,rgba(255,138,0,0.2),transparent_44%),radial-gradient(circle_at_86%_24%,rgba(0,107,111,0.18),transparent_46%),linear-gradient(135deg,rgba(255,255,255,0.97)_0%,rgba(255,249,243,0.95)_52%,rgba(240,253,250,0.94)_100%)] pointer-events-none" aria-hidden />
-          <div className="absolute inset-x-0 top-0 h-[1px] bg-gradient-to-r from-transparent via-primary-300/70 to-transparent" aria-hidden />
+        <div className="pointer-events-none absolute inset-x-0 -top-12 h-40 bg-[radial-gradient(ellipse_at_center,rgba(255,138,0,0.22),transparent_65%)] blur-2xl" aria-hidden />
+        <div className="pointer-events-none absolute inset-x-0 -bottom-20 h-56 bg-[radial-gradient(ellipse_at_center,rgba(0,107,111,0.16),transparent_70%)] blur-3xl" aria-hidden />
 
-          <div className="relative z-10 px-4 py-4 sm:p-6 lg:px-8 lg:py-6">
-            <div className="mb-4 sm:mb-5 flex flex-wrap items-center justify-between gap-2">
-              <div className="inline-flex items-center gap-2 rounded-full border border-primary-300/70 bg-primary-50 px-3 py-1.5 shadow-sm">
+        <div className="relative rounded-none sm:rounded-[36px] overflow-hidden border-y border-primary-200/70 sm:border bg-white/95 backdrop-blur-xl shadow-[0_28px_70px_-34px_rgba(15,23,42,0.45),0_0_0_1px_rgba(255,138,0,0.14),inset_0_1px_0_rgba(255,255,255,0.95)]">
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_12%_14%,rgba(255,138,0,0.16),transparent_44%),radial-gradient(circle_at_86%_28%,rgba(0,107,111,0.14),transparent_46%),linear-gradient(150deg,rgba(255,255,255,0.97)_0%,rgba(255,250,245,0.95)_54%,rgba(243,252,251,0.94)_100%)] pointer-events-none" aria-hidden />
+
+          <div className="relative z-10 px-4 py-4 sm:p-6 lg:px-8 lg:py-7">
+            <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
+              <span className="inline-flex items-center gap-2 rounded-full border border-primary-300/70 bg-white px-3 py-1.5 text-[11px] font-extrabold uppercase tracking-[0.16em] text-primary-800 shadow-sm">
                 <Sparkles className="h-3.5 w-3.5 text-primary-600" aria-hidden />
-                <span className="text-[11px] font-extrabold tracking-[0.18em] text-primary-800 uppercase">AI Kereső Központ</span>
-              </div>
-              <div className={`inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-[11px] font-bold uppercase tracking-[0.14em] border ${isIndexBuilding ? 'bg-amber-50 text-amber-800 border-amber-300/70' : 'bg-emerald-50 text-emerald-800 border-emerald-300/70'}`}>
+                Next Search Stage
+              </span>
+              <span className={`inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-[11px] font-bold uppercase tracking-[0.13em] ${isIndexBuilding ? 'border-amber-300/70 bg-amber-50 text-amber-800' : 'border-emerald-300/70 bg-emerald-50 text-emerald-800'}`}>
                 <span className={`h-1.5 w-1.5 rounded-full ${isIndexBuilding ? 'bg-amber-500 animate-pulse' : 'bg-emerald-500'}`} aria-hidden />
-                {isIndexBuilding ? 'Index épül' : 'Kereső online'}
-              </div>
+                {isIndexBuilding ? 'Rendszer tanul' : 'Rendszer kész'}
+              </span>
             </div>
-            <form onSubmit={handleSubmit} className="space-y-4 lg:space-y-3">
-              <div
-                className={`relative flex flex-col sm:flex-row gap-3 sm:gap-4 rounded-2xl sm:rounded-full bg-white border-2 border-primary-200/80 p-3 sm:p-3.5 lg:p-2.5 transition-all duration-200 shadow-[inset_0_0_0_1px_rgba(0,107,111,0.1),0_16px_35px_-20px_rgba(15,23,42,0.32)] focus-within:shadow-[inset_0_0_0_1px_rgba(255,138,0,0.32),0_22px_45px_-20px_rgba(15,23,42,0.4)] focus-within:ring-4 focus-within:ring-primary-300/25 ${searchPulse ? 'ring-4 ring-emerald-300/35' : ''}`}
-              >
-                <div className="flex-1 flex items-center gap-3 sm:gap-4 min-w-0 flex-shrink">
-                  <div className="flex h-10 w-10 sm:h-12 sm:w-12 shrink-0 rounded-xl bg-gradient-to-br from-primary-500 via-primary-600 to-secondary-600 text-white items-center justify-center shadow-[0_10px_24px_rgba(255,138,0,0.38)]">
-                    <Search className="w-5 h-5 sm:w-6 sm:h-6" aria-hidden />
+
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div className={`rounded-[22px] sm:rounded-[28px] border-2 border-primary-200/80 bg-white p-3 sm:p-4 shadow-[inset_0_0_0_1px_rgba(0,107,111,0.08),0_18px_34px_-24px_rgba(15,23,42,0.35)] transition-all duration-200 focus-within:ring-4 focus-within:ring-primary-300/25 ${searchPulse ? 'ring-4 ring-emerald-300/35' : ''}`}>
+                <div className="flex flex-col gap-3 lg:flex-row lg:items-center">
+                  <div className="flex min-w-0 flex-1 items-center gap-3 sm:gap-4">
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-primary-500 via-primary-600 to-secondary-600 text-white shadow-[0_10px_24px_rgba(255,138,0,0.36)] sm:h-12 sm:w-12">
+                      <Search className="h-5 w-5 sm:h-6 sm:w-6" aria-hidden />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <input
+                        type="search"
+                        value={query}
+                        onChange={(e) => setQuery(e.target.value)}
+                        onFocus={() => setIsOpen(true)}
+                        placeholder="Mit keresel? pl. bézs kanapé 100e alatt, skandináv komód..."
+                        className="w-full min-h-[50px] bg-transparent text-lg font-semibold tracking-[-0.01em] text-gray-900 outline-none placeholder:text-gray-500 sm:min-h-[58px] sm:text-[1.34rem] lg:min-h-[48px] lg:text-[1.15rem] xl:text-[1.28rem]"
+                        aria-label="Keresés a teljes katalógusban"
+                        autoComplete="off"
+                      />
+                      <p className="mt-1 text-xs text-gray-600 sm:text-sm">
+                        Írj természetesen: termék + stílus + helyiség + árkeret
+                      </p>
+                    </div>
                   </div>
-                  <div className="flex-1 min-w-0">
-                    <input
-                      type="search"
-                      value={query}
-                      onChange={(e) => setQuery(e.target.value)}
-                      onFocus={() => setIsOpen(true)}
-                      placeholder="Mit keresel? Pl. bézs kanapé 100e alatt, skandináv komód..."
-                      className="w-full min-h-[48px] sm:min-h-[58px] lg:min-h-[50px] bg-transparent outline-none text-lg sm:text-[1.38rem] lg:text-[1.2rem] xl:text-[1.35rem] text-gray-900 placeholder:text-gray-500 font-semibold tracking-[-0.01em]"
-                      aria-label="Keresés a teljes katalógusban"
-                      autoComplete="off"
-                    />
-                    <p className="text-xs sm:text-sm text-gray-600 mt-1 sm:mt-1.5">
-                      {isIndexBuilding ? 'Intelligens index szinkronizálás…' : 'Természetes prompt: termék + stílus + tér + költség'}
-                    </p>
+
+                  <div className="flex gap-2 sm:gap-3">
+                    <button
+                      type="button"
+                      onClick={() => setShowQuickFilterPanel((prev) => !prev)}
+                      className={`min-h-[48px] rounded-xl border px-4 text-sm font-semibold transition-all touch-manipulation sm:min-h-[54px] sm:rounded-full sm:px-5 ${showQuickFilterPanel ? 'border-primary-400 bg-primary-50 text-primary-800' : 'border-gray-200 bg-white text-gray-700 hover:border-primary-200 hover:bg-primary-50/60'}`}
+                      title="Gyors szűrők"
+                      aria-expanded={showQuickFilterPanel}
+                    >
+                      <span className="inline-flex items-center justify-center gap-2">
+                        <Filter className="h-5 w-5 shrink-0" aria-hidden />
+                        <span className="hidden sm:inline">Szűrők</span>
+                      </span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={onTryAI}
+                      className="min-h-[48px] rounded-xl border border-secondary-200 bg-secondary-50 px-4 text-sm font-semibold text-secondary-800 transition-all hover:bg-secondary-100 touch-manipulation sm:min-h-[54px] sm:rounded-full sm:px-5"
+                      title="Képből keresés"
+                      aria-label="Képből keresés"
+                    >
+                      <span className="inline-flex items-center justify-center gap-2">
+                        <Camera className="h-5 w-5 shrink-0" aria-hidden />
+                        <span className="hidden sm:inline">Képből</span>
+                      </span>
+                    </button>
+                    <button
+                      type="submit"
+                      className="min-h-[48px] flex-1 rounded-xl bg-gradient-to-r from-primary-500 via-primary-600 to-secondary-600 px-5 text-base font-bold text-white shadow-[0_10px_26px_rgba(255,138,0,0.38)] transition-all hover:-translate-y-0.5 hover:shadow-[0_14px_34px_rgba(255,138,0,0.48)] active:scale-[0.98] touch-manipulation sm:min-h-[54px] sm:flex-none sm:rounded-full sm:px-7"
+                      aria-busy={isSearching}
+                    >
+                      <span className="inline-flex items-center justify-center gap-2">
+                        {isSearching ? (
+                          <span className="h-5 w-5 shrink-0 animate-spin rounded-full border-2 border-white/80 border-t-transparent" aria-hidden />
+                        ) : (
+                          <ArrowRight className="h-5 w-5 shrink-0" aria-hidden />
+                        )}
+                        <span>{isSearching ? 'Keres...' : 'Keresés'}</span>
+                      </span>
+                    </button>
                   </div>
-                </div>
-                <div className="flex gap-2 sm:gap-3 flex-shrink-0 lg:items-center">
-                  <button
-                    type="button"
-                    onClick={() => setShowQuickFilterPanel((prev) => !prev)}
-                    className={`min-h-[48px] sm:min-h-[56px] lg:min-h-[46px] px-4 sm:px-5 rounded-xl sm:rounded-full border text-sm font-semibold inline-flex items-center justify-center gap-2 transition-all touch-manipulation ${showQuickFilterPanel ? 'border-primary-400 bg-primary-50 text-primary-800' : 'border-gray-200 bg-white text-gray-700 hover:border-primary-200 hover:bg-primary-50/60'}`}
-                    title="Gyors szűrők"
-                    aria-expanded={showQuickFilterPanel}
-                  >
-                    <Filter className="w-5 h-5 shrink-0" aria-hidden />
-                    <span className="hidden sm:inline">Szűrők</span>
-                  </button>
-                  <button
-                    type="submit"
-                    className="min-h-[48px] sm:min-h-[56px] lg:min-h-[46px] px-5 sm:px-8 lg:px-6 rounded-xl sm:rounded-full bg-gradient-to-r from-primary-500 via-primary-600 to-secondary-600 text-white text-base lg:text-sm font-bold shadow-[0_10px_28px_rgba(255,138,0,0.42)] hover:shadow-[0_14px_36px_rgba(255,138,0,0.5)] hover:-translate-y-0.5 active:scale-[0.98] transition-all inline-flex items-center justify-center gap-2 touch-manipulation"
-                    aria-busy={isSearching}
-                  >
-                    {isSearching ? (
-                      <span className="w-5 h-5 rounded-full border-2 border-white/80 border-t-transparent animate-spin shrink-0" aria-hidden />
-                    ) : (
-                      <ArrowRight className="w-5 h-5 shrink-0" aria-hidden />
-                    )}
-                    <span>{isSearching ? 'Keres...' : 'Keresés'}</span>
-                  </button>
                 </div>
               </div>
+
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <div className="flex flex-wrap items-center gap-2">
-                  <button
-                    type="button"
-                    onClick={onTryAI}
-                    className="inline-flex items-center gap-2 px-3 py-2 rounded-full border border-secondary-200/70 bg-secondary-50/70 text-secondary-800 hover:bg-secondary-100 font-semibold text-sm transition-colors"
-                    title="Képből keresés"
-                    aria-label="Képből keresés"
-                  >
-                    <Camera className="w-4 h-4" aria-hidden />
-                    <span>Képből keresés</span>
-                  </button>
-                  <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-white border border-primary-200 text-primary-800">
-                    <Wand2 className="w-3.5 h-3.5 text-primary-600" aria-hidden />
+                  <span className="inline-flex items-center gap-1.5 rounded-full border border-primary-200 bg-white px-2.5 py-1 text-xs font-semibold text-primary-800">
+                    <Wand2 className="h-3.5 w-3.5 text-primary-600" aria-hidden />
                     AI mód
+                  </span>
+                  <span className="inline-flex items-center gap-1.5 rounded-full border border-gray-200 bg-white px-2.5 py-1 text-xs font-semibold text-gray-700">
+                    <Sparkles className="h-3.5 w-3.5 text-secondary-600" aria-hidden />
+                    Smart intent parsing
                   </span>
                 </div>
                 {actualResultCount != null && trimmedQuery.length >= 2 && (
@@ -777,15 +789,16 @@ export default function HeroSmartSearch({
                   </span>
                 )}
               </div>
+
               <div className="pt-1">
-                <p className="mb-2 text-[11px] font-extrabold uppercase tracking-[0.14em] text-gray-500">Gyors indítás</p>
+                <p className="mb-2 text-[11px] font-extrabold uppercase tracking-[0.14em] text-gray-500">Gyors parancsok</p>
                 <div className="flex gap-2 overflow-x-auto pb-1 [scrollbar-width:thin] [&::-webkit-scrollbar]:h-1.5">
-                  {dynamicQuickSuggestions.slice(0, 4).map((text) => (
+                  {dynamicQuickSuggestions.slice(0, 6).map((text) => (
                     <button
                       key={`hero-chip-${text}`}
                       type="button"
                       onClick={() => applySuggestion(text, { submit: true, source: 'hero-chip' })}
-                      className="whitespace-nowrap inline-flex items-center gap-1.5 rounded-full border border-primary-200 bg-white/90 px-3 py-1.5 text-xs sm:text-sm font-semibold text-gray-700 shadow-sm transition-all hover:-translate-y-0.5 hover:border-primary-300 hover:text-primary-700 hover:shadow-md"
+                      className="whitespace-nowrap inline-flex items-center gap-1.5 rounded-full border border-primary-200 bg-white/95 px-3 py-1.5 text-xs font-semibold text-gray-700 shadow-sm transition-all hover:-translate-y-0.5 hover:border-primary-300 hover:text-primary-700 hover:shadow-md sm:text-sm"
                     >
                       <Sparkles className="h-3.5 w-3.5 text-primary-500" aria-hidden />
                       {text}
@@ -846,6 +859,8 @@ export default function HeroSmartSearch({
             </div>
           )}
 
+          {!isOpen && (
+          <>
           {/* Pontosság – trust card, AI modul stílus */}
           <div className="rounded-xl border border-emerald-200/80 bg-gradient-to-br from-emerald-50/80 via-white to-secondary-50/45 px-4 py-3.5 relative overflow-hidden w-full shadow-sm lg:col-span-6" role="status" aria-live="polite">
             <div className="absolute left-0 bottom-0 w-full h-0.5 bg-gradient-to-r from-emerald-400 via-secondary-500 to-primary-500" aria-hidden />
@@ -1024,6 +1039,8 @@ export default function HeroSmartSearch({
             <CheckCircle2 className="w-4 h-4 text-emerald-600" aria-hidden />
             Keresés elindítva
           </div>
+        )}
+          </>
         )}
 
         {isOpen && (
