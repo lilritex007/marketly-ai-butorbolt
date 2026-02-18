@@ -834,29 +834,34 @@ const App = () => {
 
   // Handle add to cart with confetti celebration
   const handleAddToCart = useCallback((product, quantity = 1) => {
-    const qty = Math.max(1, Math.floor(Number(quantity) || 1));
+    try {
+      const qty = Math.max(1, Math.floor(Number(quantity) || 1));
 
-    // UNAS kosárhoz adás (ha elérhető – widget UNAS oldalon fut)
-    const addedToUnas = addToUnasCart(product, qty);
+      // UNAS kosárhoz adás (ha elérhető – widget UNAS oldalon fut)
+      const addedToUnas = addToUnasCart(product, qty);
 
-    if (addedToUnas) {
-      setShowConfetti(true);
-      setRecentlyAddedToCart(product);
-      setTimeout(() => setRecentlyAddedToCart(null), 3000);
-      toast.success(`${product.name} hozzáadva a kosárhoz!`);
-      // UNAS kosár szinkron: késleltetve (hogy az UNAS frissüljön)
-      setTimeout(syncUnasCart, 400);
-      return;
-    }
+      if (addedToUnas) {
+        setShowConfetti(true);
+        setRecentlyAddedToCart(product);
+        setTimeout(() => setRecentlyAddedToCart(null), 3000);
+        toast.success(`${product.name} hozzáadva a kosárhoz!`);
+        // UNAS kosár szinkron: késleltetve (hogy az UNAS frissüljön)
+        setTimeout(syncUnasCart, 400);
+        return;
+      }
 
-    // Fallback: cart_add nem működik → termék oldalra navigálás (ott egy kattintás = kosárba)
-    const productUrl = (product.link || product.url || '').trim();
-    const fullUrl = !productUrl || productUrl === '#' ? '' : productUrl.startsWith('http') ? productUrl : `${WEBSHOP_DOMAIN}${productUrl.startsWith('/') ? '' : '/'}${productUrl}`;
-    if (fullUrl && fullUrl !== WEBSHOP_DOMAIN && fullUrl !== WEBSHOP_DOMAIN + '/') {
-      toast.info('A termék oldalra navigálunk – ott egy kattintással hozzáadhatod a kosárhoz.');
-      window.location.href = fullUrl;
-    } else {
-      toast.warning('A termék link nem elérhető. Próbáld később.');
+      // Fallback: cart_add nem működik → termék oldalra navigálás (ott egy kattintás = kosárba)
+      const productUrl = (product.link || product.url || '').trim();
+      const fullUrl = !productUrl || productUrl === '#' ? '' : productUrl.startsWith('http') ? productUrl : `${WEBSHOP_DOMAIN}${productUrl.startsWith('/') ? '' : '/'}${productUrl}`;
+      if (fullUrl && fullUrl !== WEBSHOP_DOMAIN && fullUrl !== WEBSHOP_DOMAIN + '/') {
+        toast.info('A termék oldalra navigálunk – ott egy kattintással hozzáadhatod a kosárhoz.');
+        window.location.href = fullUrl;
+      } else {
+        toast.warning('A termék link nem elérhető. Próbáld később.');
+      }
+    } catch (err) {
+      console.warn('[handleAddToCart]', err);
+      toast.error(err?.message || 'A kosárhoz adás sikertelen. Próbáld a termék oldalán.');
     }
   }, [toast, syncUnasCart]);
   
@@ -2028,7 +2033,7 @@ const App = () => {
         isOpen={!!quickPeekProduct}
         onClose={() => setQuickPeekProduct(null)}
         onAddToCart={(product) => {
-          toast.success(`${product.name} hozzáadva a kosárhoz!`);
+          handleAddToCart(product);
           setQuickPeekProduct(null);
         }}
       />

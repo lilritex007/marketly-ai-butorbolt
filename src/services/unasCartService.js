@@ -9,15 +9,40 @@
 
 const CART_ADD_PREFIX = '';
 
+/** Kinyeri a VX-XXXXX formátumú SKU-t linkből vagy képek URL-jéből (UNAS variant ref) */
+function extractVxSku(product) {
+  const link = (product?.link || product?.url || '').trim();
+  const m1 = link.match(/(VX-\d+)/i);
+  if (m1) return m1[1];
+  const imgs = product?.images || (product?.image ? [product.image] : []);
+  const firstImg = Array.isArray(imgs) ? imgs[0] : imgs;
+  const imgUrl = typeof firstImg === 'string' ? firstImg : firstImg?.url || firstImg?.src || '';
+  const m2 = String(imgUrl).match(/(VX-\d+)/i);
+  if (m2) return m2[1];
+  return null;
+}
+
 /**
  * UNAS termék ID formátum: VX__unas__{id}
- * Preferálja: unas_id, unas_ref, id, sku. Kiszűri az érvénytelen ID-kat (pl. unas-prod-*).
+ * Az UNAS add_to_favourites: cikk.replace(/-/g,'__unas__') → pl. VX-274769 → VX__unas__274769
+ * Preferálja: unas_ref (VX-xxx), sku, link/képből kinyert VX-xxx, unas_id, id.
  */
 function toUnasProductId(product) {
-  const id = product?.unas_id ?? product?.unas_ref ?? product?.id ?? product?.sku;
+  if (!product) return null;
+  // 1) unas_ref / sku – gyakran VX-274769 formátum
+  let raw = product?.unas_ref ?? product?.sku ?? extractVxSku(product);
+  if (raw) {
+    const s = String(raw).trim();
+    if (s && !s.startsWith('unas-prod-')) {
+      if (s.includes('-')) return s.replace(/-/g, '__unas__');
+      if (s.startsWith('VX__unas__')) return s;
+      return `VX__unas__${s}`;
+    }
+  }
+  // 2) unas_id / id – numerikus
+  const id = product?.unas_id ?? product?.id;
   if (!id) return null;
   const str = String(id).trim();
-  // Érvénytelen ID-k (pl. CSV parser unas-prod-1): ne adjunk VX__unas__ prefixet
   if (str.startsWith('unas-prod-') || str === '') return null;
   if (str.startsWith('VX__unas__')) return str;
   return `VX__unas__${str}`;
@@ -69,24 +94,46 @@ function findUnasForm(doc) {
 /**
  * Mennyiség input létrehozása – a cart_add UGYANABBAN a documentban keresi!
  * Ha iframe-ben futunk, a cart_add a parent/top-ban van → az inputot is oda kell tenni.
+ * Létrehozunk db_{unasId} és db_{numericId} inputot is – UNAS különböző sablonokban eltérő formátumot vár.
  */
 function ensureQtyInput(unasId, qty, targetDoc) {
   if (!targetDoc) return null;
-  const inputId = `db_${unasId}`;
-  let input = targetDoc.getElementById(inputId);
+  const numericId = unasId.replace(/^VX__unas__/, '');
+  const ids = [`db_${unasId}`];
+  if (numericId && numericId !== unasId) ids.push(`db_${numericId}`);
+  let input = null;
+  for (const inputId of ids) {
+    input = targetDoc.getElementById(inputId);
+    if (input) break;
+  }
   if (!input) {
     input = targetDoc.createElement('input');
     input.type = 'number';
     input.name = 'db';
-    input.id = inputId;
+    input.id = ids[0];
     input.value = String(qty);
     input.setAttribute('data-min', '1');
     input.setAttribute('data-max', '999999');
     input.style.cssText = 'position:absolute;left:-9999px;width:1px;height:1px;opacity:0;pointer-events:none;';
     const form = findUnasForm(targetDoc);
     (form || targetDoc.body).appendChild(input);
+    // Fallback: numeric id input (ha UNAS ezt keresi)
+    if (ids.length > 1) {
+      const input2 = targetDoc.createElement('input');
+      input2.type = 'number';
+      input2.name = 'db';
+      input2.id = ids[1];
+      input2.value = String(qty);
+      input2.setAttribute('data-min', '1');
+      input2.setAttribute('data-max', '999999');
+      input2.style.cssText = 'position:absolute;left:-9999px;width:1px;height:1px;opacity:0;pointer-events:none;';
+      (form || targetDoc.body).appendChild(input2);
+    }
   } else {
-    input.value = String(qty);
+    for (const id of ids) {
+      const el = targetDoc.getElementById(id);
+      if (el) el.value = String(qty);
+    }
   }
   return input;
 }

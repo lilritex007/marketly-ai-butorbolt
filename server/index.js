@@ -168,7 +168,9 @@ app.get('/api/products', async (req, res) => {
         name: p.name,
         price: p.price,
         category: p.category,
-        image: Array.isArray(p.images) ? p.images[0] : p.images, // Only first image
+        image: Array.isArray(p.images) ? p.images[0] : p.images,
+        images: p.images,
+        link: p.link,
         inStock: p.in_stock ?? p.inStock ?? true
       }));
     }
