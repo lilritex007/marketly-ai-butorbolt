@@ -1557,6 +1557,7 @@ const App = () => {
                 onProductClick={handleProductView}
                 onWishlistToggle={toggleWishlist}
                 wishlist={wishlist}
+                onAddToCart={handleAddToCart}
                 onAskAI={() => setShowStyleQuiz(true)}
                 onNavigateToCategory={handleCategoryChange}
                 allCategories={categories}
@@ -1575,6 +1576,7 @@ const App = () => {
                 onWishlistToggle={toggleWishlist}
                 onCategoryChange={handleCategoryChange}
                 wishlist={wishlist}
+                onAddToCart={handleAddToCart}
                 onAskAI={() => setShowStyleQuiz(true)}
                 totalCount={totalProductsCount}
                 loadedCount={products.length}

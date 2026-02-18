@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Heart, Eye, ShoppingBag, Info, ThumbsUp, ThumbsDown, Bell } from 'lucide-react';
+import { Heart, Eye, ShoppingBag, Info, ThumbsUp, ThumbsDown, Bell, ShoppingCart } from 'lucide-react';
 import { formatPrice } from '../../utils/helpers';
 import { SmartBadges, StockBadge } from '../ui/Badge';
 import { getOptimizedImageProps, getAdaptiveQuality } from '../../utils/imageOptimizer';
@@ -304,17 +304,33 @@ export const EnhancedProductCard = ({
               </span>
             </div>
             
-            {/* Quick View Button */}
-            <button 
-              onClick={(e) => { 
-                e.stopPropagation(); 
-                handleQuickView(); 
-              }} 
-              className="shrink-0 w-11 h-11 sm:w-12 sm:h-12 lg:w-14 lg:h-14 flex items-center justify-center bg-primary-500 text-white rounded-xl hover:bg-primary-600 transition-all tap-scale focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-400 focus-visible:ring-offset-2"
-              aria-label="Részletek"
-            >
-              <Eye className="w-5 h-5 sm:w-6 sm:h-6" />
-            </button>
+            <div className="flex items-center gap-2 shrink-0">
+              {/* Add to Cart Button */}
+              {inStock && onAddToCart && (
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onAddToCart(product, 1);
+                  }}
+                  className="w-11 h-11 sm:w-12 sm:h-12 lg:w-14 lg:h-14 flex items-center justify-center bg-primary-500 text-white rounded-xl hover:bg-primary-600 transition-all tap-scale focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-400 focus-visible:ring-offset-2"
+                  aria-label="Kosárba"
+                  title="Kosárba"
+                >
+                  <ShoppingCart className="w-5 h-5 sm:w-6 sm:h-6" />
+                </button>
+              )}
+              {/* Quick View Button */}
+              <button 
+                onClick={(e) => { 
+                  e.stopPropagation(); 
+                  handleQuickView(); 
+                }} 
+                className="w-11 h-11 sm:w-12 sm:h-12 lg:w-14 lg:h-14 flex items-center justify-center bg-primary-500 text-white rounded-xl hover:bg-primary-600 transition-all tap-scale focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-400 focus-visible:ring-offset-2"
+                aria-label="Részletek"
+              >
+                <Eye className="w-5 h-5 sm:w-6 sm:h-6" />
+              </button>
+            </div>
           </div>
         </div>
 

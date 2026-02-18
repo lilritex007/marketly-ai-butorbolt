@@ -6,7 +6,15 @@
  * A cart_add a mennyiség inputot keresi: id="db_{prefix}{productId}" vagy id="db_{productId}"
  */
 
-const CART_ADD_PREFIX = '';
+/** Kategória/kollekció oldalon az UNAS artlist_ prefixet várja (db_artlist_{productId}) */
+function getCartAddPrefix() {
+  if (typeof window === 'undefined') return '';
+  try {
+    const path = (window.location?.pathname || '') + (window.top?.location?.pathname || '');
+    if (/\/sct\//.test(path)) return 'artlist_';
+  } catch (_) { /* cross-origin */ }
+  return '';
+}
 
 /** Kinyeri a VX-XXXXX formátumú SKU-t linkből vagy képek URL-jéből (UNAS variant ref) */
 function extractVxSku(product) {
@@ -164,7 +172,7 @@ export function addToUnasCart(product, quantity = 1) {
     if (!targetDoc) return false;
     ensureQtyInput(unasId, qty, targetDoc);
     // 4 paraméter: productId, prefix ('' = termék oldal), null, quantity
-    ctx.cartAdd(unasId, CART_ADD_PREFIX, null, qty);
+    ctx.cartAdd(unasId, getCartAddPrefix(), null, qty);
     if (window.__MARKETLY_DEBUG) {
       console.log('[unasCartService] cart_add called:', { unasId, qty }, `→ cart_add('${unasId}','',null,${qty})`);
     }

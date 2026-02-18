@@ -1,6 +1,6 @@
 import React, { useMemo, useState, useEffect, useRef, useCallback } from 'react';
 import { 
-  ArrowLeft, TrendingUp, Package, Tag, Sparkles, 
+  ArrowLeft, TrendingUp, Package, Tag, Sparkles, ShoppingCart,
   ChevronRight, Filter, Grid3X3, List, Star, Home,
   ArrowUpDown, SlidersHorizontal, X, Check, LayoutGrid,
   Rows3, Plus, GitCompare, ChevronDown, ChevronUp, BookOpen,
@@ -440,7 +440,7 @@ const PriceStats = ({ products, stats }) => {
 /**
  * Featured Products
  */
-const FeaturedProducts = ({ products, onProductClick, onWishlistToggle, wishlist }) => {
+const FeaturedProducts = ({ products, onProductClick, onWishlistToggle, wishlist, onAddToCart }) => {
   const featured = useMemo(() => {
     return products
       .filter(p => p.salePrice && p.price > p.salePrice)
@@ -463,6 +463,7 @@ const FeaturedProducts = ({ products, onProductClick, onWishlistToggle, wishlist
               product={product}
               onQuickView={onProductClick}
               onToggleWishlist={onWishlistToggle}
+              onAddToCart={onAddToCart}
               isWishlisted={wishlist?.includes(product.id)}
               index={index}
             />
@@ -476,7 +477,7 @@ const FeaturedProducts = ({ products, onProductClick, onWishlistToggle, wishlist
 /**
  * Compact Product Card
  */
-const CompactProductCard = ({ product, onQuickView, onToggleWishlist, isWishlisted, onCompare, isComparing }) => {
+const CompactProductCard = ({ product, onQuickView, onToggleWishlist, isWishlisted, onAddToCart, onCompare, isComparing }) => {
   const displayPrice = product.salePrice || product.price;
   const hasDiscount = product.salePrice && product.price > product.salePrice;
   
@@ -508,6 +509,15 @@ const CompactProductCard = ({ product, onQuickView, onToggleWishlist, isWishlist
             </span>
           </div>
           <div className="flex gap-1">
+            {(product.inStock ?? product.in_stock) !== false && onAddToCart && (
+              <button
+                onClick={(e) => { e.stopPropagation(); onAddToCart(product, 1); }}
+                className="p-1.5 rounded-lg bg-primary-500 text-white hover:bg-primary-600 transition-colors"
+                title="Kosárba"
+              >
+                <ShoppingCart className="w-4 h-4" />
+              </button>
+            )}
             <button
               onClick={() => onCompare?.(product)}
               className={`p-1.5 rounded-lg transition-colors ${isComparing ? 'bg-primary-100 text-primary-500' : 'hover:bg-gray-100 text-gray-400'}`}
@@ -638,6 +648,7 @@ const CategoryPage = ({
   onWishlistToggle,
   onCategoryChange,
   wishlist,
+  onAddToCart,
   onAskAI,
   totalCount = 0,
   loadedCount = 0,
@@ -858,7 +869,7 @@ const CategoryPage = ({
       <div className="w-full max-w-[2000px] mx-auto px-4 sm:px-6 lg:px-10 xl:px-16 py-8 sm:py-12 lg:py-16">
         <AIBanner category={category} onAskAI={onAskAI} />
         <PriceStats products={products} stats={stats} />
-        <FeaturedProducts products={products} onProductClick={onProductClick} onWishlistToggle={onWishlistToggle} wishlist={wishlist} />
+        <FeaturedProducts products={products} onProductClick={onProductClick} onWishlistToggle={onWishlistToggle} wishlist={wishlist} onAddToCart={onAddToCart} />
         <RelatedCategories currentCategory={category} allCategories={allCategories} onCategoryChange={onCategoryChange} />
         <CategoryStory category={category} />
         
@@ -921,6 +932,7 @@ const CategoryPage = ({
                     product={product}
                     onQuickView={onProductClick}
                     onToggleWishlist={onWishlistToggle}
+                    onAddToCart={onAddToCart}
                     isWishlisted={wishlist?.includes(product.id)}
                     index={index}
                     sectionId={`category-${category}`}
@@ -935,6 +947,7 @@ const CategoryPage = ({
                     product={product}
                     onQuickView={onProductClick}
                     onToggleWishlist={onWishlistToggle}
+                    onAddToCart={onAddToCart}
                     isWishlisted={wishlist?.includes(product.id)}
                     onCompare={toggleCompare}
                     isComparing={compareList.some(p => p.id === product.id)}

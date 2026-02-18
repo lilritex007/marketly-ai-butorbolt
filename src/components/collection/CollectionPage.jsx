@@ -1,5 +1,5 @@
 import React, { useMemo, useState, useEffect, useRef } from 'react';
-import { Home, ChevronRight, Filter, LayoutGrid, Rows3, SlidersHorizontal, Sparkles } from 'lucide-react';
+import { Home, ChevronRight, Filter, LayoutGrid, Rows3, SlidersHorizontal, Sparkles, ShoppingCart } from 'lucide-react';
 import { EnhancedProductCard } from '../product/EnhancedProductCard';
 import { ProductGridSkeleton } from '../ui/Skeleton';
 
@@ -53,6 +53,7 @@ const CollectionPage = ({
   onProductClick,
   onWishlistToggle,
   wishlist,
+  onAddToCart,
   onAskAI,
   onNavigateToCategory,
   allCategories = [],
@@ -266,6 +267,7 @@ const CollectionPage = ({
                 product={product}
                 onQuickView={onProductClick}
                 onToggleWishlist={onWishlistToggle}
+                onAddToCart={onAddToCart}
                 isWishlisted={wishlist?.includes(product.id)}
                 index={index}
                 sectionId={`collection-${collection.id}`}
@@ -291,12 +293,23 @@ const CollectionPage = ({
                     <span className="font-bold text-gray-900">
                       {(product.salePrice || product.price).toLocaleString('hu-HU')} Ft
                     </span>
-                    <button
-                      onClick={() => onWishlistToggle?.(product.id)}
-                      className={`p-1.5 rounded-lg ${wishlist?.includes(product.id) ? 'bg-red-100 text-red-500' : 'hover:bg-gray-100 text-gray-400'}`}
-                    >
-                      ♥
-                    </button>
+                    <div className="flex gap-1">
+                      {(product.inStock ?? product.in_stock) !== false && onAddToCart && (
+                        <button
+                          onClick={(e) => { e.stopPropagation(); onAddToCart(product, 1); }}
+                          className="p-1.5 rounded-lg bg-primary-500 text-white hover:bg-primary-600 transition-colors"
+                          title="Kosárba"
+                        >
+                          <ShoppingCart className="w-4 h-4" />
+                        </button>
+                      )}
+                      <button
+                        onClick={() => onWishlistToggle?.(product.id)}
+                        className={`p-1.5 rounded-lg ${wishlist?.includes(product.id) ? 'bg-red-100 text-red-500' : 'hover:bg-gray-100 text-gray-400'}`}
+                      >
+                        ♥
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>
