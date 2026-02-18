@@ -139,13 +139,27 @@ export function isUnasCartAvailable() {
 }
 
 /**
+ * UNAS kontextus – getCart lehet iframe-ben, parent vagy top window-ban.
+ */
+function getUnasContext() {
+  if (typeof window === 'undefined') return null;
+  const wins = [window, window.parent, window.top].filter(Boolean);
+  for (const w of wins) {
+    try {
+      if (w.UNAS && typeof w.UNAS.getCart === 'function') return w.UNAS;
+    } catch (_) { /* cross-origin */ }
+  }
+  return null;
+}
+
+/**
  * Kosár tartalom lekérdezése (UNAS.getCart).
  * @param {function} callback - (result) => void, result: { sum, items }
  * @param {object} opts - { lang: 'hu' }
  */
 export function getUnasCart(callback, opts = {}) {
   if (typeof window === 'undefined') return;
-  const UNAS = window.UNAS;
+  const UNAS = getUnasContext();
   if (!UNAS || typeof UNAS.getCart !== 'function') {
     if (callback) callback({ sum: 0, items: [] });
     return;
@@ -158,4 +172,23 @@ export function getUnasCart(callback, opts = {}) {
     }
     if (callback) callback({ sum: 0, items: [] });
   }
+}
+
+/**
+ * UNAS getCart válasz átalakítása FloatingCartPreview formátumra.
+ * @param {object} result - { sum, items } UNAS.getCart callback param
+ * @returns {Array} cartItems: { id, name, price, quantity, images }
+ */
+export function transformUnasCartToItems(result) {
+  const items = result?.items;
+  if (!Array.isArray(items)) return [];
+  return items
+    .filter((item) => item.id != null || item.sku)
+    .map((item, idx) => ({
+      id: String(item.id ?? item.sku ?? `item-${idx}`),
+      name: item.name || 'Termék',
+      price: item.prices?.price_gross ?? item.prices?.price ?? 0,
+      quantity: Number(item.qty) || 1,
+      images: []
+    }));
 }

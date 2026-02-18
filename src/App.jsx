@@ -2,7 +2,7 @@ import React, { useState, useEffect, useLayoutEffect, useRef, useMemo, useCallba
 import { ShoppingCart, Camera, MessageCircle, X, Send, Plus, Move, Trash2, Home, ZoomIn, ZoomOut, Upload, Settings, Link as LinkIcon, FileText, RefreshCw, AlertCircle, Database, Lock, Search, ChevronLeft, ChevronRight, Filter, Heart, ArrowDownUp, Info, Check, Star, Truck, ShieldCheck, Phone, ArrowRight, Mail, Eye, Sparkles, Lightbulb, Image as ImageIcon, MousePointer2, Menu, Bot, Moon, Sun, Clock, Gift, Zap, TrendingUp, Instagram, Facebook, MapPin, Sofa, Lamp, BedDouble, Armchair, Grid3X3, ExternalLink, Timer, ChevronDown } from 'lucide-react';
 // framer-motion removed due to Vite production build TDZ issues
 import { fetchUnasProducts, refreshUnasProducts, fetchCategories, fetchCategoryHierarchy, fetchSearchIndex, fetchProductStats, fetchUnasProductById } from './services/unasApi';
-import { addToUnasCart, isUnasCartAvailable } from './services/unasCartService';
+import { addToUnasCart, isUnasCartAvailable, getUnasCart, transformUnasCartToItems } from './services/unasCartService';
 import { smartSearch } from './services/aiSearchService';
 import { trackProductView as trackProductViewPref, getPersonalizedRecommendations, getSimilarProducts } from './services/userPreferencesService';
 import { generateText, analyzeImage as analyzeImageAI } from './services/geminiService';
@@ -824,6 +824,14 @@ const App = () => {
     }
   };
   
+  // UNAS kosár szinkron: getUnasCart → setCartItems
+  const syncUnasCart = useCallback(() => {
+    if (!isUnasCartAvailable()) return;
+    getUnasCart((result) => {
+      setCartItems(transformUnasCartToItems(result));
+    });
+  }, []);
+
   // Handle add to cart with confetti celebration
   const handleAddToCart = useCallback((product, quantity = 1) => {
     const qty = Math.max(1, Math.floor(Number(quantity) || 1));
@@ -833,18 +841,11 @@ const App = () => {
 
     if (addedToUnas) {
       setShowConfetti(true);
-      setCartItems(prev => {
-        const existing = prev.find(item => item.id === product.id);
-        if (existing) {
-          return prev.map(item =>
-            item.id === product.id ? { ...item, quantity: (item.quantity || 1) + qty } : item
-          );
-        }
-        return [...prev, { ...product, quantity: qty }];
-      });
       setRecentlyAddedToCart(product);
       setTimeout(() => setRecentlyAddedToCart(null), 3000);
       toast.success(`${product.name} hozzáadva a kosárhoz!`);
+      // UNAS kosár szinkron: késleltetve (hogy az UNAS frissüljön)
+      setTimeout(syncUnasCart, 400);
       return;
     }
 
@@ -857,7 +858,7 @@ const App = () => {
     } else {
       toast.warning('A termék link nem elérhető. Próbáld később.');
     }
-  }, [toast]);
+  }, [toast, syncUnasCart]);
   
   // Handle remove from cart
   const handleRemoveFromCart = useCallback((productId) => {
@@ -875,6 +876,11 @@ const App = () => {
       item.id === productId ? { ...item, quantity } : item
     ));
   }, [handleRemoveFromCart]);
+
+  // UNAS kosár kezdeti betöltés (ha elérhető)
+  useEffect(() => {
+    if (isUnasCartAvailable()) syncUnasCart();
+  }, [syncUnasCart]);
   
   // Server-side search state
   const [serverSearchQuery, setServerSearchQuery] = useState('');
@@ -2151,6 +2157,7 @@ const App = () => {
         cartItems={cartItems}
         onRemove={handleRemoveFromCart}
         onUpdateQuantity={handleUpdateCartQuantity}
+        readOnly={isUnasCartAvailable()}
         onCheckout={() => {
           window.location.href = `${WEBSHOP_DOMAIN}/checkout`;
         }}

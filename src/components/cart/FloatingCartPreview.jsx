@@ -13,7 +13,8 @@ const FloatingCartPreview = ({
   onCheckout,
   onViewCart,
   recentlyAdded = null, // Last added product for animation
-  suggestedProducts = []
+  suggestedProducts = [],
+  readOnly = false // UNAS szinkron: nincs remove/update, Kosár oldalon módosítható
 }) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const [showAddedNotification, setShowAddedNotification] = useState(false);
@@ -99,7 +100,7 @@ const FloatingCartPreview = ({
               <div key={item.id} className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl">
                 <div className="w-16 h-16 bg-white rounded-lg overflow-hidden shrink-0">
                   <img 
-                    src={item.images?.[0] || item.image} 
+                    src={item.images?.[0] || item.image || 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="%23ccc" stroke-width="1.5"%3E%3Crect x="3" y="3" width="18" height="18" rx="2"/%3E%3Cpath d="M3 9h18M9 21V9"/%3E%3C/svg%3E'} 
                     alt={item.name}
                     className="w-full h-full object-contain"
                   />
@@ -110,28 +111,34 @@ const FloatingCartPreview = ({
                     {formatPrice(item.salePrice || item.price)}
                   </p>
                 </div>
-                <div className="flex items-center gap-1">
-                  {/* Quantity controls */}
+                {!readOnly && (
+                  <div className="flex items-center gap-1">
+                    <button
+                      onClick={() => onUpdateQuantity?.(item.id, Math.max(0, (item.quantity || 1) - 1))}
+                      className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-200 rounded transition-colors"
+                    >
+                      <Minus className="w-4 h-4" />
+                    </button>
+                    <span className="w-8 text-center text-base font-semibold">{item.quantity || 1}</span>
+                    <button
+                      onClick={() => onUpdateQuantity?.(item.id, (item.quantity || 1) + 1)}
+                      className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-200 rounded transition-colors"
+                    >
+                      <Plus className="w-4 h-4" />
+                    </button>
+                  </div>
+                )}
+                {!readOnly && (
                   <button
-                    onClick={() => onUpdateQuantity?.(item.id, Math.max(0, (item.quantity || 1) - 1))}
-                    className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-200 rounded transition-colors"
+                    onClick={() => onRemove?.(item.id)}
+                    className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded transition-colors"
                   >
-                    <Minus className="w-4 h-4" />
+                    <Trash2 className="w-5 h-5" />
                   </button>
-                  <span className="w-8 text-center text-base font-semibold">{item.quantity || 1}</span>
-                  <button
-                    onClick={() => onUpdateQuantity?.(item.id, (item.quantity || 1) + 1)}
-                    className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-200 rounded transition-colors"
-                  >
-                    <Plus className="w-4 h-4" />
-                  </button>
-                </div>
-                <button
-                  onClick={() => onRemove?.(item.id)}
-                  className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded transition-colors"
-                >
-                  <Trash2 className="w-5 h-5" />
-                </button>
+                )}
+                {readOnly && (
+                  <span className="w-8 text-center text-base font-semibold text-gray-600">{item.quantity || 1} db</span>
+                )}
               </div>
             ))}
           </div>
