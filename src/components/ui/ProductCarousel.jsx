@@ -18,6 +18,7 @@ const ProductCarousel = ({
   className = '',
   onInteractionChange,
   cardSize = 'default',
+  desktopColumns, // override: 6 = 6 kártya/sor desktopon (pl. Worlds)
 }) => {
   const containerRef = useRef(null);
   const [paused, setPaused] = useState(false);
@@ -94,14 +95,20 @@ const ProductCarousel = ({
         }}
         className="flex gap-4 overflow-x-auto scroll-smooth pb-3 snap-x snap-mandatory scrollbar-hide"
       >
-        {React.Children.map(children, (child, index) => (
-          <div
-            key={index}
-            className={`snap-start ${cardSize === 'large' ? 'min-w-[220px] sm:min-w-[260px] lg:min-w-[calc((100%-80px)/5)]' : 'min-w-[170px] sm:min-w-[200px] lg:min-w-[calc((100%-80px)/6)]'}`}
-          >
-            {child}
-          </div>
-        ))}
+        {React.Children.map(children, (child, index) => {
+          const lgCols6 = 'lg:min-w-[calc((100%-80px)/6)]';
+          const lgCols5 = 'lg:min-w-[calc((100%-80px)/5)]';
+          const use6cols = desktopColumns === 6 || (cardSize !== 'large' && !desktopColumns);
+          const lgClass = use6cols ? lgCols6 : lgCols5;
+          return (
+            <div
+              key={index}
+              className={`snap-start ${cardSize === 'large' ? `min-w-[220px] sm:min-w-[260px] ${lgClass}` : `min-w-[170px] sm:min-w-[200px] ${lgClass}`}`}
+            >
+              {child}
+            </div>
+          );
+        })}
       </div>
     </div>
   );

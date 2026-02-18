@@ -424,18 +424,20 @@ export default function ProductWorldsSection({
       data-section="product-worlds"
     >
       <div className="w-full max-w-[2000px] mx-auto px-4 sm:px-6 lg:px-10 xl:px-16">
-        {/* Tab bar – swipe a fejlécen, rövid cím mobilon, swipe jelzés */}
+        {/* Swipe zone: tab bar + hero – carouselen kívül mindenhol működik */}
+        <div
+          ref={tabSwipeRef}
+          onTouchStart={handleTabSwipeStart}
+          onTouchEnd={handleTabSwipeEnd}
+          className="touch-pan-y"
+        >
+        {/* Tab bar – rövid cím mobilon, swipe jelzés */}
         <div
           className="flex justify-center mb-6 sm:mb-8 lg:mb-12 px-2 sm:px-4"
           role="tablist"
           aria-label="Válassz világot"
         >
-          <div
-            ref={tabSwipeRef}
-            onTouchStart={handleTabSwipeStart}
-            onTouchEnd={handleTabSwipeEnd}
-            className="flex w-full max-w-2xl sm:w-auto sm:inline-flex flex-col sm:flex-row items-stretch sm:items-center gap-2"
-          >
+          <div className="flex w-full max-w-2xl sm:w-auto sm:inline-flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
             <div className="flex flex-1 sm:flex-initial rounded-2xl bg-white/95 backdrop-blur-sm border-2 border-gray-200/80 shadow-xl shadow-gray-300/40 p-2 sm:p-2.5 gap-2">
               {WORLDS.map((w) => (
                 <button
@@ -472,7 +474,7 @@ export default function ProductWorldsSection({
           </div>
         </div>
 
-        {/* Hero fejléc – full-bleed, dramatikus, erősebb színek */}
+        {/* Hero fejléc – full-bleed, dramatikus, erősebb színek (swipe zone része) */}
         <div className={`relative overflow-hidden px-4 sm:px-6 lg:px-10 py-8 sm:py-10 lg:py-14 rounded-2xl lg:rounded-3xl border-2 ${currentWorld.className} transition-all duration-500`}>
           <div className="absolute inset-0 bg-gradient-to-br from-white/85 via-white/60 to-transparent pointer-events-none" />
           {/* WoW: erősebb dekoratív gradient a sarkokban */}
@@ -513,6 +515,7 @@ export default function ProductWorldsSection({
             </div>
           </div>
         </div>
+        </div>
 
         <div
           id={`panel-${activeWorld}`}
@@ -527,6 +530,7 @@ export default function ProductWorldsSection({
                 autoScroll={false}
                 onInteractionChange={setIsInteracting}
                 cardSize="large"
+                desktopColumns={6}
               >
                 {visibleProducts.map((product, index) => {
                   const stockLevel = getStockLevel(product);
