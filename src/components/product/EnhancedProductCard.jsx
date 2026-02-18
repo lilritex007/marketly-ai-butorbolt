@@ -296,10 +296,10 @@ export const EnhancedProductCard = ({
         <div className="pt-2 sm:pt-3 border-t border-gray-100 text-center space-y-1 min-w-0">
           {discount > 0 ? (
             <>
-              <span className="text-xs sm:text-sm text-red-600 line-through block font-semibold">
+              <span className="text-sm sm:text-base text-red-600 line-through block font-semibold">
                 {formatPrice(product.price)}
               </span>
-              <span className="text-base sm:text-lg lg:text-xl font-black text-red-600 block">
+              <span className="text-lg sm:text-xl lg:text-2xl font-black text-red-600 block">
                 {formatPrice(displayPrice)}
               </span>
               <span className="inline-block px-2 py-1 rounded-md bg-red-100 text-red-700 text-xs sm:text-sm font-black">
@@ -307,7 +307,7 @@ export const EnhancedProductCard = ({
               </span>
             </>
           ) : (
-            <span className="text-base sm:text-lg lg:text-xl font-black text-gray-900 block">
+            <span className="text-lg sm:text-xl lg:text-2xl font-black text-gray-900 block">
               {formatPrice(displayPrice)}
             </span>
           )}

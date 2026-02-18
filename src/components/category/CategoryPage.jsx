@@ -509,12 +509,12 @@ const CompactProductCard = ({ product, onQuickView, onToggleWishlist, isWishlist
         <div className="mt-1.5 text-center min-w-0 space-y-0.5">
           {hasDiscount ? (
             <>
-              <span className="text-[10px] sm:text-xs text-red-600 line-through block font-semibold">{product.price.toLocaleString('hu-HU')} Ft</span>
-              <span className="text-sm font-black text-red-600 block">{displayPrice.toLocaleString('hu-HU')} Ft</span>
+              <span className="text-xs sm:text-sm text-red-600 line-through block font-semibold">{product.price.toLocaleString('hu-HU')} Ft</span>
+              <span className="text-base sm:text-lg font-black text-red-600 block">{displayPrice.toLocaleString('hu-HU')} Ft</span>
               <span className="inline-block px-1.5 py-0.5 rounded bg-red-100 text-red-700 text-[10px] sm:text-xs font-bold">-{discountPct}%</span>
             </>
           ) : (
-            <span className="text-sm font-black text-gray-900 block">{displayPrice.toLocaleString('hu-HU')} Ft</span>
+            <span className="text-base sm:text-lg font-black text-gray-900 block">{displayPrice.toLocaleString('hu-HU')} Ft</span>
           )}
         </div>
         {/* Like/Dislike + CTA - Kosárba hangsúlyosabb */}

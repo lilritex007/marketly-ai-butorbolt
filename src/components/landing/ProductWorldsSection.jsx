@@ -5,6 +5,7 @@ import {
   TrendingUp,
   ArrowRight,
   RefreshCw,
+  ChevronsLeftRight,
 } from 'lucide-react';
 import { EnhancedProductCard } from '../product/EnhancedProductCard';
 import { getStockLevel } from '../../utils/helpers';
@@ -423,32 +424,51 @@ export default function ProductWorldsSection({
       data-section="product-worlds"
     >
       <div className="w-full max-w-[2000px] mx-auto px-4 sm:px-6 lg:px-10 xl:px-16">
-        {/* Tab bar – széles, nincs alulvonal */}
+        {/* Tab bar – swipe a fejlécen, rövid cím mobilon, swipe jelzés */}
         <div
           className="flex justify-center mb-6 sm:mb-8 lg:mb-12 px-2 sm:px-4"
           role="tablist"
           aria-label="Válassz világot"
         >
-          <div className="flex w-full max-w-2xl sm:w-auto sm:inline-flex rounded-2xl bg-white/95 backdrop-blur-sm border-2 border-gray-200/80 shadow-xl shadow-gray-300/40 p-2 sm:p-2.5 gap-2">
-            {WORLDS.map((w) => (
-              <button
-                key={w.id}
-                type="button"
-                role="tab"
-                aria-selected={activeWorld === w.id}
-                aria-controls={`panel-${w.id}`}
-                id={`tab-${w.id}`}
-                onClick={() => setActiveWorld(w.id)}
-                className={`flex-1 sm:flex-initial inline-flex items-center justify-center gap-2 px-4 sm:px-6 lg:px-8 py-3 sm:py-3.5 rounded-xl text-sm sm:text-base font-bold transition-all duration-300 min-h-[48px] sm:min-h-[52px] whitespace-nowrap ${
-                  activeWorld === w.id
-                    ? `bg-gradient-to-r ${w.accentClass} text-white shadow-lg`
-                    : 'text-gray-700 hover:bg-gray-100'
-                }`}
-              >
-                <w.Icon className="w-5 h-5 sm:w-6 sm:h-6 shrink-0" aria-hidden />
-                <span className="truncate">{w.id === 'favorites' ? 'Kedvencek' : w.id === 'new' ? 'Friss' : 'Legnépszerűbb'}</span>
-              </button>
-            ))}
+          <div
+            ref={tabSwipeRef}
+            onTouchStart={handleTabSwipeStart}
+            onTouchEnd={handleTabSwipeEnd}
+            className="flex w-full max-w-2xl sm:w-auto sm:inline-flex flex-col sm:flex-row items-stretch sm:items-center gap-2"
+          >
+            <div className="flex flex-1 sm:flex-initial rounded-2xl bg-white/95 backdrop-blur-sm border-2 border-gray-200/80 shadow-xl shadow-gray-300/40 p-2 sm:p-2.5 gap-2">
+              {WORLDS.map((w) => (
+                <button
+                  key={w.id}
+                  type="button"
+                  role="tab"
+                  aria-selected={activeWorld === w.id}
+                  aria-controls={`panel-${w.id}`}
+                  id={`tab-${w.id}`}
+                  onClick={() => setActiveWorld(w.id)}
+                  className={`flex-1 sm:flex-initial inline-flex items-center justify-center gap-2 px-4 sm:px-6 lg:px-8 py-3 sm:py-3.5 rounded-xl text-sm sm:text-base font-bold transition-all duration-300 min-h-[48px] sm:min-h-[52px] whitespace-nowrap ${
+                    activeWorld === w.id
+                      ? `bg-gradient-to-r ${w.accentClass} text-white shadow-lg`
+                      : 'text-gray-700 hover:bg-gray-100'
+                  }`}
+                >
+                  <w.Icon className="w-5 h-5 sm:w-6 sm:h-6 shrink-0" aria-hidden />
+                  <span className="truncate">
+                    {w.id === 'favorites' ? 'Kedvencek' : w.id === 'new' ? 'Friss' : (
+                      <>
+                        <span className="sm:hidden">Népszerű</span>
+                        <span className="hidden sm:inline">Legnépszerűbb</span>
+                      </>
+                    )}
+                  </span>
+                </button>
+              ))}
+            </div>
+            {/* Swipe jelzés – csak mobilon */}
+            <div className="sm:hidden flex items-center justify-center gap-1.5 py-2 text-gray-500 text-xs font-medium">
+              <ChevronsLeftRight className="w-4 h-4" aria-hidden />
+              <span>Pörgethető</span>
+            </div>
           </div>
         </div>
 
@@ -495,14 +515,11 @@ export default function ProductWorldsSection({
         </div>
 
         <div
-          ref={tabSwipeRef}
           id={`panel-${activeWorld}`}
           role="tabpanel"
           aria-labelledby={`tab-${activeWorld}`}
           className="product-worlds-content mt-8 lg:mt-10 px-0 sm:px-2 transition-opacity duration-300 touch-pan-y"
           key={activeWorld}
-          onTouchStart={handleTabSwipeStart}
-          onTouchEnd={handleTabSwipeEnd}
         >
             {visibleProducts.length > 0 ? (
               <ProductCarousel
@@ -521,7 +538,7 @@ export default function ProductWorldsSection({
                       className={`relative overflow-hidden rounded-xl transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl ring-1 ring-gray-200/80 hover:ring-gray-300`}
                       style={{ transitionDelay: `${Math.min(index * 30, 300)}ms` }}
                     >
-                      <div className={`absolute top-0 left-0 right-0 h-1 bg-gradient-to-r ${currentWorld.accentClass} opacity-50`} aria-hidden />
+                      <div className={`absolute top-0 left-0 right-0 h-2.5 sm:h-3 bg-gradient-to-r ${currentWorld.accentClass} opacity-90`} aria-hidden />
                       <EnhancedProductCard
                         product={product}
                         onToggleWishlist={onToggleWishlist}

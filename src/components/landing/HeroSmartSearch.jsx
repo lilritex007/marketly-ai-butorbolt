@@ -1114,7 +1114,7 @@ export default function HeroSmartSearch({
                         </div>
                         <p className="text-sm font-medium text-gray-800 line-clamp-2 mt-1.5 min-h-[2.2rem]">{p.name}</p>
                         <div className="mt-1.5 flex items-center justify-between">
-                          <p className="text-sm text-primary-600 font-semibold">{formatPrice(p.salePrice || p.price)}</p>
+                          <p className="text-base sm:text-lg text-primary-600 font-semibold">{formatPrice(p.salePrice || p.price)}</p>
                           <ChevronRight className="w-3.5 h-3.5 text-gray-400" aria-hidden />
                         </div>
                         <div className="mt-2 flex items-center gap-1.5">
@@ -1279,7 +1279,7 @@ export default function HeroSmartSearch({
                   )}
                 </div>
                 <p className="text-sm font-semibold text-gray-900 line-clamp-2">{previewProduct.name}</p>
-                <p className="text-sm text-primary-600 font-semibold mt-1">{formatPrice(previewProduct.salePrice || previewProduct.price)}</p>
+                <p className="text-base sm:text-lg text-primary-600 font-semibold mt-1">{formatPrice(previewProduct.salePrice || previewProduct.price)}</p>
                 <p className="text-xs text-gray-500 mt-0.5">Kattints a részletekhez</p>
               </div>
             )}

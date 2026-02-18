@@ -203,8 +203,8 @@ const FlashSaleBanner = ({
         </button>
       </div>
 
-      {/* Desktop Layout - Single row, all visible */}
-      <div className="hidden sm:flex relative items-center justify-between gap-3 sm:gap-4 lg:gap-6 px-4 sm:px-6 lg:px-8 py-3 sm:py-3.5 lg:py-4 pb-20 max-w-[1800px] mx-auto">
+      {/* Desktop Layout - Single row, keskenyebb és magasabb, pöttyök beleférnek */}
+      <div className="hidden sm:flex relative items-center justify-between gap-3 sm:gap-4 lg:gap-6 px-4 sm:px-6 lg:px-8 py-4 sm:py-5 lg:py-6 pb-24 max-w-[1200px] mx-auto">
         {/* Left: Icon + Title + Badge */}
         <div className="flex items-center gap-3 min-w-0 flex-shrink">
           <div className="w-10 h-10 lg:w-11 lg:h-11 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center">
