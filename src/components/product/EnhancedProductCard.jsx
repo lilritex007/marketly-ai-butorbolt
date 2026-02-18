@@ -283,31 +283,31 @@ export const EnhancedProductCard = ({
           {product.category}
         </span>
         
-        {/* Product Name - 2 sor, biztosan férjen ki */}
+        {/* Product Name - 2 sor, biztosan férjen ki, kompakt betűméret */}
         <h3 
           onClick={handleQuickView} 
-          className="text-sm sm:text-base lg:text-lg font-bold text-gray-900 line-clamp-2 leading-snug cursor-pointer hover:text-primary-600 active:text-primary-700 transition-colors mb-2 min-h-[2.5em] touch-manipulation" 
+          className="text-xs sm:text-sm lg:text-base font-bold text-gray-900 line-clamp-2 leading-tight cursor-pointer hover:text-primary-600 active:text-primary-700 transition-colors mb-2 min-h-[2.4em] overflow-hidden touch-manipulation" 
           title={product.name}
         >
           {product.name}
         </h3>
         
-        {/* Ár - középre, eredeti ár piros+áthúzott fölötte, akció % */}
-        <div className="pt-2 border-t border-gray-100 text-center">
+        {/* Ár - kompakt, középre, minden férjen rá a kártyára */}
+        <div className="pt-2 border-t border-gray-100 text-center space-y-0.5 min-w-0">
           {discount > 0 ? (
             <>
-              <span className="text-sm sm:text-base text-red-500 line-through block">
+              <span className="text-[11px] sm:text-xs text-red-500 line-through block truncate">
                 {formatPrice(product.price)}
               </span>
-              <span className="text-red-600 font-black text-lg sm:text-xl lg:text-2xl block">
+              <span className="text-sm sm:text-base font-black text-red-600 block truncate">
                 {formatPrice(displayPrice)}
               </span>
-              <span className="inline-block mt-1 px-2 py-0.5 rounded-full bg-red-100 text-red-600 text-xs font-bold">
+              <span className="inline-block px-1.5 py-0.5 rounded bg-red-100 text-red-600 text-[10px] font-bold">
                 -{discount}%
               </span>
             </>
           ) : (
-            <span className="text-lg sm:text-xl lg:text-2xl font-black text-gray-900">
+            <span className="text-sm sm:text-base font-black text-gray-900 block truncate">
               {formatPrice(displayPrice)}
             </span>
           )}
@@ -349,7 +349,7 @@ export const EnhancedProductCard = ({
           </div>
         )}
         
-        {/* CTA gombok - Kosárba szöveggel desktopon, View csak ikon mobilon */}
+        {/* CTA gombok - Kosárba hangsúlyosabb */}
         <div className="mt-3 sm:mt-4 flex justify-center items-center gap-2 sm:gap-3">
           {inStock && onAddToCart && (
             <button
@@ -357,12 +357,12 @@ export const EnhancedProductCard = ({
                 e.stopPropagation();
                 onAddToCart(product, 1);
               }}
-              className="min-h-[44px] min-w-[44px] flex items-center justify-center gap-1.5 px-3 sm:px-4 py-2.5 bg-emerald-500 text-white rounded-xl hover:bg-emerald-600 active:bg-emerald-700 transition-all tap-scale touch-manipulation focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:ring-offset-2"
+              className="min-h-[44px] flex-1 sm:flex-initial flex items-center justify-center gap-1.5 px-4 py-2.5 bg-emerald-500 text-white rounded-xl hover:bg-emerald-600 active:bg-emerald-700 transition-all tap-scale touch-manipulation focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:ring-offset-2 shadow-lg shadow-emerald-500/30 font-bold text-sm sm:text-base"
               aria-label="Kosárba"
               title="Kosárba"
             >
-              <ShoppingCart className="w-4 h-4 sm:w-5 sm:h-5 shrink-0" />
-              <span className="text-xs sm:text-sm font-bold">Kosárba</span>
+              <ShoppingCart className="w-5 h-5 shrink-0" />
+              <span>Kosárba</span>
             </button>
           )}
           <button 

@@ -70,18 +70,18 @@ const CollectionCompactCard = ({ product, onProductClick, onWishlistToggle, onAd
       />
       <div className="flex-1 min-w-0">
         <p className="text-xs text-primary-500 font-medium mb-0.5 truncate">{product.category}</p>
-        <h4 className="text-xs sm:text-sm font-semibold text-gray-900 line-clamp-2 cursor-pointer hover:text-primary-500 leading-tight" onClick={() => onProductClick?.(product)}>
+        <h4 className="text-xs font-semibold text-gray-900 line-clamp-2 cursor-pointer hover:text-primary-500 leading-tight overflow-hidden" onClick={() => onProductClick?.(product)}>
           {product.name}
         </h4>
-        <div className="mt-1.5 sm:mt-2 text-center">
+        <div className="mt-1.5 text-center min-w-0 space-y-0.5">
           {hasDiscount ? (
             <>
-              <span className="text-xs text-red-500 line-through block">{product.price.toLocaleString('hu-HU')} Ft</span>
-              <span className="text-sm font-bold text-red-600">{displayPrice.toLocaleString('hu-HU')} Ft</span>
-              <span className="inline-block mt-0.5 px-1.5 py-0.5 rounded bg-red-100 text-red-600 text-[10px] font-bold">-{discountPct}%</span>
+              <span className="text-[10px] text-red-500 line-through block truncate">{product.price.toLocaleString('hu-HU')} Ft</span>
+              <span className="text-xs font-bold text-red-600 block truncate">{displayPrice.toLocaleString('hu-HU')} Ft</span>
+              <span className="inline-block px-1 py-0.5 rounded bg-red-100 text-red-600 text-[9px] font-bold">-{discountPct}%</span>
             </>
           ) : (
-            <span className="text-sm sm:text-base font-bold text-gray-900">{displayPrice.toLocaleString('hu-HU')} Ft</span>
+            <span className="text-xs font-bold text-gray-900 block truncate">{displayPrice.toLocaleString('hu-HU')} Ft</span>
           )}
         </div>
         <div className="flex justify-center items-center gap-1 sm:gap-2 mt-2 flex-wrap">
@@ -104,7 +104,7 @@ const CollectionCompactCard = ({ product, onProductClick, onWishlistToggle, onAd
           {(product.inStock ?? product.in_stock) !== false && onAddToCart && (
             <button
               onClick={(e) => { e.stopPropagation(); onAddToCart(product, 1); }}
-              className="min-w-[36px] min-h-[36px] p-1.5 flex items-center justify-center rounded-lg bg-emerald-500 text-white hover:bg-emerald-600 transition-colors touch-manipulation"
+              className="min-w-[36px] min-h-[36px] p-1.5 flex items-center justify-center rounded-lg bg-emerald-500 text-white hover:bg-emerald-600 transition-colors touch-manipulation shadow-md shadow-emerald-500/30 font-bold"
               title="Kosárba"
             >
               <ShoppingCart className="w-4 h-4" />
