@@ -53,11 +53,13 @@ export const EnhancedProductCard = ({
   const sizeClasses = {
     default: {
       image: 'p-2 sm:p-3 md:p-4 lg:p-5',
-      content: 'p-3 sm:p-4 md:p-5 lg:p-6'
+      content: 'p-3 sm:p-4 md:p-5 lg:p-6',
+      contentMinH: 'min-h-[160px] sm:min-h-[180px]'
     },
     compact: {
       image: 'p-2 sm:p-2.5 md:p-3 lg:p-3.5',
-      content: 'p-2.5 sm:p-3 md:p-4 lg:p-4'
+      content: 'p-2.5 sm:p-3 md:p-4 lg:p-4',
+      contentMinH: 'min-h-[140px] sm:min-h-[155px]'
     }
   };
   const sizeConfig = sizeClasses[size] || sizeClasses.default;
@@ -274,67 +276,61 @@ export const EnhancedProductCard = ({
         </div>
       </div>
 
-      {/* Content Section - UNIFIED TYPOGRAPHY */}
-      <div className={`${sizeConfig.content} flex flex-col flex-1`}>
-        {/* Category - kompakt mobilon */}
+      {/* Content Section - gombok alul, középre, magasabb kártya */}
+      <div className={`${sizeConfig.content} ${sizeConfig.contentMinH || 'min-h-[160px]'} flex flex-col flex-1`}>
+        {/* Category - kompakt */}
         <span className="text-xs sm:text-sm font-semibold text-primary-600 uppercase tracking-wide mb-1 truncate">
           {product.category}
         </span>
         
-        {/* Product Name - konverzió: rövid, olvasható, kattintható */}
+        {/* Product Name - 2 sor, biztosan férjen ki */}
         <h3 
           onClick={handleQuickView} 
-          className="text-sm sm:text-base lg:text-lg font-bold text-gray-900 line-clamp-2 leading-snug cursor-pointer hover:text-primary-600 active:text-primary-700 transition-colors mb-2 sm:mb-3 touch-manipulation" 
+          className="text-sm sm:text-base lg:text-lg font-bold text-gray-900 line-clamp-2 leading-snug cursor-pointer hover:text-primary-600 active:text-primary-700 transition-colors mb-2 min-h-[2.5em] touch-manipulation" 
           title={product.name}
         >
           {product.name}
         </h3>
         
-        {/* Price Section - konverzióra optimalizált, Kosárba elsődleges */}
-        <div className="mt-auto pt-2 sm:pt-3 lg:pt-4 border-t border-gray-100">
-          {/* Ár - jól látható, kompakt mobilon */}
-          <div className="flex items-baseline justify-between gap-2 mb-2 sm:mb-0 sm:flex-row sm:items-center">
-            <div className="min-w-0">
-              {discount > 0 && (
-                <span className="text-xs sm:text-sm text-gray-400 line-through block">
-                  {formatPrice(product.price)}
-                </span>
-              )}
-              <span className={`text-lg sm:text-xl lg:text-2xl font-black ${discount > 0 ? 'text-red-600' : 'text-gray-900'}`}>
-                {formatPrice(displayPrice)}
-              </span>
-            </div>
-            
-            {/* CTA gombok - mobilon Kosárba szélesebb, touch-manipulation */}
-            <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
-              {/* Kosárba - elsődleges CTA, zöld, mobilon szöveggel */}
-              {inStock && onAddToCart && (
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onAddToCart(product, 1);
-                  }}
-                  className="min-h-[44px] min-w-[44px] sm:min-w-0 flex-1 sm:flex-initial flex items-center justify-center gap-1.5 sm:gap-0 px-3 sm:px-0 py-2 sm:py-0 bg-emerald-500 text-white rounded-xl hover:bg-emerald-600 active:bg-emerald-700 transition-all tap-scale touch-manipulation focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:ring-offset-2"
-                  aria-label="Kosárba"
-                  title="Kosárba"
-                >
-                  <ShoppingCart className="w-4 h-4 sm:w-5 sm:h-5 shrink-0" />
-                  <span className="text-xs sm:text-sm font-bold sm:sr-only">Kosárba</span>
-                </button>
-              )}
-              {/* Megnézem - másodlagos */}
-              <button 
-                onClick={(e) => { 
-                  e.stopPropagation(); 
-                  handleQuickView(); 
-                }} 
-                className="min-h-[44px] min-w-[44px] w-11 h-11 sm:w-12 sm:h-12 lg:w-14 lg:h-14 flex items-center justify-center bg-primary-500 text-white rounded-xl hover:bg-primary-600 active:bg-primary-700 transition-all tap-scale touch-manipulation focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-400 focus-visible:ring-offset-2"
-                aria-label="Részletek"
-              >
-                <Eye className="w-5 h-5 sm:w-6 sm:h-6" />
-              </button>
-            </div>
-          </div>
+        {/* Ár */}
+        <div className="pt-2 border-t border-gray-100">
+          {discount > 0 && (
+            <span className="text-xs sm:text-sm text-gray-400 line-through block">
+              {formatPrice(product.price)}
+            </span>
+          )}
+          <span className={`text-lg sm:text-xl lg:text-2xl font-black ${discount > 0 ? 'text-red-600' : 'text-gray-900'}`}>
+            {formatPrice(displayPrice)}
+          </span>
+        </div>
+        
+        {/* CTA gombok - kártya alján, középre */}
+        <div className="mt-3 sm:mt-4 flex justify-center items-center gap-2 sm:gap-3">
+          {inStock && onAddToCart && (
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                onAddToCart(product, 1);
+              }}
+              className="min-h-[44px] min-w-[44px] flex items-center justify-center gap-1.5 px-4 py-2.5 bg-emerald-500 text-white rounded-xl hover:bg-emerald-600 active:bg-emerald-700 transition-all tap-scale touch-manipulation focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:ring-offset-2"
+              aria-label="Kosárba"
+              title="Kosárba"
+            >
+              <ShoppingCart className="w-4 h-4 sm:w-5 sm:h-5 shrink-0" />
+              <span className="text-xs sm:text-sm font-bold sm:sr-only">Kosárba</span>
+            </button>
+          )}
+          <button 
+            onClick={(e) => { 
+              e.stopPropagation(); 
+              handleQuickView(); 
+            }} 
+            className="min-h-[44px] min-w-[44px] flex items-center justify-center gap-1.5 px-4 py-2.5 bg-primary-500 text-white rounded-xl hover:bg-primary-600 active:bg-primary-700 transition-all tap-scale touch-manipulation focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-400 focus-visible:ring-offset-2"
+            aria-label="Részletek"
+          >
+            <Eye className="w-4 h-4 sm:w-5 sm:h-5 shrink-0" />
+            <span className="text-xs sm:text-sm font-bold sm:sr-only">Megnézem</span>
+          </button>
         </div>
 
         {showFeedback && (
