@@ -1,12 +1,21 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import {
   Sparkles, Camera, ArrowRight,
   Package, Users, Star, Zap, ChevronRight
 } from 'lucide-react';
 import { CountUp } from '../ui/CountUp';
 import HeroSmartSearch from './HeroSmartSearch';
-import { getCategoryImage } from '../../utils/categoryImages';
+import { getCategoryIcon } from '../ui/Icons';
 import { trackSectionEvent } from '../../services/userPreferencesService';
+
+const QUICK_CARD_COLORS = [
+  'from-amber-500 via-orange-500 to-primary-600',
+  'from-emerald-500 via-teal-500 to-secondary-600',
+  'from-violet-500 via-purple-500 to-fuchsia-600',
+  'from-rose-500 via-pink-500 to-red-500',
+  'from-sky-500 via-blue-500 to-indigo-600',
+  'from-lime-500 via-green-500 to-emerald-600',
+];
 
 const HERO_REVEAL_DELAY = { badge: 0, line1: 100, line2: 220, line3: 340, sub: 460, cta: 600, stats: [720, 820, 920, 1020] };
 
@@ -147,51 +156,58 @@ export const ModernHero = ({
             aria-hidden
           />
 
-          {/* Gyorskategóriák – valós kategóriák képekkel, headline alatt */}
-          {quickCategories.length > 0 && (
-            <div
-              className={`w-full max-w-4xl mx-auto mb-5 sm:mb-6 ${mounted ? 'hero-reveal' : 'opacity-0'}`}
-              style={mounted ? { animationDelay: `${HERO_REVEAL_DELAY.line2 + 80}ms` } : undefined}
-            >
-              <div className="flex gap-2 sm:gap-3 overflow-x-auto scrollbar-hide pb-2 -mx-1 px-1 snap-x snap-mandatory">
-                {quickCategories.map((cat) => {
-                  const name = typeof cat === 'string' ? cat : cat?.name;
-                  const count = typeof cat === 'object' && cat != null ? Number(cat.productCount || 0) : null;
-                  const productImg = Array.isArray(products) && products.length > 0
-                    ? products.find((p) => (p?.category || '').toLowerCase().includes(String(name || '').toLowerCase()))?.images?.[0]
-                    : null;
-                  const img = productImg || getCategoryImage(name);
-                  if (!name) return null;
-                  return (
-                    <button
-                      key={name}
-                      type="button"
-                      onClick={() => onQuickCategory?.(name)}
-                      className="group relative shrink-0 w-[140px] sm:w-[160px] lg:w-[180px] aspect-[4/5] rounded-2xl overflow-hidden border border-gray-200/80 bg-white shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1 hover:scale-[1.02] snap-start focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-400 focus-visible:ring-offset-2"
-                    >
-                      <img
-                        src={img}
-                        alt={name}
-                        className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                      />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/25 to-transparent" />
-                      <div className="absolute inset-0 flex flex-col justify-end p-3 sm:p-4 text-left">
-                        <span className="text-white font-bold text-sm sm:text-base drop-shadow-lg line-clamp-2">
-                          {name}
-                        </span>
-                        {count != null && count > 0 && (
-                          <span className="text-white/90 text-xs mt-0.5 font-medium">
-                            {count.toLocaleString('hu-HU')} termék
+          {/* Gyorskategóriák – fontosabb alkategóriák, ikonok, bátor színek, desktop full width */}
+          {(() => {
+            const mains = Array.isArray(quickCategories) ? quickCategories : [];
+            const subcats = mains.flatMap((m) =>
+              (m?.children || []).map((c) => ({ ...c, parentName: m?.name }))
+            );
+            const sorted = [...subcats].sort((a, b) => Number(b?.productCount || 0) - Number(a?.productCount || 0));
+            const items = sorted.length >= 4
+              ? sorted.slice(0, 10)
+              : mains.slice(0, 6).map((m) => ({ name: m?.name, productCount: m?.productCount }));
+            if (items.length === 0) return null;
+            return (
+              <div
+                className={`w-screen max-w-[100vw] relative left-1/2 -translate-x-1/2 mb-5 sm:mb-6 overflow-hidden ${mounted ? 'hero-reveal' : 'opacity-0'}`}
+                style={mounted ? { animationDelay: `${HERO_REVEAL_DELAY.line2 + 80}ms` } : undefined}
+              >
+                <div className="flex gap-3 sm:gap-4 overflow-x-auto scrollbar-hide pb-2 px-4 sm:px-6 lg:px-10 snap-x snap-mandatory">
+                  {items.map((item, idx) => {
+                    const name = item?.name;
+                    const count = Number(item?.productCount || 0);
+                    if (!name) return null;
+                    const Icon = getCategoryIcon(name);
+                    const gradient = QUICK_CARD_COLORS[idx % QUICK_CARD_COLORS.length];
+                    return (
+                      <button
+                        key={`${item.parentName || ''}-${name}`}
+                        type="button"
+                        onClick={() => onQuickCategory?.(name)}
+                        className="group relative shrink-0 w-[120px] sm:w-[140px] lg:w-[160px] aspect-[3/4] rounded-2xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1.5 hover:scale-[1.03] snap-start focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-gray-900 border-2 border-white/30"
+                      >
+                        <div className={`absolute inset-0 bg-gradient-to-br ${gradient}`} />
+                        <div className="absolute inset-0 flex flex-col items-center justify-center p-3 sm:p-4 text-center">
+                          <div className="w-14 h-14 sm:w-16 sm:h-16 lg:w-20 lg:h-20 rounded-xl lg:rounded-2xl bg-white/30 backdrop-blur-sm flex items-center justify-center mb-2 sm:mb-3 shadow-lg group-hover:bg-white/45 group-hover:scale-110 transition-all duration-300 ring-2 ring-white/20">
+                            <Icon className="w-7 h-7 sm:w-8 sm:h-8 lg:w-10 lg:h-10 text-white drop-shadow-[0_2px_8px_rgba(0,0,0,0.3)]" strokeWidth={2.5} />
+                          </div>
+                          <span className="text-white font-bold text-xs sm:text-sm lg:text-base drop-shadow-lg line-clamp-2 leading-tight">
+                            {name}
                           </span>
-                        )}
-                        <ChevronRight className="absolute bottom-3 right-3 w-5 h-5 text-white/80 group-hover:translate-x-0.5 transition-transform" aria-hidden />
-                      </div>
-                    </button>
-                  );
-                })}
+                          {count > 0 && (
+                            <span className="text-white/90 text-[10px] sm:text-xs mt-1 font-semibold">
+                              {count.toLocaleString('hu-HU')} db
+                            </span>
+                          )}
+                          <ChevronRight className="absolute bottom-2 right-2 w-4 h-4 sm:w-5 sm:h-5 text-white/80 group-hover:translate-x-0.5 transition-transform" aria-hidden />
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
-            </div>
-          )}
+            );
+          })()}
 
           {/* Központi hero search – full width minus 2px */}
           <div

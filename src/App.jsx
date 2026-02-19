@@ -1469,7 +1469,7 @@ const App = () => {
                   setTimeout(() => scrollToProductsSectionRef.current?.(), 150);
                 }
               }}
-              quickCategories={(categoryHierarchy?.mainCategories || []).slice(0, 6)}
+              quickCategories={categoryHierarchy?.mainCategories || []}
               onQuickCategory={(name) => {
                 setActiveTab('shop');
                 handleCategoryChange(name);
