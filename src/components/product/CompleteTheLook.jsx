@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { Sparkles, Plus, ShoppingBag, Check, ChevronRight, Package, Percent } from 'lucide-react';
+import { formatPriceNumber } from '../../utils/helpers';
 import { generateText } from '../../services/geminiService';
 
 /**
@@ -128,7 +129,7 @@ const CompleteTheLook = ({ currentProduct, allProducts, onAddToCart, onViewProdu
     );
   };
 
-  const formatPrice = (price) => (price || 0).toLocaleString('hu-HU');
+  const formatPrice = (price) => formatPriceNumber(price);
 
   // Számítások
   const selectedProducts = bundleItems.filter(p => selectedItems.includes(p.id));

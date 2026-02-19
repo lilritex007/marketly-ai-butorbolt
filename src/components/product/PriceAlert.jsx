@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Bell, BellRing, Mail, Check, X, TrendingDown, Sparkles } from 'lucide-react';
+import { formatPriceNumber } from '../../utils/helpers';
 
 /**
  * PriceAlert - "Értesíts ha lecsökken az ár" feature
@@ -54,7 +55,7 @@ const PriceAlert = ({ product, variant = 'button' }) => {
     setIsAlertSet(false);
   };
 
-  const formatPrice = (p) => (p || 0).toLocaleString('hu-HU');
+  const formatPrice = (p) => formatPriceNumber(p);
 
   // Button variant
   if (variant === 'button') {

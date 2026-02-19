@@ -2,6 +2,16 @@
 export const PLACEHOLDER_IMAGE = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='400'%3E%3Crect fill='%23e5e7eb' width='400' height='400'/%3E%3Ctext fill='%239ca3af' x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='sans-serif' font-size='16'%3ENincs kép%3C/text%3E%3C/svg%3E";
 
 /**
+ * Normalize product from UNAS API (images, inStock)
+ */
+export const normalizeProduct = (p) => ({
+  ...p,
+  images: p.images || (p.image ? [p.image] : []),
+  image: p.images?.[0] || p.image,
+  inStock: p.inStock ?? p.in_stock ?? true
+});
+
+/**
  * Format price to Hungarian currency (safe for null/undefined)
  */
 export const formatPrice = (price) => {
@@ -11,6 +21,12 @@ export const formatPrice = (price) => {
     currency: 'HUF',
     maximumFractionDigits: 0
   }).format(value);
+};
+
+/** Format price as number only (no "Ft") - for custom display */
+export const formatPriceNumber = (price) => {
+  const value = price != null && !Number.isNaN(Number(price)) ? Number(price) : 0;
+  return new Intl.NumberFormat('hu-HU', { maximumFractionDigits: 0 }).format(value);
 };
 
 /**

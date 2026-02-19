@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { Filter, X, DollarSign, Package, Tag } from 'lucide-react';
+import { formatPrice } from '../../utils/helpers';
 
 /**
  * Shared filter panel content (controlled). Used in desktop dropdown and mobile BottomSheet.
@@ -86,8 +87,6 @@ export const AdvancedFiltersPanel = ({
     effective.priceMin > priceRange.min,
     effective.priceMax < priceRange.max
   ].filter(Boolean).length;
-
-  const formatPrice = (n) => new Intl.NumberFormat('hu-HU', { style: 'currency', currency: 'HUF', maximumFractionDigits: 0 }).format(n);
 
   return (
     <>

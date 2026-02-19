@@ -9,6 +9,7 @@ import {
   ShoppingBag, Star
 } from 'lucide-react';
 import { generateText } from '../../services/geminiService';
+import { formatPrice } from '../../utils/helpers';
 import { saveStyleDNA, getPersonalizedRecommendations } from '../../services/userPreferencesService';
 
 /**
@@ -360,8 +361,6 @@ Legyél barátságos, használj tegezést. Magyarul válaszolj!`;
 
     return `${styleMap[allAnswers.space] || 'Egyedi ízlésed van'}, és ${priorityMap[allAnswers.priority] || 'a minőséget'} helyezed előtérbe. Az ajánlott termékek tökéletesen illenek a stílusodhoz!`;
   };
-
-  const formatPrice = (price) => (price || 0).toLocaleString('hu-HU') + ' Ft';
 
   const QuestionIcon = currentQuestion?.icon || Home;
 

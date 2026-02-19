@@ -8,7 +8,7 @@ import { trackProductView as trackProductViewPref, getPersonalizedRecommendation
 import { generateText, analyzeImage as analyzeImageAI } from './services/geminiService';
 
 // New UI Components
-import { ProductCardSkeleton, ProductGridSkeleton, CategorySkeleton } from './components/ui/Skeleton';
+import { ProductCardSkeleton } from './components/ui/Skeleton';
 import { ToastProvider, useToast } from './components/ui/Toast';
 import { NoSearchResults, NoFilterResults, ErrorState } from './components/ui/EmptyState';
 import { SmartBadges } from './components/ui/Badge';
@@ -94,10 +94,16 @@ import { useLocalStorage, useDebounce } from './hooks/index';
 
 // Utils
 import { getOptimizedImageProps } from './utils/imageOptimizer';
-import { PLACEHOLDER_IMAGE, formatPrice } from './utils/helpers';
+import { PLACEHOLDER_IMAGE, formatPrice, normalizeProduct } from './utils/helpers';
 import { WEBSHOP_DOMAIN, SHOP_ID, DISPLAY_BATCH, INITIAL_PAGE, TAB_HASH, HASH_TO_TAB } from './config';
 
 /* --- 1. KONFIGURÁCIÓ & ADATOK (config.js) --- */
+
+const MODAL_LOADING_FALLBACK = (
+  <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30">
+    <div className="w-10 h-10 border-2 border-primary-500 border-t-transparent rounded-full animate-spin" />
+  </div>
+);
 
 /* --- 2. SEGÉDFÜGGVÉNYEK --- */
 
@@ -882,12 +888,7 @@ const App = () => {
         ...(Array.isArray(styleKeywords) && styleKeywords.length > 0 && { styleKeywords })
       };
       const data = await fetchUnasProducts(params);
-      const newProducts = (data.products || []).map(p => ({
-        ...p,
-        images: p.images || (p.image ? [p.image] : []),
-        image: p.images?.[0] || p.image,
-        inStock: p.inStock ?? p.in_stock ?? true
-      }));
+      const newProducts = (data.products || []).map(normalizeProduct);
       const totalCount = data.total ?? 0;
       
       if (append) {
@@ -958,26 +959,31 @@ const App = () => {
   }, []);
 
   const lastScrollToProductsRef = useRef(0);
-  const scrollToProductsSection = useCallback(() => {
+  const scrollToProductsSection = useCallback((retryCount = 0) => {
     const el = document.getElementById('products-section');
-    if (!el) return;
+    const main = document.getElementById('mkt-butorbolt-main');
+    const target = el || main;
+    if (!target) {
+      if (retryCount < 6) setTimeout(() => scrollToProductsSection(retryCount + 1), 50);
+      return;
+    }
     const now = performance.now();
-    if (now - lastScrollToProductsRef.current < 250) return;
-    const rect = el.getBoundingClientRect();
+    if (now - lastScrollToProductsRef.current < 200) return;
+    const rect = target.getBoundingClientRect();
     const inView = rect.top >= 0 && rect.top <= 120;
     if (inView) return;
     lastScrollToProductsRef.current = now;
 
     const run = () => {
-      const scrollParent = getScrollParent(el);
+      const scrollParent = getScrollParent(target);
       if (scrollParent && scrollParent !== document.documentElement) {
-        const elRect = el.getBoundingClientRect();
+        const elRect = target.getBoundingClientRect();
         const parentRect = scrollParent.getBoundingClientRect();
         const offset = 88;
         const targetScrollTop = scrollParent.scrollTop + (elRect.top - parentRect.top) - offset;
         scrollParent.scrollTo({ top: Math.max(0, targetScrollTop), behavior: 'smooth' });
       } else {
-        el.scrollIntoView({ behavior: 'smooth', block: 'start', inline: 'nearest' });
+        target.scrollIntoView({ behavior: 'smooth', block: 'start', inline: 'nearest' });
       }
     };
     requestAnimationFrame(run);
@@ -1197,16 +1203,10 @@ const App = () => {
     let cancelled = false;
     let extraTimeoutId = null;
     const limit = 150;
-    const normalize = (p) => ({
-      ...p,
-      images: p.images || (p.image ? [p.image] : []),
-      image: p.images?.[0] || p.image,
-      inStock: p.inStock ?? p.in_stock ?? true
-    });
     const mergeInto = (map, data) => {
       (data?.products || []).forEach((p) => {
         if (!p || !p.id) return;
-        map.set(p.id, normalize(p));
+        map.set(p.id, normalizeProduct(p));
       });
     };
     fetchUnasProducts({ limit, offset: 0, slim: false })
@@ -1812,13 +1812,16 @@ const App = () => {
                     <p className="text-gray-600 mb-6 max-w-md">Próbáld később, vagy ellenőrizd a kapcsolatot.</p>
                     <button
                       type="button"
-                      onClick={() => loadUnasDataRef.current({
-                        search: searchIndexReady ? undefined : (searchQuery.trim() || undefined),
-                        category: getCategoryMainList(categoryFilter).length === 0 && categoryFilter !== 'Összes' ? categoryFilter : '',
-                        categoryMain: getCategoryMainList(categoryFilter).length > 0 ? getCategoryMainList(categoryFilter) : undefined,
-                        limit: INITIAL_PAGE,
-                        offset: 0
-                      })}
+                      onClick={() => {
+                        const catMain = getCategoryMainList(categoryFilter);
+                        loadUnasDataRef.current({
+                          search: searchIndexReady ? undefined : (searchQuery.trim() || undefined),
+                          category: catMain.length === 0 && categoryFilter !== 'Összes' ? categoryFilter : '',
+                          categoryMain: catMain.length > 0 ? catMain : undefined,
+                          limit: INITIAL_PAGE,
+                          offset: 0
+                        });
+                      }}
                       className="px-6 py-3 min-h-[44px] bg-primary-500 text-white rounded-xl font-bold hover:bg-primary-600 transition-colors"
                     >
                       Újrapróbálás
@@ -1965,7 +1968,7 @@ const App = () => {
       
       {/* AI Style Quiz Modal */}
       {showStyleQuiz && (
-        <Suspense fallback={<div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30"><div className="w-10 h-10 border-2 border-primary-500 border-t-transparent rounded-full animate-spin" /></div>}>
+        <Suspense fallback={MODAL_LOADING_FALLBACK}>
           <AIStyleQuiz
             products={products}
             onRecommendations={(recs) => {
@@ -1978,7 +1981,7 @@ const App = () => {
       
       {/* AI Room Designer Modal */}
       {showRoomDesigner && (
-        <Suspense fallback={<div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30"><div className="w-10 h-10 border-2 border-primary-500 border-t-transparent rounded-full animate-spin" /></div>}>
+        <Suspense fallback={MODAL_LOADING_FALLBACK}>
           <AIRoomDesigner
             products={products}
             onProductRecommendations={(recs) => {

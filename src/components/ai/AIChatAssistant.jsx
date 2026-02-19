@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect, useMemo, useCallback } from 'react';
 import { MessageCircle, X, Send, Loader2, Sparkles, User, Bot, AlertCircle, ThumbsUp, ThumbsDown, Search, Package, Tag, TrendingUp, Filter, Zap, Star, ShoppingBag } from 'lucide-react';
 import { generateText } from '../../services/geminiService';
+import { formatPrice } from '../../utils/helpers';
 import { smartSearch, parseSearchIntent, getProactiveSuggestions } from '../../services/aiSearchService';
 import { fetchUnasProducts } from '../../services/unasApi';
 import { 
@@ -471,10 +472,6 @@ VÁLASZOLJ MOST a fenti szabályok szerint:`;
     
     return suggestions.slice(0, 5);
   }, [proactiveSuggestions]);
-
-  const formatPrice = (price) => {
-    return (price || 0).toLocaleString('hu-HU') + ' Ft';
-  };
 
   return (
     <>

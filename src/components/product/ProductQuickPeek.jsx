@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { X, ShoppingCart, Heart, Share2, ExternalLink, Sparkles, Bell } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import QuickAddToCart from './QuickAddToCart';
-import { PLACEHOLDER_IMAGE } from '../../utils/helpers';
+import { PLACEHOLDER_IMAGE, formatPrice } from '../../utils/helpers';
 import { getOptimizedImageProps } from '../../utils/imageOptimizer';
 import {
   requestBackInStock,
@@ -44,14 +44,6 @@ const ProductQuickPeek = ({ product, isOpen, onClose, onAddToCart }) => {
   }, [isOpen]);
 
   if (!product) return null;
-
-  const formatPrice = (price) => {
-    return new Intl.NumberFormat('hu-HU', {
-      style: 'currency',
-      currency: 'HUF',
-      maximumFractionDigits: 0
-    }).format(price);
-  };
 
   // Parse product images (array or single)
   const images = Array.isArray(product.images) && product.images.length > 0

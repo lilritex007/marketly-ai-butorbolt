@@ -8,6 +8,7 @@ import {
   smartSearch
 } from '../../services/aiSearchService';
 import { trackSearch, trackSectionEvent, getSearchHistory, getViewedProducts, getLikedProducts } from '../../services/userPreferencesService';
+import { formatPrice as formatPriceHu } from '../../utils/helpers';
 
 const QUICK_INTENTS = [
   'bézs kanapé 100e alatt',
@@ -515,7 +516,7 @@ export default function HeroSmartSearch({
 
   const formatPrice = (value) => {
     const amount = Number(value || 0);
-    return amount > 0 ? `${amount.toLocaleString('hu-HU')} Ft` : 'Ár hamarosan';
+    return amount > 0 ? formatPriceHu(value) : 'Ár hamarosan';
   };
 
   const getProductImage = (product) => {

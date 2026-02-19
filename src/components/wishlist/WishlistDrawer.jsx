@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { X, Heart, Trash2, ShoppingCart, Share2, ChevronRight, Sparkles, Package } from 'lucide-react';
+import { formatPrice } from '../../utils/helpers';
 
 /**
  * WishlistDrawer - Slide-in sidebar showing all wishlist items
@@ -33,8 +34,6 @@ const WishlistDrawer = ({
       onClose();
     }, 300);
   };
-
-  const formatPrice = (price) => (price || 0).toLocaleString('hu-HU') + ' Ft';
 
   const totalValue = wishlistItems.reduce((sum, item) => sum + (item.salePrice || item.price || 0), 0);
 

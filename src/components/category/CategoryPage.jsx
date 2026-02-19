@@ -7,6 +7,7 @@ import {
   ShieldCheck, MapPin
 } from 'lucide-react';
 import { getCategoryIcon } from '../ui/Icons';
+import { formatPrice } from '../../utils/helpers';
 import { EnhancedProductCard } from '../product/EnhancedProductCard';
 import { getLikedProducts, getViewedProducts, toggleLikeProduct, toggleDislikeProduct, isProductLiked, isProductDisliked } from '../../services/userPreferencesService';
 
@@ -415,10 +416,6 @@ const PriceStats = ({ products, stats }) => {
   }, [products, stats]);
   
   if (!computedStats) return null;
-  
-  const formatPrice = (price) => new Intl.NumberFormat('hu-HU', { 
-    style: 'currency', currency: 'HUF', maximumFractionDigits: 0 
-  }).format(price);
   
   return (
     <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
@@ -888,7 +885,7 @@ const CategoryPage = ({
   };
   
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div id="products-section" className="min-h-screen bg-gray-50">
       <CategoryHero category={category} productCount={totalCount || products.length} theme={theme} onBack={onBack} />
       
       <div className="w-full max-w-[2000px] mx-auto px-4 sm:px-6 lg:px-10 xl:px-16 py-8 sm:py-12 lg:py-16">

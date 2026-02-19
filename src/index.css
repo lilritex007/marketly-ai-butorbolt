@@ -69,8 +69,9 @@
    ======================================== */
 
 /* Görgetés pontosan a termékek szekció elejéig (navbar alá) */
-#mkt-butorbolt-app #products-section {
-  scroll-margin-top: 5.5rem; /* ~88px – sticky navbar alá igazítva (top-16 sm:top-20) */
+#mkt-butorbolt-app #products-section,
+#mkt-butorbolt-app #mkt-butorbolt-main {
+  scroll-margin-top: 5.5rem; /* ~88px – sticky navbar alá igazítva */
 }
 
 #mkt-butorbolt-app {

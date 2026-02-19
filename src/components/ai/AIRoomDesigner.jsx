@@ -1,6 +1,7 @@
 import React, { useState, useRef, useMemo } from 'react';
 import { Camera, Upload, Loader2, Sparkles, CheckCircle, X, AlertCircle, RotateCcw, ShoppingBag, Lightbulb, Star } from 'lucide-react';
 import { analyzeImage } from '../../services/geminiService';
+import { formatPrice } from '../../utils/helpers';
 import { trackProductView } from '../../services/userPreferencesService';
 
 /**
@@ -281,8 +282,6 @@ TIPP: [1 mondat személyre szabott tanács magyarul, tegezve]`;
       onProductRecommendations([product, ...recommendations.filter(p => p.id !== product.id)]);
     }
   };
-
-  const formatPrice = (price) => (price || 0).toLocaleString('hu-HU') + ' Ft';
 
   return (
     <div 
