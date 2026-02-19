@@ -18,6 +18,13 @@ const QUICK_CARD_COLORS = [
   'from-lime-500 via-green-500 to-emerald-600',
 ];
 
+/** Fontosabb alkategóriák – előnyben részesítjük, ha szerepelnek a hierarchiában */
+const PRIORITY_QUICK_CATEGORIES = [
+  'Kanapé', 'Fotel', 'Nappali', 'Ágy', 'Hálószoba', 'Matrac',
+  'Asztal', 'Szék', 'Konyha', 'Gardrób', 'Szekrény', 'Komód',
+  'Iroda', 'Gyerek', 'Kert', 'Lámpa', 'TV', 'Ruhafogas'
+];
+
 const HERO_REVEAL_DELAY = { badge: 0, line1: 100, line2: 220, line3: 340, sub: 460, cta: 600, stats: [720, 820, 920, 1020] };
 
 /**
@@ -103,14 +110,39 @@ export const ModernHero = ({
 
   const HERO_BG_IMAGE = 'https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?w=1920&q=85';
 
-  // Gyorskategória adatok
+  // Gyorskategória adatok – prioritás + produktCount, max 14 elem
   const mains = Array.isArray(quickCategories) ? quickCategories : [];
   const subcats = mains.flatMap((m) =>
     (m?.children || []).map((c) => ({ ...c, parentName: m?.name }))
   );
-  const sorted = [...subcats].sort((a, b) => Number(b?.productCount || 0) - Number(a?.productCount || 0));
-  const quickCategoryItems = sorted.length >= 4
-    ? sorted.slice(0, 10)
+  const byCount = [...subcats].sort((a, b) => Number(b?.productCount || 0) - Number(a?.productCount || 0));
+  const picked = new Set();
+  const result = [];
+  // 1. Prioritás: fontosabb alkategóriák (ha szerepelnek)
+  for (const kw of PRIORITY_QUICK_CATEGORIES) {
+    const n = kw.toLowerCase();
+    const found = subcats.find((c) => {
+      if (!c?.name) return false;
+      const key = `${c.parentName || ''}-${c.name}`;
+      if (picked.has(key)) return false;
+      return String(c.name).toLowerCase().includes(n);
+    });
+    if (found) {
+      const key = `${found.parentName || ''}-${found.name}`;
+      picked.add(key);
+      result.push(found);
+    }
+  }
+  // 2. Töltse ki a maradékot productCount szerint (max 14)
+  for (const c of byCount) {
+    if (result.length >= 14) break;
+    const key = `${c.parentName || ''}-${c.name}`;
+    if (picked.has(key) || !c?.name) continue;
+    picked.add(key);
+    result.push(c);
+  }
+  const quickCategoryItems = result.length >= 4
+    ? result
     : mains.slice(0, 6).map((m) => ({ name: m?.name, productCount: m?.productCount }));
 
   const categoryCarouselRef = useRef(null);
