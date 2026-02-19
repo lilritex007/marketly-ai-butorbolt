@@ -1469,10 +1469,11 @@ const App = () => {
                   setTimeout(() => scrollToProductsSectionRef.current?.(), 150);
                 }
               }}
-              quickCategories={(categoryHierarchy?.mainCategories || []).slice(0, 6).map((c) => c.name)}
+              quickCategories={(categoryHierarchy?.mainCategories || []).slice(0, 6)}
               onQuickCategory={(name) => {
                 setActiveTab('shop');
                 handleCategoryChange(name);
+                setTimeout(() => scrollToProductsSectionRef.current?.(), 200);
               }}
             />
             <FadeInOnScroll direction="up" className="section-perf">

@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import {
   Sparkles, Camera, ArrowRight,
-  Package, Users, Star, Zap
+  Package, Users, Star, Zap, ChevronRight
 } from 'lucide-react';
 import { CountUp } from '../ui/CountUp';
 import HeroSmartSearch from './HeroSmartSearch';
+import { getCategoryImage } from '../../utils/categoryImages';
 import { trackSectionEvent } from '../../services/userPreferencesService';
 
 const HERO_REVEAL_DELAY = { badge: 0, line1: 100, line2: 220, line3: 340, sub: 460, cta: 600, stats: [720, 820, 920, 1020] };
@@ -146,6 +147,52 @@ export const ModernHero = ({
             aria-hidden
           />
 
+          {/* Gyorskategóriák – valós kategóriák képekkel, headline alatt */}
+          {quickCategories.length > 0 && (
+            <div
+              className={`w-full max-w-4xl mx-auto mb-5 sm:mb-6 ${mounted ? 'hero-reveal' : 'opacity-0'}`}
+              style={mounted ? { animationDelay: `${HERO_REVEAL_DELAY.line2 + 80}ms` } : undefined}
+            >
+              <div className="flex gap-2 sm:gap-3 overflow-x-auto scrollbar-hide pb-2 -mx-1 px-1 snap-x snap-mandatory">
+                {quickCategories.map((cat) => {
+                  const name = typeof cat === 'string' ? cat : cat?.name;
+                  const count = typeof cat === 'object' && cat != null ? Number(cat.productCount || 0) : null;
+                  const productImg = Array.isArray(products) && products.length > 0
+                    ? products.find((p) => (p?.category || '').toLowerCase().includes(String(name || '').toLowerCase()))?.images?.[0]
+                    : null;
+                  const img = productImg || getCategoryImage(name);
+                  if (!name) return null;
+                  return (
+                    <button
+                      key={name}
+                      type="button"
+                      onClick={() => onQuickCategory?.(name)}
+                      className="group relative shrink-0 w-[140px] sm:w-[160px] lg:w-[180px] aspect-[4/5] rounded-2xl overflow-hidden border border-gray-200/80 bg-white shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1 hover:scale-[1.02] snap-start focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-400 focus-visible:ring-offset-2"
+                    >
+                      <img
+                        src={img}
+                        alt={name}
+                        className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/25 to-transparent" />
+                      <div className="absolute inset-0 flex flex-col justify-end p-3 sm:p-4 text-left">
+                        <span className="text-white font-bold text-sm sm:text-base drop-shadow-lg line-clamp-2">
+                          {name}
+                        </span>
+                        {count != null && count > 0 && (
+                          <span className="text-white/90 text-xs mt-0.5 font-medium">
+                            {count.toLocaleString('hu-HU')} termék
+                          </span>
+                        )}
+                        <ChevronRight className="absolute bottom-3 right-3 w-5 h-5 text-white/80 group-hover:translate-x-0.5 transition-transform" aria-hidden />
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
           {/* Központi hero search – full width minus 2px */}
           <div
             className={`relative w-full min-w-0 max-w-full px-[1px] mb-6 sm:mb-8 ${mounted ? 'hero-reveal' : 'opacity-0'}`}
@@ -207,21 +254,6 @@ export const ModernHero = ({
             <span className="inline-flex items-center gap-1.5"><Users className="w-4 h-4 text-primary-500" aria-hidden /> 50K+ elégedett vásárló</span>
             <span className="inline-flex items-center gap-1.5"><Zap className="w-4 h-4 text-secondary-700" aria-hidden /> 24/7 AI támogatás</span>
           </div>
-
-          {quickCategories.length > 0 && (
-            <div className={`flex flex-wrap items-center justify-center gap-2.5 mb-10 ${mounted ? 'hero-reveal' : 'opacity-0'}`} style={mounted ? { animationDelay: `${HERO_REVEAL_DELAY.cta + 120}ms` } : undefined}>
-              {quickCategories.slice(0, 3).map((cat) => (
-                <button
-                  key={cat}
-                  type="button"
-                  onClick={() => onQuickCategory?.(cat)}
-                  className="px-4 py-2 rounded-full bg-white border border-gray-200 text-gray-700 font-medium text-sm hover:bg-primary-50 hover:text-primary-700 hover:border-primary-200 transition-colors shadow-sm"
-                >
-                  {cat}
-                </button>
-              ))}
-            </div>
-          )}
 
           <div className={`w-full max-w-6xl ${mounted ? 'hero-reveal' : 'opacity-0'}`} style={mounted ? { animationDelay: `${HERO_REVEAL_DELAY.cta + 180}ms` } : undefined}>
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
