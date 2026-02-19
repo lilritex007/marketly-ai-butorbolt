@@ -4,20 +4,19 @@
  */
 import React, { forwardRef } from 'react';
 
-// Motion component - just renders with CSS transitions
 const createMotionComponent = (tag) => {
-  return forwardRef(({ 
-    children, 
-    initial, 
-    animate, 
-    exit, 
+  return forwardRef(({
+    children,
+    initial,
+    animate,
+    exit,
     transition,
     whileHover,
     whileTap,
     variants,
     className = '',
     style = {},
-    ...props 
+    ...props
   }, ref) => {
     const Tag = tag;
     return (
@@ -51,9 +50,6 @@ export const motion = {
   img: createMotionComponent('img'),
 };
 
-// AnimatePresence - just renders children
-export const AnimatePresence = ({ children, mode, initial, onExitComplete }) => {
-  return <>{children}</>;
-};
+export const AnimatePresence = ({ children }) => <>{children}</>;
 
 export default motion;
