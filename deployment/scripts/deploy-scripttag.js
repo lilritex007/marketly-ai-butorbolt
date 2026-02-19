@@ -16,6 +16,7 @@ const __dirname = path.dirname(__filename);
 dotenv.config({ path: path.join(__dirname, '../../.env.deployment') });
 
 // SHOP_URL = full backend API base including /api (e.g. https://xxx.railway.app/api)
+// GITHUB_CDN_BASE = opcionális; ha nincs megadva, a dist a Railway-ről szolgál (backend base + /dist)
 const config = {
   apiKey: process.env.UNAS_API_KEY,
   apiUrl: process.env.UNAS_API_URL,
@@ -26,7 +27,7 @@ const config = {
   buildDir: path.join(__dirname, '../../dist'),
   githubRepo: process.env.GITHUB_REPO,
   githubBranch: process.env.GITHUB_BRANCH || 'main',
-  cdnBase: process.env.GITHUB_CDN_BASE
+  cdnBase: process.env.GITHUB_CDN_BASE || (process.env.SHOP_URL ? process.env.SHOP_URL.replace(/\/api\/?$/, '') + '/dist' : undefined)
 };
 
 /**

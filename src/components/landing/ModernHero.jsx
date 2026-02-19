@@ -1,7 +1,7 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   Sparkles, Camera, ArrowRight,
-  Package, Users, Star, Zap, ChevronRight
+  Package, Users, Star, Zap, ChevronRight, ChevronLeft
 } from 'lucide-react';
 import { CountUp } from '../ui/CountUp';
 import HeroSmartSearch from './HeroSmartSearch';
@@ -103,6 +103,54 @@ export const ModernHero = ({
 
   const HERO_BG_IMAGE = 'https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?w=1920&q=85';
 
+  // Gyorskategória adatok
+  const mains = Array.isArray(quickCategories) ? quickCategories : [];
+  const subcats = mains.flatMap((m) =>
+    (m?.children || []).map((c) => ({ ...c, parentName: m?.name }))
+  );
+  const sorted = [...subcats].sort((a, b) => Number(b?.productCount || 0) - Number(a?.productCount || 0));
+  const quickCategoryItems = sorted.length >= 4
+    ? sorted.slice(0, 10)
+    : mains.slice(0, 6).map((m) => ({ name: m?.name, productCount: m?.productCount }));
+
+  const categoryCarouselRef = useRef(null);
+  const [categoryCarouselPaused, setCategoryCarouselPaused] = useState(false);
+
+  const getCategoryScrollStep = (container) => {
+    if (!container) return 191;
+    const first = container.firstElementChild;
+    if (!first) return 191;
+    const rect = first.getBoundingClientRect();
+    const gap = parseFloat(getComputedStyle(container).columnGap || '16');
+    return Math.max(130, rect.width + gap);
+  };
+
+  useEffect(() => {
+    if (!categoryCarouselPaused && quickCategoryItems.length > 0) {
+      const container = categoryCarouselRef.current;
+      if (!container) return undefined;
+      const id = setInterval(() => {
+        const step = getCategoryScrollStep(container);
+        const maxScroll = container.scrollWidth - container.clientWidth;
+        const next = container.scrollLeft + step;
+        if (maxScroll <= 0 || next >= maxScroll - 5) {
+          container.scrollTo({ left: 0, behavior: 'smooth' });
+        } else {
+          container.scrollBy({ left: step, behavior: 'smooth' });
+        }
+      }, 4500);
+      return () => clearInterval(id);
+    }
+    return undefined;
+  }, [categoryCarouselPaused, quickCategoryItems.length]);
+
+  const scrollCategoryCarousel = (direction) => {
+    const container = categoryCarouselRef.current;
+    if (!container) return;
+    const step = getCategoryScrollStep(container);
+    container.scrollBy({ left: step * direction, behavior: 'smooth' });
+  };
+
   return (
     <section
       className="relative min-h-screen flex flex-col items-center justify-center overflow-x-clip overflow-y-auto bg-[#fcfcfb]"
@@ -124,7 +172,7 @@ export const ModernHero = ({
         <div className="absolute inset-x-0 bottom-0 h-[1px] bg-gradient-to-r from-transparent via-secondary-300 to-transparent opacity-60" />
       </div>
 
-      <div className="relative z-10 w-full max-w-[1500px] mx-auto px-4 sm:px-6 lg:px-10 py-16 sm:py-20 lg:py-24 min-w-0">
+      <div className="relative z-10 w-full max-w-[1500px] mx-auto px-4 sm:px-6 lg:px-10 pt-16 sm:pt-20 lg:pt-24 pb-2 sm:pb-3 min-w-0">
         <div className="flex flex-col items-center text-center w-full min-w-0 max-w-full">
           <div
             className={`inline-flex items-center gap-2.5 px-4 py-2 bg-white rounded-full border border-gray-200 shadow-sm mb-8 ${mounted ? 'hero-reveal' : 'opacity-0'}`}
@@ -152,76 +200,88 @@ export const ModernHero = ({
           </h1>
 
           <div
-            className={`mx-auto h-1.5 w-28 rounded-full bg-gradient-to-r from-primary-500 to-secondary-700 mb-5 sm:mb-6 ${mounted ? 'hero-reveal' : 'opacity-0'}`}
+            className={`mx-auto h-1.5 w-28 rounded-full bg-gradient-to-r from-primary-500 to-secondary-700 mb-2 sm:mb-3 ${mounted ? 'hero-reveal' : 'opacity-0'}`}
             style={mounted ? { animationDelay: `${HERO_REVEAL_DELAY.line2 + 40}ms` } : undefined}
             aria-hidden
           />
         </div>
       </div>
 
-      {/* Gyorskategóriák – a w1500 konténeren kívül, teljes szélesség */}
-      {(() => {
-        const mains = Array.isArray(quickCategories) ? quickCategories : [];
-        const subcats = mains.flatMap((m) =>
-          (m?.children || []).map((c) => ({ ...c, parentName: m?.name }))
-        );
-        const sorted = [...subcats].sort((a, b) => Number(b?.productCount || 0) - Number(a?.productCount || 0));
-        const items = sorted.length >= 4
-          ? sorted.slice(0, 10)
-          : mains.slice(0, 6).map((m) => ({ name: m?.name, productCount: m?.productCount }));
-        if (items.length === 0) return null;
-        const productImg = (n) => Array.isArray(products) && products.length > 0
-          ? products.find((p) => (p?.category || '').toLowerCase().includes(String(n || '').toLowerCase()))?.images?.[0]
-          : null;
-        return (
-          <div
-            className={`relative z-10 w-full mb-5 sm:mb-6 overflow-hidden ${mounted ? 'hero-reveal' : 'opacity-0'}`}
-            style={mounted ? { animationDelay: `${HERO_REVEAL_DELAY.line2 + 80}ms` } : undefined}
+      {/* Gyorskategóriák – carousel: auto scroll, desktop nyilak */}
+      {quickCategoryItems.length > 0 && (
+        <div
+          className={`relative z-10 w-full mb-4 sm:mb-5 overflow-hidden ${mounted ? 'hero-reveal' : 'opacity-0'}`}
+          style={mounted ? { animationDelay: `${HERO_REVEAL_DELAY.line2 + 80}ms` } : undefined}
+        >
+          <button
+            type="button"
+            onClick={() => scrollCategoryCarousel(-1)}
+            className="hidden lg:flex absolute left-2 top-1/2 -translate-y-1/2 z-10 w-11 h-11 rounded-full bg-white/95 shadow-lg border border-gray-200 flex items-center justify-center hover:bg-white hover:shadow-xl transition-all"
+            aria-label="Balra"
           >
-            <div className="flex justify-center gap-3 sm:gap-4 overflow-x-auto scrollbar-hide pb-2 px-4 sm:px-6 lg:px-10 snap-x snap-mandatory min-w-0">
-              {items.map((item, idx) => {
-                const name = item?.name;
-                const count = Number(item?.productCount || 0);
-                if (!name) return null;
-                const Icon = getCategoryIcon(name);
-                const img = productImg(name) || getCategoryImage(name);
-                const gradient = QUICK_CARD_COLORS[idx % QUICK_CARD_COLORS.length];
-                return (
-                  <button
-                    key={`${item.parentName || ''}-${name}`}
-                    type="button"
-                    onClick={() => onQuickCategory?.(name)}
-                    className="group relative shrink-0 w-[130px] sm:w-[150px] lg:w-[175px] aspect-[3/4] rounded-2xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1.5 hover:scale-[1.03] snap-start focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-gray-900 border-2 border-white/40"
-                  >
-                    <img
-                      src={img}
-                      alt=""
-                      className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                      aria-hidden
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
-                    <div className={`absolute inset-0 bg-gradient-to-br ${gradient} opacity-35`} aria-hidden />
-                    <div className="absolute inset-0 flex flex-col items-center justify-center p-3 sm:p-4 text-center">
-                      <div className="w-14 h-14 sm:w-16 sm:h-16 lg:w-20 lg:h-20 rounded-xl lg:rounded-2xl bg-white/25 backdrop-blur-sm flex items-center justify-center mb-2 sm:mb-3 shadow-lg group-hover:bg-white/40 group-hover:scale-110 transition-all duration-300 ring-2 ring-white/30">
-                        <Icon className="w-7 h-7 sm:w-8 sm:h-8 lg:w-10 lg:h-10 text-white drop-shadow-[0_2px_8px_rgba(0,0,0,0.5)]" strokeWidth={2.5} />
-                      </div>
-                      <span className="text-white font-bold text-xs sm:text-sm lg:text-base drop-shadow-lg line-clamp-2 leading-tight">
-                        {name}
-                      </span>
-                      {count > 0 && (
-                        <span className="text-white/95 text-[10px] sm:text-xs mt-1 font-semibold">
-                          {count.toLocaleString('hu-HU')} db
-                        </span>
-                      )}
-                      <ChevronRight className="absolute bottom-2 right-2 w-4 h-4 sm:w-5 sm:h-5 text-white/90 group-hover:translate-x-0.5 transition-transform" aria-hidden />
+            <ChevronLeft className="w-6 h-6 text-gray-700" />
+          </button>
+          <button
+            type="button"
+            onClick={() => scrollCategoryCarousel(1)}
+            className="hidden lg:flex absolute right-2 top-1/2 -translate-y-1/2 z-10 w-11 h-11 rounded-full bg-white/95 shadow-lg border border-gray-200 flex items-center justify-center hover:bg-white hover:shadow-xl transition-all"
+            aria-label="Jobbra"
+          >
+            <ChevronRight className="w-6 h-6 text-gray-700" />
+          </button>
+          <div
+            ref={categoryCarouselRef}
+            onMouseEnter={() => setCategoryCarouselPaused(true)}
+            onMouseLeave={() => setCategoryCarouselPaused(false)}
+            onTouchStart={() => setCategoryCarouselPaused(true)}
+            onTouchEnd={() => setTimeout(() => setCategoryCarouselPaused(false), 3000)}
+            className="flex gap-3 sm:gap-4 overflow-x-auto scrollbar-hide pb-2 px-4 sm:px-6 lg:px-14 snap-x snap-mandatory scroll-smooth min-w-0"
+          >
+            {quickCategoryItems.map((item, idx) => {
+              const name = item?.name;
+              const count = Number(item?.productCount || 0);
+              if (!name) return null;
+              const Icon = getCategoryIcon(name);
+              const productImg = (n) => Array.isArray(products) && products.length > 0
+                ? products.find((p) => (p?.category || '').toLowerCase().includes(String(n || '').toLowerCase()))?.images?.[0]
+                : null;
+              const img = productImg(name) || getCategoryImage(name);
+              const gradient = QUICK_CARD_COLORS[idx % QUICK_CARD_COLORS.length];
+              return (
+                <button
+                  key={`${item.parentName || ''}-${name}`}
+                  type="button"
+                  onClick={() => onQuickCategory?.(name)}
+                  className="group relative shrink-0 w-[130px] sm:w-[150px] lg:w-[175px] aspect-[3/4] rounded-2xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1.5 hover:scale-[1.03] snap-start focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-gray-900 border-2 border-white/40"
+                >
+                  <img
+                    src={img}
+                    alt=""
+                    className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                    aria-hidden
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
+                  <div className={`absolute inset-0 bg-gradient-to-br ${gradient} opacity-35`} aria-hidden />
+                  <div className="absolute inset-0 flex flex-col items-center justify-center p-3 sm:p-4 text-center">
+                    <div className="w-14 h-14 sm:w-16 sm:h-16 lg:w-20 lg:h-20 rounded-xl lg:rounded-2xl bg-white/25 backdrop-blur-sm flex items-center justify-center mb-2 sm:mb-3 shadow-lg group-hover:bg-white/40 group-hover:scale-110 transition-all duration-300 ring-2 ring-white/30">
+                      <Icon className="w-7 h-7 sm:w-8 sm:h-8 lg:w-10 lg:h-10 text-white drop-shadow-[0_2px_8px_rgba(0,0,0,0.5)]" strokeWidth={2.5} />
                     </div>
-                  </button>
-                );
-              })}
-            </div>
+                    <span className="text-white font-bold text-xs sm:text-sm lg:text-base drop-shadow-lg line-clamp-2 leading-tight">
+                      {name}
+                    </span>
+                    {count > 0 && (
+                      <span className="text-white/95 text-[10px] sm:text-xs mt-1 font-semibold">
+                        {count.toLocaleString('hu-HU')} db
+                      </span>
+                    )}
+                    <ChevronRight className="absolute bottom-2 right-2 w-4 h-4 sm:w-5 sm:h-5 text-white/90 group-hover:translate-x-0.5 transition-transform" aria-hidden />
+                  </div>
+                </button>
+              );
+            })}
           </div>
-        );
-      })()}
+        </div>
+      )}
 
       <div className="relative z-10 w-full max-w-[1500px] mx-auto px-4 sm:px-6 lg:px-10 min-w-0">
         <div className="flex flex-col items-center text-center w-full min-w-0 max-w-full">
