@@ -18,12 +18,14 @@ const QUICK_CARD_COLORS = [
   'from-lime-500 via-green-500 to-emerald-600',
 ];
 
-/** Fontosabb alkategóriák – előnyben részesítjük, ha szerepelnek a hierarchiában */
+/** Fontosabb alkategóriák – csak ezek jelennek meg, ABC sorrendben */
 const PRIORITY_QUICK_CATEGORIES = [
-  'Kanapé', 'Fotel', 'Nappali', 'Ágy', 'Hálószoba', 'Matrac',
-  'Asztal', 'Szék', 'Konyha', 'Gardrób', 'Szekrény', 'Komód',
-  'Iroda', 'Gyerek', 'Kert', 'Lámpa', 'TV', 'Ruhafogas'
+  'Asztal', 'Emeletes ágy', 'Fotel', 'Gardrób', 'Gyerek', 'Hálószoba',
+  'Iroda', 'Kanapé', 'Kert', 'Kerti tárol', 'Konyha', 'Komód', 'Lámpa',
+  'Matrac', 'Nappali', 'Ruhafogas', 'Szekrény', 'Szék', 'TV'
 ];
+
+const MIN_QUICK_CATEGORY_PRODUCTS = 20;
 
 const HERO_REVEAL_DELAY = { badge: 0, line1: 100, line2: 220, line3: 340, sub: 460, cta: 600, stats: [720, 820, 920, 1020] };
 
@@ -110,18 +112,17 @@ export const ModernHero = ({
 
   const HERO_BG_IMAGE = 'https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?w=1920&q=85';
 
-  // Gyorskategória adatok – prioritás + produktCount, max 14 elem
+  // Kiemelt kategóriák – min. termékszám, ABC sorrend, csak fontosabb alkategóriák
   const mains = Array.isArray(quickCategories) ? quickCategories : [];
   const subcats = mains.flatMap((m) =>
     (m?.children || []).map((c) => ({ ...c, parentName: m?.name }))
   );
-  const byCount = [...subcats].sort((a, b) => Number(b?.productCount || 0) - Number(a?.productCount || 0));
+  const filtered = subcats.filter((c) => Number(c?.productCount || 0) >= MIN_QUICK_CATEGORY_PRODUCTS);
   const picked = new Set();
   const result = [];
-  // 1. Prioritás: fontosabb alkategóriák (ha szerepelnek)
   for (const kw of PRIORITY_QUICK_CATEGORIES) {
     const n = kw.toLowerCase();
-    const found = subcats.find((c) => {
+    const found = filtered.find((c) => {
       if (!c?.name) return false;
       const key = `${c.parentName || ''}-${c.name}`;
       if (picked.has(key)) return false;
@@ -133,8 +134,7 @@ export const ModernHero = ({
       result.push(found);
     }
   }
-  // 2. Töltse ki a maradékot productCount szerint (max 14)
-  for (const c of byCount) {
+  for (const c of filtered) {
     if (result.length >= 14) break;
     const key = `${c.parentName || ''}-${c.name}`;
     if (picked.has(key) || !c?.name) continue;
@@ -142,8 +142,11 @@ export const ModernHero = ({
     result.push(c);
   }
   const quickCategoryItems = result.length >= 4
-    ? result
-    : mains.slice(0, 6).map((m) => ({ name: m?.name, productCount: m?.productCount }));
+    ? [...result].sort((a, b) => String(a?.name || '').localeCompare(String(b?.name || ''), 'hu'))
+    : mains.filter((m) => Number(m?.productCount || 0) >= MIN_QUICK_CATEGORY_PRODUCTS)
+        .sort((a, b) => String(a?.name || '').localeCompare(String(b?.name || ''), 'hu'))
+        .slice(0, 6)
+        .map((m) => ({ name: m?.name, productCount: m?.productCount }));
 
   const categoryCarouselRef = useRef(null);
   const [categoryCarouselPaused, setCategoryCarouselPaused] = useState(false);
@@ -239,12 +242,15 @@ export const ModernHero = ({
         </div>
       </div>
 
-      {/* Gyorskategóriák – carousel: auto scroll, desktop nyilak */}
+      {/* Kiemelt kategóriák – carousel: auto scroll, desktop nyilak */}
       {quickCategoryItems.length > 0 && (
         <div
           className={`relative z-10 w-full mb-4 sm:mb-5 overflow-hidden ${mounted ? 'hero-reveal' : 'opacity-0'}`}
           style={mounted ? { animationDelay: `${HERO_REVEAL_DELAY.line2 + 80}ms` } : undefined}
         >
+          <h2 className="text-center text-lg sm:text-xl font-bold text-gray-800 mb-3 px-4">
+            Kiemelt kategóriák
+          </h2>
           <button
             type="button"
             onClick={() => scrollCategoryCarousel(-1)}
