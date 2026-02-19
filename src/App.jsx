@@ -1087,24 +1087,34 @@ const App = () => {
     requestAnimationFrame(() => requestAnimationFrame(() => scrollToProductsSectionRef.current?.()));
   }, [selectedCollection, categoryHierarchy]);
 
+  const deferProductsLoadRef = useRef(true);
   useEffect(() => {
-    // Kollekció nézetben ne futtassuk a normál kategória/keresés betöltést
     if (selectedCollection) return;
-    // Ha a keresőindex kész, a keresés lokálisan fut – ne írjuk felül a listát API kereséssel
     const useApiSearch = !canUseLocalSearch || !debouncedSearch.trim();
     const categoryMainList = getCategoryMainList(categoryFilter);
-    loadUnasDataRef.current({
-      search: useApiSearch ? (debouncedSearch.trim() || undefined) : undefined,
-      category: categoryMainList.length === 0 && categoryFilter !== 'Összes' ? categoryFilter : '',
-      categoryMain: categoryMainList.length > 0 ? categoryMainList : undefined,
-      limit: INITIAL_PAGE,
-      offset: 0
-    });
-    // Csak akkor görgetünk a termékekre, ha a felhasználó most indított keresést/kategóriaváltást (ne listagörgetéskor)
-    if (requestScrollToProductsRef.current && debouncedSearch.trim()) {
-      requestScrollToProductsRef.current = false;
-      requestAnimationFrame(() => requestAnimationFrame(() => scrollToProductsSectionRef.current?.()));
+    const isInitialState = categoryFilter === 'Összes' && !debouncedSearch.trim();
+    const shouldDefer = deferProductsLoadRef.current && isInitialState;
+
+    const run = () => {
+      loadUnasDataRef.current({
+        search: useApiSearch ? (debouncedSearch.trim() || undefined) : undefined,
+        category: categoryMainList.length === 0 && categoryFilter !== 'Összes' ? categoryFilter : '',
+        categoryMain: categoryMainList.length > 0 ? categoryMainList : undefined,
+        limit: INITIAL_PAGE,
+        offset: 0
+      });
+      if (requestScrollToProductsRef.current && debouncedSearch.trim()) {
+        requestScrollToProductsRef.current = false;
+        requestAnimationFrame(() => requestAnimationFrame(() => scrollToProductsSectionRef.current?.()));
+      }
+    };
+
+    if (shouldDefer) {
+      deferProductsLoadRef.current = false;
+      const t = setTimeout(run, 900);
+      return () => clearTimeout(t);
     }
+    run();
   }, [categoryFilter, debouncedSearch, canUseLocalSearch, getCategoryMainList, selectedCollection]);
 
   useEffect(() => {
