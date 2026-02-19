@@ -9,18 +9,26 @@ const BackToTop = () => {
   const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
+    let rafId = null;
     const toggleVisibility = () => {
       const scrollHeight = document.documentElement.scrollHeight - document.documentElement.clientHeight;
       const scrolled = window.pageYOffset;
-      const scrollPercent = (scrolled / scrollHeight) * 100;
-      
-      setIsVisible(scrollPercent > 30); // Show after 30% scroll
+      const scrollPercent = scrollHeight > 0 ? (scrolled / scrollHeight) * 100 : 0;
+      setIsVisible(scrollPercent > 30);
     };
-
-    window.addEventListener('scroll', toggleVisibility);
-    toggleVisibility(); // Initial check
-
-    return () => window.removeEventListener('scroll', toggleVisibility);
+    const onScroll = () => {
+      if (rafId != null) return;
+      rafId = requestAnimationFrame(() => {
+        toggleVisibility();
+        rafId = null;
+      });
+    };
+    window.addEventListener('scroll', onScroll, { passive: true });
+    toggleVisibility();
+    return () => {
+      if (rafId != null) cancelAnimationFrame(rafId);
+      window.removeEventListener('scroll', onScroll);
+    };
   }, []);
 
   const scrollToTop = () => {

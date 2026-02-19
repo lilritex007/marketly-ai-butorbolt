@@ -38,8 +38,8 @@ import LiveActivityStrip from './components/ux/LiveActivityStrip';
 import { ModernHero } from './components/landing/ModernHero';
 import AIModuleUnified from './components/landing/AIModuleUnified';
 import { InteractiveCTA } from './components/landing/ShowcaseSections';
-import InspirationSection from './components/landing/InspirationSection';
-import ProductWorldsSection from './components/landing/ProductWorldsSection';
+const InspirationSection = lazy(() => import('./components/landing/InspirationSection'));
+const ProductWorldsSection = lazy(() => import('./components/landing/ProductWorldsSection'));
 // Footer eltávolítva - a fő UNAS shopnak már van saját láblécce
 
 // Product Components
@@ -57,14 +57,14 @@ import AIPricePredictor from './components/ai/AIPricePredictor';
 // Marketing Components
 import SmartNewsletterPopup from './components/marketing/SmartNewsletterPopup';
 import ExitIntentPopup from './components/marketing/ExitIntentPopup';
-import NewsletterStrip from './components/marketing/NewsletterStrip';
+const NewsletterStrip = lazy(() => import('./components/marketing/NewsletterStrip'));
 
 // AR Components
 import ARProductPreview from './components/ar/ARProductPreview';
 
 // New UX Components
 import CompleteTheLook from './components/product/CompleteTheLook';
-import PersonalizedSection from './components/home/PersonalizedSection';
+const PersonalizedSection = lazy(() => import('./components/home/PersonalizedSection'));
 import ImageGallery from './components/product/ImageGallery';
 import StickyAddToCart from './components/product/StickyAddToCart';
 import PriceAlert from './components/product/PriceAlert';
@@ -83,7 +83,7 @@ import SmartBundle from './components/product/SmartBundle';
 import PriceHistory from './components/product/PriceHistory';
 import OneClickCheckout from './components/checkout/OneClickCheckout';
 import SmartSearchBar from './components/search/SmartSearchBar';
-import LoyaltyProgram from './components/loyalty/LoyaltyProgram';
+const LoyaltyProgram = lazy(() => import('./components/loyalty/LoyaltyProgram'));
 import ARMeasure from './components/ar/ARMeasure';
 import StickyAddToCartMobile from './components/mobile/StickyAddToCartMobile';
 import TrustBadges from './components/trust/TrustBadges';
@@ -769,7 +769,7 @@ const App = () => {
     setSearchQuery(''); // Reset search
     
     setActiveTab('shop');
-    setTimeout(() => scrollToProductsSectionRef.current?.(), 400);
+    requestAnimationFrame(() => requestAnimationFrame(() => scrollToProductsSectionRef.current?.()));
   }, [products]);
   
   // Clear AI recommendations
@@ -924,10 +924,7 @@ const App = () => {
   }, []);
   const hasUserSearchedRef = useRef(false);
   useLayoutEffect(() => {
-    if (typeof window !== 'undefined') {
-      window.history.scrollRestoration = 'manual';
-      window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
-    }
+    if (typeof window !== 'undefined') window.history.scrollRestoration = 'manual';
   }, []);
 
   useEffect(() => {
@@ -960,38 +957,30 @@ const App = () => {
     return null;
   }, []);
 
+  const lastScrollToProductsRef = useRef(0);
   const scrollToProductsSection = useCallback(() => {
     const el = document.getElementById('products-section');
     if (!el) return;
-    const offset = 100;
-    const initialRect = el.getBoundingClientRect();
-    if (initialRect.top >= 0 && initialRect.top <= offset + 20) return;
+    const now = performance.now();
+    if (now - lastScrollToProductsRef.current < 250) return;
+    const rect = el.getBoundingClientRect();
+    const inView = rect.top >= 0 && rect.top <= 120;
+    if (inView) return;
+    lastScrollToProductsRef.current = now;
 
     const run = () => {
       const scrollParent = getScrollParent(el);
-      if (scrollParent) {
+      if (scrollParent && scrollParent !== document.documentElement) {
         const elRect = el.getBoundingClientRect();
         const parentRect = scrollParent.getBoundingClientRect();
+        const offset = 88;
         const targetScrollTop = scrollParent.scrollTop + (elRect.top - parentRect.top) - offset;
         scrollParent.scrollTo({ top: Math.max(0, targetScrollTop), behavior: 'smooth' });
       } else {
-        const scrollY = window.scrollY ?? window.pageYOffset;
-        const targetTop = Math.max(0, el.getBoundingClientRect().top + scrollY - offset);
-        window.scrollTo({ top: Math.max(0, scrollY - 1), behavior: 'auto' });
-        requestAnimationFrame(() => {
-          window.scrollTo({ top: targetTop, behavior: 'smooth' });
-        });
+        el.scrollIntoView({ behavior: 'smooth', block: 'start', inline: 'nearest' });
       }
-      // Fallback: ha 400 ms után még nincs a szekció a viewportban, scrollIntoView (pl. UNAS embed)
-      setTimeout(() => {
-        const rect = el.getBoundingClientRect();
-        const inView = rect.top <= 150 && rect.bottom >= 0;
-        if (!inView) {
-          el.scrollIntoView({ behavior: 'smooth', block: 'start', inline: 'nearest' });
-        }
-      }, 400);
     };
-    requestAnimationFrame(() => requestAnimationFrame(run));
+    requestAnimationFrame(run);
   }, [getScrollParent]);
 
   const scrollToProductsSectionRef = useRef(scrollToProductsSection);
@@ -1012,7 +1001,7 @@ const App = () => {
     setIsLoadingUnas(true);
     setUnasError(null);
     if (category && category !== 'Összes') setActiveTab('shop');
-    setTimeout(scrollToProductsSection, 500);
+    requestAnimationFrame(() => requestAnimationFrame(scrollToProductsSection));
   }, [scrollToProductsSection, clearAIRecommendations]);
 
   const handleCollectionSelect = useCallback((collection) => {
@@ -1089,11 +1078,7 @@ const App = () => {
       limit,
       offset: 0
     });
-    setTimeout(() => {
-      requestAnimationFrame(() => requestAnimationFrame(() => {
-        scrollToProductsSectionRef.current?.();
-      }));
-    }, 100);
+    requestAnimationFrame(() => requestAnimationFrame(() => scrollToProductsSectionRef.current?.()));
   }, [selectedCollection, categoryHierarchy]);
 
   useEffect(() => {
@@ -1112,7 +1097,7 @@ const App = () => {
     // Csak akkor görgetünk a termékekre, ha a felhasználó most indított keresést/kategóriaváltást (ne listagörgetéskor)
     if (requestScrollToProductsRef.current && debouncedSearch.trim()) {
       requestScrollToProductsRef.current = false;
-      setTimeout(() => scrollToProductsSectionRef.current?.(), 120);
+      requestAnimationFrame(() => requestAnimationFrame(() => scrollToProductsSectionRef.current?.()));
     }
   }, [categoryFilter, debouncedSearch, canUseLocalSearch, getCategoryMainList, selectedCollection]);
 
@@ -1124,10 +1109,6 @@ const App = () => {
     };
     window.addEventListener('hashchange', onHashChange);
     return () => window.removeEventListener('hashchange', onHashChange);
-  }, []);
-
-  useEffect(() => {
-    window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
   }, []);
 
   useEffect(() => {
@@ -1207,45 +1188,57 @@ const App = () => {
     return () => clearInterval(t);
   }, []);
 
-  // Featured pool for homepage modules (ProductWorldsSection: ~450 termék, nagyobb merítés)
+  // Featured pool for homepage modules – 1. batch azonnal, 2–3. batch 1s késleltetve
   useEffect(() => {
     if (!totalProductsCount || totalProductsCount <= 0) return;
     const key = `${totalProductsCount}-${lastUpdated || ''}`;
     if (featuredPoolKeyRef.current === key) return;
     featuredPoolKeyRef.current = key;
     let cancelled = false;
+    let extraTimeoutId = null;
     const limit = 150;
-    const baseOffsets = [0];
-    if (totalProductsCount > limit * 2) {
-      baseOffsets.push(
-        Math.max(0, Math.floor(totalProductsCount / 3) - Math.floor(limit / 2)),
-        Math.max(0, Math.floor((totalProductsCount * 2) / 3) - Math.floor(limit / 2))
-      );
-    }
-    Promise.all(
-      baseOffsets.map((offset) => fetchUnasProducts({ limit, offset, slim: false }))
-    )
-      .then((batches) => {
+    const normalize = (p) => ({
+      ...p,
+      images: p.images || (p.image ? [p.image] : []),
+      image: p.images?.[0] || p.image,
+      inStock: p.inStock ?? p.in_stock ?? true
+    });
+    const mergeInto = (map, data) => {
+      (data?.products || []).forEach((p) => {
+        if (!p || !p.id) return;
+        map.set(p.id, normalize(p));
+      });
+    };
+    fetchUnasProducts({ limit, offset: 0, slim: false })
+      .then((first) => {
         if (cancelled) return;
         const merged = new Map();
-        batches.forEach((data) => {
-          (data?.products || []).forEach((p) => {
-            if (!p || !p.id) return;
-            const normalized = {
-              ...p,
-              images: p.images || (p.image ? [p.image] : []),
-              image: p.images?.[0] || p.image,
-              inStock: p.inStock ?? p.in_stock ?? true
-            };
-            merged.set(p.id, normalized);
-          });
-        });
+        mergeInto(merged, first);
         setFeaturedPool(Array.from(merged.values()));
+        if (totalProductsCount <= limit * 2) return;
+        const extraOffsets = [
+          Math.max(0, Math.floor(totalProductsCount / 3) - Math.floor(limit / 2)),
+          Math.max(0, Math.floor((totalProductsCount * 2) / 3) - Math.floor(limit / 2))
+        ];
+        extraTimeoutId = setTimeout(() => {
+          if (cancelled) return;
+          Promise.all(extraOffsets.map((o) => fetchUnasProducts({ limit, offset: o, slim: false })))
+            .then((batches) => {
+              if (cancelled) return;
+              const map = new Map(Array.from(merged.entries()));
+              batches.forEach((b) => mergeInto(map, b));
+              setFeaturedPool(Array.from(map.values()));
+            })
+            .catch(() => {});
+        }, 1000);
       })
       .catch(() => {
         if (!cancelled) setFeaturedPool([]);
       });
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+      if (extraTimeoutId != null) clearTimeout(extraTimeoutId);
+    };
   }, [totalProductsCount, lastUpdated]);
 
   const normalizedAdvancedFilters = useMemo(() => ({
@@ -1389,6 +1382,8 @@ const App = () => {
     return [{ id: 'Összes', name: 'Összes', totalCount: total }, ...sorted];
   }, [categoryHierarchy?.mainCategories, products, totalProductsCount]);
 
+  const recentPurchasesForSocialProof = useMemo(() => products.slice(0, 10), [products]);
+
   return (
     <ToastProvider>
     <div id="mkt-butorbolt-app" className="min-h-screen bg-white font-sans text-gray-900 rounded-3xl sm:rounded-[2rem] lg:rounded-[2.5rem] overflow-hidden shadow-2xl shadow-gray-300/50 mx-auto w-full max-w-[2000px]">
@@ -1420,7 +1415,7 @@ const App = () => {
       {/* Live Social Proof */}
       <LiveSocialProof 
         currentProduct={selectedProduct} 
-        recentPurchases={products.slice(0, 10)}
+        recentPurchases={recentPurchasesForSocialProof}
       />
       
       {/* Back to Top Button */}
@@ -1466,14 +1461,13 @@ const App = () => {
                 }
                 handleServerSearch(query, { scrollFromEffect: false });
                 if (meta?.source !== 'instant') {
-                  setTimeout(() => scrollToProductsSectionRef.current?.(), 150);
+                  requestAnimationFrame(() => requestAnimationFrame(() => scrollToProductsSectionRef.current?.()));
                 }
               }}
               quickCategories={categoryHierarchy?.mainCategories || []}
               onQuickCategory={(name) => {
                 setActiveTab('shop');
                 handleCategoryChange(name);
-                setTimeout(() => scrollToProductsSectionRef.current?.(), 200);
               }}
             />
             <FadeInOnScroll direction="up" className="section-perf">
@@ -1491,60 +1485,69 @@ const App = () => {
             </FadeInOnScroll>
 
             <FadeInOnScroll direction="up" className="section-perf section-gap-lg">
-              <InspirationSection
-                onExplore={scrollToProductsSection}
-                onCategorySelect={(name) => {
-                  setActiveTab('shop');
-                  handleCategoryChange(name);
-                  setTimeout(() => scrollToProductsSectionRef.current?.(), 400);
-                }}
-                onCollectionSelect={(col) => {
-                  handleCollectionSelect(col);
-                  setTimeout(() => scrollToProductsSectionRef.current?.(), 500);
-                }}
-              />
+              <Suspense fallback={null}>
+                <InspirationSection
+                  onExplore={scrollToProductsSection}
+                  onCategorySelect={(name) => {
+                    setActiveTab('shop');
+                    handleCategoryChange(name);
+                  }}
+                  onCollectionSelect={(col) => {
+                    handleCollectionSelect(col);
+                    requestAnimationFrame(() => requestAnimationFrame(() => scrollToProductsSectionRef.current?.()));
+                  }}
+                />
+              </Suspense>
             </FadeInOnScroll>
             
             {featuredBase.length > 0 && (
               <FadeInOnScroll direction="up" className="section-perf">
-                <div className="w-[100vw] relative left-1/2 -translate-x-1/2 sm:w-full sm:relative sm:left-auto sm:translate-x-0">
-                  <ProductWorldsSection
-                  products={featuredBase}
-                  onProductClick={handleProductView}
-                  onToggleWishlist={toggleWishlist}
-                  wishlist={wishlist}
-                  onViewAll={scrollToProductsSection}
-                  onAddToCart={handleAddToCart}
-                  contextLabel={sectionContextLabel}
-                  rotationTick={sectionRotateTick}
-                />
-                </div>
+                <Suspense fallback={null}>
+                  <div className="w-[100vw] relative left-1/2 -translate-x-1/2 sm:w-full sm:relative sm:left-auto sm:translate-x-0">
+                    <ProductWorldsSection
+                      products={featuredBase}
+                      onProductClick={handleProductView}
+                      onToggleWishlist={toggleWishlist}
+                      wishlist={wishlist}
+                      onViewAll={scrollToProductsSection}
+                      onAddToCart={handleAddToCart}
+                      contextLabel={sectionContextLabel}
+                      rotationTick={sectionRotateTick}
+                    />
+                  </div>
+                </Suspense>
               </FadeInOnScroll>
             )}
             
             {/* Personalized Section - For You + Recently Viewed + Trending */}
             {featuredBase.length > 0 && (
-              <PersonalizedSection
-                products={featuredBase}
-                onProductClick={handleProductView}
-                onToggleWishlist={toggleWishlist}
-                wishlist={wishlist}
-                onAddToCart={handleAddToCart}
-                contextLabel={sectionContextLabel}
-              />
+              <Suspense fallback={null}>
+                <PersonalizedSection
+                  products={featuredBase}
+                  onProductClick={handleProductView}
+                  onToggleWishlist={toggleWishlist}
+                  wishlist={wishlist}
+                  onAddToCart={handleAddToCart}
+                  contextLabel={sectionContextLabel}
+                />
+              </Suspense>
             )}
 
             <div className="w-full max-w-[500px] mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
-              <LoyaltyProgram
-                currentPoints={2450}
-                totalSpent={485000}
-                tier="silver"
-                onViewRewards={() => {}}
-                onRedeemPoints={(reward) => console.log('Redeem:', reward)}
-              />
+              <Suspense fallback={null}>
+                <LoyaltyProgram
+                  currentPoints={2450}
+                  totalSpent={485000}
+                  tier="silver"
+                  onViewRewards={() => {}}
+                  onRedeemPoints={(reward) => console.log('Redeem:', reward)}
+                />
+              </Suspense>
             </div>
 
-            <NewsletterStrip />
+            <Suspense fallback={null}>
+              <NewsletterStrip />
+            </Suspense>
 
             <FadeInOnScroll direction="up" className="section-perf">
               <Features />
@@ -1794,7 +1797,7 @@ const App = () => {
                       <p className="text-sm text-gray-500 font-medium">Termékek betöltése...</p>
                     </div>
                     <div className="product-grid">
-                      {[...Array(12)].map((_, i) => (
+                      {[...Array(8)].map((_, i) => (
                         <ProductCardSkeleton key={`skeleton-${i}`} />
                       ))}
                     </div>

@@ -44,15 +44,10 @@ export const FadeInOnScroll = ({
     );
 
     try {
-    try {
       observer.observe(ref.current);
     } catch (err) {
-      return;
+      return undefined;
     }
-    } catch (err) {
-      return;
-    }
-
     return () => observer.disconnect();
   }, [threshold]);
 
@@ -78,7 +73,7 @@ export const FadeInOnScroll = ({
         transform: getTransform(),
         opacity: visible ? 1 : 0,
         transition,
-        willChange: prefersReducedMotion ? 'auto' : 'transform, opacity'
+        willChange: prefersReducedMotion || visible ? 'auto' : 'transform, opacity'
       }}
     >
       {children}

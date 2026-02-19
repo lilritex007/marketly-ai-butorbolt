@@ -40,7 +40,8 @@ export default defineConfig({
       output: {
         entryFileNames: 'assets/index.js',
         manualChunks: {
-          vendor: ['react', 'react-dom']
+          vendor: ['react', 'react-dom'],
+          icons: ['lucide-react']
         },
         chunkFileNames: 'assets/[name].js',
         assetFileNames: 'assets/[name][extname]'

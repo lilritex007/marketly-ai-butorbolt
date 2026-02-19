@@ -24,13 +24,8 @@ if (typeof window !== 'undefined' && !window.__MKT_SCROLL_INIT) {
       }
     }
   }
-  const scrollTopNowDelayed = () => {
-    scrollTopNow()
-    requestAnimationFrame(scrollTopNow)
-    setTimeout(scrollTopNow, 50)
-  }
-  window.addEventListener('load', scrollTopNowDelayed)
-  window.addEventListener('pageshow', scrollTopNowDelayed)
+  window.addEventListener('load', scrollTopNow)
+  window.addEventListener('pageshow', scrollTopNow)
 }
 
 const rootEl = document.getElementById('root')

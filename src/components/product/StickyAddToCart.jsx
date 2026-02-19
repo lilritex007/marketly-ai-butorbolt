@@ -44,7 +44,7 @@ const StickyAddToCart = ({
       return () => observer.disconnect();
     }
     const handleScroll = () => setIsShown(window.scrollY > 400);
-    window.addEventListener('scroll', handleScroll);
+    window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
   }, [observedElementId]);
 

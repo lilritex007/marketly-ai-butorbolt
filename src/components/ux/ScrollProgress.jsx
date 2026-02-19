@@ -8,17 +8,26 @@ const ScrollProgress = () => {
   const [scrollProgress, setScrollProgress] = useState(0);
 
   useEffect(() => {
+    let rafId = null;
     const updateScrollProgress = () => {
       const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
       const scrollHeight = document.documentElement.scrollHeight - document.documentElement.clientHeight;
-      const progress = (scrollTop / scrollHeight) * 100;
+      const progress = scrollHeight > 0 ? (scrollTop / scrollHeight) * 100 : 0;
       setScrollProgress(Math.min(progress, 100));
     };
-
-    window.addEventListener('scroll', updateScrollProgress);
-    updateScrollProgress(); // Initial call
-
-    return () => window.removeEventListener('scroll', updateScrollProgress);
+    const onScroll = () => {
+      if (rafId != null) return;
+      rafId = requestAnimationFrame(() => {
+        updateScrollProgress();
+        rafId = null;
+      });
+    };
+    window.addEventListener('scroll', onScroll, { passive: true });
+    updateScrollProgress();
+    return () => {
+      if (rafId != null) cancelAnimationFrame(rafId);
+      window.removeEventListener('scroll', onScroll);
+    };
   }, []);
 
   return (
