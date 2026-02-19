@@ -27,7 +27,10 @@ if (typeof window !== 'undefined' && !window.__MKT_SCROLL_INIT) {
   scrollTopNow()
   window.addEventListener('DOMContentLoaded', scrollTopNow)
   window.addEventListener('load', scrollTopNow)
-  window.addEventListener('pageshow', scrollTopNow)
+  window.addEventListener('pageshow', (e) => {
+    scrollTopNow()
+    if (e.persisted) setTimeout(scrollTopNow, 80)
+  })
 }
 
 const rootEl = document.getElementById('root')
