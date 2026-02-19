@@ -689,23 +689,23 @@ export default function HeroSmartSearch({
         <div className="pointer-events-none absolute inset-x-0 -top-16 h-44 bg-[radial-gradient(ellipse_at_center,rgba(255,138,0,0.18),transparent_65%)] blur-2xl" aria-hidden />
         <div className="pointer-events-none absolute inset-x-0 -bottom-24 h-60 bg-[radial-gradient(ellipse_at_center,rgba(0,107,111,0.14),transparent_70%)] blur-3xl" aria-hidden />
 
-        <div className="relative rounded-none sm:rounded-[38px] overflow-hidden bg-white border border-gray-200 shadow-lg animate-scale-in">
+        <div className="relative rounded-xl sm:rounded-2xl overflow-hidden bg-white border border-gray-200 shadow-lg animate-scale-in">
           {/* ExitIntentPopup-style header bar with gradient + blobs */}
-          <div className="bg-gradient-to-br from-primary-500 via-secondary-700 to-pink-500 p-5 sm:p-6 text-center relative overflow-hidden">
+          <div className="bg-gradient-to-br from-primary-500 via-secondary-700 to-pink-500 p-5 sm:p-6 lg:p-7 text-center relative overflow-hidden">
             <div className="absolute inset-0 overflow-hidden pointer-events-none" aria-hidden>
               <div className="absolute -top-10 -left-10 w-40 h-40 bg-white/10 rounded-full animate-blob motion-reduce:animate-none" />
               <div className="absolute -bottom-10 -right-10 w-40 h-40 bg-white/10 rounded-full animate-blob animation-delay-2000 motion-reduce:animate-none" />
             </div>
             <div className="relative flex items-center justify-center sm:justify-between gap-4 flex-wrap">
-              <div className="flex items-center gap-3">
-                <div className="w-12 h-12 sm:w-14 sm:h-14 bg-white/20 rounded-full flex items-center justify-center shrink-0">
-                  <Sparkles className="w-6 h-6 sm:w-7 sm:h-7 text-white" aria-hidden />
+              <div className="flex items-center gap-3 sm:gap-4">
+                <div className="w-14 h-14 sm:w-16 sm:h-16 bg-white/25 rounded-full flex items-center justify-center shrink-0 shadow-lg">
+                  <Sparkles className="w-7 h-7 sm:w-8 sm:h-8 text-white" aria-hidden />
                 </div>
                 <div className="text-left">
-                  <h2 className="text-xl sm:text-2xl font-bold text-white">
+                  <h2 className="text-2xl sm:text-3xl font-extrabold text-white drop-shadow-sm">
                     AI Kereső
                   </h2>
-                  <p className="text-white/90 text-sm">
+                  <p className="text-white text-sm sm:text-base font-semibold mt-0.5">
                     Írj természetesen, találj gyorsan
                   </p>
                 </div>

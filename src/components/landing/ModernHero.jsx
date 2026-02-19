@@ -146,9 +146,9 @@ export const ModernHero = ({
             aria-hidden
           />
 
-          {/* Központi hero search – azonnal a headline után */}
+          {/* Központi hero search – azonnal a headline után, FlashSaleBanner-rel azonos szélesség mobilon */}
           <div
-            className={`relative w-full min-w-0 max-w-full -mx-4 sm:-mx-8 lg:-mx-14 xl:-mx-20 mb-6 sm:mb-8 ${mounted ? 'hero-reveal' : 'opacity-0'}`}
+            className={`relative w-full min-w-0 max-w-full px-[2px] sm:px-2 lg:px-4 mb-6 sm:mb-8 ${mounted ? 'hero-reveal' : 'opacity-0'}`}
             style={mounted ? { animationDelay: `${HERO_REVEAL_DELAY.sub - 60}ms` } : undefined}
           >
             <div className="pointer-events-none absolute inset-0 rounded-[32px] border border-white/70 bg-white/[0.04] backdrop-blur-[1px] shadow-[inset_0_1px_0_rgba(255,255,255,0.75)]" aria-hidden />
