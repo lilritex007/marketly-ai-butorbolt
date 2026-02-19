@@ -686,7 +686,6 @@ const CategoryPage = ({
   const [presetName, setPresetName] = useState('');
   const [savedPresets, setSavedPresets] = useState([]);
   const loadMoreRef = useRef(null);
-  const scrollKey = `mkt_category_scroll_${category}`;
   
   const theme = getCategoryTheme(category);
   const likedIds = useMemo(() => getLikedProducts(), []);
@@ -702,28 +701,8 @@ const CategoryPage = ({
   }, [category]);
 
   useEffect(() => {
-    const saved = sessionStorage.getItem(scrollKey);
-    if (saved) {
-      const y = parseInt(saved, 10);
-      if (Number.isFinite(y)) {
-        requestAnimationFrame(() => window.scrollTo({ top: y, behavior: 'auto' }));
-      }
-    }
-  }, [scrollKey]);
-
-  useEffect(() => {
-    let ticking = false;
-    const onScroll = () => {
-      if (ticking) return;
-      ticking = true;
-      requestAnimationFrame(() => {
-        sessionStorage.setItem(scrollKey, String(window.scrollY || 0));
-        ticking = false;
-      });
-    };
-    window.addEventListener('scroll', onScroll, { passive: true });
-    return () => window.removeEventListener('scroll', onScroll);
-  }, [scrollKey]);
+    window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
+  }, [category]);
 
   const savePreset = () => {
     const name = presetName.trim();
