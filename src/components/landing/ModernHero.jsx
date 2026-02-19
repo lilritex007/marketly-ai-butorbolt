@@ -18,13 +18,7 @@ const QUICK_CARD_COLORS = [
   'from-lime-500 via-green-500 to-emerald-600',
 ];
 
-/** Fontosabb alkategóriák – csak ezek jelennek meg, ABC sorrendben */
-const PRIORITY_QUICK_CATEGORIES = [
-  'Asztal', 'Emeletes ágy', 'Fotel', 'Gardrób', 'Gyerek', 'Hálószoba',
-  'Iroda', 'Kanapé', 'Kert', 'Kerti tárol', 'Konyha', 'Komód', 'Lámpa',
-  'Matrac', 'Nappali', 'Ruhafogas', 'Szekrény', 'Szék', 'TV'
-];
-
+const QUICK_CATEGORY_LIMIT = 18;
 const MIN_QUICK_CATEGORY_PRODUCTS = 20;
 
 const HERO_REVEAL_DELAY = { badge: 0, line1: 100, line2: 220, line3: 340, sub: 460, cta: 600, stats: [720, 820, 920, 1020] };
@@ -112,41 +106,27 @@ export const ModernHero = ({
 
   const HERO_BG_IMAGE = 'https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?w=1920&q=85';
 
-  // Kiemelt kategóriák – min. termékszám, ABC sorrend, csak fontosabb alkategóriák
+  // Kiemelt kategóriák – 18 legfontosabb (termékszám szerint), ABC sorrendben megjelenítve
   const mains = Array.isArray(quickCategories) ? quickCategories : [];
   const subcats = mains.flatMap((m) =>
     (m?.children || []).map((c) => ({ ...c, parentName: m?.name }))
   );
-  const filtered = subcats.filter((c) => Number(c?.productCount || 0) >= MIN_QUICK_CATEGORY_PRODUCTS);
-  const picked = new Set();
-  const result = [];
-  for (const kw of PRIORITY_QUICK_CATEGORIES) {
-    const n = kw.toLowerCase();
-    const found = filtered.find((c) => {
-      if (!c?.name) return false;
-      const key = `${c.parentName || ''}-${c.name}`;
-      if (picked.has(key)) return false;
-      return String(c.name).toLowerCase().includes(n);
-    });
-    if (found) {
-      const key = `${found.parentName || ''}-${found.name}`;
-      picked.add(key);
-      result.push(found);
-    }
+  const allItems = [
+    ...mains.filter((m) => m?.name).map((m) => ({ name: m.name, productCount: m.productCount, parentName: null })),
+    ...subcats.filter((c) => c?.name)
+  ];
+  const byName = new Map();
+  for (const item of allItems) {
+    const count = Number(item?.productCount || 0);
+    if (count < MIN_QUICK_CATEGORY_PRODUCTS) continue;
+    const name = String(item.name).trim();
+    const existing = byName.get(name);
+    if (!existing || count > Number(existing.productCount || 0)) byName.set(name, { ...item, name });
   }
-  for (const c of filtered) {
-    if (result.length >= 14) break;
-    const key = `${c.parentName || ''}-${c.name}`;
-    if (picked.has(key) || !c?.name) continue;
-    picked.add(key);
-    result.push(c);
-  }
-  const quickCategoryItems = result.length >= 4
-    ? [...result].sort((a, b) => String(a?.name || '').localeCompare(String(b?.name || ''), 'hu'))
-    : mains.filter((m) => Number(m?.productCount || 0) >= MIN_QUICK_CATEGORY_PRODUCTS)
-        .sort((a, b) => String(a?.name || '').localeCompare(String(b?.name || ''), 'hu'))
-        .slice(0, 6)
-        .map((m) => ({ name: m?.name, productCount: m?.productCount }));
+  const topByCount = [...byName.values()]
+    .sort((a, b) => Number(b?.productCount || 0) - Number(a?.productCount || 0))
+    .slice(0, QUICK_CATEGORY_LIMIT);
+  const quickCategoryItems = [...topByCount].sort((a, b) => String(a?.name || '').localeCompare(String(b?.name || ''), 'hu'));
 
   const categoryCarouselRef = useRef(null);
   const [categoryCarouselPaused, setCategoryCarouselPaused] = useState(false);
