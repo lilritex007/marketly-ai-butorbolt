@@ -108,13 +108,13 @@ export const ModernHero = ({
       className="relative min-h-screen flex items-center justify-center overflow-hidden bg-[#fcfcfb]"
       aria-label="Főoldal – AI bútorbolt"
     >
-      {/* Háttérkép ~10% halványan – minden képernyőméreten (mobil, tablet, desktop) */}
+      {/* Háttérkép ~10% átlátszósággal – ahogy volt */}
       <div
-        className="absolute inset-0 bg-cover bg-center opacity-10"
+        className="absolute inset-0 bg-cover bg-center opacity-10 z-0"
         style={{ backgroundImage: `url(${HERO_BG_IMAGE})` }}
         aria-hidden
       />
-      <div className="absolute inset-0 bg-gradient-to-b from-white/90 via-white/72 to-primary-50/90" aria-hidden />
+      <div className="absolute inset-0 bg-gradient-to-b from-white/88 via-white/70 to-primary-50/88 z-[1]" aria-hidden />
       <div className="pointer-events-none absolute inset-0" aria-hidden>
         <div className="absolute left-1/2 top-[30%] h-[520px] w-[min(1100px,92vw)] -translate-x-1/2 -translate-y-1/2 bg-[radial-gradient(ellipse_at_center,rgba(255,138,0,0.24),transparent_62%)] blur-2xl" />
         <div className="absolute left-1/2 top-[34%] h-[420px] w-[min(860px,84vw)] -translate-x-1/2 -translate-y-1/2 bg-[radial-gradient(ellipse_at_center,rgba(0,107,111,0.16),transparent_70%)] blur-xl" />
@@ -176,7 +176,7 @@ export const ModernHero = ({
                 className={`w-screen max-w-[100vw] relative left-1/2 -translate-x-1/2 mb-5 sm:mb-6 overflow-hidden ${mounted ? 'hero-reveal' : 'opacity-0'}`}
                 style={mounted ? { animationDelay: `${HERO_REVEAL_DELAY.line2 + 80}ms` } : undefined}
               >
-                <div className="flex gap-3 sm:gap-4 overflow-x-auto scrollbar-hide pb-2 px-2 sm:px-4 snap-x snap-mandatory">
+                <div className="flex justify-center gap-3 sm:gap-4 overflow-x-auto scrollbar-hide pb-2 px-1 snap-x snap-mandatory min-w-0">
                   {items.map((item, idx) => {
                     const name = item?.name;
                     const count = Number(item?.productCount || 0);
