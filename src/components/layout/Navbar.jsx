@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useScrollPastY } from '../../hooks/useScrollPosition';
+import { useScrollLock } from '../../hooks/useScrollLock';
 import {
   Home, Sparkles, Grid3X3, ChevronDown, ChevronUp, ArrowRight, Search, Sun, Moon, Heart, Menu, X, ChevronRight,
   ShoppingCart, Camera, Move, Truck, Gift, Zap, TrendingUp, Star, Sofa, BedDouble, Armchair,
@@ -197,11 +198,7 @@ export default function Navbar({
     }
   }, [showMegaMenu]);
 
-  useEffect(() => {
-    if (mobileMenuOpen) document.body.style.overflow = 'hidden';
-    else document.body.style.overflow = '';
-    return () => { document.body.style.overflow = ''; };
-  }, [mobileMenuOpen]);
+  useScrollLock(mobileMenuOpen);
 
   useEffect(() => {
     if (mobileMenuOpen) {

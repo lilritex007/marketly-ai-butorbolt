@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { ZoomIn, ZoomOut, ChevronLeft, ChevronRight, X, Expand, Maximize2 } from 'lucide-react';
+import { useScrollLock } from '../../hooks/useScrollLock';
 
 /**
  * ImageGallery - Professional product image gallery
@@ -8,8 +9,9 @@ import { ZoomIn, ZoomOut, ChevronLeft, ChevronRight, X, Expand, Maximize2 } from
 const ImageGallery = ({ images = [], productName = 'Termék' }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isZoomed, setIsZoomed] = useState(false);
-  const [zoomPosition, setZoomPosition] = useState({ x: 50, y: 50 });
   const [isFullscreen, setIsFullscreen] = useState(false);
+  useScrollLock(isFullscreen);
+  const [zoomPosition, setZoomPosition] = useState({ x: 50, y: 50 });
   const [touchStart, setTouchStart] = useState(null);
   const mainImageRef = useRef(null);
 

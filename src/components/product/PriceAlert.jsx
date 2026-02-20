@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Bell, BellRing, Mail, Check, X, TrendingDown, Sparkles } from 'lucide-react';
+import { useScrollLock } from '../../hooks/useScrollLock';
 import { formatPriceNumber } from '../../utils/helpers';
 
 /**
@@ -15,6 +16,7 @@ const PriceAlert = ({ product, variant = 'button' }) => {
     const alerts = JSON.parse(localStorage.getItem('priceAlerts') || '[]');
     return alerts.some(a => a.productId === product?.id);
   });
+  useScrollLock(isOpen);
 
   if (!product) return null;
 

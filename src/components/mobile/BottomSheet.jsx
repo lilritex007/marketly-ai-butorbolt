@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { X, ChevronDown } from 'lucide-react';
+import { useScrollLock } from '../../hooks/useScrollLock';
 
 /**
  * BottomSheet - iOS-style bottom sheet modal
@@ -21,16 +22,13 @@ const BottomSheet = ({
   const [touchStartY, setTouchStartY] = useState(0);
   const sheetRef = useRef(null);
   const contentRef = useRef(null);
+  useScrollLock(isOpen);
 
   useEffect(() => {
     if (isOpen) {
-      document.body.style.overflow = 'hidden';
       setCurrentSnap(initialSnap);
       setDragOffset(0);
-    } else {
-      document.body.style.overflow = '';
     }
-    return () => { document.body.style.overflow = ''; };
   }, [isOpen, initialSnap]);
 
   const getSheetHeight = () => {

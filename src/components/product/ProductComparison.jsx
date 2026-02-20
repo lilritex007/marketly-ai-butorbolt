@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { X, Check, ArrowLeftRight, Plus } from 'lucide-react';
+import { useScrollLock } from '../../hooks/useScrollLock';
 import { formatPrice, PLACEHOLDER_IMAGE } from '../../utils/helpers';
 
 /**
@@ -12,6 +13,7 @@ export const ProductComparison = ({
   onAddMore 
 }) => {
   const [isExpanded, setIsExpanded] = useState(false);
+  useScrollLock(isExpanded);
 
   if (comparisonList.length === 0) {
     return null;

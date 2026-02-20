@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { X, Gift, Timer, Sparkles, ArrowRight, Mail, Check } from 'lucide-react';
+import { useScrollLock } from '../../hooks/useScrollLock';
 
 /**
  * ExitIntentPopup - Shows discount offer when user tries to leave
@@ -7,6 +8,7 @@ import { X, Gift, Timer, Sparkles, ArrowRight, Mail, Check } from 'lucide-react'
  */
 const ExitIntentPopup = ({ discountPercent = 10, onClose }) => {
   const [isVisible, setIsVisible] = useState(false);
+  useScrollLock(isVisible);
   const [hasShown, setHasShown] = useState(false);
   const [email, setEmail] = useState('');
   const [isSubmitted, setIsSubmitted] = useState(false);

@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Box, Eye, Smartphone, X, AlertCircle } from 'lucide-react';
+import { useScrollLock } from '../../hooks/useScrollLock';
 import { motion, AnimatePresence } from 'framer-motion';
 
 /**
@@ -7,6 +8,7 @@ import { motion, AnimatePresence } from 'framer-motion';
  * Uses WebXR/AR Quick Look for supported devices
  */
 const ARProductPreview = ({ product, onClose }) => {
+  useScrollLock(true);
   const [isARAvailable, setIsARAvailable] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);

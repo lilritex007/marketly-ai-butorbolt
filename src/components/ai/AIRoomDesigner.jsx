@@ -1,4 +1,5 @@
 import React, { useState, useRef, useMemo } from 'react';
+import { useScrollLock } from '../../hooks/useScrollLock';
 import { Camera, Upload, Loader2, Sparkles, CheckCircle, X, AlertCircle, RotateCcw, ShoppingBag, Lightbulb, Star } from 'lucide-react';
 import { analyzeImage } from '../../services/geminiService';
 import { formatPrice } from '../../utils/helpers';
@@ -9,6 +10,7 @@ import { trackProductView } from '../../services/userPreferencesService';
  * Teljes adatbázis ismeretével személyre szabott ajánlások
  */
 const AIRoomDesigner = ({ products, onProductRecommendations, onClose }) => {
+  useScrollLock(true);
   const [selectedImage, setSelectedImage] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);

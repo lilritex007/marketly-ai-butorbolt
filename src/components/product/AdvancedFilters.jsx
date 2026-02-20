@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { Filter, X, DollarSign, Package, Tag } from 'lucide-react';
+import { useScrollLock } from '../../hooks/useScrollLock';
 import { formatPrice } from '../../utils/helpers';
 
 /**
@@ -169,6 +170,7 @@ export const AdvancedFilters = ({
   initialFilters = {}
 }) => {
   const [isOpen, setIsOpen] = useState(false);
+  useScrollLock(isOpen);
   const [filters, setFilters] = useState({
     priceMin: initialFilters.priceMin || 0,
     priceMax: initialFilters.priceMax || 1000000,

@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { X, Heart, Trash2, ShoppingCart, Share2, ChevronRight, Sparkles, Package } from 'lucide-react';
+import { useScrollLock } from '../../hooks/useScrollLock';
 import { formatPrice } from '../../utils/helpers';
 
 /**
@@ -16,16 +17,7 @@ const WishlistDrawer = ({
   onClearAll 
 }) => {
   const [isClosing, setIsClosing] = useState(false);
-
-  // Prevent body scroll when open
-  useEffect(() => {
-    if (isOpen) {
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = '';
-    }
-    return () => { document.body.style.overflow = ''; };
-  }, [isOpen]);
+  useScrollLock(isOpen);
 
   const handleClose = () => {
     setIsClosing(true);

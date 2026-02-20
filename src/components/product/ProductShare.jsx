@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Share2, Copy, Check, Facebook, MessageCircle, Mail, Link2, X } from 'lucide-react';
+import { useScrollLock } from '../../hooks/useScrollLock';
 
 /**
  * ProductShare - Share product via social media or copy link
@@ -11,6 +12,7 @@ const ProductShare = ({
 }) => {
   const [showModal, setShowModal] = useState(false);
   const [copied, setCopied] = useState(false);
+  useScrollLock(showModal);
 
   if (!product) return null;
 

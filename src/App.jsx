@@ -89,7 +89,7 @@ import StickyAddToCartMobile from './components/mobile/StickyAddToCartMobile';
 import TrustBadges from './components/trust/TrustBadges';
 
 // Hooks
-import { useLocalStorage, useDebounce } from './hooks/index';
+import { useLocalStorage, useDebounce, useScrollLock } from './hooks/index';
 import { DeferredSection } from './hooks/useDeferredSection';
 // useInfiniteScroll removed - using manual "Load More" button instead
 
@@ -350,6 +350,7 @@ const Features = () => (
 const ProductModal = ({ product, isOpen, onClose, allProducts = [], onAddToCart }) => {
     const [aiTip, setAiTip] = useState(null);
     const [loadingTip, setLoadingTip] = useState(false);
+    useScrollLock(isOpen);
     
     useEffect(() => {
         setAiTip(null);
@@ -726,6 +727,7 @@ const App = () => {
   // New hooks
   const toast = useToast();
   const comparison = useComparison();
+  useScrollLock(showARMeasure || showOneClickCheckout);
   
   // Track product views - both for RecentlyViewed component and user preferences
   const handleProductView = (product) => {

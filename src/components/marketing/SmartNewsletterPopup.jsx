@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { X, Mail, Gift, Sparkles, CheckCircle } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useScrollPosition } from '../../hooks/useScrollPosition';
+import { useScrollLock } from '../../hooks/useScrollLock';
 
 /**
  * SmartNewsletterPopup - Intelligent newsletter popup
@@ -9,6 +10,7 @@ import { useScrollPosition } from '../../hooks/useScrollPosition';
  */
 const SmartNewsletterPopup = ({ onSubscribe }) => {
   const [isVisible, setIsVisible] = useState(false);
+  useScrollLock(isVisible);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [email, setEmail] = useState('');
   const [error, setError] = useState('');

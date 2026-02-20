@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { X, ShoppingCart, Heart, Share2, ExternalLink, Sparkles, Bell } from 'lucide-react';
+import { useScrollLock } from '../../hooks/useScrollLock';
 import { motion, AnimatePresence } from 'framer-motion';
 import QuickAddToCart from './QuickAddToCart';
 import { PLACEHOLDER_IMAGE, formatPrice } from '../../utils/helpers';
@@ -24,6 +25,8 @@ const ProductQuickPeek = ({ product, isOpen, onClose, onAddToCart }) => {
     disliked: isProductDisliked(product?.id)
   }));
 
+  useScrollLock(isOpen);
+
   useEffect(() => {
     if (isOpen) {
       setImageLoaded(false);
@@ -32,15 +35,7 @@ const ProductQuickPeek = ({ product, isOpen, onClose, onAddToCart }) => {
         liked: isProductLiked(product?.id),
         disliked: isProductDisliked(product?.id)
       });
-      // Prevent body scroll
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = 'unset';
     }
-
-    return () => {
-      document.body.style.overflow = 'unset';
-    };
   }, [isOpen]);
 
   if (!product) return null;

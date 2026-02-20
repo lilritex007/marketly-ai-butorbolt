@@ -1,4 +1,5 @@
 import React, { useState, useMemo } from 'react';
+import { useScrollLock } from '../../hooks/useScrollLock';
 import { 
   Sparkles, ArrowRight, X, Loader2, CheckCircle,
   Building2, TreePine, Factory, Clock, Palette,
@@ -17,6 +18,7 @@ import { saveStyleDNA, getPersonalizedRecommendations } from '../../services/use
  * Teljes adatbázis ismeretével
  */
 const AIStyleQuiz = ({ products, onRecommendations, onClose }) => {
+  useScrollLock(true);
   const [step, setStep] = useState(0);
   const [answers, setAnswers] = useState({});
   const [isAnalyzing, setIsAnalyzing] = useState(false);

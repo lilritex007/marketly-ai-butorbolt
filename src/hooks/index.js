@@ -107,3 +107,4 @@ export {
   useParallax, 
   useScrollProgress 
 } from './useScrollAnimation';
+export { useScrollLock } from './useScrollLock';
