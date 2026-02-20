@@ -18,7 +18,7 @@ const QUICK_INTENTS = [
 ];
 
 const SUCCESSFUL_SEARCHES_KEY = 'mkt_successful_hero_searches';
-const SEARCH_DEBOUNCE_MS = 180;
+const SEARCH_DEBOUNCE_MS = 150;
 const LONG_PRESS_MS = 450;
 
 const QUICK_FILTER_PRESETS = {
@@ -35,7 +35,9 @@ export default function HeroSmartSearch({
   onSearch,
   onTryAI,
   variant = 'A',
-  onOpenProductQuickView
+  onOpenProductQuickView,
+  serverSearchMode = false,
+  onFetchSearchPreview
 }) {
   const [query, setQuery] = useState('');
   const [isOpen, setIsOpen] = useState(false);
@@ -58,16 +60,27 @@ export default function HeroSmartSearch({
   const [isIndexBuilding, setIsIndexBuilding] = useState(false);
   const [previewProduct, setPreviewProduct] = useState(null);
   const [previewAnchor, setPreviewAnchor] = useState(null);
+  const [serverPreview, setServerPreview] = useState({ results: [], total: 0, loading: false });
+  const serverRequestIdRef = useRef(0);
   const instantSearchRef = useRef('');
   const longPressTimerRef = useRef(null);
 
   const trimmedQuery = query.trim();
 
   const suggestions = useMemo(() => {
-    if (trimmedQuery.length < 2 || !Array.isArray(products) || products.length === 0) return [];
+    if (trimmedQuery.length < 2) return [];
+    if (serverSearchMode && serverPreview.results?.length > 0) {
+      return serverPreview.results.slice(0, 6).map((p) => ({
+        text: p.name,
+        type: 'product',
+        product: p,
+        score: 150
+      }));
+    }
+    if (!Array.isArray(products) || products.length === 0) return [];
     const local = getAutocompleteSuggestions(products, trimmedQuery, 6) || [];
     return local;
-  }, [products, trimmedQuery]);
+  }, [products, trimmedQuery, serverSearchMode, serverPreview.results]);
 
   useEffect(() => {
     let cancelled = false;
@@ -93,12 +106,36 @@ export default function HeroSmartSearch({
   }, [trimmedQuery]);
 
   useEffect(() => {
-    if (!Array.isArray(products) || products.length === 0) {
+    if (debouncedQuery.length < 2) {
       setSmartResults([]);
       setSmartTotalMatches(0);
+      if (serverSearchMode) setServerPreview({ results: [], total: 0, loading: false });
       return;
     }
-    if (debouncedQuery.length < 2) {
+
+    if (serverSearchMode && typeof onFetchSearchPreview === 'function') {
+      const requestId = ++serverRequestIdRef.current;
+      setServerPreview((p) => ({ ...p, loading: true }));
+      onFetchSearchPreview(debouncedQuery)
+        .then((data) => {
+          if (serverRequestIdRef.current !== requestId) return;
+          const results = Array.isArray(data?.results) ? data.results : [];
+          const total = typeof data?.total === 'number' ? data.total : results.length;
+          setServerPreview({ results, total, loading: false });
+          setSmartResults(results);
+          setSmartTotalMatches(total);
+          setResultCountPulse(true);
+        })
+        .catch(() => {
+          if (serverRequestIdRef.current !== requestId) return;
+          setServerPreview({ results: [], total: 0, loading: false });
+          setSmartResults([]);
+          setSmartTotalMatches(0);
+        });
+      return;
+    }
+
+    if (!Array.isArray(products) || products.length === 0) {
       setSmartResults([]);
       setSmartTotalMatches(0);
       return;
@@ -110,7 +147,7 @@ export default function HeroSmartSearch({
     setSmartResults(nextResults);
     setSmartTotalMatches(nextTotal);
     setResultCountPulse(true);
-  }, [products, debouncedQuery]);
+  }, [products, debouncedQuery, serverSearchMode, onFetchSearchPreview]);
 
   useEffect(() => {
     if (!resultCountPulse) return;
@@ -339,7 +376,7 @@ export default function HeroSmartSearch({
   }, [trimmedQuery, queryTokens, rankedQueryProducts, intent]);
 
   const rewriteSuggestionsWithQuality = useMemo(() => {
-    if (!Array.isArray(products) || products.length === 0) return [];
+    if (!showRewriteOptions || !Array.isArray(products) || products.length === 0) return [];
     return rewriteSuggestions.map((text) => {
       const result = smartSearch(products, text, { limit: 12 });
       const count = Number(result?.totalMatches || 0);
@@ -348,7 +385,7 @@ export default function HeroSmartSearch({
       else if (count <= 3) quality = { label: 'Szűk', classes: 'bg-rose-50 text-rose-700 border-rose-200' };
       return { text, count, quality };
     });
-  }, [rewriteSuggestions, products]);
+  }, [showRewriteOptions, rewriteSuggestions, products]);
 
   const intentTimeline = useMemo(() => {
     if (!intent || trimmedQuery.length < 2) return [];

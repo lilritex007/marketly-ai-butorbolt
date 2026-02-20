@@ -1081,7 +1081,7 @@ const App = () => {
     return searchIndexReady && searchIndexRef.current.length > 0 && searchIndexRef.current.length <= MAX_LOCAL_INDEX;
   }, [SERVER_SEARCH_ONLY, searchIndexReady, searchIndexVersion]);
 
-  const debouncedSearch = useDebounce(searchQuery, 400);
+  const debouncedSearch = useDebounce(searchQuery, 350);
 
   // Kollekció termékbetöltés – valódi termékek: categoryMain ( fő kategória) vagy categories ( leaf kategóriák )
   useEffect(() => {
@@ -1528,6 +1528,11 @@ const App = () => {
                 setActiveTab('shop');
                 handleCategoryChange(name);
               }}
+              serverSearchMode={SERVER_SEARCH_ONLY}
+              onFetchSearchPreview={SERVER_SEARCH_ONLY ? async (q) => {
+                const data = await fetchUnasProducts({ search: q?.trim() || '', limit: 24, offset: 0, slim: true });
+                return { results: data?.products || [], total: data?.total ?? 0 };
+              } : undefined}
             />
             <FadeInOnScroll direction="up" className="section-perf">
               <Suspense fallback={null}>

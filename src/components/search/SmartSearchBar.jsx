@@ -115,14 +115,14 @@ const SmartSearchBar = ({
     }
   }, [products.length, indexVersion, canUseLocalIndex, localIndexDisabled]);
 
-  // Debounce query - csak 300ms után kezdjen keresni
+  // Debounce query - 150ms gyors válasz
   useEffect(() => {
     if (debounceTimerRef.current) {
       clearTimeout(debounceTimerRef.current);
     }
     debounceTimerRef.current = setTimeout(() => {
       setDebouncedQuery(query);
-    }, 200);
+    }, 150);
     return () => {
       if (debounceTimerRef.current) {
         clearTimeout(debounceTimerRef.current);

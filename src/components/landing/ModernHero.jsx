@@ -52,7 +52,9 @@ export const ModernHero = ({
   onQuickCategory,
   products = [],
   onHeroSearch,
-  onHeroQuickView
+  onHeroQuickView,
+  serverSearchMode = false,
+  onFetchSearchPreview
 }) => {
   const mounted = true;
   const [heroVariant, setHeroVariant] = useState('A');
@@ -341,6 +343,8 @@ export const ModernHero = ({
               onTryAI={onTryAI}
               variant={heroVariant}
               onOpenProductQuickView={onHeroQuickView}
+              serverSearchMode={serverSearchMode}
+              onFetchSearchPreview={onFetchSearchPreview}
             />
           </div>
 

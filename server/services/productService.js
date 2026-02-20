@@ -1,19 +1,24 @@
 import db from '../database/db.js';
 import { EXCLUDED_MAIN_CATEGORIES } from '../config/excludedCategories.js';
 import { getDisplayMainName, MAIN_CATEGORY_DISPLAY_ORDER } from '../config/mainCategoryGroups.js';
+import { expandSearchTerms } from '../../shared/searchSynonyms.js';
 
 const applySearchTerms = (query, params, search) => {
-  const terms = String(search || '')
+  const rawTerms = String(search || '')
     .split(/\s+/)
     .map(t => t.trim())
     .filter(Boolean);
-  if (terms.length === 0) return { query, params };
+  if (rawTerms.length === 0) return { query, params };
   let nextQuery = query;
   const nextParams = [...params];
-  for (const term of terms) {
-    nextQuery += ' AND (name LIKE ? OR description LIKE ? OR params LIKE ? OR category LIKE ?)';
-    const pattern = `%${term}%`;
-    nextParams.push(pattern, pattern, pattern, pattern);
+  for (const rawTerm of rawTerms) {
+    const expanded = expandSearchTerms([rawTerm]);
+    const orParts = expanded.map(() => '(LOWER(name) LIKE LOWER(?) OR LOWER(COALESCE(description,\'\')) LIKE LOWER(?) OR LOWER(COALESCE(params,\'\')) LIKE LOWER(?) OR LOWER(COALESCE(category,\'\')) LIKE LOWER(?))').join(' OR ');
+    nextQuery += ` AND (${orParts})`;
+    expanded.forEach((t) => {
+      const p = `%${t}%`;
+      nextParams.push(p, p, p, p);
+    });
   }
   return { query: nextQuery, params: nextParams };
 };
