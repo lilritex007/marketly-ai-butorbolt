@@ -1082,7 +1082,7 @@ const App = () => {
     return searchIndexReady && searchIndexRef.current.length > 0 && searchIndexRef.current.length <= MAX_LOCAL_INDEX;
   }, [SERVER_SEARCH_ONLY, searchIndexReady, searchIndexVersion]);
 
-  const debouncedSearch = useDebounce(searchQuery, 350);
+  const debouncedSearch = useDebounce(searchQuery, 150);
 
   // Kollekció termékbetöltés – valódi termékek: categoryMain ( fő kategória) vagy categories ( leaf kategóriák )
   useEffect(() => {

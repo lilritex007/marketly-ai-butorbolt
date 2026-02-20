@@ -94,10 +94,75 @@ export function initializeDatabase() {
     CREATE INDEX IF NOT EXISTS idx_categories_enabled ON categories(enabled);
   `);
 
+  // FTS5 full-text search – 10–100x gyorsabb mint LIKE
+  // remove_diacritics 1: ékezet eltávolítás mindkét oldalon (kanapé = kanape)
+  db.exec(`
+    CREATE VIRTUAL TABLE IF NOT EXISTS products_fts USING fts5(
+      name,
+      category,
+      description,
+      params,
+      content='products',
+      content_rowid='rowid',
+      tokenize='unicode61 remove_diacritics 1'
+    )
+  `);
+
+  // Triggers: products INSERT/UPDATE/DELETE → products_fts sync
+  db.exec(`
+    DROP TRIGGER IF EXISTS products_fts_ai;
+    CREATE TRIGGER products_fts_ai AFTER INSERT ON products BEGIN
+      INSERT INTO products_fts(rowid, name, category, description, params)
+      VALUES (new.rowid, new.name, COALESCE(new.category,''), COALESCE(new.description,''), COALESCE(new.params,''));
+    END
+  `);
+  db.exec(`
+    DROP TRIGGER IF EXISTS products_fts_ad;
+    CREATE TRIGGER products_fts_ad AFTER DELETE ON products BEGIN
+      INSERT INTO products_fts(products_fts, rowid, name, category, description, params)
+      VALUES ('delete', old.rowid, old.name, COALESCE(old.category,''), COALESCE(old.description,''), COALESCE(old.params,''));
+    END
+  `);
+  db.exec(`
+    DROP TRIGGER IF EXISTS products_fts_au;
+    CREATE TRIGGER products_fts_au AFTER UPDATE ON products BEGIN
+      INSERT INTO products_fts(products_fts, rowid, name, category, description, params)
+      VALUES ('delete', old.rowid, old.name, COALESCE(old.category,''), COALESCE(old.description,''), COALESCE(old.params,''));
+      INSERT INTO products_fts(rowid, name, category, description, params)
+      VALUES (new.rowid, new.name, COALESCE(new.category,''), COALESCE(new.description,''), COALESCE(new.params,''));
+    END
+  `);
+
   console.log('✅ Database initialized successfully');
+}
+
+/**
+ * Populate products_fts from products (migration / initial sync).
+ * Call after schema init – rebuilds FTS index from products table.
+ * Uses rebuild to sync entire index from content table
+ */
+export function populateProductsFTS() {
+  try {
+    db.exec(`INSERT INTO products_fts(products_fts) VALUES('rebuild')`);
+    const total = db.prepare('SELECT COUNT(*) as n FROM products_fts').get();
+    console.log(`✅ products_fts populated: ${total?.n ?? 0} rows`);
+    return total?.n ?? 0;
+  } catch (err) {
+    console.warn('⚠️ products_fts populate:', err.message);
+    return 0;
+  }
 }
 
 // Initialize on import
 initializeDatabase();
+
+// Populate FTS index from existing products (async to not block startup)
+setImmediate(() => {
+  try {
+    populateProductsFTS();
+  } catch (e) {
+    console.warn('FTS populate deferred:', e?.message);
+  }
+});
 
 export default db;

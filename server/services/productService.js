@@ -3,6 +3,41 @@ import { EXCLUDED_MAIN_CATEGORIES } from '../config/excludedCategories.js';
 import { getDisplayMainName, MAIN_CATEGORY_DISPLAY_ORDER } from '../config/mainCategoryGroups.js';
 import { expandSearchTerms } from '../loadSearchConfig.js';
 
+/** Escape FTS5 special chars: " \ */
+function escapeFTS5Term(term) {
+  return String(term || '').replace(/\\/g, '\\\\').replace(/"/g, '""');
+}
+
+/** Build FTS5 MATCH query from search string with synonyms. Terms AND, synonyms OR. */
+function buildFTS5Query(search) {
+  const rawTerms = String(search || '').split(/\s+/).map(t => t.trim()).filter(Boolean);
+  if (rawTerms.length === 0) return null;
+  const groups = rawTerms.map((raw) => {
+    const expanded = expandSearchTerms([raw]);
+    if (expanded.length === 0) return null;
+    const quoted = expanded.map((t) => `"${escapeFTS5Term(t)}"`).join(' OR ');
+    return `(${quoted})`;
+  }).filter(Boolean);
+  if (groups.length === 0) return null;
+  return groups.join(' ');
+}
+
+/**
+ * Get product rowids matching search via FTS5. Returns [] on error or if FTS empty.
+ */
+function getProductRowidsByFTS(search) {
+  try {
+    const ftsQuery = buildFTS5Query(search);
+    if (!ftsQuery) return [];
+    const rows = db.prepare(
+      `SELECT rowid FROM products_fts WHERE products_fts MATCH ?`
+    ).all(ftsQuery);
+    return rows.map((r) => r.rowid);
+  } catch (err) {
+    return [];
+  }
+}
+
 const applySearchTerms = (query, params, search) => {
   const rawTerms = String(search || '')
     .split(/\s+/)
@@ -117,9 +152,15 @@ export function getProducts(filters = {}) {
     }
 
     if (search) {
-      const applied = applySearchTerms(query, params, search);
-      query = applied.query;
-      params.splice(0, params.length, ...applied.params);
+      const ftsRowids = getProductRowidsByFTS(search);
+      if (ftsRowids.length > 0) {
+        query += ` AND rowid IN (${ftsRowids.map(() => '?').join(',')})`;
+        params.push(...ftsRowids);
+      } else {
+        const applied = applySearchTerms(query, params, search);
+        query = applied.query;
+        params.splice(0, params.length, ...applied.params);
+      }
     }
 
     if (styleKeywords && Array.isArray(styleKeywords) && styleKeywords.length > 0) {
@@ -427,9 +468,15 @@ export function getProductCount(filters = {}) {
     }
 
     if (search) {
-      const applied = applySearchTerms(query, params, search);
-      query = applied.query;
-      params.splice(0, params.length, ...applied.params);
+      const ftsRowids = getProductRowidsByFTS(search);
+      if (ftsRowids.length > 0) {
+        query += ` AND rowid IN (${ftsRowids.map(() => '?').join(',')})`;
+        params.push(...ftsRowids);
+      } else {
+        const applied = applySearchTerms(query, params, search);
+        query = applied.query;
+        params.splice(0, params.length, ...applied.params);
+      }
     }
 
     if (styleKeywords && Array.isArray(styleKeywords) && styleKeywords.length > 0) {
@@ -507,9 +554,15 @@ export function getProductStats(filters = {}) {
     }
 
     if (search) {
-      const applied = applySearchTerms(query, params, search);
-      query = applied.query;
-      params.splice(0, params.length, ...applied.params);
+      const ftsRowids = getProductRowidsByFTS(search);
+      if (ftsRowids.length > 0) {
+        query += ` AND rowid IN (${ftsRowids.map(() => '?').join(',')})`;
+        params.push(...ftsRowids);
+      } else {
+        const applied = applySearchTerms(query, params, search);
+        query = applied.query;
+        params.splice(0, params.length, ...applied.params);
+      }
     }
 
     if (styleKeywords && Array.isArray(styleKeywords) && styleKeywords.length > 0) {
