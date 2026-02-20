@@ -32,7 +32,8 @@ export const FadeInOnScroll = ({
   }, []);
 
   useEffect(() => {
-    if (!ref.current || !(ref.current instanceof Element)) return;
+    const el = ref.current;
+    if (!el || !(el instanceof Element)) return;
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {
@@ -44,7 +45,7 @@ export const FadeInOnScroll = ({
     );
 
     try {
-      observer.observe(ref.current);
+      observer.observe(el);
     } catch (err) {
       return undefined;
     }

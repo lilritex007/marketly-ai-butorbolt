@@ -27,14 +27,19 @@ const StickyAddToCartMobile = ({
 
   const handleAddToCart = async () => {
     setIsAdding(true);
-    await onAddToCart?.(product, quantity);
-    setIsAdding(false);
-    setJustAdded(true);
-    setTimeout(() => {
-      setJustAdded(false);
-      setQuantity(1);
-      setShowQuantity(false);
-    }, 2000);
+    try {
+      await onAddToCart?.(product, quantity);
+      setJustAdded(true);
+      setTimeout(() => {
+        setJustAdded(false);
+        setQuantity(1);
+        setShowQuantity(false);
+      }, 2000);
+    } catch {
+      /* handled by parent / toast */
+    } finally {
+      setIsAdding(false);
+    }
   };
 
   const incrementQuantity = () => setQuantity(q => Math.min(q + 1, 10));

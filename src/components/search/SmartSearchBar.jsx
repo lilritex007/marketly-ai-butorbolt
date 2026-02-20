@@ -273,14 +273,19 @@ const SmartSearchBar = ({
   }, []);
 
   const handleProductClickFn = useCallback(async (product) => {
-    if (serverSearchMode && product?.id) {
-      const full = await fetchUnasProductById(product.id);
-      onProductClick?.(full || product);
-    } else {
+    try {
+      if (serverSearchMode && product?.id) {
+        const full = await fetchUnasProductById(product.id);
+        onProductClick?.(full || product);
+      } else {
+        onProductClick?.(product);
+      }
+    } catch (err) {
       onProductClick?.(product);
+    } finally {
+      setQuery('');
+      setIsOpen(false);
     }
-    setQuery('');
-    setIsOpen(false);
   }, [onProductClick, serverSearchMode]);
 
   const handleSuggestionClick = useCallback((suggestion) => {

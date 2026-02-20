@@ -52,8 +52,16 @@ const WishlistDrawer = ({
       }
     } else {
       // Fallback: copy to clipboard
-      navigator.clipboard?.writeText(text + ' ' + window.location.href);
-      alert('Link másolva a vágólapra!');
+      try {
+        if (navigator.clipboard?.writeText) {
+          await navigator.clipboard.writeText(text + ' ' + window.location.href);
+          alert('Link másolva a vágólapra!');
+        } else {
+          alert('Nem sikerült másolni. Próbáld meg manuálisan.');
+        }
+      } catch {
+        alert('Nem sikerült másolni. Próbáld meg manuálisan.');
+      }
     }
   };
 

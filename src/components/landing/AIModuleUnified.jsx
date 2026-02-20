@@ -229,7 +229,7 @@ export default function AIModuleUnified({ onFeatureClick }) {
 
   useEffect(() => {
     const el = sectionRef.current;
-    if (!el) return;
+    if (!el || !(el instanceof Element)) return;
     const observer = new IntersectionObserver(
       ([e]) => e.isIntersecting && setSectionInView(true),
       { threshold: 0.15 }

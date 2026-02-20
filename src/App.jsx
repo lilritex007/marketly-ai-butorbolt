@@ -1204,8 +1204,6 @@ const App = () => {
           searchIndexRef.current = data.products;
           setSearchIndexReady(true);
           setSearchIndexVersion((v) => v + 1);
-          // #region agent log
-          // #endregion
           if (data.lastSync) setLastUpdated(data.lastSync);
           const q = searchQueryRef.current.trim();
           if (q && data.products.length <= MAX_LOCAL_INDEX) {

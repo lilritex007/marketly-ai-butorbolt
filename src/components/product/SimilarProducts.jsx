@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { Sparkles, ThumbsUp, ThumbsDown, ArrowRight } from 'lucide-react';
 import { EnhancedProductCard } from './EnhancedProductCard';
 import { generateText } from '../../services/geminiService';
@@ -27,13 +27,23 @@ export const SimilarProducts = ({
   const [isLoading, setIsLoading] = useState(false);
   const [aiReason, setAiReason] = useState('');
 
-  useEffect(() => {
-    if (currentProduct && allProducts.length > 0) {
-      findSimilarProducts();
-    }
-  }, [currentProduct, allProducts]);
+  const findBasicSimilar = useCallback(() => {
+    if (!currentProduct || !allProducts?.length) return [];
+    const price = currentProduct.salePrice || currentProduct.price || 0;
+    const priceRange = price * 0.4;
+    const dislikedIds = getDislikedProducts();
+    return allProducts
+      .filter(p =>
+        p.id !== currentProduct.id &&
+        !dislikedIds.includes(p.id) &&
+        (p.category || '').includes((currentProduct.category || '').split(' > ')[0]) &&
+        Math.abs((p.salePrice || p.price || 0) - price) <= priceRange
+      )
+      .sort(() => Math.random() - 0.5)
+      .slice(0, maxResults);
+  }, [currentProduct, allProducts, maxResults]);
 
-  const findSimilarProducts = async () => {
+  const findSimilarProducts = useCallback(async () => {
     setIsLoading(true);
     setAiReason('');
 
@@ -85,26 +95,13 @@ Csak az indoklást írd meg, ne a termékneveket!`;
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [currentProduct, allProducts, maxResults, findBasicSimilar]);
 
-  const findBasicSimilar = () => {
-    // Basic similarity: same category, similar price range
-    const price = currentProduct.salePrice || currentProduct.price || 0;
-    const priceRange = price * 0.4; // ±40%
-    const dislikedIds = getDislikedProducts();
-    
-    const similar = allProducts
-      .filter(p => 
-        p.id !== currentProduct.id &&
-        !dislikedIds.includes(p.id) &&
-        (p.category || '').includes((currentProduct.category || '').split(' > ')[0]) &&
-        Math.abs((p.salePrice || p.price || 0) - price) <= priceRange
-      )
-      .sort(() => Math.random() - 0.5)
-      .slice(0, maxResults);
-
-    return similar;
-  };
+  useEffect(() => {
+    if (currentProduct && allProducts.length > 0) {
+      findSimilarProducts();
+    }
+  }, [currentProduct, allProducts, findSimilarProducts]);
 
   // Feedback kezelés
   const handleLike = (productId) => {
