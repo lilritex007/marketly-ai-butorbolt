@@ -144,147 +144,71 @@ const FlashSaleBanner = ({
       <div className="absolute top-1/4 right-1/4 w-24 h-24 rounded-full bg-white/5 blur-2xl pointer-events-none" aria-hidden />
       <div className="absolute bottom-1/3 left-1/4 w-16 h-16 rounded-full bg-white/10 blur-xl pointer-events-none" aria-hidden />
 
-      {/* Mobile Layout - Stacked, centered */}
-      <div className="sm:hidden relative px-4 py-4 pb-20 min-h-[200px]">
-        {/* Top row: Icon + Title + Dismiss */}
-        <div className="flex items-center justify-between gap-2 mb-2">
-          <div className="flex items-center gap-2 min-w-0 flex-1">
-            <div className="w-8 h-8 bg-white/20 backdrop-blur-sm rounded-lg flex items-center justify-center">
-              <Flame className="w-5 h-5 text-white animate-pulse" />
-            </div>
-            <div className="min-w-0 flex-1">
-              <div className="flex items-center gap-1.5 flex-wrap">
-                <span key={offerIndex} className="font-black text-white text-sm sm:text-base flash-offer-enter inline-block">{displayTitle}</span>
-                <span className="px-1.5 py-0.5 bg-yellow-400 text-yellow-900 text-[10px] font-black rounded animate-pulse shrink-0">
-                  {currentOffer.badge}
-                </span>
-              </div>
-            </div>
+      {/* Dismiss – egyetlen gomb, absolute top-right */}
+      <button
+        type="button"
+        onClick={handleDismiss}
+        className="absolute top-4 right-4 z-20 min-w-[44px] min-h-[44px] flex items-center justify-center p-2 text-white/60 hover:text-white rounded-full hover:bg-white/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/50"
+        aria-label="Banner elrejtése ma"
+      >
+        <X className="w-4 h-4 sm:w-5 sm:h-5" />
+      </button>
+
+      {/* Egyetlen responsive layout – flex-col mobil, flex-row desktop */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 lg:gap-6 px-4 sm:px-6 lg:px-8 py-4 sm:py-5 lg:py-6 pr-14 min-h-[200px] sm:min-h-0 pb-16 sm:pb-5 max-w-[1200px] mx-auto">
+        {/* Bal: Icon + Title + Badge + Subtitle (desktop) */}
+        <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-shrink">
+          <div className="w-8 h-8 sm:w-10 sm:h-10 lg:w-11 lg:h-11 bg-white/20 backdrop-blur-sm rounded-lg sm:rounded-xl flex items-center justify-center flex-shrink-0">
+            <Flame className="w-5 h-5 sm:w-6 sm:h-6 lg:w-7 lg:h-7 text-white animate-pulse" />
           </div>
-          <button
-            type="button"
-            onClick={handleDismiss}
-            className="min-w-[44px] min-h-[44px] flex items-center justify-center p-2 text-white/60 hover:text-white rounded-full hover:bg-white/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/50"
-            aria-label="Banner elrejtése ma"
-          >
-            <X className="w-4 h-4" />
-          </button>
+          <div className="min-w-0 flex-1">
+            <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
+              <span key={`title-${offerIndex}`} className="font-black text-white text-sm sm:text-base lg:text-lg flash-offer-enter inline-block">{displayTitle}</span>
+              <span className="px-1.5 sm:px-2 py-0.5 bg-yellow-400 text-yellow-900 text-[10px] sm:text-xs font-black rounded sm:rounded-md animate-pulse shrink-0">
+                {currentOffer.badge}
+              </span>
+            </div>
+            <p key={`sub-${offerIndex}`} className="text-white/80 text-xs lg:text-sm flash-offer-enter line-clamp-2 mt-0.5 hidden sm:block">{displaySubtitle}</p>
+          </div>
         </div>
 
-        {/* Center: Countdown - Big and clear */}
-        <div className="flex items-center justify-center gap-1 mb-2.5">
-          <Clock className="w-4 h-4 text-white/80" />
-          <span className="text-white/80 text-xs font-medium mr-1">Vége:</span>
-          {[
-            { value: timeLeft.hours, label: 'ó' },
-            { value: timeLeft.minutes, label: 'p' },
-            { value: timeLeft.seconds, label: 'mp' }
-          ].map((unit, idx) => (
-            <React.Fragment key={idx}>
-              <div className="bg-black/30 backdrop-blur-sm rounded px-2 py-1">
-                <span className="flash-countdown-digit text-white font-black text-lg tabular-nums inline-block">{pad(unit.value)}</span>
-                <span className="text-white/70 text-[10px] ml-0.5">{unit.label}</span>
-              </div>
-              {idx < 2 && <span className="text-white/40 font-bold">:</span>}
-            </React.Fragment>
-          ))}
+        {/* Közép: Countdown – rövid címkék (ó, p, mp) mindkét nézetben */}
+        <div className="flex items-center justify-center sm:justify-start gap-1 sm:gap-2">
+          <Clock className="w-4 h-4 sm:w-5 sm:h-5 text-white/80 flex-shrink-0" />
+          <span className="text-white/80 sm:text-white/90 text-xs sm:text-sm font-medium mr-1 sm:mr-0">Lejár:</span>
+          <div className="flex items-center gap-1">
+            {[
+              { value: timeLeft.hours, label: 'ó' },
+              { value: timeLeft.minutes, label: 'p' },
+              { value: timeLeft.seconds, label: 'mp' }
+            ].map((unit, idx) => (
+              <React.Fragment key={idx}>
+                <div className="bg-black/30 backdrop-blur-sm rounded sm:rounded-lg px-2 sm:px-2.5 lg:px-3 py-1 sm:py-1.5">
+                  <span className="flash-countdown-digit text-white font-black text-lg sm:text-xl lg:text-2xl tabular-nums inline-block">{pad(unit.value)}</span>
+                  <span className="text-white/70 text-[10px] lg:text-xs ml-0.5 sm:ml-1">{unit.label}</span>
+                </div>
+                {idx < 2 && <span className="text-white/40 font-bold">:</span>}
+              </React.Fragment>
+            ))}
+          </div>
         </div>
 
-        {/* CTA Button - Full width */}
+        {/* Jobb: CTA – full width mobil, auto desktop */}
         <button
           type="button"
           onClick={onViewSale}
-          className={`w-full min-h-[44px] flex items-center justify-center gap-2 px-4 py-3 bg-white ${ctaColor} font-bold text-sm rounded-lg shadow-lg active:scale-[0.98] transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-current`}
+          className={`w-full sm:w-auto min-h-[44px] flex items-center justify-center gap-2 px-4 sm:px-5 lg:px-6 py-3 sm:py-2.5 bg-white ${ctaColor} font-bold text-sm sm:text-base rounded-lg sm:rounded-xl shadow-lg hover:shadow-xl active:scale-[0.98] sm:hover:scale-[1.02] transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-current`}
           aria-label={displayCta}
         >
-          <Zap className="w-4 h-4" aria-hidden />
-          <span key={offerIndex} className="animate-fade-in">{displayCta}</span>
-          <ArrowRight className="w-4 h-4" aria-hidden />
+          <Zap className="w-4 h-4 lg:w-5 lg:h-5" aria-hidden />
+          <span key={offerIndex} className="animate-fade-in sm:hidden">{displayCta}</span>
+          <span key={`short-${offerIndex}`} className="animate-fade-in hidden sm:inline">{displayCtaShort}</span>
+          <ArrowRight className="w-4 h-4 lg:w-5 lg:h-5" aria-hidden />
         </button>
       </div>
 
-      {/* Desktop Layout - flex-col: tartalom + pöttyök sor + progress */}
-      <div className="hidden sm:flex flex-col relative max-w-[1200px] mx-auto">
-        <div className="flex items-center justify-between gap-3 sm:gap-4 lg:gap-6 px-4 sm:px-6 lg:px-8 py-4 sm:py-5 lg:py-6">
-          {/* Left: Icon + Title + Badge */}
-          <div className="flex items-center gap-3 min-w-0 flex-shrink">
-            <div className="w-10 h-10 lg:w-11 lg:h-11 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center">
-              <Flame className="w-6 h-6 lg:w-7 lg:h-7 text-white animate-pulse" />
-            </div>
-            <div className="min-w-0">
-              <div className="flex items-center gap-2 flex-wrap">
-                <span key={`title-${offerIndex}`} className="font-black text-white text-base sm:text-lg lg:text-xl flash-offer-enter">{displayTitle}</span>
-                <span className="px-2 py-0.5 bg-yellow-400 text-yellow-900 text-xs font-black rounded-md shrink-0">
-                  {currentOffer.badge}
-                </span>
-              </div>
-              <p key={`sub-${offerIndex}`} className="text-white/80 text-xs lg:text-sm flash-offer-enter line-clamp-2 mt-0.5">{displaySubtitle}</p>
-            </div>
-          </div>
-
-          {/* Center: Countdown */}
-          <div className="flex items-center gap-2">
-            <Clock className="w-5 h-5 text-white/80" />
-            <span className="text-white/90 text-sm font-medium">Lejár:</span>
-            <div className="flex items-center gap-1">
-              {[
-                { value: timeLeft.hours, label: 'óra' },
-                { value: timeLeft.minutes, label: 'perc' },
-                { value: timeLeft.seconds, label: 'mp' }
-              ].map((unit, idx) => (
-                <React.Fragment key={idx}>
-                  <div className="bg-black/30 backdrop-blur-sm rounded-lg px-2.5 lg:px-3 py-1.5">
-                    <span className="flash-countdown-digit text-white font-black text-xl lg:text-2xl tabular-nums inline-block">{pad(unit.value)}</span>
-                    <span className="text-white/70 text-[10px] lg:text-xs ml-1">{unit.label}</span>
-                  </div>
-                  {idx < 2 && <span className="text-white/40 font-bold text-xl mx-0.5">:</span>}
-                </React.Fragment>
-              ))}
-            </div>
-          </div>
-
-          {/* Right: CTA + Dismiss */}
-          <div className="flex items-center gap-3">
-            <button
-              type="button"
-              onClick={onViewSale}
-              className={`min-h-[44px] flex items-center gap-2 px-5 lg:px-6 py-2.5 bg-white ${ctaColor} font-bold text-sm lg:text-base rounded-xl shadow-lg hover:shadow-xl hover:scale-[1.02] transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-current`}
-              aria-label={displayCta}
-            >
-              <Zap className="w-4 h-4 lg:w-5 lg:h-5" aria-hidden />
-              <span key={offerIndex} className="animate-fade-in">{displayCtaShort}</span>
-              <ArrowRight className="w-4 h-4 lg:w-5 lg:h-5" aria-hidden />
-            </button>
-            <button
-              type="button"
-              onClick={handleDismiss}
-              className="min-w-[44px] min-h-[44px] flex items-center justify-center p-2 text-white/60 hover:text-white rounded-full hover:bg-white/10 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-white/50"
-              aria-label="Banner elrejtése ma"
-            >
-              <X className="w-5 h-5" />
-            </button>
-          </div>
-        </div>
-        {/* Desktop: pöttyök dedikált sorban, progress bar fölött */}
-        <div className="flex justify-center gap-2 py-4 z-10" role="tablist" aria-label="Ajánlat váltása">
-          {FLASH_OFFERS.map((_, i) => (
-            <button
-              key={i}
-              type="button"
-              role="tab"
-              aria-selected={offerIndex === i}
-              onClick={() => goToOffer(i)}
-              className={`w-3 h-3 rounded-full transition-all duration-200 min-w-[12px] min-h-[12px] focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-gray-600 ${
-                offerIndex === i ? 'bg-white scale-125 shadow-lg' : 'bg-white/50 hover:bg-white/80'
-              }`}
-              aria-label={`Ajánlat ${i + 1}`}
-            />
-          ))}
-        </div>
-      </div>
-
-      {/* Dots – mobil: absolute, progress bar fölött */}
-      <div className="sm:hidden absolute bottom-10 left-0 right-0 flex justify-center gap-2 z-10" role="tablist" aria-label="Ajánlat váltása">
+      {/* Dots – egyetlen sor, absolute mobil (progress fölött), normal flow desktop */}
+      <div className="absolute bottom-10 sm:static left-0 right-0 flex justify-center gap-2 py-0 sm:py-4 z-10" role="tablist" aria-label="Ajánlat váltása">
         {FLASH_OFFERS.map((_, i) => (
           <button
             key={i}

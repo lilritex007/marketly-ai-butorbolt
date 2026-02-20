@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useLayoutEffect, useRef, useMemo, useCallback, Suspense, lazy } from 'react';
-import { ShoppingCart, Camera, MessageCircle, X, Send, Plus, Move, Trash2, Home, ZoomIn, ZoomOut, Upload, Settings, Link as LinkIcon, FileText, RefreshCw, AlertCircle, Database, Lock, Search, ChevronLeft, ChevronRight, Filter, Heart, ArrowDownUp, Info, Check, Star, Truck, ShieldCheck, Phone, ArrowRight, Mail, Eye, Sparkles, Lightbulb, Image as ImageIcon, MousePointer2, Menu, Bot, Moon, Sun, Clock, Gift, Zap, TrendingUp, Instagram, Facebook, MapPin, Sofa, Lamp, BedDouble, Armchair, Grid3X3, ExternalLink, Timer, ChevronDown } from 'lucide-react';
+import { ShoppingCart, Camera, MessageCircle, X, Send, Plus, Trash2, Home, ZoomIn, Upload, RefreshCw, AlertCircle, Database, Lock, Search, ChevronLeft, ChevronRight, Filter, Heart, Info, Check, Star, Truck, ShieldCheck, Phone, ArrowRight, Mail, Eye, Sparkles, Lightbulb, Menu, Bot, Moon, Sun, Clock, Gift, Zap, TrendingUp, Instagram, Facebook, MapPin, Grid3X3, ExternalLink, Timer, ChevronDown } from 'lucide-react';
 // framer-motion removed due to Vite production build TDZ issues
 import { fetchUnasProducts, refreshUnasProducts, fetchCategories, fetchCategoryHierarchy, fetchSearchIndex, fetchProductStats, fetchUnasProductById } from './services/unasApi';
 import { addToUnasCart } from './services/unasCartService';
@@ -36,7 +36,7 @@ import LiveActivityStrip from './components/ux/LiveActivityStrip';
 
 // Landing Components  
 import { ModernHero } from './components/landing/ModernHero';
-import AIModuleUnified from './components/landing/AIModuleUnified';
+const AIModuleUnified = lazy(() => import('./components/landing/AIModuleUnified'));
 import { InteractiveCTA } from './components/landing/ShowcaseSections';
 const InspirationSection = lazy(() => import('./components/landing/InspirationSection'));
 const ProductWorldsSection = lazy(() => import('./components/landing/ProductWorldsSection'));
@@ -90,6 +90,7 @@ import TrustBadges from './components/trust/TrustBadges';
 
 // Hooks
 import { useLocalStorage, useDebounce } from './hooks/index';
+import { DeferredSection } from './hooks/useDeferredSection';
 // useInfiniteScroll removed - using manual "Load More" button instead
 
 // Utils
@@ -1484,8 +1485,9 @@ const App = () => {
               }}
             />
             <FadeInOnScroll direction="up" className="section-perf">
-              <AIModuleUnified
-                onFeatureClick={(feature) => {
+              <Suspense fallback={null}>
+                <AIModuleUnified
+                  onFeatureClick={(feature) => {
                   if (feature.id === 'visual-search') setActiveTab('visual-search');
                   else if (feature.id === 'chat') {
                     document.getElementById('mkt-butorbolt-chat')?.scrollIntoView({ behavior: 'smooth' });
@@ -1494,30 +1496,34 @@ const App = () => {
                   else if (feature.id === 'style-quiz') setShowStyleQuiz(true);
                   else if (feature.id === 'room-designer') setShowRoomDesigner(true);
                 }}
-              />
-            </FadeInOnScroll>
-
-            <FadeInOnScroll direction="up" className="section-perf section-gap-lg">
-              <Suspense fallback={null}>
-                <InspirationSection
-                  onExplore={scrollToProductsSection}
-                  onCategorySelect={(name) => {
-                    setActiveTab('shop');
-                    handleCategoryChange(name);
-                  }}
-                  onCollectionSelect={(col) => {
-                    handleCollectionSelect(col);
-                    requestAnimationFrame(() => requestAnimationFrame(() => scrollToProductsSectionRef.current?.()));
-                  }}
                 />
               </Suspense>
             </FadeInOnScroll>
+
+            <DeferredSection rootMargin="200px" className="section-perf section-gap-lg">
+              <FadeInOnScroll direction="up" className="section-perf section-gap-lg">
+                <Suspense fallback={null}>
+                  <InspirationSection
+                    onExplore={scrollToProductsSection}
+                    onCategorySelect={(name) => {
+                      setActiveTab('shop');
+                      handleCategoryChange(name);
+                    }}
+                    onCollectionSelect={(col) => {
+                      handleCollectionSelect(col);
+                      requestAnimationFrame(() => requestAnimationFrame(() => scrollToProductsSectionRef.current?.()));
+                    }}
+                  />
+                </Suspense>
+              </FadeInOnScroll>
+            </DeferredSection>
             
             {featuredBase.length > 0 && (
-              <FadeInOnScroll direction="up" className="section-perf">
-                <Suspense fallback={null}>
-                  <div className="w-[100vw] relative left-1/2 -translate-x-1/2 sm:w-full sm:relative sm:left-auto sm:translate-x-0">
-                    <ProductWorldsSection
+              <DeferredSection rootMargin="200px" className="section-perf">
+                <FadeInOnScroll direction="up" className="section-perf">
+                  <Suspense fallback={null}>
+                    <div className="w-[100vw] relative left-1/2 -translate-x-1/2 sm:w-full sm:relative sm:left-auto sm:translate-x-0">
+                      <ProductWorldsSection
                       products={featuredBase}
                       onProductClick={handleProductView}
                       onToggleWishlist={toggleWishlist}
@@ -1526,41 +1532,48 @@ const App = () => {
                       onAddToCart={handleAddToCart}
                       contextLabel={sectionContextLabel}
                       rotationTick={sectionRotateTick}
-                    />
-                  </div>
-                </Suspense>
-              </FadeInOnScroll>
+                      />
+                    </div>
+                  </Suspense>
+                </FadeInOnScroll>
+              </DeferredSection>
             )}
             
             {/* Personalized Section - For You + Recently Viewed + Trending */}
             {featuredBase.length > 0 && (
-              <Suspense fallback={null}>
-                <PersonalizedSection
-                  products={featuredBase}
-                  onProductClick={handleProductView}
-                  onToggleWishlist={toggleWishlist}
-                  wishlist={wishlist}
-                  onAddToCart={handleAddToCart}
-                  contextLabel={sectionContextLabel}
-                />
-              </Suspense>
+              <DeferredSection rootMargin="200px">
+                <Suspense fallback={null}>
+                  <PersonalizedSection
+                    products={featuredBase}
+                    onProductClick={handleProductView}
+                    onToggleWishlist={toggleWishlist}
+                    wishlist={wishlist}
+                    onAddToCart={handleAddToCart}
+                    contextLabel={sectionContextLabel}
+                  />
+                </Suspense>
+              </DeferredSection>
             )}
 
-            <div className="w-full max-w-[500px] mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
-              <Suspense fallback={null}>
-                <LoyaltyProgram
-                  currentPoints={2450}
-                  totalSpent={485000}
-                  tier="silver"
-                  onViewRewards={() => {}}
-                  onRedeemPoints={(reward) => console.log('Redeem:', reward)}
-                />
-              </Suspense>
-            </div>
+            <DeferredSection rootMargin="200px">
+              <div className="w-full max-w-[500px] mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+                <Suspense fallback={null}>
+                  <LoyaltyProgram
+                    currentPoints={2450}
+                    totalSpent={485000}
+                    tier="silver"
+                    onViewRewards={() => {}}
+                    onRedeemPoints={(reward) => console.log('Redeem:', reward)}
+                  />
+                </Suspense>
+              </div>
+            </DeferredSection>
 
-            <Suspense fallback={null}>
-              <NewsletterStrip />
-            </Suspense>
+            <DeferredSection rootMargin="200px">
+              <Suspense fallback={null}>
+                <NewsletterStrip />
+              </Suspense>
+            </DeferredSection>
 
             <FadeInOnScroll direction="up" className="section-perf">
               <Features />
@@ -1810,7 +1823,7 @@ const App = () => {
                       <p className="text-sm text-gray-500 font-medium">Termékek betöltése...</p>
                     </div>
                     <div className="product-grid">
-                      {[...Array(8)].map((_, i) => (
+                      {[...Array(6)].map((_, i) => (
                         <ProductCardSkeleton key={`skeleton-${i}`} />
                       ))}
                     </div>

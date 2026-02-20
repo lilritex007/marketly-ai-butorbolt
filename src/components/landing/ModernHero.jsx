@@ -18,7 +18,7 @@ const QUICK_CARD_COLORS = [
   'from-lime-500 via-green-500 to-emerald-600',
 ];
 
-const QUICK_CATEGORY_LIMIT = 18;
+const QUICK_CATEGORY_LIMIT = 8;
 const MIN_QUICK_CATEGORY_PRODUCTS = 20;
 const CAROUSEL_SCROLL_DURATION = 700;
 const CAROUSEL_AUTO_INTERVAL = 6000;
@@ -295,6 +295,7 @@ export const ModernHero = ({
                   <img
                     src={img}
                     alt=""
+                    loading={idx < 6 ? 'eager' : 'lazy'}
                     className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 ease-out group-hover:scale-105"
                     aria-hidden
                   />
