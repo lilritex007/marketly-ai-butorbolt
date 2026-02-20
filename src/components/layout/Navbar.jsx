@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { useScrollPastY } from '../../hooks/useScrollPosition';
 import {
   Home, Sparkles, Grid3X3, ChevronDown, ChevronUp, ArrowRight, Search, Sun, Moon, Heart, Menu, X, ChevronRight,
   ShoppingCart, Camera, Move, Truck, Gift, Zap, TrendingUp, Star, Sofa, BedDouble, Armchair,
@@ -50,7 +51,7 @@ export default function Navbar({
   onRecentProductClick
 }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [isScrolled, setIsScrolled] = useState(false);
+  const isScrolled = useScrollPastY(20);
   const [announcementIndex, setAnnouncementIndex] = useState(0);
   const [announcementProgress, setAnnouncementProgress] = useState(0);
   const announcementStartRef = useRef(Date.now());
@@ -147,11 +148,6 @@ export default function Navbar({
     };
   }, [announcementIndex]);
 
-  useEffect(() => {
-    const handleScroll = () => setIsScrolled(window.scrollY > 20);
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
 
   useEffect(() => {
     const handleEsc = (e) => { if (e.key === 'Escape') setShowMegaMenu(false); };

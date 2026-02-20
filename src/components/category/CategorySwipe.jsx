@@ -38,14 +38,24 @@ const CategorySwipe = ({ categories, activeCategory, onCategoryChange, displayed
       setCanScrollRight(scrollLeft < scrollWidth - clientWidth - 5);
     }
   };
-  
+
   useEffect(() => {
     updateScrollIndicators();
     const el = scrollRef.current;
-    if (el) {
-      el.addEventListener('scroll', updateScrollIndicators);
-      return () => el.removeEventListener('scroll', updateScrollIndicators);
-    }
+    if (!el) return;
+    let rafId = null;
+    const onScroll = () => {
+      if (rafId != null) return;
+      rafId = requestAnimationFrame(() => {
+        updateScrollIndicators();
+        rafId = null;
+      });
+    };
+    el.addEventListener('scroll', onScroll, { passive: true });
+    return () => {
+      if (rafId != null) cancelAnimationFrame(rafId);
+      el.removeEventListener('scroll', onScroll);
+    };
   }, [categories]);
   
   const scroll = (direction) => {

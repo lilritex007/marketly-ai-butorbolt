@@ -1,35 +1,13 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { ArrowUp } from 'lucide-react';
+import { useScrollPastPercent } from '../../hooks/useScrollPosition';
 
 /**
  * BackToTop - Floating button to scroll back to top
- * Only appears after scrolling down 50%
+ * Only appears after scrolling down 30%. Uses shared scroll hook.
  */
 const BackToTop = () => {
-  const [isVisible, setIsVisible] = useState(false);
-
-  useEffect(() => {
-    let rafId = null;
-    const toggleVisibility = () => {
-      const scrollHeight = document.documentElement.scrollHeight - document.documentElement.clientHeight;
-      const scrolled = window.pageYOffset;
-      const scrollPercent = scrollHeight > 0 ? (scrolled / scrollHeight) * 100 : 0;
-      setIsVisible(scrollPercent > 30);
-    };
-    const onScroll = () => {
-      if (rafId != null) return;
-      rafId = requestAnimationFrame(() => {
-        toggleVisibility();
-        rafId = null;
-      });
-    };
-    window.addEventListener('scroll', onScroll, { passive: true });
-    toggleVisibility();
-    return () => {
-      if (rafId != null) cancelAnimationFrame(rafId);
-      window.removeEventListener('scroll', onScroll);
-    };
-  }, []);
+  const isVisible = useScrollPastPercent(30);
 
   const scrollToTop = () => {
     window.scrollTo({

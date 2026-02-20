@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { ShoppingCart, Heart, Check, AlertTriangle, Truck, Clock, Shield, ChevronUp } from 'lucide-react';
 import { formatPrice } from '../../utils/helpers';
+import { useScrollPastY } from '../../hooks/useScrollPosition';
 
 /**
  * StickyAddToCart - Sticky bottom bar for product pages
- * Shows when the product view (modal) is not in viewport, or after scrolling past threshold
+ * Shows when the product view (modal) is not in viewport, or after scrolling past threshold.
+ * Uses shared scroll hook when no observedElementId.
  */
 const StickyAddToCart = ({ 
   product, 
@@ -15,38 +17,29 @@ const StickyAddToCart = ({
   /** When set, bar is shown only when this element is NOT in viewport (e.g. product modal root) */
   observedElementId = null
 }) => {
-  const [isShown, setIsShown] = useState(false);
+  const [isShownObserved, setIsShownObserved] = useState(false);
   const [addedToCart, setAddedToCart] = useState(false);
   const [quantity, setQuantity] = useState(1);
+  const scrollPast400 = useScrollPastY(400);
 
   useEffect(() => {
-    if (observedElementId) {
-      const el = document.getElementById(observedElementId);
-      if (!el || !(el instanceof Element)) {
-        setIsShown(window.scrollY > 400);
-        return;
-      }
-      if (typeof window === 'undefined' || !('IntersectionObserver' in window)) {
-        setIsShown(window.scrollY > 400);
-        return;
-      }
-      const observer = new IntersectionObserver(
-        ([entry]) => {
-          setIsShown(!entry.isIntersecting);
-        },
-        { threshold: 0.1, root: null }
-      );
-      try {
-        observer.observe(el);
-      } catch (err) {
-        return;
-      }
-      return () => observer.disconnect();
+    if (!observedElementId) return;
+    const el = document.getElementById(observedElementId);
+    if (!el || !(el instanceof Element)) return;
+    if (typeof window === 'undefined' || !('IntersectionObserver' in window)) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => setIsShownObserved(!entry.isIntersecting),
+      { threshold: 0.1, root: null }
+    );
+    try {
+      observer.observe(el);
+    } catch (err) {
+      return;
     }
-    const handleScroll = () => setIsShown(window.scrollY > 400);
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => window.removeEventListener('scroll', handleScroll);
+    return () => observer.disconnect();
   }, [observedElementId]);
+
+  const isShown = observedElementId ? isShownObserved : scrollPast400;
 
   if (!product || !isVisible) return null;
 

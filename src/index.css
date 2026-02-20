@@ -1104,10 +1104,7 @@
   contain: layout style;
 }
 
-/* Optimize images */
-#mkt-butorbolt-app img {
-  content-visibility: auto;
-}
+/* Images: lazy loading handles deferral; content-visibility on img can cause scroll jank */
 
 /* ========================================
    UTILITIES

@@ -986,29 +986,29 @@ const App = () => {
     const main = document.getElementById('mkt-butorbolt-main');
     const target = el || main;
     if (!target) {
-      if (retryCount < 6) setTimeout(() => scrollToProductsSection(retryCount + 1), 50);
+      if (retryCount < 12) setTimeout(() => scrollToProductsSection(retryCount + 1), 80);
       return;
     }
     const now = performance.now();
-    if (now - lastScrollToProductsRef.current < 200) return;
+    if (now - lastScrollToProductsRef.current < 150) return;
     const rect = target.getBoundingClientRect();
-    const inView = rect.top >= 0 && rect.top <= 120;
-    if (inView) return;
+    const inView = rect.top >= -50 && rect.top <= 180;
+    if (inView && retryCount === 0) return;
     lastScrollToProductsRef.current = now;
 
     const run = () => {
       const scrollParent = getScrollParent(target);
+      const offset = 88;
       if (scrollParent && scrollParent !== document.documentElement) {
         const elRect = target.getBoundingClientRect();
         const parentRect = scrollParent.getBoundingClientRect();
-        const offset = 88;
         const targetScrollTop = scrollParent.scrollTop + (elRect.top - parentRect.top) - offset;
         scrollParent.scrollTo({ top: Math.max(0, targetScrollTop), behavior: 'smooth' });
       } else {
         target.scrollIntoView({ behavior: 'smooth', block: 'start', inline: 'nearest' });
       }
     };
-    requestAnimationFrame(run);
+    requestAnimationFrame(() => requestAnimationFrame(run));
   }, [getScrollParent]);
 
   const scrollToProductsSectionRef = useRef(scrollToProductsSection);
@@ -1029,8 +1029,11 @@ const App = () => {
     setIsLoadingUnas(true);
     setUnasError(null);
     if (category && category !== 'Összes') setActiveTab('shop');
-    requestAnimationFrame(() => requestAnimationFrame(scrollToProductsSection));
-  }, [scrollToProductsSection, clearAIRecommendations]);
+    requestAnimationFrame(() => {
+      setTimeout(() => scrollToProductsSectionRef.current?.(), 120);
+      setTimeout(() => scrollToProductsSectionRef.current?.(1), 300);
+    });
+  }, [clearAIRecommendations]);
 
   const handleCollectionSelect = useCallback((collection) => {
     setSelectedCollection(collection);
@@ -1044,6 +1047,10 @@ const App = () => {
     setIsLoadingUnas(true);
     setUnasError(null);
     setActiveTab('shop');
+    requestAnimationFrame(() => {
+      setTimeout(() => scrollToProductsSectionRef.current?.(), 120);
+      setTimeout(() => scrollToProductsSectionRef.current?.(1), 300);
+    });
   }, []);
 
   const handleCollectionBack = useCallback(() => {
@@ -1527,10 +1534,7 @@ const App = () => {
                       setActiveTab('shop');
                       handleCategoryChange(name);
                     }}
-                    onCollectionSelect={(col) => {
-                      handleCollectionSelect(col);
-                      requestAnimationFrame(() => requestAnimationFrame(() => scrollToProductsSectionRef.current?.()));
-                    }}
+                    onCollectionSelect={(col) => handleCollectionSelect(col)}
                   />
                 </Suspense>
               </FadeInOnScroll>

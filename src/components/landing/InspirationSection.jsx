@@ -35,10 +35,19 @@ export default function InspirationSection({ onExplore, onCategorySelect, onColl
     const el = scrollRef.current;
     if (!el) return;
     updateScrollState();
-    el.addEventListener("scroll", updateScrollState);
+    let rafId = null;
+    const onScroll = () => {
+      if (rafId != null) return;
+      rafId = requestAnimationFrame(() => {
+        updateScrollState();
+        rafId = null;
+      });
+    };
+    el.addEventListener("scroll", onScroll, { passive: true });
     window.addEventListener("resize", updateScrollState);
     return () => {
-      el.removeEventListener("scroll", updateScrollState);
+      if (rafId != null) cancelAnimationFrame(rafId);
+      el.removeEventListener("scroll", onScroll);
       window.removeEventListener("resize", updateScrollState);
     };
   }, []);

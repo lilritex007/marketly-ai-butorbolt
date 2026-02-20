@@ -1,72 +1,53 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { X, Mail, Gift, Sparkles, CheckCircle } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useScrollPosition } from '../../hooks/useScrollPosition';
 
 /**
  * SmartNewsletterPopup - Intelligent newsletter popup
- * Shows based on exit intent, time on site, and scroll depth
+ * Shows based on exit intent, time on site, and scroll depth. Uses shared scroll hook.
  */
 const SmartNewsletterPopup = ({ onSubscribe }) => {
   const [isVisible, setIsVisible] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [email, setEmail] = useState('');
   const [error, setError] = useState('');
+  const timeOnSiteRef = useRef(null);
+  const scrollTriggeredRef = useRef(false);
+  const exitIntentRef = useRef(false);
+  const { scrollPercent } = useScrollPosition();
 
   useEffect(() => {
-    // Check if user already dismissed or subscribed
     const dismissed = localStorage.getItem('newsletter_dismissed');
     const subscribed = localStorage.getItem('newsletter_subscribed');
-    
-    if (dismissed || subscribed) {
-      return;
-    }
+    if (dismissed || subscribed) return;
 
-    let timeOnSiteTimeout;
-    let scrollDepthTriggered = false;
-    let exitIntentTriggered = false;
-
-    // Strategy 1: Time on site (30 seconds)
-    timeOnSiteTimeout = setTimeout(() => {
-      if (!scrollDepthTriggered && !exitIntentTriggered) {
-        setIsVisible(true);
-      }
+    timeOnSiteRef.current = setTimeout(() => {
+      if (!scrollTriggeredRef.current && !exitIntentRef.current) setIsVisible(true);
     }, 30000);
 
-    // Strategy 2: Scroll depth (70%)
-    const handleScroll = () => {
-      if (scrollDepthTriggered) return;
-
-      const scrolled = window.pageYOffset;
-      const height = document.documentElement.scrollHeight - window.innerHeight;
-      const scrollPercent = (scrolled / height) * 100;
-
-      if (scrollPercent > 70) {
-        scrollDepthTriggered = true;
-        clearTimeout(timeOnSiteTimeout);
-        setIsVisible(true);
-      }
-    };
-
-    // Strategy 3: Exit intent (mouse leaving viewport)
     const handleMouseLeave = (e) => {
-      if (exitIntentTriggered) return;
-      
+      if (exitIntentRef.current) return;
       if (e.clientY <= 0) {
-        exitIntentTriggered = true;
-        clearTimeout(timeOnSiteTimeout);
+        exitIntentRef.current = true;
+        if (timeOnSiteRef.current) clearTimeout(timeOnSiteRef.current);
         setIsVisible(true);
       }
     };
-
-    window.addEventListener('scroll', handleScroll, { passive: true });
     document.addEventListener('mouseleave', handleMouseLeave);
-
     return () => {
-      clearTimeout(timeOnSiteTimeout);
-      window.removeEventListener('scroll', handleScroll);
+      if (timeOnSiteRef.current) clearTimeout(timeOnSiteRef.current);
       document.removeEventListener('mouseleave', handleMouseLeave);
     };
   }, []);
+
+  useEffect(() => {
+    if (scrollPercent > 70 && !scrollTriggeredRef.current) {
+      scrollTriggeredRef.current = true;
+      if (timeOnSiteRef.current) clearTimeout(timeOnSiteRef.current);
+      setIsVisible(true);
+    }
+  }, [scrollPercent]);
 
   const handleClose = () => {
     setIsVisible(false);
