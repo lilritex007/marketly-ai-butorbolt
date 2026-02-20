@@ -252,7 +252,7 @@ export default function Navbar({
   const setTabAndClose = (tab) => {
     setActiveTab(tab);
     closeMobileMenu();
-    if (tab === 'shop') requestAnimationFrame(() => requestAnimationFrame(() => onScrollToShop?.()));
+    if (tab === 'shop') onScrollToShop?.();
   };
 
   const navItems = [
@@ -273,10 +273,10 @@ export default function Navbar({
           <div className={`flex justify-between items-center transition-all duration-300 py-3 sm:py-2 lg:py-0 ${isScrolled ? 'min-h-[64px] sm:min-h-[72px] lg:min-h-[80px] xl:min-h-[96px]' : 'min-h-[76px] sm:min-h-[80px] lg:min-h-[96px] xl:min-h-[112px]'}`}>
             <div
               className="flex items-center cursor-pointer group"
-              onClick={() => { setActiveTab('shop'); requestAnimationFrame(() => requestAnimationFrame(() => onScrollToShop?.())); }}
+              onClick={() => { setActiveTab('shop'); onScrollToShop?.(); }}
               role="button"
               tabIndex={0}
-              onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setActiveTab('shop'); requestAnimationFrame(() => requestAnimationFrame(() => onScrollToShop?.())); } }}
+              onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setActiveTab('shop'); onScrollToShop?.(); } }}
               aria-label="Marketly.AI – Főoldal"
             >
               <div className={`relative bg-gradient-to-br from-primary-500 via-secondary-600 to-secondary-500 rounded-xl sm:rounded-2xl flex items-center justify-center text-white mr-3 sm:mr-4 lg:mr-5 transform group-hover:scale-105 group-hover:rotate-3 transition-all duration-300 shadow-lg shadow-primary-300/50 group-hover:shadow-xl ${isScrolled ? 'w-11 h-11 sm:w-12 sm:h-12 lg:w-14 lg:h-14 xl:w-16 xl:h-16' : 'w-12 h-12 sm:w-14 sm:h-14 lg:w-16 lg:h-16 xl:w-20 xl:h-20'}`}>
@@ -458,7 +458,7 @@ export default function Navbar({
             </div>
 
             <div className="flex items-center gap-2 sm:gap-3 lg:gap-4">
-              <button onClick={() => { setActiveTab('shop'); requestAnimationFrame(() => requestAnimationFrame(() => { onScrollToShop?.(); window.dispatchEvent(new CustomEvent('mkt-focus-search')); })); }} className="hidden md:flex items-center gap-2 lg:gap-3 xl:gap-3 px-3 lg:px-4 xl:px-5 py-2.5 lg:py-3 min-h-[44px] bg-gray-100 hover:bg-gray-200 rounded-xl lg:rounded-2xl text-gray-600 hover:text-gray-900 hover:scale-[1.02] active:scale-[0.98] transition-all" aria-label="Keresés" data-nav-action="search">
+              <button onClick={() => { setActiveTab('shop'); onScrollToShop?.(); window.dispatchEvent(new CustomEvent('mkt-focus-search')); }} className="hidden md:flex items-center gap-2 lg:gap-3 xl:gap-3 px-3 lg:px-4 xl:px-5 py-2.5 lg:py-3 min-h-[44px] bg-gray-100 hover:bg-gray-200 rounded-xl lg:rounded-2xl text-gray-600 hover:text-gray-900 hover:scale-[1.02] active:scale-[0.98] transition-all" aria-label="Keresés" data-nav-action="search">
                 <Search className="w-5 h-5 lg:w-5 xl:w-6 xl:h-6" />
                 <span className="text-sm lg:text-base font-bold">Keresés</span>
               </button>

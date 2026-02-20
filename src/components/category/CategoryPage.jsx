@@ -702,7 +702,8 @@ const CategoryPage = ({
   }, [category]);
 
   useEffect(() => {
-    onScrollToSection?.();
+    const t = setTimeout(() => onScrollToSection?.(), 50);
+    return () => clearTimeout(t);
   }, [category]);
 
   const savePreset = () => {

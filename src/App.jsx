@@ -106,6 +106,13 @@ const MODAL_LOADING_FALLBACK = (
   </div>
 );
 
+/* Scroll időzítések – egységes görgetés a termék szekcióhoz */
+const SCROLL_DELAY_INITIAL = 80;   /* Első késleltetés (DOM render) */
+const SCROLL_DELAY_RETRY = 200;    /* Második próbálkozás (layout settle) */
+const SCROLL_DELAY_FINAL = 400;    /* Harmadik (képek/betöltések) */
+const SCROLL_THROTTLE_MS = 180;    /* Minimum időkülönbség hívások között */
+const SCROLL_RETRY_MAX = 15;       /* Max retry, ha elem még nincs DOM-ban */
+
 /* --- 2. SEGÉDFÜGGVÉNYEK --- */
 
 const fixUrl = (url, type = 'main') => {
@@ -776,7 +783,7 @@ const App = () => {
     setSearchQuery(''); // Reset search
     
     setActiveTab('shop');
-    requestAnimationFrame(() => requestAnimationFrame(() => scrollToProductsSectionRef.current?.()));
+    scheduleScrollToProductsRef.current?.();
   }, [products]);
   
   // Clear AI recommendations
@@ -860,6 +867,7 @@ const App = () => {
   const [serverSearchQuery, setServerSearchQuery] = useState('');
   const [serverCategory, setServerCategory] = useState('');
   const searchTimeoutRef = useRef(null);
+  const scheduleScrollToProductsRef = useRef(null);
 
   // API-first: kis lap, gyors first paint; soha nem töltünk 200k-t
   const loadUnasData = useCallback(async (options = {}) => {
@@ -901,9 +909,7 @@ const App = () => {
         setHasMoreProducts(newProducts.length > 0 && newProducts.length < totalCount);
       }
       if (!append && search && String(search).trim()) {
-        requestAnimationFrame(() => requestAnimationFrame(() => {
-          scrollToProductsSectionRef.current?.()
-        }));
+        scheduleScrollToProductsRef.current?.();
       }
       if (!append) setTotalProductsCount(totalCount);
       setLastUpdated(data.lastSync || data.lastUpdated);
@@ -986,11 +992,11 @@ const App = () => {
     const main = document.getElementById('mkt-butorbolt-main');
     const target = el || main;
     if (!target) {
-      if (retryCount < 12) setTimeout(() => scrollToProductsSection(retryCount + 1), 80);
+      if (retryCount < SCROLL_RETRY_MAX) setTimeout(() => scrollToProductsSection(retryCount + 1), SCROLL_DELAY_INITIAL);
       return;
     }
     const now = performance.now();
-    if (now - lastScrollToProductsRef.current < 150) return;
+    if (now - lastScrollToProductsRef.current < SCROLL_THROTTLE_MS) return;
     const rect = target.getBoundingClientRect();
     const inView = rect.top >= -50 && rect.top <= 180;
     if (inView && retryCount === 0) return;
@@ -1014,6 +1020,16 @@ const App = () => {
   const scrollToProductsSectionRef = useRef(scrollToProductsSection);
   scrollToProductsSectionRef.current = scrollToProductsSection;
 
+  const scheduleScrollToProducts = useCallback(() => {
+    requestAnimationFrame(() => {
+      setTimeout(() => scrollToProductsSectionRef.current?.(), SCROLL_DELAY_INITIAL);
+      setTimeout(() => scrollToProductsSectionRef.current?.(1), SCROLL_DELAY_RETRY);
+      setTimeout(() => scrollToProductsSectionRef.current?.(2), SCROLL_DELAY_FINAL);
+    });
+  }, []);
+
+  scheduleScrollToProductsRef.current = scheduleScrollToProducts;
+
   const handleCategoryChange = useCallback((category) => {
     setSelectedCollection(null);
     setCategoryFilter(category);
@@ -1029,11 +1045,8 @@ const App = () => {
     setIsLoadingUnas(true);
     setUnasError(null);
     if (category && category !== 'Összes') setActiveTab('shop');
-    requestAnimationFrame(() => {
-      setTimeout(() => scrollToProductsSectionRef.current?.(), 120);
-      setTimeout(() => scrollToProductsSectionRef.current?.(1), 300);
-    });
-  }, [clearAIRecommendations]);
+    scheduleScrollToProducts();
+  }, [clearAIRecommendations, scheduleScrollToProducts]);
 
   const handleCollectionSelect = useCallback((collection) => {
     setSelectedCollection(collection);
@@ -1047,11 +1060,8 @@ const App = () => {
     setIsLoadingUnas(true);
     setUnasError(null);
     setActiveTab('shop');
-    requestAnimationFrame(() => {
-      setTimeout(() => scrollToProductsSectionRef.current?.(), 120);
-      setTimeout(() => scrollToProductsSectionRef.current?.(1), 300);
-    });
-  }, []);
+    scheduleScrollToProducts();
+  }, [scheduleScrollToProducts]);
 
   const handleCollectionBack = useCallback(() => {
     setSelectedCollection(null);
@@ -1113,7 +1123,7 @@ const App = () => {
       limit,
       offset: 0
     });
-    requestAnimationFrame(() => requestAnimationFrame(() => scrollToProductsSectionRef.current?.()));
+    scheduleScrollToProductsRef.current?.();
   }, [selectedCollection, categoryHierarchy]);
 
   const deferProductsLoadRef = useRef(true);
@@ -1134,7 +1144,7 @@ const App = () => {
       });
       if (requestScrollToProductsRef.current && debouncedSearch.trim()) {
         requestScrollToProductsRef.current = false;
-        requestAnimationFrame(() => requestAnimationFrame(() => scrollToProductsSectionRef.current?.()));
+        scheduleScrollToProductsRef.current?.();
       }
     };
 
@@ -1439,7 +1449,7 @@ const App = () => {
         activeCategory={categoryFilter}
         onOpenWishlist={() => setShowWishlistDrawer(true)}
         onCategorySelect={handleCategoryChange}
-        onScrollToShop={scrollToProductsSection}
+        onScrollToShop={scheduleScrollToProducts}
         fixUrl={fixUrl}
         onRecentProductClick={handleProductView}
       />
@@ -1483,13 +1493,13 @@ const App = () => {
                 endTime={flashSaleEndTime}
                 title="🔥 Flash Sale!"
                 subtitle="Csak ma! Akár 50% kedvezmény kiválasztott bútorokra"
-                onViewSale={scrollToProductsSection}
+                onViewSale={scheduleScrollToProducts}
                 variant="banner"
               />
             </div>
 
             <ModernHero 
-              onExplore={scrollToProductsSection}
+              onExplore={scheduleScrollToProducts}
               onTryAI={() => setActiveTab('visual-search')}
               products={SERVER_SEARCH_ONLY ? products : (searchIndexReady ? searchIndexRef.current : products)}
               onHeroQuickView={(product) => handleProductView(product)}
@@ -1500,7 +1510,7 @@ const App = () => {
                 }
                 handleServerSearch(query, { scrollFromEffect: false });
                 if (meta?.source !== 'instant') {
-                  requestAnimationFrame(() => requestAnimationFrame(() => scrollToProductsSectionRef.current?.()));
+                  scheduleScrollToProductsRef.current?.();
                 }
               }}
               quickCategories={categoryHierarchy?.mainCategories || []}
@@ -1529,7 +1539,7 @@ const App = () => {
               <FadeInOnScroll direction="up" className="section-perf section-gap-lg">
                 <Suspense fallback={null}>
                   <InspirationSection
-                    onExplore={scrollToProductsSection}
+                    onExplore={scheduleScrollToProducts}
                     onCategorySelect={(name) => {
                       setActiveTab('shop');
                       handleCategoryChange(name);
@@ -1550,7 +1560,7 @@ const App = () => {
                       onProductClick={handleProductView}
                       onToggleWishlist={toggleWishlist}
                       wishlist={wishlist}
-                      onViewAll={scrollToProductsSection}
+                      onViewAll={scheduleScrollToProducts}
                       onAddToCart={handleAddToCart}
                       contextLabel={sectionContextLabel}
                       rotationTick={sectionRotateTick}
@@ -1618,6 +1628,7 @@ const App = () => {
                 loadedCount={products.length}
                 onLoadMore={handleCollectionLoadMore}
                 isLoading={isLoadingUnas}
+                onScrollToSection={scrollToProductsSection}
               />
             ) : categoryFilter && categoryFilter !== "Összes" && !isLoadingUnas ? (
               <CategoryPage
@@ -1979,7 +1990,7 @@ const App = () => {
             
             {/* Final CTA */}
             <InteractiveCTA 
-              onGetStarted={scrollToProductsSection}
+              onGetStarted={scheduleScrollToProducts}
             />
           </>
         )}

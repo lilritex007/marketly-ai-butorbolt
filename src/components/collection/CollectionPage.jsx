@@ -139,7 +139,8 @@ const CollectionPage = ({
   totalCount = 0,
   loadedCount = 0,
   onLoadMore,
-  isLoading = false
+  isLoading = false,
+  onScrollToSection
 }) => {
   const [sortOption, setSortOption] = useState('default');
   const [viewMode, setViewMode] = useState('grid');
@@ -204,6 +205,11 @@ const CollectionPage = ({
     if (loadMoreRef.current instanceof Element) observer.observe(loadMoreRef.current);
     return () => observer.disconnect();
   }, [hasMoreToShow, onLoadMore]);
+
+  useEffect(() => {
+    const t = setTimeout(() => onScrollToSection?.(), 50);
+    return () => clearTimeout(t);
+  }, [collection?.id]);
 
   return (
     <div id="products-section" className="min-h-screen bg-gray-50">
