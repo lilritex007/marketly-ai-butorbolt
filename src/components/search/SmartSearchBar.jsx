@@ -11,7 +11,8 @@ import {
   parseSearchIntent,
   buildSearchIndex,
   isIndexReady,
-  getIndexStats
+  getIndexStats,
+  getDidYouMeanSuggestion
 } from '../../services/aiSearchService';
 import { fetchUnasProducts, fetchUnasProductById } from '../../services/unasApi';
 import { trackSearch, getSearchHistory, getViewedProducts } from '../../services/userPreferencesService';
@@ -147,7 +148,19 @@ const SmartSearchBar = ({
     }
     const requestId = ++serverRequestIdRef.current;
     setServerPreview((prev) => ({ ...prev, loading: true }));
-    fetchUnasProducts({ search: q, limit: 6, offset: 0, slim: true })
+    const intent = q.length >= 3 ? parseSearchIntent(q) : null;
+    const intentKw = intent
+      ? [...(intent.productTypes || []), ...(intent.styles || []), ...(intent.colors || []), ...(intent.materials || [])].filter(Boolean)
+      : [];
+    fetchUnasProducts({
+      search: q,
+      limit: 6,
+      offset: 0,
+      slim: true,
+      minPrice: intent?.priceRange?.min,
+      maxPrice: intent?.priceRange?.max,
+      styleKeywords: intentKw.length > 0 ? intentKw : undefined
+    })
       .then((data) => {
         if (serverRequestIdRef.current !== requestId) return;
         setServerPreview({
@@ -756,13 +769,13 @@ const SmartSearchBar = ({
           {!serverSearchMode && debouncedQuery.length >= 2 && searchResults.didYouMean && (
             <div className="px-4 py-3 bg-gradient-to-r from-amber-50 to-orange-50 border-b border-amber-100">
               <button
-                onClick={() => handleSuggestionClick(searchResults.didYouMean.query)}
+                onClick={() => handleSuggestionClick(typeof searchResults.didYouMean === 'string' ? searchResults.didYouMean : searchResults.didYouMean?.query)}
                 className="flex items-center gap-2 text-sm group"
               >
                 <Lightbulb className="w-4 h-4 text-amber-500" />
                 <span className="text-gray-600">Erre gondoltál?</span>
                 <span className="font-semibold text-amber-700 group-hover:text-amber-800 underline underline-offset-2">
-                  {searchResults.didYouMean.query}
+                  {typeof searchResults.didYouMean === 'string' ? searchResults.didYouMean : searchResults.didYouMean?.query}
                 </span>
                 <ArrowRight className="w-4 h-4 text-amber-500 group-hover:translate-x-1 transition-transform" />
               </button>
@@ -776,6 +789,20 @@ const SmartSearchBar = ({
                 <Search className="w-10 h-10 text-gray-300" strokeWidth={1.5} />
               </div>
               <p className="text-gray-800 font-semibold mb-1 text-base">Nincs találat: &quot;{debouncedQuery}&quot;</p>
+              {(() => {
+                const didYouMean = getDidYouMeanSuggestion(debouncedQuery);
+                return didYouMean ? (
+                  <div className="mb-5">
+                    <button
+                      onClick={() => handleSuggestionClick(didYouMean)}
+                      className="inline-flex items-center gap-2 px-4 py-2 bg-amber-50 hover:bg-amber-100 border border-amber-200 rounded-xl text-amber-800 font-medium transition-colors"
+                    >
+                      <Lightbulb className="w-4 h-4" />
+                      Talán ezt kerested: {didYouMean}
+                    </button>
+                  </div>
+                ) : null;
+              })()}
               <p className="text-sm text-gray-500 mb-5 max-w-xs mx-auto">Próbálj más kulcsszavakat, szinonimákat vagy egyszerűsítsd a keresést.</p>
               <div className="mt-6 pt-4 border-t border-gray-100">
                 <p className="text-xs text-gray-400 mb-3">Népszerű keresések:</p>

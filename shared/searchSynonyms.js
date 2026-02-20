@@ -1,6 +1,6 @@
 /**
  * Közös szinonim lista - kliens (aiSearchService) és backend (productService) számára.
- * Az összes termék és keresési variáns egy helyen.
+ * Szerkeszthető: config/searchSynonyms.json (backend) - bővíti/felülírja a beépített listát.
  */
 
 export function normalize(str) {

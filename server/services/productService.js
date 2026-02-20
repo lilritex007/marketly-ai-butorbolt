@@ -1,7 +1,7 @@
 import db from '../database/db.js';
 import { EXCLUDED_MAIN_CATEGORIES } from '../config/excludedCategories.js';
 import { getDisplayMainName, MAIN_CATEGORY_DISPLAY_ORDER } from '../config/mainCategoryGroups.js';
-import { expandSearchTerms } from '../../shared/searchSynonyms.js';
+import { expandSearchTerms } from '../loadSearchConfig.js';
 
 const applySearchTerms = (query, params, search) => {
   const rawTerms = String(search || '')
@@ -346,7 +346,7 @@ export function deleteProduct(id) {
  */
 export function getProductCount(filters = {}) {
   try {
-    const { category, categories, categoryMain, styleKeywords, showInAI, inStock, search } = filters;
+    const { category, categories, categoryMain, styleKeywords, showInAI, inStock, search, minPrice, maxPrice } = filters;
 
     let query = 'SELECT COUNT(*) as count FROM products WHERE 1=1';
     const params = [];
@@ -390,6 +390,15 @@ export function getProductCount(filters = {}) {
       params.splice(0, params.length, ...applied.params);
     }
 
+    if (minPrice != null) {
+      query += ' AND price >= ?';
+      params.push(minPrice);
+    }
+    if (maxPrice != null) {
+      query += ' AND price <= ?';
+      params.push(maxPrice);
+    }
+
     if (inStock !== undefined) {
       query += ' AND in_stock = ?';
       params.push(inStock ? 1 : 0);
@@ -409,7 +418,7 @@ export function getProductCount(filters = {}) {
  */
 export function getProductStats(filters = {}) {
   try {
-    const { category, categories, categoryMain, styleKeywords, showInAI, inStock, search } = filters;
+    const { category, categories, categoryMain, styleKeywords, showInAI, inStock, search, minPrice, maxPrice } = filters;
 
     let query = `
       SELECT
@@ -459,6 +468,15 @@ export function getProductStats(filters = {}) {
       const applied = applyStyleKeywordsFilter(query, params, styleKeywords);
       query = applied.query;
       params.splice(0, params.length, ...applied.params);
+    }
+
+    if (minPrice != null) {
+      query += ' AND price >= ?';
+      params.push(minPrice);
+    }
+    if (maxPrice != null) {
+      query += ' AND price <= ?';
+      params.push(maxPrice);
     }
 
     if (inStock !== undefined) {

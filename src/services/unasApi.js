@@ -55,6 +55,8 @@ export const fetchUnasProducts = async (filters = {}) => {
     if (filters.styleKeywords && Array.isArray(filters.styleKeywords) && filters.styleKeywords.length > 0) {
       params.set('styleKeywords', filters.styleKeywords.filter(Boolean).join(','));
     }
+    if (filters.minPrice != null && Number.isFinite(filters.minPrice)) params.set('minPrice', String(Math.floor(filters.minPrice)));
+    if (filters.maxPrice != null && Number.isFinite(filters.maxPrice)) params.set('maxPrice', String(Math.floor(filters.maxPrice)));
     if (filters.search && String(filters.search).trim()) params.set('search', String(filters.search).trim());
 
     const url = `${API_BASE}/products?${params.toString()}`;

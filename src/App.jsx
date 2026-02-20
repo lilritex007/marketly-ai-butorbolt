@@ -81,6 +81,7 @@ import SmartBundle from './components/product/SmartBundle';
 import PriceHistory from './components/product/PriceHistory';
 import OneClickCheckout from './components/checkout/OneClickCheckout';
 import SmartSearchBar from './components/search/SmartSearchBar';
+import { parseSearchIntent, getDidYouMeanSuggestion } from './services/aiSearchService';
 const LoyaltyProgram = lazy(() => import('./components/loyalty/LoyaltyProgram'));
 import ARMeasure from './components/ar/ARMeasure';
 import StickyAddToCartMobile from './components/mobile/StickyAddToCartMobile';
@@ -1140,10 +1141,18 @@ const App = () => {
     const shouldDefer = deferProductsLoadRef.current && isInitialState;
 
     const run = () => {
+      const searchStr = useApiSearch ? debouncedSearch.trim() || undefined : undefined;
+      const intent = searchStr && searchStr.length >= 3 ? parseSearchIntent(searchStr) : null;
+      const intentKeywords = intent
+        ? [...(intent.productTypes || []), ...(intent.styles || []), ...(intent.colors || []), ...(intent.materials || [])].filter(Boolean)
+        : [];
       loadUnasDataRef.current({
-        search: useApiSearch ? (debouncedSearch.trim() || undefined) : undefined,
+        search: searchStr,
         category: categoryMainList.length === 0 && categoryFilter !== 'Összes' ? categoryFilter : '',
         categoryMain: categoryMainList.length > 0 ? categoryMainList : undefined,
+        styleKeywords: intentKeywords.length > 0 ? intentKeywords : undefined,
+        minPrice: intent?.priceRange?.min,
+        maxPrice: intent?.priceRange?.max,
         limit: INITIAL_PAGE,
         offset: 0
       });
@@ -1530,7 +1539,20 @@ const App = () => {
               }}
               serverSearchMode={SERVER_SEARCH_ONLY}
               onFetchSearchPreview={SERVER_SEARCH_ONLY ? async (q) => {
-                const data = await fetchUnasProducts({ search: q?.trim() || '', limit: 24, offset: 0, slim: true });
+                const searchStr = q?.trim() || '';
+                const intent = searchStr.length >= 3 ? parseSearchIntent(searchStr) : null;
+                const intentKw = intent
+                  ? [...(intent.productTypes || []), ...(intent.styles || []), ...(intent.colors || []), ...(intent.materials || [])].filter(Boolean)
+                  : [];
+                const data = await fetchUnasProducts({
+                  search: searchStr,
+                  limit: 24,
+                  offset: 0,
+                  slim: true,
+                  minPrice: intent?.priceRange?.min,
+                  maxPrice: intent?.priceRange?.max,
+                  styleKeywords: intentKw.length > 0 ? intentKw : undefined
+                });
                 return { results: data?.products || [], total: data?.total ?? 0 };
               } : undefined}
             />
@@ -1910,6 +1932,8 @@ const App = () => {
                     <NoSearchResults 
                       query={searchQuery}
                       onClear={() => setSearchQuery('')}
+                      didYouMean={getDidYouMeanSuggestion(searchQuery)}
+                      onDidYouMean={(s) => setSearchQuery(s)}
                     />
                   ) : (
                     <NoFilterResults 

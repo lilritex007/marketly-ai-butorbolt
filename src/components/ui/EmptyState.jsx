@@ -125,22 +125,35 @@ export const EmptyState = ({
 };
 
 // No Search Results
-export const NoSearchResults = ({ query, onClear, onSuggest }) => (
-  <EmptyState
-    icon={Search}
-    title={`Nincs találat: "${query}"`}
-    description="Próbálj más kulcsszavakat használni, vagy böngéssz a kategóriák között."
-    action={onClear && {
-      label: 'Keresés törlése',
-      icon: RefreshCw,
-      onClick: onClear
-    }}
-    secondaryAction={onSuggest && {
-      label: 'AI javaslatok',
-      icon: Sparkles,
-      onClick: onSuggest
-    }}
-  />
+export const NoSearchResults = ({ query, onClear, onSuggest, didYouMean, onDidYouMean }) => (
+  <div className="text-center py-12">
+    <EmptyState
+      icon={Search}
+      title={`Nincs találat: "${query}"`}
+      description={didYouMean && onDidYouMean ? (
+        <span>
+          Próbálj más kulcsszavakat, vagy{' '}
+          <button
+            type="button"
+            onClick={() => onDidYouMean(didYouMean)}
+            className="font-semibold text-primary-600 hover:text-primary-700 underline underline-offset-2"
+          >
+            Talán ezt kerested: {didYouMean}
+          </button>
+        </span>
+      ) : 'Próbálj más kulcsszavakat használni, vagy böngéssz a kategóriák között.'}
+      action={onClear && {
+        label: 'Keresés törlése',
+        icon: RefreshCw,
+        onClick: onClear
+      }}
+      secondaryAction={onSuggest && {
+        label: 'AI javaslatok',
+        icon: Sparkles,
+        onClick: onSuggest
+      }}
+    />
+  </div>
 );
 
 // No Products in Category

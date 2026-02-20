@@ -1,0 +1,17 @@
+{
+  "kanapé": ["szófa", "sofa", "couch", "kanape", "kanapá", "kanap", "ülőgarnitúra", "garnitúra", "sarokkanapé", "sarok kanapé", "heverő", "rekamié", "pamlag", "pamlág", "kanapék", "ülőbútor"],
+  "fotel": ["karosszék", "armchair", "pihenőfotel", "relax fotel", "relaxfotel", "füles fotel", "fülesfotel", "zsákfotel", "babzsák", "fotelek", "fotell"],
+  "asztal": ["table", "asztalka", "asztalok"],
+  "szék": ["chair", "székek", "szekek", "szek", "székk", "szekék"],
+  "szekrény": ["cabinet", "gardrób", "gardróbszekrény", "ruhásszekrény", "szekreny", "szekrények", "gardrob"],
+  "komód": ["fiókos szekrény", "drawer", "komod", "komódok", "fiokos szekreny"],
+  "ágy": ["bed", "franciaágy", "boxspring", "ágykeret", "agy", "ágynemű", "agyak"],
+  "modern": ["kortárs", "contemporary", "minimalista", "dizájn", "design", "modrn", "mdoern"],
+  "skandináv": ["nordic", "scandi", "északi", "skandinav", "skandináv", "skandinv"],
+  "fehér": ["white", "feher", "hófehér", "krémfehér", "fehérek"],
+  "fekete": ["black", "sötét", "antracit", "fektee"],
+  "szürke": ["gray", "grey", "szurke", "grafit"],
+  "barna": ["brown", "dió", "tölgy", "bükk", "csokoládé", "mogyoró", "barnna"],
+  "bézs": ["beige", "krém", "homok", "cappuccino", "bezs", "beéz"],
+  "olcsó": ["akciós", "akció", "kedvezményes", "leárazott", "olcso", "olcsobb"]
+}

@@ -5,7 +5,8 @@ import {
   getAutocompleteSuggestions,
   getProactiveSuggestions,
   parseSearchIntent,
-  smartSearch
+  smartSearch,
+  getBroadenSuggestions
 } from '../../services/aiSearchService';
 import { trackSearch, trackSectionEvent, getSearchHistory, getViewedProducts, getLikedProducts } from '../../services/userPreferencesService';
 import { formatPrice as formatPriceHu } from '../../utils/helpers';
@@ -57,6 +58,7 @@ export default function HeroSmartSearch({
   const [hoverCard, setHoverCard] = useState({ id: null, rx: 0, ry: 0 });
   const [smartResults, setSmartResults] = useState([]);
   const [smartTotalMatches, setSmartTotalMatches] = useState(0);
+  const [broadenSuggestions, setBroadenSuggestions] = useState([]);
   const [isIndexBuilding, setIsIndexBuilding] = useState(false);
   const [previewProduct, setPreviewProduct] = useState(null);
   const [previewAnchor, setPreviewAnchor] = useState(null);
@@ -109,6 +111,7 @@ export default function HeroSmartSearch({
     if (debouncedQuery.length < 2) {
       setSmartResults([]);
       setSmartTotalMatches(0);
+      setBroadenSuggestions([]);
       if (serverSearchMode) setServerPreview({ results: [], total: 0, loading: false });
       return;
     }
@@ -131,6 +134,7 @@ export default function HeroSmartSearch({
           setServerPreview({ results: [], total: 0, loading: false });
           setSmartResults([]);
           setSmartTotalMatches(0);
+          setBroadenSuggestions([]);
         });
       return;
     }
@@ -146,6 +150,7 @@ export default function HeroSmartSearch({
     const nextTotal = result?.totalMatches || 0;
     setSmartResults(nextResults);
     setSmartTotalMatches(nextTotal);
+    setBroadenSuggestions(result?.broadenSuggestions || []);
     setResultCountPulse(true);
   }, [products, debouncedQuery, serverSearchMode, onFetchSearchPreview]);
 
@@ -310,6 +315,11 @@ export default function HeroSmartSearch({
     if (actualResultCount >= 1) return { label: `${actualResultCount} találat`, tone: 'bg-orange-500' };
     return { label: 'Nincs találat', tone: 'bg-rose-500' };
   }, [actualResultCount]);
+
+  const effectiveBroadenSuggestions = useMemo(() => {
+    if (actualResultCount == null || actualResultCount >= 5 || actualResultCount === 0) return [];
+    return broadenSuggestions.length > 0 ? broadenSuggestions : getBroadenSuggestions(trimmedQuery, actualResultCount);
+  }, [actualResultCount, broadenSuggestions, trimmedQuery]);
 
   const dynamicQuickSuggestions = useMemo(() => {
     if (trimmedQuery.length < 2) return [...PROACTIVE_QUICK, ...QUICK_INTENTS].slice(0, 6);
@@ -962,6 +972,21 @@ export default function HeroSmartSearch({
               >
                 Összes találat megnyitása ({actualResultCount ?? 0})
               </button>
+              {effectiveBroadenSuggestions.length > 0 && (
+                <div className="mt-3 flex flex-wrap gap-2">
+                  <span className="text-xs text-gray-500 w-full">Kevés találat – próbáld:</span>
+                  {effectiveBroadenSuggestions.map((sug) => (
+                    <button
+                      key={sug}
+                      type="button"
+                      onClick={() => applySuggestion(sug)}
+                      className="px-3 py-1.5 rounded-lg bg-amber-50 border border-amber-200 text-amber-800 text-sm font-medium hover:bg-amber-100 transition-colors"
+                    >
+                      {sug}
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
           )}
 

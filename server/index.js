@@ -137,7 +137,9 @@ app.get('/api/products', async (req, res) => {
       search,
       limit,
       offset = 0,
-      slim // If slim=true, return only essential fields (faster)
+      slim,
+      minPrice,
+      maxPrice
     } = req.query;
     const categoryMainList = categoryMain ? String(categoryMain).split(',').map(s => s.trim()).filter(Boolean) : undefined;
     const categoriesList = categories ? String(categories).split(',').map(s => s.trim()).filter(Boolean) : undefined;
@@ -148,13 +150,18 @@ app.get('/api/products', async (req, res) => {
     // No limit = load ALL products; only apply limit when explicitly set
     const limitNum = limit !== undefined && limit !== '' ? parseInt(limit, 10) : undefined;
 
+    const minPriceNum = minPrice !== undefined && minPrice !== '' ? parseInt(minPrice, 10) : undefined;
+    const maxPriceNum = maxPrice !== undefined && maxPrice !== '' ? parseInt(maxPrice, 10) : undefined;
+
     let products = getProducts({
       category,
       categories: categoriesList,
       categoryMain: categoryMainList,
       styleKeywords: styleKeywordsList,
       search,
-      showInAI: true, // Only show products enabled for AI
+      minPrice: minPriceNum,
+      maxPrice: maxPriceNum,
+      showInAI: true,
       limit: limitNum,
       offset: parseInt(offset, 10) || 0
     });
@@ -181,6 +188,8 @@ app.get('/api/products', async (req, res) => {
       categoryMain: categoryMainList,
       styleKeywords: styleKeywordsList,
       search,
+      minPrice: minPriceNum,
+      maxPrice: maxPriceNum,
       showInAI: true
     });
 

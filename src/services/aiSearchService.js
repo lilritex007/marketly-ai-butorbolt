@@ -62,6 +62,37 @@ function levenshtein(a, b) {
   return matrix[b.length][a.length];
 }
 
+/** "Did you mean?" - legközelebbi szó a szótárból, ha 0 találat. Exportált a server preview 0 találatnál. */
+export function getDidYouMeanSuggestion(queryNorm, queryWords = null, vocabulary = null) {
+  const words = queryWords || getWords(queryNorm);
+  if (!vocabulary || vocabulary.length === 0) {
+    vocabulary = [...new Set(Object.keys(SYNONYMS).flatMap(k => [normalize(k), ...(SYNONYMS[k] || []).map(normalize)]))];
+  }
+  const replacements = [];
+  for (const w of words) {
+    if (w.length < 2) {
+      replacements.push(w);
+      continue;
+    }
+    let bestWord = w;
+    let bestDist = 999;
+    const first = w[0];
+    for (const v of vocabulary) {
+      if (v === w) continue;
+      if (v.length < 2) continue;
+      if (v[0] !== first && Math.abs(v.length - w.length) > 2) continue;
+      const d = levenshtein(w, v);
+      if (d < bestDist && d <= 2) {
+        bestDist = d;
+        bestWord = v;
+      }
+    }
+    replacements.push(bestWord);
+  }
+  const suggested = replacements.join(' ');
+  return suggested && suggested !== queryNorm ? suggested : null;
+}
+
 /** Find words in vocabulary within edit distance - only same first letter + similar length for speed */
 function findFuzzyMatches(word, vocabulary, maxDist = 2) {
   const results = [];
@@ -342,7 +373,28 @@ export function smartSearch(products, query, options = {}) {
 
   devLog(`✅ Found ${scored.length} matches in ${searchTime.toFixed(1)}ms`);
 
-  const result = { results, totalMatches: scored.length, searchTime };
+  let didYouMean = null;
+  if (scored.length === 0 && queryWords.length > 0) {
+    didYouMean = getDidYouMeanSuggestion(queryNorm, queryWords, vocabArray);
+  }
+
+  let broadenSuggestions = [];
+  if (scored.length > 0 && scored.length < 5 && queryWords.length > 0) {
+    for (const w of queryWords.slice(0, 2)) {
+      const root = WORD_TO_ROOT.get(w);
+      if (root && SYNONYMS[Object.keys(SYNONYMS).find(k => normalize(k) === root)]) {
+        const syns = SYNONYMS[Object.keys(SYNONYMS).find(k => normalize(k) === root)];
+        const alt = syns?.[0];
+        if (alt && alt !== w) {
+          const rewritten = queryWords.map(ww => (ww === w ? alt : ww)).join(' ');
+          if (rewritten !== queryNorm) broadenSuggestions.push(rewritten);
+        }
+      }
+    }
+    broadenSuggestions = [...new Set(broadenSuggestions)].slice(0, 3);
+  }
+
+  const result = { results, totalMatches: scored.length, searchTime, didYouMean, broadenSuggestions };
   if (scored.length > 0) {
     INDEX.cache.set(cacheKey, result);
     if (INDEX.cache.size > 500) {
@@ -570,6 +622,24 @@ export function parseSearchIntent(query) {
 // ============================================================================
 // PROACTIVE SUGGESTIONS
 // ============================================================================
+
+/** Kevés találatnál: alternatív keresések szinonimákkal (server mode-hoz is) */
+export function getBroadenSuggestions(queryNorm, totalMatches) {
+  if (totalMatches >= 5 || totalMatches === 0) return [];
+  const queryWords = getWords(queryNorm);
+  const broaden = [];
+  for (const w of queryWords.slice(0, 2)) {
+    const root = WORD_TO_ROOT.get(w);
+    const key = Object.keys(SYNONYMS).find(k => normalize(k) === root);
+    if (key && SYNONYMS[key]?.[0]) {
+      const alt = SYNONYMS[key][0];
+      if (normalize(alt) !== w) {
+        broaden.push(queryWords.map(ww => (ww === w ? alt : ww)).join(' '));
+      }
+    }
+  }
+  return [...new Set(broaden)].slice(0, 3);
+}
 
 export function getProactiveSuggestions() {
   return [
