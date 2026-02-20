@@ -9,6 +9,7 @@ const STORAGE_KEYS = {
   LIKED_PRODUCTS: 'mkt_liked_products',
   DISLIKED_PRODUCTS: 'mkt_disliked_products',
   SEARCH_HISTORY: 'mkt_search_history',
+  SEARCH_CLICKS: 'mkt_search_clicks',
   STYLE_DNA: 'mkt_style_dna',
   AI_FEEDBACK: 'mkt_ai_feedback',
   CHAT_CONTEXT: 'mkt_chat_context',
@@ -25,6 +26,7 @@ const MAX_ITEMS = {
   VIEWED: 50,
   LIKED: 100,
   SEARCHES: 20,
+  SEARCH_CLICKS: 500,
   FEEDBACK: 100,
 };
 
@@ -375,6 +377,47 @@ export function getSearchHistory(limit = 10) {
   } catch (e) {
     return [];
   }
+}
+
+// ==================== SEARCH CLICKS (tanulás) ====================
+
+function normalizeSearchQuery(str) {
+  if (!str) return '';
+  return String(str).toLowerCase()
+    .replace(/ő/g, 'o').replace(/ű/g, 'u').replace(/ö/g, 'o').replace(/ü/g, 'u')
+    .replace(/ó/g, 'o').replace(/ú/g, 'u').replace(/á/g, 'a').replace(/é/g, 'e').replace(/í/g, 'i')
+    .replace(/[^a-z0-9]/g, ' ').replace(/\s+/g, ' ').trim();
+}
+
+function getSearchQueryWords(str) {
+  return normalizeSearchQuery(str).split(' ').filter(w => w.length >= 2);
+}
+
+export function trackSearchClick(query, productId, position = 0) {
+  if (!query || !productId) return;
+  const queryNorm = normalizeSearchQuery(query);
+  if (!queryNorm) return;
+  const clicks = getJSONSafe(STORAGE_KEYS.SEARCH_CLICKS, []);
+  const updated = [{ queryNorm, productId, position, timestamp: Date.now() }, ...clicks].slice(0, MAX_ITEMS.SEARCH_CLICKS);
+  try { localStorage.setItem(STORAGE_KEYS.SEARCH_CLICKS, JSON.stringify(updated)); } catch (e) { console.warn('Failed to save search click:', e); }
+}
+
+export function getSearchClickBoosts(query) {
+  const boosts = {};
+  if (!query || query.length < 2) return boosts;
+  const queryNorm = normalizeSearchQuery(query);
+  const queryWords = getSearchQueryWords(query);
+  if (!queryNorm || queryWords.length === 0) return boosts;
+  const clicks = getJSONSafe(STORAGE_KEYS.SEARCH_CLICKS, []);
+  for (const c of clicks) {
+    if (!c?.productId || !c?.queryNorm) continue;
+    const storedWords = getSearchQueryWords(c.queryNorm);
+    const isExact = c.queryNorm === queryNorm;
+    const hasOverlap = storedWords.some(w => queryWords.includes(w)) || queryWords.some(w => storedWords.includes(w));
+    if (isExact) boosts[c.productId] = Math.max(boosts[c.productId] || 0, 15);
+    else if (hasOverlap) boosts[c.productId] = Math.max(boosts[c.productId] || 0, 5);
+  }
+  return boosts;
 }
 
 // ==================== STYLE DNA (Quiz Results) ====================
@@ -811,4 +854,6 @@ export default {
   trackSectionEvent,
   getSectionStats,
   clearAllData,
+  trackSearchClick,
+  getSearchClickBoosts,
 };

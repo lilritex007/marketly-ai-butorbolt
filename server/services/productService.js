@@ -219,6 +219,54 @@ export function getProductsSearchIndex() {
 }
 
 /**
+ * Get minimal product list for client-side search index (lightweight, ~5–15 MB for 160k).
+ * Only id, name, category, price, image, inStock – no description/params for smaller payload.
+ * Same filters as getProductsSearchIndex.
+ */
+export function getProductsSearchIndexMinimal() {
+  try {
+    let query = `
+      SELECT id, name, category, price, images, in_stock
+      FROM products WHERE 1=1
+    `;
+    const params = [];
+    query += ' AND show_in_ai = ? AND price > 0';
+    params.push(1);
+    if (EXCLUDED_MAIN_CATEGORIES.length > 0) {
+      query += ` AND (CASE WHEN category_path IS NOT NULL AND category_path != '' AND instr(category_path, '|') > 0 THEN trim(substr(category_path, 1, instr(category_path, '|') - 1)) ELSE category END) NOT IN (${EXCLUDED_MAIN_CATEGORIES.map(() => '?').join(',')})`;
+      params.push(...EXCLUDED_MAIN_CATEGORIES);
+    }
+    query += ' ORDER BY priority DESC, name ASC';
+
+    const stmt = db.prepare(query);
+    const rows = stmt.all(...params);
+
+    const safeFirstImage = (raw) => {
+      if (!raw) return null;
+      try {
+        const parsed = JSON.parse(raw);
+        const arr = Array.isArray(parsed) ? parsed : [];
+        return arr[0] || null;
+      } catch { return null; }
+    };
+
+    return rows.map((row) => ({
+      id: row.id,
+      name: row.name || '',
+      category: row.category || '',
+      price: row.price || 0,
+      image: safeFirstImage(row.images),
+      images: safeFirstImage(row.images) ? [safeFirstImage(row.images)] : [],
+      inStock: Boolean(row.in_stock),
+      in_stock: Boolean(row.in_stock)
+    }));
+  } catch (error) {
+    console.error('getProductsSearchIndexMinimal error:', error);
+    return [];
+  }
+}
+
+/**
  * Get product by ID. Never throws: returns null on error.
  */
 export function getProductById(id) {

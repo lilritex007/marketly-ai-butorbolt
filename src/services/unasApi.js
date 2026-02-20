@@ -110,11 +110,15 @@ export const fetchCategories = async () => {
 /**
  * Keresőindex: minden termék minimális adattal (gyors, gzip-pel kisebb).
  * A kereső ezen fut; frissítés = újra letölti (készlet naprakész).
+ * @param {Object} opts - { minimal: true } → search-index-minimal (~5–15 MB, csak id/name/category/price/image/inStock)
  */
-export const fetchSearchIndex = async () => {
+export const fetchSearchIndex = async (opts = {}) => {
   try {
     const API_BASE = getApiBase();
-    const res = await fetch(`${API_BASE}/products/search-index`);
+    const url = opts.minimal
+      ? `${API_BASE}/products/search-index-minimal`
+      : `${API_BASE}/products/search-index`;
+    const res = await fetch(url);
     if (!res.ok) return { products: [], lastSync: null };
     const data = await res.json();
     if (Array.isArray(data)) return { products: data, lastSync: null };

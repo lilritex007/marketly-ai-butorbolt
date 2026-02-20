@@ -11,6 +11,7 @@
  */
 
 import { SYNONYMS, expandWithSynonyms } from '../../shared/searchSynonyms.js';
+import { getSearchClickBoosts } from './userPreferencesService.js';
 
 const DEV = typeof import.meta !== 'undefined' && import.meta.env?.DEV;
 
@@ -268,6 +269,13 @@ export function smartSearch(products, query, options = {}) {
   const cacheKey = `${queryNorm}:${limit}:${intent?.priceRange ? JSON.stringify(intent.priceRange) : ''}`;
   if (INDEX.cache.has(cacheKey)) {
     const cached = INDEX.cache.get(cacheKey);
+    const clickBoosts = getSearchClickBoosts(query.trim());
+    if (Object.keys(clickBoosts).length > 0 && cached.results?.length > 0) {
+      const boosted = cached.results.filter(p => (clickBoosts[p.id] || 0) > 0);
+      const rest = cached.results.filter(p => !(clickBoosts[p.id] || 0));
+      const reordered = [...boosted.sort((a, b) => (clickBoosts[b.id] || 0) - (clickBoosts[a.id] || 0)), ...rest];
+      return { ...cached, results: reordered, fromCache: true };
+    }
     return { ...cached, fromCache: true };
   }
 
@@ -283,6 +291,7 @@ export function smartSearch(products, query, options = {}) {
 
   const queryWords = getWords(queryNorm);
   const expandedQuery = expandWithSynonyms(queryWords);
+  const clickBoosts = getSearchClickBoosts(query.trim());
 
   const candidateScores = new Map();
   const vocabArray = Array.from(INDEX.wordToProducts.keys());
@@ -363,6 +372,8 @@ export function smartSearch(products, query, options = {}) {
     for (const w of queryWords) {
       if (norm.catNorm.includes(w)) score += 30;
     }
+
+    score += clickBoosts[product.id] || 0;
 
     scored.push({ idx, score, product });
   }

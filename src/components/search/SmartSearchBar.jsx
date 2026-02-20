@@ -15,7 +15,7 @@ import {
   getDidYouMeanSuggestion
 } from '../../services/aiSearchService';
 import { fetchUnasProducts, fetchUnasProductById } from '../../services/unasApi';
-import { trackSearch, getSearchHistory, getViewedProducts } from '../../services/userPreferencesService';
+import { trackSearch, trackSearchClick, getSearchHistory, getViewedProducts } from '../../services/userPreferencesService';
 
 // Keresett szó kiemelése a szövegben (case-insensitive, split tartalmazza a találatokat)
 const highlightMatch = (text, query) => {
@@ -285,7 +285,10 @@ const SmartSearchBar = ({
     setQuery(value);
   }, []);
 
-  const handleProductClickFn = useCallback(async (product) => {
+  const handleProductClickFn = useCallback(async (product, position = 0, fromSearchResults = true) => {
+    if (fromSearchResults && debouncedQuery.trim() && product?.id) {
+      trackSearchClick(debouncedQuery.trim(), product.id, position);
+    }
     try {
       if (serverSearchMode && product?.id) {
         const full = await fetchUnasProductById(product.id);
@@ -299,7 +302,7 @@ const SmartSearchBar = ({
       setQuery('');
       setIsOpen(false);
     }
-  }, [onProductClick, serverSearchMode]);
+  }, [onProductClick, serverSearchMode, debouncedQuery]);
 
   const handleSuggestionClick = useCallback((suggestion) => {
     const text = typeof suggestion === 'string' ? suggestion : suggestion.text || suggestion.query;
@@ -310,10 +313,13 @@ const SmartSearchBar = ({
   }, [onSearch]);
 
   const handleAutocompleteClickFn = useCallback((item) => {
-    if (item.type === 'product' && item.product) {
+    if (item.type === 'result' && item.item) {
+      handleProductClickFn(item.item, item.index ?? 0);
+    } else if (item.type === 'product' && item.product) {
       handleProductClickFn(item.product);
     } else {
-      handleSuggestionClick(item.text);
+      const text = typeof item?.item === 'string' ? item.item : item?.text;
+      if (text) handleSuggestionClick(text);
     }
   }, [handleProductClickFn, handleSuggestionClick]);
 
@@ -612,7 +618,7 @@ const SmartSearchBar = ({
                   return (
                   <button
                     key={product.id}
-                    onClick={() => handleProductClick(product)}
+                    onClick={() => handleProductClick(product, idx)}
                     style={{ animationDelay: `${idx * 35}ms` }}
                     className={`search-item-enter w-full flex items-center gap-3 p-3 rounded-xl border transition-all duration-200 text-left group
                       ${isSelected 
@@ -700,7 +706,7 @@ const SmartSearchBar = ({
                   return (
                   <button
                     key={product.id}
-                    onClick={() => handleProductClick(product)}
+                    onClick={() => handleProductClick(product, idx)}
                     style={{ animationDelay: `${idx * 35}ms` }}
                     className={`search-item-enter w-full flex items-center gap-3 p-3 rounded-xl border transition-all duration-200 text-left group
                       ${isSelected 
@@ -939,7 +945,7 @@ const SmartSearchBar = ({
                     {recentlyViewed.map((product, idx) => (
                       <button
                         key={idx}
-                        onClick={() => handleProductClick(product)}
+                        onClick={() => handleProductClick(product, 0, false)}
                         className="flex-shrink-0 w-24 group"
                       >
                         <div className="w-24 h-24 bg-gray-100 rounded-xl overflow-hidden ring-1 ring-gray-200 group-hover:ring-primary-300 transition-all">

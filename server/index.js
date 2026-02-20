@@ -14,6 +14,7 @@ import {
   getProducts,
   getProductById,
   getProductsSearchIndex,
+  getProductsSearchIndexMinimal,
   updateProductAISettings,
   deleteProduct,
   getProductCount,
@@ -254,6 +255,25 @@ app.get('/api/products/search-index', (req, res) => {
   } catch (error) {
     console.error('Error fetching search index:', error);
     res.status(500).json({ error: 'Failed to fetch search index' });
+  }
+});
+
+/**
+ * Minimal keresőindex: csak id, name, category, price, image, inStock (~5–15 MB 160k termékre).
+ * Gyorsabb letöltés, lokális kereséshez elég.
+ */
+app.get('/api/products/search-index-minimal', (req, res) => {
+  try {
+    const products = getProductsSearchIndexMinimal();
+    const lastSync = getLastSyncInfo();
+    res.setHeader('Cache-Control', 'private, max-age=300');
+    res.json({
+      products,
+      lastSync: lastSync?.completed_at || null
+    });
+  } catch (error) {
+    console.error('Error fetching search index minimal:', error);
+    res.status(500).json({ error: 'Failed to fetch search index minimal' });
   }
 });
 

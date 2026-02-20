@@ -8,7 +8,7 @@ import {
   smartSearch,
   getBroadenSuggestions
 } from '../../services/aiSearchService';
-import { trackSearch, trackSectionEvent, getSearchHistory, getViewedProducts, getLikedProducts } from '../../services/userPreferencesService';
+import { trackSearch, trackSearchClick, trackSectionEvent, getSearchHistory, getViewedProducts, getLikedProducts } from '../../services/userPreferencesService';
 import { formatPrice as formatPriceHu } from '../../utils/helpers';
 
 const QUICK_INTENTS = [
@@ -488,9 +488,12 @@ export default function HeroSmartSearch({
     setIsOpen(true);
   };
 
-  const handlePreviewProductClick = (product) => {
+  const handlePreviewProductClick = (product, position = 0) => {
     const name = product?.name || '';
     if (!name || !product) return;
+    if (trimmedQuery && product?.id) {
+      trackSearchClick(trimmedQuery, product.id, position);
+    }
     trackSectionEvent(`hero-search-${variant}`, 'click', String(product?.id || 'preview-product'));
     onOpenProductQuickView?.(product);
   };
@@ -1205,14 +1208,14 @@ export default function HeroSmartSearch({
                             setPreviewAnchor(null);
                             return;
                           }
-                          handlePreviewProductClick(p);
+                          handlePreviewProductClick(p, index);
                         }}
                         onMouseMove={(e) => handleCardMouseMove(e, p.id || p.name)}
                         onMouseLeave={() => setHoverCard({ id: null, rx: 0, ry: 0 })}
                         onKeyDown={(e) => {
                           if (e.key === 'Enter' || e.key === ' ') {
                             e.preventDefault();
-                            handlePreviewProductClick(p);
+                            handlePreviewProductClick(p, index);
                           }
                         }}
                         className="min-w-[140px] xs:min-w-[160px] sm:min-w-[200px] lg:min-w-[220px] snap-start text-left rounded-xl border border-gray-200 bg-white hover:border-primary-300 hover:shadow-lg transition-all p-3 touch-manipulation active:scale-[0.98]"

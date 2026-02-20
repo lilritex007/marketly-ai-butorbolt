@@ -651,8 +651,8 @@ const App = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const searchQueryRef = useRef(searchQuery);
   searchQueryRef.current = searchQuery;
-  const SERVER_SEARCH_ONLY = true;
-  const MAX_LOCAL_INDEX = SERVER_SEARCH_ONLY ? 0 : 50000;
+  const SERVER_SEARCH_ONLY = false;
+  const MAX_LOCAL_INDEX = 200000;
   const searchIndexRef = useRef([]);
   const [searchIndexReady, setSearchIndexReady] = useState(false);
   const [searchIndexVersion, setSearchIndexVersion] = useState(0);
@@ -1213,7 +1213,7 @@ const App = () => {
     if (SERVER_SEARCH_ONLY) return;
     let cancelled = false;
     const load = () => {
-      fetchSearchIndex().then(async (data) => {
+      fetchSearchIndex({ minimal: true }).then(async (data) => {
         if (!cancelled && data && Array.isArray(data.products)) {
           searchIndexRef.current = data.products;
           setSearchIndexReady(true);
