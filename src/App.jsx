@@ -925,11 +925,29 @@ const App = () => {
     setSearchQuery(query);
   }, []);
   const hasUserSearchedRef = useRef(false);
+  // Mindig headernél landoljon: első betöltés és reload esetén
   useLayoutEffect(() => {
-    if (typeof window !== 'undefined') {
-      window.history.scrollRestoration = 'manual';
+    if (typeof window === 'undefined') return;
+    window.history.scrollRestoration = 'manual';
+    const scrollToHeader = () => {
       window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
-    }
+      const appRoot = document.getElementById('mkt-butorbolt-app') || document.getElementById('root');
+      if (appRoot) {
+        let p = appRoot.parentElement;
+        while (p && p !== document.body) {
+          const s = getComputedStyle(p);
+          if ((s.overflowY === 'auto' || s.overflowY === 'scroll' || s.overflowY === 'overlay') && p.scrollHeight > p.clientHeight) {
+            p.scrollTo({ top: 0, left: 0, behavior: 'auto' });
+            break;
+          }
+          p = p.parentElement;
+        }
+      }
+    };
+    scrollToHeader();
+    const t1 = setTimeout(scrollToHeader, 100);
+    const t2 = setTimeout(scrollToHeader, 300);
+    return () => { clearTimeout(t1); clearTimeout(t2); };
   }, []);
 
   useEffect(() => {

@@ -7,9 +7,9 @@ import './index.css'
 if (typeof window !== 'undefined' && !window.__MKT_SCROLL_INIT) {
   window.__MKT_SCROLL_INIT = true
   window.history.scrollRestoration = 'manual'
-  const scrollTopNow = () => {
+  const scrollToHeader = () => {
     window.scrollTo({ top: 0, left: 0, behavior: 'auto' })
-    const appRoot = document.getElementById('mkt-butorbolt-app')
+    const appRoot = document.getElementById('mkt-butorbolt-app') || document.getElementById('root')
     if (appRoot) {
       let parent = appRoot.parentElement
       while (parent && parent !== document.body) {
@@ -24,12 +24,18 @@ if (typeof window !== 'undefined' && !window.__MKT_SCROLL_INIT) {
       }
     }
   }
-  scrollTopNow()
-  window.addEventListener('DOMContentLoaded', scrollTopNow)
-  window.addEventListener('load', scrollTopNow)
+  scrollToHeader()
+  window.addEventListener('DOMContentLoaded', scrollToHeader)
+  window.addEventListener('load', () => {
+    scrollToHeader()
+    requestAnimationFrame(() => { scrollToHeader(); setTimeout(scrollToHeader, 50); setTimeout(scrollToHeader, 150) })
+  })
   window.addEventListener('pageshow', (e) => {
-    scrollTopNow()
-    if (e.persisted) setTimeout(scrollTopNow, 80)
+    scrollToHeader()
+    if (e.persisted) {
+      setTimeout(scrollToHeader, 50)
+      setTimeout(scrollToHeader, 150)
+    }
   })
 }
 
