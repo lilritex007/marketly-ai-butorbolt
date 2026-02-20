@@ -675,7 +675,8 @@ const CategoryPage = ({
   totalCount = 0,
   loadedCount = 0,
   stats,
-  onLoadMore
+  onLoadMore,
+  onScrollToSection
 }) => {
   const [sortOption, setSortOption] = useState('default');
   const [viewMode, setViewMode] = useState('grid');
@@ -701,7 +702,7 @@ const CategoryPage = ({
   }, [category]);
 
   useEffect(() => {
-    window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
+    onScrollToSection?.();
   }, [category]);
 
   const savePreset = () => {

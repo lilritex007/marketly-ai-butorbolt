@@ -1635,6 +1635,7 @@ const App = () => {
                 loadedCount={products.length}
                 stats={categoryStats}
                 onLoadMore={handleLoadMore}
+                onScrollToSection={scrollToProductsSection}
               />
             ) : (
             <section id="products-section" className="container-app section-padding section-perf">
