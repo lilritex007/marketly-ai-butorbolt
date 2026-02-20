@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { TrendingDown, TrendingUp, Bell, BellOff, Sparkles, Calendar, DollarSign } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { generateText } from '../../services/geminiService';
 
 /**
  * AIPricePredictor - AI-powered price prediction and smart alerts
@@ -50,6 +49,7 @@ VÁLASZ FORMÁTUM (JSON):
 Adj reális elemzést a bútoráruház kontextusában.
 `;
 
+      const { generateText } = await import('../../services/geminiService');
       const aiResult = await generateText(prompt, { temperature: 0.7 });
       
       if (aiResult.success && aiResult.text) {

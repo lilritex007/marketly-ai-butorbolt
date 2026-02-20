@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { Sparkles, ThumbsUp, ThumbsDown, ArrowRight } from 'lucide-react';
 import { EnhancedProductCard } from './EnhancedProductCard';
-import { generateText } from '../../services/geminiService';
 import { 
   getSimilarProducts, 
   likeProduct, 
@@ -76,6 +75,7 @@ Ajánlj 4 hasonló terméket ami illik hozzá!
 Válaszolj egyetlen mondatban, hogy MIÉRT passzolnak ezek.
 Csak az indoklást írd meg, ne a termékneveket!`;
 
+      const { generateText } = await import('../../services/geminiService');
       const result = await generateText(prompt, { temperature: 0.7, maxTokens: 100 });
       
       if (result.success && result.text) {

@@ -295,7 +295,10 @@ export const ModernHero = ({
                   <img
                     src={img}
                     alt=""
-                    loading={idx < 6 ? 'eager' : 'lazy'}
+                    width={175}
+                    height={233}
+                    loading={idx < 4 ? 'eager' : 'lazy'}
+                    fetchPriority={idx < 2 ? 'high' : undefined}
                     className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 ease-out group-hover:scale-105"
                     aria-hidden
                   />

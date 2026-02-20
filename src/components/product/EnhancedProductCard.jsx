@@ -240,10 +240,12 @@ export const EnhancedProductCard = ({
           <div className="absolute inset-0 bg-gray-100" />
         )}
         
-        {/* Actual image */}
+        {/* Actual image - width/height prevents CLS */}
         <img 
           src={imageError ? PLACEHOLDER_IMAGE : (optimizedProps.src || mainImage)}
-          alt={product.name} 
+          alt={product.name}
+          width={400}
+          height={400}
           className={`
             w-full h-full object-contain ${sizeConfig.image}
             transition-opacity duration-300 ease-out

@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { Sparkles, Plus, ShoppingBag, Check, ChevronRight, Package, Percent } from 'lucide-react';
 import { formatPriceNumber } from '../../utils/helpers';
-import { generateText } from '../../services/geminiService';
 
 /**
  * CompleteTheLook - AI-powered bundle suggestions
@@ -94,7 +93,7 @@ const CompleteTheLook = ({ currentProduct, allProducts, onAddToCart, onViewProdu
         
         // AI generált cím
         const prompt = `Írj egy rövid, vonzó marketing címet (max 6 szó) ami arra ösztönöz, hogy a "${currentProduct.name}" mellé vegyék meg a kiegészítőket is. Magyarul, kreatívan!`;
-        
+        const { generateText } = await import('../../services/geminiService');
         const result = await generateText(prompt, { temperature: 0.9, maxTokens: 30 });
         if (result.success && result.text) {
           setBundleTitle(result.text.replace(/["']/g, '').trim());

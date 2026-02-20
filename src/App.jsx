@@ -3,9 +3,7 @@ import { ShoppingCart, Camera, MessageCircle, X, Send, Plus, Trash2, Home, ZoomI
 // framer-motion removed due to Vite production build TDZ issues
 import { fetchUnasProducts, refreshUnasProducts, fetchCategories, fetchCategoryHierarchy, fetchSearchIndex, fetchProductStats, fetchUnasProductById } from './services/unasApi';
 import { addToUnasCart } from './services/unasCartService';
-import { smartSearch } from './services/aiSearchService';
 import { trackProductView as trackProductViewPref, getPersonalizedRecommendations, getSimilarProducts } from './services/userPreferencesService';
-import { generateText, analyzeImage as analyzeImageAI } from './services/geminiService';
 
 // New UI Components
 import { ProductCardSkeleton } from './components/ui/Skeleton';
@@ -366,6 +364,7 @@ const ProductModal = ({ product, isOpen, onClose, allProducts = [], onAddToCart 
             Paraméterek: ${product.params || "Nincs adat"}
             Válaszolj magyarul, emojikkal.`;
 
+            const { generateText } = await import('./services/geminiService');
             const result = await generateText(prompt);
             if (result.success) {
                 setAiTip(result.text);
@@ -534,7 +533,7 @@ const VisualSearch = ({ products }) => {
     try {
       const base64Data = base64Image.split(',')[1];
       const prompt = "Elemezd a bútort. JSON: { \"style\": \"...\", \"category\": \"...\", \"color\": \"...\" } Magyarul.";
-      
+      const { analyzeImage: analyzeImageAI } = await import('./services/geminiService');
       const result = await analyzeImageAI(base64Data, "image/jpeg", prompt);
       
       if (result.success && result.text) {
@@ -1205,7 +1204,7 @@ const App = () => {
     if (SERVER_SEARCH_ONLY) return;
     let cancelled = false;
     const load = () => {
-      fetchSearchIndex().then((data) => {
+      fetchSearchIndex().then(async (data) => {
         if (!cancelled && data && Array.isArray(data.products)) {
           searchIndexRef.current = data.products;
           setSearchIndexReady(true);
@@ -1213,6 +1212,8 @@ const App = () => {
           if (data.lastSync) setLastUpdated(data.lastSync);
           const q = searchQueryRef.current.trim();
           if (q && data.products.length <= MAX_LOCAL_INDEX) {
+            const { smartSearch } = await import('./services/aiSearchService');
+            if (cancelled) return;
             const { results = [], totalMatches = 0 } = smartSearch(searchIndexRef.current, q, { limit: 500 });
             setSearchResults(results);
             setSearchTotalMatches(totalMatches || results.length);
@@ -1237,9 +1238,14 @@ const App = () => {
       setSearchTotalMatches(0);
       return;
     }
-    const { results = [], totalMatches = 0 } = smartSearch(searchIndexRef.current, searchQuery.trim(), { limit: 500 });
-    setSearchResults(results);
-    setSearchTotalMatches(totalMatches || results.length);
+    let cancelled = false;
+    import('./services/aiSearchService').then(({ smartSearch }) => {
+      if (cancelled) return;
+      const { results = [], totalMatches = 0 } = smartSearch(searchIndexRef.current, searchQuery.trim(), { limit: 500 });
+      setSearchResults(results);
+      setSearchTotalMatches(totalMatches || results.length);
+    });
+    return () => { cancelled = true; };
   }, [searchQuery, canUseLocalSearch]);
 
   useEffect(() => {
