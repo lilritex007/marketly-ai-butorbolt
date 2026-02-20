@@ -211,6 +211,7 @@ const StickyAddToCart = ({
       <button
         onClick={scrollToTop}
         className="absolute -top-12 right-4 p-2 bg-white rounded-full shadow-lg border border-gray-200 text-gray-600 hover:text-primary-500 hover:border-primary-300 transition-all"
+        aria-label="Oldal tetejére"
       >
         <ChevronUp className="w-5 h-5" />
       </button>

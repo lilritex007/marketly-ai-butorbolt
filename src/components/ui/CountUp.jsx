@@ -9,6 +9,7 @@ export const CountUp = ({ end, duration = 2000, suffix = '', decimals = 0, start
   const [isVisible, setIsVisible] = useState(false);
   const countRef = useRef(null);
   const hasStarted = useRef(false);
+  const timeoutRef = useRef(null);
 
   useEffect(() => {
     const element = countRef.current;
@@ -18,14 +19,17 @@ export const CountUp = ({ end, duration = 2000, suffix = '', decimals = 0, start
       ([entry]) => {
         if (entry.isIntersecting && !hasStarted.current) {
           hasStarted.current = true;
-          setTimeout(() => setIsVisible(true), delay);
+          timeoutRef.current = setTimeout(() => setIsVisible(true), delay);
         }
       },
       { threshold: 0.1 }
     );
 
     observer.observe(element);
-    return () => observer.disconnect();
+    return () => {
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
+      observer.disconnect();
+    };
   }, [delay]);
 
   useEffect(() => {

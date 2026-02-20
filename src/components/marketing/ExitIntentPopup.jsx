@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { X, Gift, Timer, Sparkles, ArrowRight, Mail, Check } from 'lucide-react';
 
 /**
@@ -12,27 +12,28 @@ const ExitIntentPopup = ({ discountPercent = 10, onClose }) => {
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [countdown, setCountdown] = useState(600); // 10 minutes
 
+  const hasShownRef = useRef(false);
+  hasShownRef.current = hasShown;
+
   // Exit intent detection
   useEffect(() => {
-    // Check if already shown in this session
-    if (sessionStorage.getItem('exitIntentShown')) {
-      return;
-    }
+    if (sessionStorage.getItem('exitIntentShown')) return;
 
     const handleMouseLeave = (e) => {
-      if (e.clientY <= 0 && !hasShown) {
+      if (e.clientY <= 0 && !hasShownRef.current) {
+        hasShownRef.current = true;
         setIsVisible(true);
         setHasShown(true);
         sessionStorage.setItem('exitIntentShown', 'true');
       }
     };
 
-    // Also show after 45 seconds of inactivity
     let inactivityTimer;
     const resetTimer = () => {
       clearTimeout(inactivityTimer);
       inactivityTimer = setTimeout(() => {
-        if (!hasShown) {
+        if (!hasShownRef.current) {
+          hasShownRef.current = true;
           setIsVisible(true);
           setHasShown(true);
           sessionStorage.setItem('exitIntentShown', 'true');
@@ -51,7 +52,7 @@ const ExitIntentPopup = ({ discountPercent = 10, onClose }) => {
       document.removeEventListener('click', resetTimer);
       clearTimeout(inactivityTimer);
     };
-  }, [hasShown]);
+  }, []);
 
   // Countdown timer
   useEffect(() => {
@@ -112,6 +113,7 @@ const ExitIntentPopup = ({ discountPercent = 10, onClose }) => {
         <button
           onClick={handleClose}
           className="absolute top-4 right-4 p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-full transition-colors z-10"
+          aria-label="Bezárás"
         >
           <X className="w-5 h-5" />
         </button>

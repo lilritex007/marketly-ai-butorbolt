@@ -24,19 +24,28 @@ if (typeof window !== 'undefined' && !window.__MKT_SCROLL_INIT) {
       }
     }
   }
-  scrollToHeader()
-  window.addEventListener('DOMContentLoaded', scrollToHeader)
-  window.addEventListener('load', () => {
+  const handleLoad = () => {
     scrollToHeader()
     requestAnimationFrame(() => { scrollToHeader(); setTimeout(scrollToHeader, 50); setTimeout(scrollToHeader, 150) })
-  })
-  window.addEventListener('pageshow', (e) => {
+  }
+  const handlePageshow = (e) => {
     scrollToHeader()
     if (e.persisted) {
       setTimeout(scrollToHeader, 50)
       setTimeout(scrollToHeader, 150)
     }
-  })
+  }
+  scrollToHeader()
+  window.addEventListener('DOMContentLoaded', scrollToHeader)
+  window.addEventListener('load', handleLoad)
+  window.addEventListener('pageshow', handlePageshow)
+  window.__MKT_SCROLL_CLEANUP = () => {
+    window.removeEventListener('DOMContentLoaded', scrollToHeader)
+    window.removeEventListener('load', handleLoad)
+    window.removeEventListener('pageshow', handlePageshow)
+    window.__MKT_SCROLL_INIT = false
+    delete window.__MKT_SCROLL_CLEANUP
+  }
 }
 
 const rootEl = document.getElementById('root')

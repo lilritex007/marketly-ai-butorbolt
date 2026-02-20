@@ -87,6 +87,7 @@ export const EnhancedProductCard = ({
   const optimizedProps = getOptimizedImageProps(mainImage, product.name, { responsive: true, lazy: false, quality: getAdaptiveQuality() });
 
   // Intersection Observer for scroll animation – kihagyva ha skipScrollAnimation (Worlds)
+  const timeoutRef = useRef(null);
   useEffect(() => {
     if (skipScrollAnimation) return;
     const element = cardRef.current;
@@ -96,8 +97,11 @@ export const EnhancedProductCard = ({
       ([entry]) => {
         if (entry.isIntersecting) {
           const delay = Math.min((index % 4) * 25, 100);
-          if (delay > 0) setTimeout(() => setIsVisible(true), delay);
-          else setIsVisible(true);
+          if (delay > 0) {
+            timeoutRef.current = setTimeout(() => setIsVisible(true), delay);
+          } else {
+            setIsVisible(true);
+          }
           observer.disconnect();
         }
       },
@@ -109,7 +113,10 @@ export const EnhancedProductCard = ({
     } catch {
       return;
     }
-    return () => observer.disconnect();
+    return () => {
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
+      observer.disconnect();
+    };
   }, [index, skipScrollAnimation]);
 
   useEffect(() => {

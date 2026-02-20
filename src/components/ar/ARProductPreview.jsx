@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Box, Eye, Smartphone, X, AlertCircle } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -70,26 +70,30 @@ const ARProductPreview = ({ product, onClose }) => {
     }
   };
 
+  const sessionEndHandlerRef = useRef(null);
   const launchWebXR = async () => {
     try {
       const session = await navigator.xr.requestSession('immersive-ar', {
         requiredFeatures: ['hit-test'],
         optionalFeatures: ['dom-overlay']
       });
-      
-      // Here you would initialize the WebXR rendering
-      // This is a simplified example
-      // In production, use libraries like three.js or babylon.js
-      
-      // Placeholder for WebXR session handling
-      session.addEventListener('end', () => {
-        // Cleanup
-      });
-      
+      const handler = () => { /* Cleanup */ };
+      sessionEndHandlerRef.current = { session, handler };
+      session.addEventListener('end', handler);
     } catch (err) {
       setError('Nem sikerült elindítani az AR nézetet.');
     }
   };
+
+  useEffect(() => {
+    return () => {
+      const current = sessionEndHandlerRef.current;
+      if (current?.session && current?.handler) {
+        current.session.removeEventListener('end', current.handler);
+        sessionEndHandlerRef.current = null;
+      }
+    };
+  }, []);
 
   const generateMockUSDZ = (product) => {
     // In production, you would have actual 3D models

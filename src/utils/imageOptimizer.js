@@ -1,3 +1,5 @@
+import { useRef } from 'react';
+
 /**
  * Image Optimization Utilities
  * WebP conversion, lazy loading, responsive images
@@ -82,47 +84,45 @@ const appendSizeParam = (imageUrl, width) => {
 };
 
 /**
- * Lazy load image with Intersection Observer
- * Returns a ref to attach to image element
+ * Lazy load image with Intersection Observer.
+ * Returns a ref callback. Callback receives element on mount and null on unmount.
+ * Observer is disconnected when element is removed or component unmounts.
  */
 export const useLazyLoad = () => {
+  const observerRef = useRef(null);
   if (typeof window === 'undefined' || !('IntersectionObserver' in window)) {
-    return null;
+    return () => {}; // no-op when IO unavailable
   }
 
   return (imageElement) => {
+    const prev = observerRef.current;
+    if (prev) {
+      prev.disconnect();
+      observerRef.current = null;
+    }
     if (!imageElement || !(imageElement instanceof Element)) return;
 
     const observer = new IntersectionObserver(
       (entries) => {
-        entries.forEach(entry => {
+        entries.forEach((entry) => {
           if (entry.isIntersecting) {
             const img = entry.target;
             const src = img.getAttribute('data-src');
             const srcset = img.getAttribute('data-srcset');
-            
-            if (src) {
-              img.src = src;
-            }
-            if (srcset) {
-              img.srcset = srcset;
-            }
-            
+            if (src) img.src = src;
+            if (srcset) img.srcset = srcset;
             img.classList.add('loaded');
             observer.unobserve(img);
           }
         });
       },
-      {
-        rootMargin: '50px 0px', // Start loading 50px before entering viewport
-        threshold: 0.01
-      }
+      { rootMargin: '50px 0px', threshold: 0.01 }
     );
-
     try {
       observer.observe(imageElement);
-    } catch (err) {
-      return;
+      observerRef.current = observer;
+    } catch {
+      observerRef.current = null;
     }
   };
 };

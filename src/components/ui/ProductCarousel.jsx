@@ -25,6 +25,12 @@ const ProductCarousel = ({
   const interactionTimeoutRef = useRef(null);
 
   useEffect(() => {
+    return () => {
+      if (interactionTimeoutRef.current) clearTimeout(interactionTimeoutRef.current);
+    };
+  }, []);
+
+  useEffect(() => {
     if (!autoScroll || paused) return undefined;
     const container = containerRef.current;
     if (!container) return undefined;

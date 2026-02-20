@@ -87,6 +87,7 @@ const QuickActionsBar = ({
               onClick={() => handleAction(action)}
               onMouseEnter={() => setShowTooltip(action.id)}
               onMouseLeave={() => setShowTooltip(null)}
+              aria-label={action.label}
               className={`
                 relative p-3 rounded-xl transition-all duration-200
                 ${action.isActive ? action.activeColor : action.color}
@@ -127,6 +128,7 @@ const QuickActionsBar = ({
               ${action.isActive ? action.activeColor : action.color}
               ${activeAction === action.id ? 'scale-90' : 'hover:scale-110'}
             `}
+            aria-label={action.label}
             title={action.label}
           >
             <action.icon 
@@ -167,6 +169,7 @@ export const FloatingQuickActions = (props) => {
       <button
         onClick={() => setIsVisible(!isVisible)}
         className="absolute -right-3 top-1/2 -translate-y-1/2 w-6 h-12 bg-white rounded-r-lg shadow-lg border border-l-0 border-gray-200 flex items-center justify-center text-gray-400 hover:text-gray-600"
+        aria-label={isVisible ? 'Gyorsgombok elrejtése' : 'Gyorsgombok megjelenítése'}
       >
         {isVisible ? <X className="w-3 h-3" /> : <Eye className="w-3 h-3" />}
       </button>

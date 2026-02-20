@@ -278,7 +278,7 @@ const FileLoaderBar = ({ onFileLoad, onUnasRefresh, isLoadingUnas, lastUpdated, 
                     <input type="file" ref={fileInputRef} accept=".csv" className="hidden" onChange={(e) => {
                         const file = e.target.files[0];
                         if(file) {
-                            file.text().then(text => onFileLoad(parseCSV(text)));
+                            file.text().then(text => onFileLoad(parseCSV(text))).catch(err => console.warn('CSV betöltés hiba:', err));
                         }
                     }} />
                     <button 

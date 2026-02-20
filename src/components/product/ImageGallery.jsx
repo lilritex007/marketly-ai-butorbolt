@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { ZoomIn, ZoomOut, ChevronLeft, ChevronRight, X, Expand, Maximize2 } from 'lucide-react';
 
 /**
@@ -19,15 +19,15 @@ const ImageGallery = ({ images = [], productName = 'Termék' }) => {
   const currentImage = imageList[currentIndex];
 
   // Navigation
-  const goToNext = () => {
+  const goToNext = useCallback(() => {
     setCurrentIndex((prev) => (prev + 1) % imageList.length);
     setIsZoomed(false);
-  };
+  }, [imageList.length]);
 
-  const goToPrev = () => {
+  const goToPrev = useCallback(() => {
     setCurrentIndex((prev) => (prev - 1 + imageList.length) % imageList.length);
     setIsZoomed(false);
-  };
+  }, [imageList.length]);
 
   // Zoom handling
   const handleMouseMove = (e) => {
@@ -76,7 +76,7 @@ const ImageGallery = ({ images = [], productName = 'Termék' }) => {
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, []);
+  }, [goToPrev, goToNext]);
 
   // Fullscreen Gallery Modal
   if (isFullscreen) {
@@ -86,6 +86,7 @@ const ImageGallery = ({ images = [], productName = 'Termék' }) => {
         <button
           onClick={() => setIsFullscreen(false)}
           className="absolute top-4 right-4 p-3 bg-white/10 hover:bg-white/20 rounded-full text-white transition-colors z-10"
+          aria-label="Bezárás"
         >
           <X className="w-6 h-6" />
         </button>
@@ -96,12 +97,14 @@ const ImageGallery = ({ images = [], productName = 'Termék' }) => {
             <button
               onClick={goToPrev}
               className="absolute left-4 p-3 bg-white/10 hover:bg-white/20 rounded-full text-white transition-colors z-10"
+              aria-label="Előző kép"
             >
               <ChevronLeft className="w-8 h-8" />
             </button>
             <button
               onClick={goToNext}
               className="absolute right-4 p-3 bg-white/10 hover:bg-white/20 rounded-full text-white transition-colors z-10"
+              aria-label="Következő kép"
             >
               <ChevronRight className="w-8 h-8" />
             </button>
@@ -186,12 +189,14 @@ const ImageGallery = ({ images = [], productName = 'Termék' }) => {
             <button
               onClick={(e) => { e.stopPropagation(); goToPrev(); }}
               className="absolute left-2 top-1/2 -translate-y-1/2 p-2 bg-white/80 hover:bg-white rounded-full shadow-lg opacity-0 group-hover:opacity-100 transition-all"
+              aria-label="Előző kép"
             >
               <ChevronLeft className="w-5 h-5 text-gray-700" />
             </button>
             <button
               onClick={(e) => { e.stopPropagation(); goToNext(); }}
               className="absolute right-2 top-1/2 -translate-y-1/2 p-2 bg-white/80 hover:bg-white rounded-full shadow-lg opacity-0 group-hover:opacity-100 transition-all"
+              aria-label="Következő kép"
             >
               <ChevronRight className="w-5 h-5 text-gray-700" />
             </button>
@@ -202,6 +207,7 @@ const ImageGallery = ({ images = [], productName = 'Termék' }) => {
         <button
           onClick={(e) => { e.stopPropagation(); setIsFullscreen(true); }}
           className="absolute top-4 right-4 p-2 bg-white/80 hover:bg-white rounded-full shadow-lg opacity-0 group-hover:opacity-100 transition-all"
+          aria-label="Teljes képernyő"
           title="Teljes képernyő"
         >
           <Maximize2 className="w-5 h-5 text-gray-700" />
