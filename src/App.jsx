@@ -651,8 +651,8 @@ const App = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const searchQueryRef = useRef(searchQuery);
   searchQueryRef.current = searchQuery;
-  const SERVER_SEARCH_ONLY = false;
-  const MAX_LOCAL_INDEX = 200000;
+  const SERVER_SEARCH_ONLY = true;
+  const MAX_LOCAL_INDEX = SERVER_SEARCH_ONLY ? 0 : 50000;
   const searchIndexRef = useRef([]);
   const [searchIndexReady, setSearchIndexReady] = useState(false);
   const [searchIndexVersion, setSearchIndexVersion] = useState(0);
@@ -1118,7 +1118,7 @@ const App = () => {
       categoryMainList = undefined;
       categoriesList = undefined;
     }
-    const limit = selectedCollection.isSale || selectedCollection.isNew ? 300 : INITIAL_PAGE;
+    const limit = INITIAL_PAGE;
     const styleKw = selectedCollection.styleKeywords || [];
     loadUnasDataRef.current({
       search: undefined,
