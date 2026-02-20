@@ -16,7 +16,7 @@ export function useDeferredSection(options = {}) {
 
   useEffect(() => {
     const el = ref.current;
-    if (!el || shouldMount) return;
+    if (!el || !(el instanceof Element) || shouldMount) return;
 
     const io = new IntersectionObserver(
       ([entry]) => {

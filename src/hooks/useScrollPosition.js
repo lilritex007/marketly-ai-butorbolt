@@ -4,6 +4,7 @@ import { useSyncExternalStore } from 'react';
 let scrollY = 0;
 let scrollPercent = 0;
 let scrollHeight = 0;
+let snapshot = { scrollY: 0, scrollPercent: 0, scrollHeight: 0 };
 const listeners = new Set();
 let rafId = null;
 
@@ -17,9 +18,11 @@ function getScrollData() {
 
 function notify() {
   const data = getScrollData();
+  if (data.scrollY === scrollY && data.scrollPercent === scrollPercent) return;
   scrollY = data.scrollY;
   scrollPercent = data.scrollPercent;
   scrollHeight = data.scrollHeight;
+  snapshot = { scrollY, scrollPercent, scrollHeight };
   listeners.forEach((fn) => fn());
 }
 
@@ -46,7 +49,7 @@ function subscribe(listener) {
 }
 
 function getSnapshot() {
-  return { scrollY, scrollPercent, scrollHeight };
+  return snapshot;
 }
 
 function getServerSnapshot() {
