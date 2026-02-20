@@ -7,7 +7,12 @@ import './index.css'
 if (typeof window !== 'undefined' && !window.__MKT_SCROLL_INIT) {
   window.__MKT_SCROLL_INIT = true
   window.history.scrollRestoration = 'manual'
+  const NAV_TO_PRODUCTS_WINDOW_MS = 3000
+  const shouldSkipScrollToHeader = () =>
+    typeof window.__MKT_NAV_TO_PRODUCTS === 'number' &&
+    Date.now() - window.__MKT_NAV_TO_PRODUCTS < NAV_TO_PRODUCTS_WINDOW_MS
   const scrollToHeader = () => {
+    if (shouldSkipScrollToHeader()) return
     window.scrollTo({ top: 0, left: 0, behavior: 'auto' })
     const appRoot = document.getElementById('mkt-butorbolt-app') || document.getElementById('root')
     if (appRoot) {

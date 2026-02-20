@@ -1013,6 +1013,7 @@ const App = () => {
       } else {
         target.scrollIntoView({ behavior: 'smooth', block: 'start', inline: 'nearest' });
       }
+      if (typeof window !== 'undefined') delete window.__MKT_NAV_TO_PRODUCTS;
     };
     requestAnimationFrame(() => requestAnimationFrame(run));
   }, [getScrollParent]);
@@ -1021,6 +1022,9 @@ const App = () => {
   scrollToProductsSectionRef.current = scrollToProductsSection;
 
   const scheduleScrollToProducts = useCallback(() => {
+    if (typeof window !== 'undefined') {
+      window.__MKT_NAV_TO_PRODUCTS = Date.now();
+    }
     requestAnimationFrame(() => {
       setTimeout(() => scrollToProductsSectionRef.current?.(), SCROLL_DELAY_INITIAL);
       setTimeout(() => scrollToProductsSectionRef.current?.(1), SCROLL_DELAY_RETRY);
