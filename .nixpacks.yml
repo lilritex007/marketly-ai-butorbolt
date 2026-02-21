@@ -11,7 +11,8 @@ phases:
     cmds:
       - npm ci
   build:
-    cmds: []
+    cmds:
+      - npm run build
 
 start:
   cmd: node server/index.js
