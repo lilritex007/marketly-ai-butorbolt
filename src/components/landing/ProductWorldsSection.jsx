@@ -475,13 +475,13 @@ export default function ProductWorldsSection({
   return (
     <section
       ref={sectionRef}
-      className={`section-shell section-world section-world--${activeWorld} py-12 sm:py-14 lg:py-20 overflow-hidden w-full transition-colors duration-500 ${sectionBgClass}`}
+      className={`section-shell section-world section-world--${activeWorld} py-12 sm:py-16 lg:py-20 overflow-hidden w-full transition-colors duration-500 ${sectionBgClass}`}
       aria-labelledby={`${activeWorld}-heading`}
       aria-label="Termék világok"
       role="region"
       data-section="product-worlds"
     >
-      <div className="w-full max-w-[2000px] mx-auto px-4 sm:px-6 lg:px-10 xl:px-16">
+      <div className="w-full max-w-8xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Swipe zone: tab bar + hero – carouselen kívül mindenhol működik */}
         <div
           ref={tabSwipeRef}
@@ -547,11 +547,11 @@ export default function ProductWorldsSection({
                 </span>
                 <h2
                   id={`${activeWorld}-heading`}
-                  className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-black leading-[1.15] tracking-tight text-gray-900 break-words"
+                  className="text-2xl sm:text-3xl font-bold leading-[1.15] tracking-tight text-gray-900 break-words"
                 >
                   {currentWorld.title}
                 </h2>
-                <p className="text-base sm:text-lg lg:text-xl xl:text-2xl text-gray-600 max-w-2xl font-semibold">
+                <p className="text-base text-gray-600 max-w-2xl font-semibold">
                   {currentWorld.subtitle}
                 </p>
                 <div className="flex flex-wrap items-center gap-2 sm:gap-3 pt-1 sm:pt-2">

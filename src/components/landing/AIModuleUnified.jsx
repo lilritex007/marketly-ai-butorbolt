@@ -241,7 +241,7 @@ export default function AIModuleUnified({ onFeatureClick }) {
   return (
     <section
       ref={sectionRef}
-      className="relative py-20 overflow-hidden bg-gradient-to-b from-primary-50/40 via-white to-white border-t border-gray-100"
+      className="relative py-12 sm:py-16 lg:py-20 overflow-hidden bg-gradient-to-b from-primary-50/40 via-white to-white border-t border-gray-100"
       aria-labelledby="ai-module-heading"
     >
       {/* Gradient orbs háttér */}
@@ -251,15 +251,15 @@ export default function AIModuleUnified({ onFeatureClick }) {
         <div className="absolute bottom-0 left-1/2 w-[300px] h-[300px] rounded-full bg-amber-200/40 mix-blend-multiply filter blur-[80px] animate-blob animation-delay-4000 motion-reduce:animate-none" />
       </div>
 
-      <div className="relative z-10 w-full max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-12 xl:px-16">
+      <div className="relative z-10 w-full max-w-8xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-12">
           <h2
             id="ai-module-heading"
-            className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 tracking-tight mb-3"
+            className="text-2xl sm:text-3xl font-bold text-gray-900 tracking-tight mb-2"
           >
             AI a <span className="bg-gradient-to-r from-primary-500 to-secondary-600 bg-clip-text text-transparent">szolgálatodban</span>
           </h2>
-          <p className="text-base sm:text-lg text-gray-500 max-w-2xl mx-auto">
+          <p className="text-base text-gray-600 max-w-2xl mx-auto mb-6 sm:mb-8">
             Okos funkciók a tökéletes választáshoz
           </p>
         </div>
@@ -307,7 +307,7 @@ export default function AIModuleUnified({ onFeatureClick }) {
         </div>
 
         {/* Tablet + Desktop: 5 kártya egy sorban, staggered fade-in */}
-        <div className="hidden sm:grid sm:grid-cols-2 lg:grid-cols-5 gap-4 lg:gap-5 mt-0">
+        <div className="hidden sm:grid sm:grid-cols-2 lg:grid-cols-5 gap-4 sm:gap-6 mt-0">
           {FEATURES.map((feature, idx) => {
             const Icon = feature.icon;
             const show = sectionInView || reduceMotion;

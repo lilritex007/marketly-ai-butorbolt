@@ -104,16 +104,16 @@ export default function InspirationSection({ onExplore, onCategorySelect, onColl
 
   return (
     <section
-      className="py-16 sm:py-20 lg:py-24 bg-white border-t border-gray-100"
+      className="py-12 sm:py-16 lg:py-20 bg-white border-t border-gray-100"
       aria-labelledby="inspiration-heading"
     >
-      <div className="w-full max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-12 xl:px-16">
-        <div className="text-center mb-10 sm:mb-12">
+      <div className="w-full max-w-8xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="text-center mb-6 sm:mb-8">
           <div className="inline-block h-1 w-20 rounded-full bg-gradient-to-r from-primary-500 to-secondary-600 mb-4" aria-hidden />
-          <h2 id="inspiration-heading" className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 tracking-tight mb-3">
+          <h2 id="inspiration-heading" className="text-2xl sm:text-3xl font-bold text-gray-900 tracking-tight mb-2">
             Fedezd fel a stílusokat
           </h2>
-          <p className="text-base sm:text-lg text-gray-500 max-w-2xl mx-auto">
+          <p className="text-base text-gray-600 max-w-2xl mx-auto mb-6 sm:mb-8">
             Gondosan válogatott kollekciók
           </p>
         </div>
@@ -162,7 +162,7 @@ export default function InspirationSection({ onExplore, onCategorySelect, onColl
         </div>
 
         {/* Desktop: 6 oszlop, méretezett kártyák */}
-        <div className="hidden lg:grid lg:grid-cols-6 gap-4 xl:gap-5">
+        <div className="hidden lg:grid lg:grid-cols-6 gap-4 sm:gap-6">
           {COLLECTIONS.map((col, idx) => (
             <div key={col.id} className="animate-fade-in-up" style={{ animationDelay: `${Math.min(idx * 40, 400)}ms` }}>
               <CollectionCard col={col} onPress={() => handleClick(col)} />

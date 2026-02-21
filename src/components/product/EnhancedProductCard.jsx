@@ -55,12 +55,12 @@ export const EnhancedProductCard = ({
   const sizeClasses = {
     default: {
       image: 'p-2 sm:p-3 md:p-4 lg:p-5',
-      content: 'p-3 sm:p-4 md:p-5 lg:p-6',
+      content: 'p-4 sm:p-5',
       contentMinH: 'min-h-[160px] sm:min-h-[180px]'
     },
     compact: {
       image: 'p-2 sm:p-2.5 md:p-3 lg:p-3.5',
-      content: 'p-2.5 sm:p-3 md:p-4 lg:p-4',
+      content: 'p-4 sm:p-5',
       contentMinH: 'min-h-[140px] sm:min-h-[155px]'
     }
   };
@@ -162,8 +162,8 @@ export const EnhancedProductCard = ({
     <article 
       ref={cardRef}
       className={`
-        group relative rounded-lg overflow-hidden bg-white border border-gray-200 shadow-sm
-        hover:shadow-md hover:border-gray-300 hover:-translate-y-0.5 active:scale-[0.99]
+        group relative rounded-xl overflow-hidden bg-white border border-gray-100 shadow-sm
+        hover:shadow-md hover:border-gray-200 hover:-translate-y-0.5 active:scale-[0.99]
         h-full flex flex-col touch-manipulation
         ${toneClasses[tone] || ''}
         ${isVisible ? 'opacity-100' : 'opacity-0 translate-y-3'}

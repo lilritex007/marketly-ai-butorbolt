@@ -209,7 +209,7 @@ export const ModernHero = ({
         <div className="absolute inset-x-0 bottom-0 h-[1px] bg-gradient-to-r from-transparent via-secondary-300 to-transparent opacity-60" />
       </div>
 
-      <div className="relative z-10 w-full max-w-[1500px] mx-auto px-4 sm:px-6 lg:px-10 pt-16 sm:pt-20 lg:pt-24 pb-2 sm:pb-3 min-w-0">
+      <div className="relative z-10 w-full max-w-8xl mx-auto px-4 sm:px-6 lg:px-8 pt-16 sm:pt-20 lg:pt-24 pb-2 sm:pb-3 min-w-0">
         <div className="flex flex-col items-center text-center w-full min-w-0 max-w-full">
           <div
             className={`inline-flex items-center gap-2.5 px-4 py-2 bg-white rounded-full border border-gray-200 shadow-sm mb-8 ${mounted ? 'hero-reveal' : 'opacity-0'}`}
@@ -292,7 +292,7 @@ export const ModernHero = ({
                   key={`${item.parentName || ''}-${name}`}
                   type="button"
                   onClick={() => onQuickCategory?.(name)}
-                  className="group relative shrink-0 w-[130px] sm:w-[150px] lg:w-[175px] aspect-[3/4] rounded-2xl overflow-hidden shadow-md hover:shadow-lg transition-all duration-300 ease-out hover:-translate-y-0.5 hover:scale-[1.02] snap-start focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-gray-900 border-2 border-white/40"
+                  className="group relative shrink-0 w-[130px] sm:w-[150px] lg:w-[175px] aspect-[3/4] rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 ease-out hover:-translate-y-0.5 hover:scale-[1.02] snap-start focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-gray-900 border border-white/20"
                 >
                   <img
                     src={img}
@@ -327,7 +327,7 @@ export const ModernHero = ({
         </div>
       )}
 
-      <div className="relative z-10 w-full max-w-[1500px] mx-auto px-4 sm:px-6 lg:px-10 min-w-0">
+      <div className="relative z-10 w-full max-w-8xl mx-auto px-4 sm:px-6 lg:px-8 min-w-0">
         <div className="flex flex-col items-center text-center w-full min-w-0 max-w-full">
           {/* Központi hero search – full width minus 2px */}
           <div
@@ -400,7 +400,7 @@ export const ModernHero = ({
               return (
               <div
                 key={idx}
-                    className={`group relative overflow-hidden bg-gradient-to-tr ${style.card} rounded-2xl p-4 border shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-200`}
+                    className={`group relative overflow-hidden bg-gradient-to-tr ${style.card} rounded-xl p-4 sm:p-5 border border-gray-100 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-200`}
               >
                     <div className={`absolute left-0 bottom-0 w-[78%] h-[2px] bg-gradient-to-r ${style.edge}`} aria-hidden />
                     <div className="absolute left-0 bottom-0 w-24 h-24 bg-gradient-to-tr from-black/5 to-transparent rotate-12 -translate-x-7 translate-y-7 blur-[1px]" aria-hidden />
