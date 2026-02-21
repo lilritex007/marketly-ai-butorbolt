@@ -148,21 +148,21 @@ export const EnhancedProductCard = ({
 
   const hasWorldAccent = accentClass && (tone === 'favorites' || tone === 'new' || tone === 'popular');
   const worldGlow = hasWorldAccent && {
-    favorites: 'radial-gradient(ellipse 120% 120% at 100% 100%, rgba(244,63,94,0.18) 0%, transparent 50%)',
-    new: 'radial-gradient(ellipse 120% 120% at 100% 100%, rgba(139,92,246,0.18) 0%, transparent 50%)',
-    popular: 'radial-gradient(ellipse 120% 120% at 100% 100%, rgba(251,191,36,0.18) 0%, transparent 50%)',
+    favorites: 'radial-gradient(ellipse 120% 120% at 0% 0%, rgba(244,63,94,0.18) 0%, transparent 50%)',
+    new: 'radial-gradient(ellipse 120% 120% at 0% 0%, rgba(139,92,246,0.18) 0%, transparent 50%)',
+    popular: 'radial-gradient(ellipse 120% 120% at 0% 0%, rgba(251,191,36,0.18) 0%, transparent 50%)',
   }[tone];
   const worldCorner = hasWorldAccent && {
-    favorites: 'linear-gradient(315deg, rgba(244,63,94,0.45) 0%, transparent 40%)',
-    new: 'linear-gradient(315deg, rgba(139,92,246,0.45) 0%, transparent 40%)',
-    popular: 'linear-gradient(315deg, rgba(251,191,36,0.45) 0%, transparent 40%)',
+    favorites: 'linear-gradient(135deg, rgba(244,63,94,0.45) 0%, transparent 40%)',
+    new: 'linear-gradient(135deg, rgba(139,92,246,0.45) 0%, transparent 40%)',
+    popular: 'linear-gradient(135deg, rgba(251,191,36,0.45) 0%, transparent 40%)',
   }[tone];
 
   return (
     <article 
       ref={cardRef}
       className={`
-        group relative rounded-xl overflow-hidden bg-white border border-gray-100 shadow-sm
+        group relative rounded-xl overflow-visible bg-white border border-gray-100 shadow-sm
         hover:shadow-md hover:border-gray-200 hover:-translate-y-0.5 active:scale-[0.99]
         h-full flex flex-col touch-manipulation
         ${toneClasses[tone] || ''}
@@ -173,12 +173,12 @@ export const EnhancedProductCard = ({
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      {/* Világ dizájn – bal él (kártya eleje) border, jobb alsó sarok gradient */}
+      {/* Világ dizájn – felső border túlnyúlásokkal, bal felső sarok gradient */}
       {hasWorldAccent && (
         <>
           <div className="absolute inset-0 z-[1] pointer-events-none" style={{ background: worldGlow }} aria-hidden />
-          <div className="absolute bottom-0 right-0 w-16 h-16 z-[2] pointer-events-none" style={{ background: worldCorner, clipPath: 'polygon(100% 100%, 0 100%, 100% 0)' }} aria-hidden />
-          <div className={`absolute left-0 top-0 bottom-0 w-2 sm:w-2.5 bg-gradient-to-b ${accentClass} z-[2] pointer-events-none`} aria-hidden />
+          <div className="absolute top-0 left-0 w-16 h-16 z-[2] pointer-events-none" style={{ background: worldCorner, clipPath: 'polygon(0 0, 100% 0, 0 100%)' }} aria-hidden />
+          <div className={`absolute -left-1 -right-1 top-0 h-2 sm:h-2.5 bg-gradient-to-r ${accentClass} z-[2] pointer-events-none`} aria-hidden />
         </>
       )}
       {/* Smart Badges - kisebb mobilon */}
@@ -229,10 +229,10 @@ export const EnhancedProductCard = ({
         </div>
       )}
 
-      {/* Image Section - FILL the space */}
+      {/* Image Section - kitölti a kártya felső részét, border radius */}
       <div 
         onClick={handleQuickView} 
-        className="relative aspect-square overflow-hidden ecom-card__image cursor-pointer"
+        className="relative aspect-square overflow-hidden rounded-t-xl ecom-card__image cursor-pointer"
       >
         {/* Simple placeholder */}
         {!imageLoaded && (
@@ -246,7 +246,7 @@ export const EnhancedProductCard = ({
           width={400}
           height={400}
           className={`
-            w-full h-full object-contain ${sizeConfig.image}
+            w-full h-full object-cover
             transition-opacity duration-300 ease-out
             ${imageLoaded ? 'opacity-100' : 'opacity-0'}
           `}
