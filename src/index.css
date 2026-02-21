@@ -416,11 +416,15 @@
     }
   }
 
-  /* Product grid - mobil optimalizált: 2 oszlop, touch-friendly gap */
+  /* Product grid - mobil optimalizált: 2 oszlop, desktop 6 oszlop, egységes méret */
   .product-grid {
     display: grid;
     gap: 0.5rem;  /* 8px mobil - kompakt de kattintható */
     grid-template-columns: repeat(2, 1fr);
+    min-width: 0;  /* grid overflow megakadályozása */
+  }
+  .product-grid > * {
+    min-width: 0;
   }
   
   @media (min-width: 375px) {
@@ -449,10 +453,11 @@
     }
   }
   
+  
   @media (min-width: 1280px) {
     .product-grid {
       gap: 1.25rem;
-      grid-template-columns: repeat(5, 1fr);
+      grid-template-columns: repeat(6, 1fr);
     }
   }
   
@@ -460,13 +465,6 @@
     .product-grid {
       gap: 1.5rem;
       grid-template-columns: repeat(6, 1fr);
-    }
-  }
-  
-  @media (min-width: 1800px) {
-    .product-grid {
-      gap: 1.75rem;
-      grid-template-columns: repeat(7, 1fr);
     }
   }
 
@@ -716,14 +714,6 @@
   border-radius: 1rem;
 }
 
-.lux-card::after {
-  content: '';
-  position: absolute;
-  inset: 8px;
-  border-radius: 16px;
-  border: 1px solid rgba(255, 255, 255, 0.7);
-  pointer-events: none;
-}
 
 .lux-card--popular { --lux-accent: 251, 191, 36; }
 .lux-card--new { --lux-accent: 139, 92, 246; }

@@ -583,77 +583,42 @@ export default function ProductWorldsSection({
           key={activeWorld}
         >
             {visibleProducts.length > 0 ? (
-              <>
-                {/* Mobil/tablet: carousel – ugyanolyan kártyaméret mint a főoldal */}
-                <div className="lg:hidden">
-                  <ProductCarousel
-                    key={`${activeWorld}-${activeWorld === 'favorites' ? favoritesSeed : activeWorld === 'new' ? newPage : popularPage}`}
-                    className="mt-2 -mx-4 sm:mx-0 pl-4 sm:pl-0 pr-4 sm:pr-0"
-                    autoScroll={false}
-                    onInteractionChange={setIsInteracting}
-                    cardSize="default"
-                    desktopColumns={6}
-                  >
-                    {visibleProducts.map((product, index) => {
-                      const stockLevel = getStockLevel(product);
-                      const highlightBadge =
-                        stockLevel !== null && stockLevel <= 3 ? `Utolsó ${stockLevel} db` : '';
-                      return (
-                        <div
-                          key={product.id}
-                          className="relative overflow-hidden rounded-xl transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl ring-1 ring-gray-200/80 hover:ring-gray-300"
-                        >
-                          <EnhancedProductCard
-                            product={product}
-                            onToggleWishlist={onToggleWishlist}
-                            isWishlisted={wishlist.includes(product.id)}
-                            onQuickView={onProductClick}
-                            onAddToCart={onAddToCart || (() => {})}
-                            index={index}
-                            highlightBadge={highlightBadge}
-                            sectionId={currentWorld.sectionId}
-                            showFeedback
-                            size="default"
-                            tone={currentWorld.tone}
-                            accentClass={currentWorld.accentClass}
-                            skipScrollAnimation
-                          />
-                        </div>
-                      );
-                    })}
-                  </ProductCarousel>
-                </div>
-                {/* Desktop: product-grid – ugyanolyan kártyaméret mint a főoldal */}
-                <div className="hidden lg:grid product-grid mt-2">
-                  {visibleProducts.map((product, index) => {
-                    const stockLevel = getStockLevel(product);
-                    const highlightBadge =
-                      stockLevel !== null && stockLevel <= 3 ? `Utolsó ${stockLevel} db` : '';
-                    return (
-                      <div
-                        key={product.id}
-                        className="relative overflow-hidden rounded-xl transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl ring-1 ring-gray-200/80 hover:ring-gray-300"
-                      >
-                        <EnhancedProductCard
-                          product={product}
-                          onToggleWishlist={onToggleWishlist}
-                          isWishlisted={wishlist.includes(product.id)}
-                          onQuickView={onProductClick}
-                          onAddToCart={onAddToCart || (() => {})}
-                          index={index}
-                          highlightBadge={highlightBadge}
-                          sectionId={currentWorld.sectionId}
-                          showFeedback
-                          size="default"
-                          tone={currentWorld.tone}
-                          accentClass={currentWorld.accentClass}
-                          skipScrollAnimation
-                        />
-                      </div>
-                    );
-                  })}
-                </div>
-              </>
+              <ProductCarousel
+                key={`${activeWorld}-${activeWorld === 'favorites' ? favoritesSeed : activeWorld === 'new' ? newPage : popularPage}`}
+                className="mt-2 -mx-4 sm:mx-0 pl-4 sm:pl-0 pr-4 sm:pr-0"
+                autoScroll={false}
+                onInteractionChange={setIsInteracting}
+                cardSize="default"
+                desktopColumns={6}
+              >
+                {visibleProducts.map((product, index) => {
+                  const stockLevel = getStockLevel(product);
+                  const highlightBadge =
+                    stockLevel !== null && stockLevel <= 3 ? `Utolsó ${stockLevel} db` : '';
+                  return (
+                    <div
+                      key={product.id}
+                      className="relative overflow-hidden rounded-xl transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl ring-1 ring-gray-200/80 hover:ring-gray-300"
+                    >
+                      <EnhancedProductCard
+                        product={product}
+                        onToggleWishlist={onToggleWishlist}
+                        isWishlisted={wishlist.includes(product.id)}
+                        onQuickView={onProductClick}
+                        onAddToCart={onAddToCart || (() => {})}
+                        index={index}
+                        highlightBadge={highlightBadge}
+                        sectionId={currentWorld.sectionId}
+                        showFeedback
+                        size="default"
+                        tone={currentWorld.tone}
+                        accentClass={currentWorld.accentClass}
+                        skipScrollAnimation
+                      />
+                    </div>
+                  );
+                })}
+              </ProductCarousel>
             ) : (
               <div className="text-center py-12 bg-white rounded-2xl shadow-inner">
                 <currentWorld.Icon className="w-12 h-12 text-gray-300 mx-auto mb-3" />

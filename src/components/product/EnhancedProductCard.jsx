@@ -147,22 +147,17 @@ export const EnhancedProductCard = ({
   };
 
   const hasWorldAccent = accentClass && (tone === 'favorites' || tone === 'new' || tone === 'popular');
-  const worldGlow = hasWorldAccent && {
-    favorites: 'radial-gradient(ellipse 120% 120% at 0% 0%, rgba(244,63,94,0.18) 0%, transparent 50%)',
-    new: 'radial-gradient(ellipse 120% 120% at 0% 0%, rgba(139,92,246,0.18) 0%, transparent 50%)',
-    popular: 'radial-gradient(ellipse 120% 120% at 0% 0%, rgba(251,191,36,0.18) 0%, transparent 50%)',
-  }[tone];
-  const worldCorner = hasWorldAccent && {
-    favorites: 'linear-gradient(135deg, rgba(244,63,94,0.45) 0%, transparent 40%)',
-    new: 'linear-gradient(135deg, rgba(139,92,246,0.45) 0%, transparent 40%)',
-    popular: 'linear-gradient(135deg, rgba(251,191,36,0.45) 0%, transparent 40%)',
+  const worldCornerGradient = hasWorldAccent && {
+    favorites: 'radial-gradient(ellipse 80% 80% at 100% 100%, rgba(244,63,94,0.12) 0%, transparent 60%)',
+    new: 'radial-gradient(ellipse 80% 80% at 100% 100%, rgba(139,92,246,0.12) 0%, transparent 60%)',
+    popular: 'radial-gradient(ellipse 80% 80% at 100% 100%, rgba(251,191,36,0.12) 0%, transparent 60%)',
   }[tone];
 
   return (
     <article 
       ref={cardRef}
       className={`
-        group relative rounded-xl overflow-visible bg-white border border-gray-100 shadow-sm
+        group relative rounded-xl overflow-hidden bg-white border border-gray-100 shadow-sm
         hover:shadow-md hover:border-gray-200 hover:-translate-y-0.5 active:scale-[0.99]
         h-full flex flex-col touch-manipulation
         ${toneClasses[tone] || ''}
@@ -173,12 +168,12 @@ export const EnhancedProductCard = ({
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      {/* Világ dizájn – felső border túlnyúlásokkal, bal felső sarok gradient */}
+      {/* Világ dizájn – bal felső sarok border (L-alak), jobb alsó sarok finom gradient */}
       {hasWorldAccent && (
         <>
-          <div className="absolute inset-0 z-[1] pointer-events-none" style={{ background: worldGlow }} aria-hidden />
-          <div className="absolute top-0 left-0 w-16 h-16 z-[2] pointer-events-none" style={{ background: worldCorner, clipPath: 'polygon(0 0, 100% 0, 0 100%)' }} aria-hidden />
-          <div className={`absolute -left-1 -right-1 top-0 h-2 sm:h-2.5 bg-gradient-to-r ${accentClass} z-[2] pointer-events-none`} aria-hidden />
+          <div className="absolute bottom-0 right-0 w-24 h-24 sm:w-28 sm:h-28 z-[1] pointer-events-none" style={{ background: worldCornerGradient }} aria-hidden />
+          <div className={`absolute top-0 left-0 w-2 sm:w-2.5 h-8 sm:h-10 bg-gradient-to-b ${accentClass} z-[2] pointer-events-none rounded-br`} aria-hidden />
+          <div className={`absolute top-0 left-0 h-2 sm:h-2.5 w-12 sm:w-14 bg-gradient-to-r ${accentClass} z-[2] pointer-events-none rounded-br`} aria-hidden />
         </>
       )}
       {/* Smart Badges - kisebb mobilon */}
@@ -284,7 +279,7 @@ export const EnhancedProductCard = ({
         
         {/* Desktop hover overlay */}
         <div 
-          className="hidden md:flex absolute inset-0 bg-black/40 items-end justify-center pb-6 lg:pb-8 transition-opacity duration-200"
+          className="hidden md:flex absolute inset-0 bg-black/40 items-center justify-center transition-opacity duration-200"
           style={{ opacity: isHovered ? 1 : 0, pointerEvents: isHovered ? 'auto' : 'none' }}
         >
           <button
@@ -292,10 +287,10 @@ export const EnhancedProductCard = ({
               e.stopPropagation();
               onQuickView?.(product);
             }}
-            className="bg-white text-gray-900 px-6 py-3 lg:px-8 lg:py-3.5 rounded-full text-base lg:text-lg font-bold shadow-lg flex items-center gap-2 hover:bg-gray-50 tap-scale focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-400 focus-visible:ring-offset-2"
+            className="w-14 h-14 flex items-center justify-center rounded-full bg-white text-gray-900 shadow-lg hover:bg-gray-50 tap-scale focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-400 focus-visible:ring-offset-2"
+            aria-label="Gyors megtekintés"
           >
-            <Eye className="w-5 h-5 lg:w-6 lg:h-6" /> 
-            Megnézem
+            <Eye className="w-7 h-7" />
           </button>
         </div>
       </div>
@@ -394,12 +389,11 @@ export const EnhancedProductCard = ({
               e.stopPropagation(); 
               handleQuickView(); 
             }} 
-            className="min-h-[44px] min-w-[44px] flex items-center justify-center p-2.5 sm:px-4 sm:py-2.5 bg-primary-500 text-white rounded-xl hover:bg-primary-600 active:bg-primary-700 transition-all tap-scale touch-manipulation focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-400 focus-visible:ring-offset-2"
-            aria-label="Megnézem"
-            title="Megnézem"
+            className="min-h-[44px] min-w-[44px] flex items-center justify-center p-2.5 bg-primary-500 text-white rounded-xl hover:bg-primary-600 active:bg-primary-700 transition-all tap-scale touch-manipulation focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-400 focus-visible:ring-offset-2"
+            aria-label="Gyors megtekintés"
+            title="Gyors megtekintés"
           >
-            <Eye className="w-4 h-4 sm:w-5 sm:h-5" />
-            <span className="hidden sm:inline text-sm font-bold ml-1.5">Megnézem</span>
+            <Eye className="w-5 h-5" />
           </button>
         </div>
       </div>
