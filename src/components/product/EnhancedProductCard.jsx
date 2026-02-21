@@ -148,14 +148,14 @@ export const EnhancedProductCard = ({
 
   const hasWorldAccent = accentClass && (tone === 'favorites' || tone === 'new' || tone === 'popular');
   const worldGlow = hasWorldAccent && {
-    favorites: 'radial-gradient(ellipse 120% 120% at 0% 0%, rgba(244,63,94,0.18) 0%, transparent 50%)',
-    new: 'radial-gradient(ellipse 120% 120% at 0% 0%, rgba(139,92,246,0.18) 0%, transparent 50%)',
-    popular: 'radial-gradient(ellipse 120% 120% at 0% 0%, rgba(251,191,36,0.18) 0%, transparent 50%)',
+    favorites: 'radial-gradient(ellipse 120% 120% at 100% 100%, rgba(244,63,94,0.18) 0%, transparent 50%)',
+    new: 'radial-gradient(ellipse 120% 120% at 100% 100%, rgba(139,92,246,0.18) 0%, transparent 50%)',
+    popular: 'radial-gradient(ellipse 120% 120% at 100% 100%, rgba(251,191,36,0.18) 0%, transparent 50%)',
   }[tone];
   const worldCorner = hasWorldAccent && {
-    favorites: 'linear-gradient(135deg, rgba(244,63,94,0.45) 0%, transparent 40%)',
-    new: 'linear-gradient(135deg, rgba(139,92,246,0.45) 0%, transparent 40%)',
-    popular: 'linear-gradient(135deg, rgba(251,191,36,0.45) 0%, transparent 40%)',
+    favorites: 'linear-gradient(315deg, rgba(244,63,94,0.45) 0%, transparent 40%)',
+    new: 'linear-gradient(315deg, rgba(139,92,246,0.45) 0%, transparent 40%)',
+    popular: 'linear-gradient(315deg, rgba(251,191,36,0.45) 0%, transparent 40%)',
   }[tone];
 
   return (
@@ -173,13 +173,12 @@ export const EnhancedProductCard = ({
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      {/* Világ dizájn – kártya elején, nem mélyen (magas z-index, de badge/wishlist alatt) */}
+      {/* Világ dizájn – bal él (kártya eleje) border, jobb alsó sarok gradient */}
       {hasWorldAccent && (
         <>
           <div className="absolute inset-0 z-[1] pointer-events-none" style={{ background: worldGlow }} aria-hidden />
-          <div className="absolute top-0 left-0 w-16 h-16 z-[2] pointer-events-none" style={{ background: worldCorner, clipPath: 'polygon(0 0, 100% 0, 0 100%)' }} aria-hidden />
-          <div className={`absolute top-0 left-0 right-0 h-2 sm:h-2.5 bg-gradient-to-r ${accentClass} z-[2] pointer-events-none`} aria-hidden />
-          <div className={`absolute top-0 left-0 h-10 sm:h-12 w-0.5 sm:w-1 bg-gradient-to-b ${accentClass} z-[2] pointer-events-none`} aria-hidden />
+          <div className="absolute bottom-0 right-0 w-16 h-16 z-[2] pointer-events-none" style={{ background: worldCorner, clipPath: 'polygon(100% 100%, 0 100%, 100% 0)' }} aria-hidden />
+          <div className={`absolute left-0 top-0 bottom-0 w-2 sm:w-2.5 bg-gradient-to-b ${accentClass} z-[2] pointer-events-none`} aria-hidden />
         </>
       )}
       {/* Smart Badges - kisebb mobilon */}
